@@ -18,6 +18,10 @@ export const useCrmStore = defineStore('crm', () => {
     errorMessage.value = ''
   }
 
+  const clearContatos = () => {
+    contatos.value = []
+  }
+
   const fetchContatos = async (search = '') => {
     loadingContatos.value = true
     clearError()
@@ -78,6 +82,7 @@ export const useCrmStore = defineStore('crm', () => {
     savingContato,
     errorMessage,
     clearError,
+    clearContatos,
     fetchContatos,
     upsertContato,
   }

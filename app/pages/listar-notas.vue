@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import NoteListTable from '../components/NoteList/NoteListTable.vue'
+import NotasListaTabela from '../components/notas-lista/NotasListaTabela.vue'
 import AppPageShell from '../components/layout/AppPageShell.vue'
 import Botao from '../components/Botao.vue'
 
@@ -26,7 +26,7 @@ definePageMeta({
     </template>
 
     <div class="mt-8">
-      <NoteListTable />
+      <NotasListaTabela />
     </div>
   </AppPageShell>
 </template>

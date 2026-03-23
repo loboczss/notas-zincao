@@ -16,7 +16,7 @@ const onFinish = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50">
+  <div class="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
     <!-- 
       Note: We are not using AppPageShell here because NoteRegisterForm 
       already contains its own editorial header and responsive layout 

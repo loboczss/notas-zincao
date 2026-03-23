@@ -48,7 +48,7 @@ const onInput = (event: Event) => {
       :type="inputType"
       :placeholder="props.placeholder"
       :disabled="props.disabled"
-      class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 disabled:cursor-not-allowed disabled:bg-slate-100"
+      class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/30 dark:focus:ring-blue-400/20 disabled:cursor-not-allowed disabled:bg-slate-100 dark:disabled:bg-slate-800"
       :class="isPasswordField ? 'pr-10' : ''"
       @input="onInput"
     >
@@ -56,7 +56,7 @@ const onInput = (event: Event) => {
     <button
       v-if="isPasswordField"
       type="button"
-      class="absolute inset-y-0 right-0 flex items-center px-3 text-slate-500 transition hover:text-slate-700"
+      class="absolute inset-y-0 right-0 flex items-center px-3 text-slate-500 dark:text-slate-400 transition hover:text-slate-700 dark:hover:text-slate-200"
       :aria-label="exibirSenha ? 'Ocultar senha' : 'Mostrar senha'"
       @click="exibirSenha = !exibirSenha"
     >

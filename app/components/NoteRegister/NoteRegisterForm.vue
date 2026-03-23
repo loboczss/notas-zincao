@@ -59,24 +59,45 @@ const totalItems = computed(() => {
   }, 0)
 })
 
+const activeItemsCount = computed(() => {
+  return items.value.filter(i => i.nome.trim() !== '').length || (items.value.length > 0 ? 1 : 0)
+})
+
 const onFileUploaded = async (dataUrl: string) => {
+  form.value.foto_cupom_data_url = dataUrl
+  
   const result = await extractNotaFromImage(dataUrl)
   if (result) {
-    form.value = { ...form.value, ...result.draft }
-    items.value = result.draft.produtos.map(p => ({
-      nome: p.nome || '',
-      qtd: String(p.quantidade || ''),
-      preco: String(p.valor_unitario || ''),
-      unidade: p.unidade || 'un'
-    }))
+    // Merge results but preserve the image URL we just set
+    form.value = { 
+      ...form.value, 
+      ...result.draft,
+      foto_cupom_data_url: dataUrl 
+    }
+    
+    if (result.draft.produtos?.length) {
+      items.value = result.draft.produtos.map(p => ({
+        nome: p.nome || '',
+        qtd: String(p.quantidade || ''),
+        preco: String(p.valor_unitario || ''),
+        unidade: p.unidade || 'un'
+      }))
+    }
   }
 }
 
 const handleSave = async () => {
-  form.value.produtos = items.value.map(i => ({
+  const activeItems = items.value.filter(i => i.nome.trim() !== '')
+  
+  if (activeItems.length === 0) {
+    alert('Adicione pelo menos um produto.')
+    return
+  }
+
+  form.value.produtos = activeItems.map(i => ({
     nome: i.nome,
-    quantidade: parseFloat(i.qtd),
-    valor_unitario: parseFloat(i.preco),
+    quantidade: parseFloat(i.qtd) || 0,
+    valor_unitario: parseFloat(i.preco) || 0,
     unidade: i.unidade
   }))
   
@@ -91,27 +112,28 @@ const searchCrm = async () => {
 }
 
 const selectContact = (contact: any) => {
-  form.value.nome_cliente = contact.nome
+  form.value.nome_cliente = contact.nome || ''
   form.value.contato_id = contact.contato_id
-  form.value.telefone_cliente = contact.telefone
-  crmBusca.value = contact.nome
+  form.value.telefone_cliente = contact.contato_id
+  crmBusca.value = contact.nome || ''
+  crmStore.clearContatos()
 }
 
 </script>
 
 <template>
-  <div class="mx-auto max-w-5xl px-4 py-8">
+  <div class="mx-auto max-w-5xl px-4 py-8 pb-32">
     <!-- Header Strategy: Editorial Depth -->
     <header class="mb-10 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
       <div>
-        <h1 class="text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
+        <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 md:text-4xl">
           Nova Nota Fiscal
         </h1>
-        <p class="mt-2 text-lg text-slate-600">
+        <p class="mt-2 text-lg text-slate-600 dark:text-slate-400">
           Cadastre e processe notas com o apoio da nossa IA de precisão.
         </p>
       </div>
-      <div class="flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1 text-sm font-semibold text-indigo-700">
+      <div class="flex items-center gap-2 rounded-full bg-indigo-50 dark:bg-indigo-950/30 px-3 py-1 text-sm font-semibold text-indigo-700 dark:text-indigo-400">
         <span class="relative flex h-2 w-2">
           <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo-400 opacity-75"></span>
           <span class="relative inline-flex h-2 w-2 rounded-full bg-indigo-500"></span>
@@ -125,12 +147,12 @@ const selectContact = (contact: any) => {
       <div class="space-y-8 lg:col-span-8">
         
         <!-- AI Processing Card: The Precision Curator style (No thick borders, tonal shifting) -->
-        <section class="overflow-hidden rounded-2xl bg-white p-6 shadow-sm shadow-slate-200">
+        <section class="overflow-hidden rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm shadow-slate-200 dark:shadow-slate-950/50">
           <div class="mb-6">
-            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500">
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               Processamento inteligente
             </h2>
-            <h3 class="mt-1 text-xl font-semibold text-slate-900">Foto do Cupom</h3>
+            <h3 class="mt-1 text-xl font-semibold text-slate-900 dark:text-slate-100">Foto do Cupom</h3>
           </div>
           
           <NotaUploadImagem 
@@ -151,15 +173,15 @@ const selectContact = (contact: any) => {
         </section>
 
         <!-- Customer Data Section -->
-        <section class="rounded-2xl bg-white p-6 shadow-sm shadow-slate-200">
+        <section class="rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm shadow-slate-200 dark:shadow-slate-950/50">
           <div class="mb-6 flex items-center gap-2">
-            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
+            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
               </svg>
             </div>
-            <h2 class="text-lg font-bold text-slate-900">Dados do Cliente</h2>
+            <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">Dados do Cliente</h2>
           </div>
 
           <div class="space-y-6">
@@ -170,14 +192,15 @@ const selectContact = (contact: any) => {
                 placeholder="Nome, ID ou Telefone..." 
                 @input="searchCrm"
               />
-              <div v-if="contatos.length && crmBusca" class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-xl border border-slate-200 bg-white shadow-lg">
+              <div v-if="contatos.length && crmBusca" class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800 shadow-lg custom-scroll">
                 <button 
                   v-for="c in contatos" :key="c.contato_id"
-                  class="flex w-full flex-col p-3 transition hover:bg-slate-50 text-left"
-                  @click="selectContact(c)"
+                  type="button"
+                  class="flex w-full flex-col p-3 transition hover:bg-slate-50 dark:hover:bg-slate-700/50 text-left"
+                  @mousedown.prevent="selectContact(c)"
                 >
-                  <span class="font-medium text-slate-900">{{ c.nome }}</span>
-                  <span class="text-xs text-slate-500">{{ c.contato_id }}</span>
+                  <span class="font-medium text-slate-900 dark:text-slate-100">{{ c.nome || 'Sem nome' }}</span>
+                  <span class="text-xs text-slate-500 dark:text-slate-400">{{ c.contato_id }}</span>
                 </button>
               </div>
             </div>
@@ -195,20 +218,26 @@ const selectContact = (contact: any) => {
               <NotaCampo label="Data da compra" required>
                 <Input v-model="form.data_compra" type="date" />
               </NotaCampo>
+              <NotaCampo label="Número da Nota" required>
+                <Input v-model="form.numero_nota" placeholder="Ex: 000.123" />
+              </NotaCampo>
+              <NotaCampo label="Série" required>
+                <Input v-model="form.serie_nota" placeholder="Ex: 1" />
+              </NotaCampo>
             </div>
           </div>
         </section>
 
         <!-- Dynamic Items List -->
-        <section class="rounded-2xl bg-white p-6 shadow-sm shadow-slate-200">
+        <section class="rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm shadow-slate-200 dark:shadow-slate-950/50">
           <div class="mb-6 flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
+              <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5">
                   <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                 </svg>
               </div>
-              <h2 class="text-lg font-bold text-slate-900">Itens da Nota</h2>
+              <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">Itens da Nota</h2>
             </div>
             <button 
               type="button" 
@@ -220,26 +249,26 @@ const selectContact = (contact: any) => {
           </div>
 
           <div class="space-y-4">
-            <div v-for="(item, idx) in items" :key="idx" class="group relative grid grid-cols-1 gap-4 rounded-xl border border-slate-100 bg-slate-50/50 p-4 transition hover:bg-slate-50 md:grid-cols-12">
+            <div v-for="(item, idx) in items" :key="idx" class="group relative grid grid-cols-1 gap-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 p-4 transition hover:bg-slate-50 dark:hover:bg-slate-800 md:grid-cols-12">
               <div class="md:col-span-12 lg:col-span-5">
-                <label class="mb-1 block text-[10px] font-bold uppercase tracking-tight text-slate-400">Produto</label>
-                <input v-model="item.nome" class="w-full bg-transparent border-b border-slate-200 py-1 outline-none focus:border-indigo-500 transition" placeholder="Descrição do item..." />
+                <label class="mb-1 block text-[10px] font-bold uppercase tracking-tight text-slate-400 dark:text-slate-500">Produto</label>
+                <input v-model="item.nome" class="w-full bg-transparent border-b border-slate-200 dark:border-slate-700 py-1 outline-none focus:border-indigo-500 transition text-slate-900 dark:text-slate-100 placeholder:text-slate-300 dark:placeholder:text-slate-600" placeholder="Descrição do item..." />
               </div>
               <div class="md:col-span-4 lg:col-span-2">
-                <label class="mb-1 block text-[10px] font-bold uppercase tracking-tight text-slate-400">Qtd</label>
-                <input v-model="item.qtd" type="number" class="w-full bg-transparent border-b border-slate-200 py-1 outline-none focus:border-indigo-500 transition" />
+                <label class="mb-1 block text-[10px] font-bold uppercase tracking-tight text-slate-400 dark:text-slate-500">Qtd</label>
+                <input v-model="item.qtd" type="number" class="w-full bg-transparent border-b border-slate-200 dark:border-slate-700 py-1 outline-none focus:border-indigo-500 transition text-slate-900 dark:text-slate-100" />
               </div>
               <div class="md:col-span-4 lg:col-span-2">
-                <label class="mb-1 block text-[10px] font-bold uppercase tracking-tight text-slate-400">Unidade</label>
-                <select v-model="item.unidade" class="w-full bg-transparent border-b border-slate-200 py-1 outline-none focus:border-indigo-500 transition">
+                <label class="mb-1 block text-[10px] font-bold uppercase tracking-tight text-slate-500 dark:text-slate-400">Unidade</label>
+                <select v-model="item.unidade" class="w-full bg-transparent border-b border-slate-200 dark:border-slate-700 py-1 outline-none focus:border-indigo-500 transition text-slate-900 dark:text-slate-100 dark:bg-slate-800">
                   <option value="un">un</option>
                   <option value="kg">kg</option>
                   <option value="m">m</option>
                 </select>
               </div>
               <div class="md:col-span-4 lg:col-span-2">
-                <label class="mb-1 block text-[10px] font-bold uppercase tracking-tight text-slate-400">Preço</label>
-                <input v-model="item.preco" type="number" step="0.01" class="w-full bg-transparent border-b border-slate-200 py-1 outline-none focus:border-indigo-500 transition" />
+                <label class="mb-1 block text-[10px] font-bold uppercase tracking-tight text-slate-500 dark:text-slate-400">Preço</label>
+                <input v-model="item.preco" type="number" step="0.01" class="w-full bg-transparent border-b border-slate-200 dark:border-slate-700 py-1 outline-none focus:border-indigo-500 transition text-slate-900 dark:text-slate-100" />
               </div>
               <div class="absolute -right-2 -top-2 scale-0 group-hover:scale-100 transition duration-200 md:relative md:scale-100 md:right-0 md:top-0 md:col-span-1 flex items-end pb-1">
                 <button @click="removeItem(idx)" class="text-slate-300 hover:text-rose-500 transition p-1">
@@ -255,17 +284,17 @@ const selectContact = (contact: any) => {
       <aside class="space-y-8 lg:col-span-4">
         <section class="sticky top-8 space-y-8">
           <!-- Summary Card -->
-          <div class="rounded-2xl bg-slate-900 p-6 text-white shadow-xl shadow-slate-200">
-            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400">Resumo da Nota</h2>
+          <div class="rounded-2xl bg-white dark:bg-slate-900 p-6 text-slate-900 dark:text-slate-100 shadow-xl shadow-slate-200 dark:shadow-slate-950/50 border border-slate-100 dark:border-slate-800">
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Resumo da Nota</h2>
             
             <div class="mt-8 space-y-4">
-              <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-                <span class="text-slate-400">Total de Itens</span>
-                <span class="text-lg font-semibold">{{ items.length }}</span>
+              <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+                <span class="text-slate-500 dark:text-slate-400">Total de Itens</span>
+                <span class="text-lg font-semibold">{{ activeItemsCount }}</span>
               </div>
               <div class="pt-4">
-                <span class="text-xs uppercase tracking-wider text-slate-400">Valor Total Estimado</span>
-                <div class="mt-1 text-3xl font-bold text-indigo-400">
+                <span class="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">Valor Total Estimado</span>
+                <div class="mt-1 text-3xl font-bold text-indigo-600 dark:text-indigo-400">
                   R$ {{ totalItems.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) }}
                 </div>
               </div>
@@ -276,7 +305,7 @@ const selectContact = (contact: any) => {
                 <textarea 
                   v-model="form.observacoes" 
                   rows="4" 
-                  class="w-full rounded-xl bg-slate-800 border-none p-4 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                  class="w-full rounded-xl bg-slate-50 dark:bg-slate-800 border-none p-4 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:ring-2 focus:ring-indigo-500 transition"
                   placeholder="Instruções especiais..."
                 ></textarea>
               </NotaCampo>
@@ -284,12 +313,12 @@ const selectContact = (contact: any) => {
           </div>
 
           <!-- Status / Action help -->
-          <div class="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-6">
-            <h3 class="flex items-center gap-2 font-bold text-indigo-900">
+          <div class="rounded-2xl border border-indigo-100 dark:border-indigo-900/50 bg-indigo-50/50 dark:bg-indigo-950/20 p-6">
+            <h3 class="flex items-center gap-2 font-bold text-indigo-900 dark:text-indigo-300">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
               Verificação de Segurança
             </h3>
-            <p class="mt-2 text-sm text-indigo-700/80 leading-relaxed">
+            <p class="mt-2 text-sm text-indigo-700/80 dark:text-indigo-400/80 leading-relaxed">
               Confira se os dados extraídos pela IA conferem com o documento físico antes de finalizar o cadastro.
             </p>
           </div>
@@ -298,17 +327,17 @@ const selectContact = (contact: any) => {
     </div>
 
     <!-- Sticky Action Bar -->
-    <nav class="fixed bottom-0 inset-x-0 z-50 border-t border-slate-200 bg-white/80 p-4 backdrop-blur-md">
+    <nav class="fixed bottom-0 inset-x-0 z-50 border-t border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 p-4 backdrop-blur-md">
       <div class="mx-auto flex max-w-5xl items-center justify-end gap-4">
         <button 
           @click="emit('cancel')"
-          class="px-6 py-2.5 text-sm font-bold text-slate-600 hover:text-slate-900 transition"
+          class="px-6 py-2.5 text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition"
         >
           Descartar
         </button>
         <button 
           @click="handleSave"
-          class="rounded-xl bg-gradient-to-br from-indigo-600 to-indigo-700 px-10 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-200 hover:shadow-indigo-300 transition active:scale-95"
+          class="rounded-xl bg-gradient-to-br from-indigo-600 to-indigo-700 px-10 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-900/40 dark:shadow-indigo-950/80 hover:shadow-indigo-900/60 dark:hover:shadow-black transition active:scale-95 border border-indigo-500/20"
         >
           Finalizar Cadastro
         </button>

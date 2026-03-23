@@ -101,19 +101,29 @@ const fecharFotoModal = () => {
   fotoModalUrl.value = ''
 }
 
+const getStatusColor = (status: string) => {
+  if (!status) return 'bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 border-slate-100 dark:border-slate-700'
+  switch (status.toLowerCase()) {
+    case 'pendente': return 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-100 dark:border-amber-900/50'
+    case 'retirada': 
+    case 'retirado': return 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/50'
+    case 'parcial': return 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 border-blue-100 dark:border-blue-900/50'
+    case 'cancelado': return 'bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 border-rose-100 dark:border-rose-900/50'
+    default: return 'bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 border-slate-100 dark:border-slate-700'
+  }
+}
+
 onMounted(() => {
   carregarNotas()
 })
 </script>
 
 <template>
-  <section class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 md:p-6 lg:p-8">
-    <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-      <h2 class="text-xl font-semibold text-slate-900">
-        Lista de notas fiscais
-      </h2>
-
-      <Botao variant="secondary" class="w-full sm:w-auto" :disabled="loadingNotas" @click="carregarNotas">
+  <div class="space-y-4">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+      <Botao variant="secondary" class="w-full sm:w-auto shadow-sm dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700" :disabled="loadingNotas" @click="carregarNotas">
+        <svg v-if="loadingNotas" class="mr-2 h-4 w-4 animate-spin inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+        <svg v-else class="mr-2 h-4 w-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 2v6h6"/></svg>
         {{ loadingNotas ? 'Atualizando...' : 'Atualizar lista' }}
       </Botao>
     </div>
@@ -135,92 +145,127 @@ onMounted(() => {
         <article
           v-for="item in notasFiltradas"
           :key="item.id"
-          class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+          class="rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm transition-colors duration-300 ring-1 ring-slate-100 dark:ring-slate-800"
         >
           <div class="flex items-start justify-between gap-3">
-            <div>
-              <p class="text-base font-semibold text-slate-900">{{ item.nome_cliente }}</p>
-              <p class="mt-1 text-sm text-slate-500">Nota {{ item.numero_nota }} • Série {{ item.serie_nota }}</p>
-            </div>
-            <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
-              {{ item.status_retirada }}
-            </span>
-          </div>
-
-          <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div>
-              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Data compra</p>
-              <p class="mt-1 text-sm text-slate-700">{{ formatDate(item.data_compra) }}</p>
-            </div>
-            <div>
-              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Data retirada</p>
-              <p class="mt-1 text-sm text-slate-700">{{ formatDateTime(item.data_retirada) }}</p>
-            </div>
-            <div>
-              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Valor</p>
-              <p class="mt-1 text-sm text-slate-700">{{ formatCurrency(item.valor_total) }}</p>
+            <div class="flex items-center gap-3">
+              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-xs font-bold text-indigo-700 dark:text-indigo-400">
+                {{ item.nome_cliente.charAt(0).toUpperCase() }}
+              </div>
+              <div>
+                <p class="text-base font-bold text-slate-900 dark:text-slate-100">{{ item.nome_cliente }}</p>
+                <p class="mt-0.5 text-sm font-medium text-slate-500 dark:text-slate-400">#NF-{{ item.numero_nota || '---' }} <span class="text-slate-300 dark:text-slate-600">•</span> Série {{ item.serie_nota || '-' }}</p>
+              </div>
             </div>
           </div>
 
-          <div class="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-            <Botao variant="secondary" class="w-full sm:w-auto" :disabled="!item.foto_url" @click="abrirFoto(item.foto_url, 'Foto do cupom')">
+          <div class="mt-5 grid grid-cols-2 gap-4 rounded-lg bg-slate-50/50 dark:bg-slate-800/30 p-4 border border-slate-100 dark:border-slate-800">
+            <div>
+              <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Data compra</p>
+              <p class="mt-1 text-sm font-medium text-slate-900 dark:text-slate-300">{{ formatDate(item.data_compra) }}</p>
+            </div>
+            <div>
+              <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Data retirada</p>
+              <p class="mt-1 text-sm font-medium text-slate-900 dark:text-slate-300">{{ formatDateTime(item.data_retirada) }}</p>
+            </div>
+            <div>
+              <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Valor</p>
+              <p class="mt-1 text-sm font-bold text-slate-900 dark:text-slate-100">{{ formatCurrency(item.valor_total) }}</p>
+            </div>
+            <div>
+              <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Status</p>
+              <span :class="['inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-bold leading-none', getStatusColor(item.status_retirada)]">
+                {{ item.status_retirada }}
+              </span>
+            </div>
+          </div>
+
+          <div class="mt-5 flex flex-wrap gap-2">
+            <Botao variant="secondary" class="flex-1 sm:flex-none text-xs" :disabled="!item.foto_url" @click="abrirFoto(item.foto_url, 'Foto do cupom')">
               Cupom
             </Botao>
-            <Botao variant="secondary" class="w-full sm:w-auto" :disabled="!item.foto_cliente_url" @click="abrirFoto(item.foto_cliente_url, 'Foto do cliente')">
+            <Botao variant="secondary" class="flex-1 sm:flex-none text-xs" :disabled="!item.foto_cliente_url" @click="abrirFoto(item.foto_cliente_url, 'Foto do cliente')">
               Cliente
             </Botao>
-            <Botao variant="secondary" class="w-full sm:w-auto" :disabled="!item.comprovante_retirada_url" @click="abrirFoto(item.comprovante_retirada_url, 'Foto da retirada')">
-              Foto retirada
+            <Botao variant="secondary" class="flex-1 sm:flex-none text-xs" :disabled="!item.comprovante_retirada_url" @click="abrirFoto(item.comprovante_retirada_url, 'Foto da retirada')">
+              Retirada
             </Botao>
           </div>
         </article>
 
-        <div v-if="notasFiltradas.length === 0" class="rounded-xl border border-slate-200 bg-white px-4 py-6 text-center text-sm text-slate-500">
+        <div v-if="notasFiltradas.length === 0" class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-8 text-center text-sm text-slate-500 dark:text-slate-400 shadow-sm">
           Nenhuma nota encontrada com os filtros informados.
         </div>
       </div>
 
-      <div class="hidden overflow-x-auto rounded-xl border border-slate-200 lg:block">
-        <table class="min-w-full divide-y divide-slate-200 bg-white">
-          <thead class="bg-slate-50">
-            <tr>
-              <th class="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Cliente</th>
-              <th class="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Nº nota</th>
-              <th class="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Série</th>
-              <th class="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Data compra</th>
-              <th class="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Data retirada</th>
-              <th class="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Valor</th>
-              <th class="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
-              <th class="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Fotos</th>
+      <div class="hidden overflow-hidden rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm ring-1 ring-slate-100 dark:ring-slate-800 lg:block">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-50/50 dark:bg-slate-800/50">
+              <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Cliente</th>
+              <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Nº nota</th>
+              <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Série</th>
+              <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Data compra</th>
+              <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Data retirada</th>
+              <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Valor</th>
+              <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status</th>
+              <th class="px-6 py-4 text-right text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Fotos</th>
             </tr>
           </thead>
 
-          <tbody class="divide-y divide-slate-100">
+          <tbody class="divide-y divide-slate-100 dark:divide-slate-800/50">
             <tr v-if="notasFiltradas.length === 0">
-              <td colspan="8" class="px-4 py-6 text-center text-sm text-slate-500">
+              <td colspan="8" class="px-6 py-12 text-center text-sm text-slate-500 dark:text-slate-400">
                 Nenhuma nota encontrada com os filtros informados.
               </td>
             </tr>
 
-            <tr v-for="item in notasFiltradas" :key="item.id">
-              <td class="px-3 py-3 text-sm text-slate-700">{{ item.nome_cliente }}</td>
-              <td class="px-3 py-3 text-sm text-slate-700">{{ item.numero_nota }}</td>
-              <td class="px-3 py-3 text-sm text-slate-700">{{ item.serie_nota }}</td>
-              <td class="px-3 py-3 text-sm text-slate-700">{{ formatDate(item.data_compra) }}</td>
-              <td class="px-3 py-3 text-sm text-slate-700">{{ formatDateTime(item.data_retirada) }}</td>
-              <td class="px-3 py-3 text-sm text-slate-700">{{ formatCurrency(item.valor_total) }}</td>
-              <td class="px-3 py-3 text-sm text-slate-700">{{ item.status_retirada }}</td>
-              <td class="px-3 py-3">
-                <div class="flex flex-wrap gap-2">
-                  <Botao variant="secondary" :disabled="!item.foto_url" @click="abrirFoto(item.foto_url, 'Foto do cupom')">
+            <tr 
+              v-for="item in notasFiltradas" 
+              :key="item.id"
+              class="group transition hover:bg-indigo-50/30 dark:hover:bg-slate-800/50"
+            >
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-[10px] font-bold text-indigo-700 dark:text-indigo-400">
+                    {{ item.nome_cliente.charAt(0).toUpperCase() }}
+                  </div>
+                  <span class="text-sm font-medium text-slate-900 dark:text-slate-100">{{ item.nome_cliente }}</span>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-sm font-bold text-slate-900 dark:text-slate-100">#NF-{{ item.numero_nota || '---' }}</td>
+              <td class="px-6 py-4 text-sm font-medium text-slate-600 dark:text-slate-400">{{ item.serie_nota || '-' }}</td>
+              <td class="px-6 py-4 text-sm font-medium text-slate-600 dark:text-slate-400">{{ formatDate(item.data_compra) }}</td>
+              <td class="px-6 py-4 text-sm font-medium text-slate-600 dark:text-slate-400">{{ formatDateTime(item.data_retirada) }}</td>
+              <td class="px-6 py-4 text-sm font-bold text-slate-900 dark:text-slate-100">{{ formatCurrency(item.valor_total) }}</td>
+              <td class="px-6 py-4">
+                <span :class="['inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-bold leading-none', getStatusColor(item.status_retirada)]">
+                  {{ item.status_retirada }}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-right">
+                <div class="flex flex-wrap justify-end gap-2">
+                  <button 
+                    :disabled="!item.foto_url" 
+                    @click="abrirFoto(item.foto_url, 'Foto do cupom')"
+                    class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-2 py-1 text-xs font-semibold text-slate-600 dark:text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-700 transition"
+                  >
                     Cupom
-                  </Botao>
-                  <Botao variant="secondary" :disabled="!item.foto_cliente_url" @click="abrirFoto(item.foto_cliente_url, 'Foto do cliente')">
+                  </button>
+                  <button 
+                    :disabled="!item.foto_cliente_url" 
+                    @click="abrirFoto(item.foto_cliente_url, 'Foto do cliente')"
+                    class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-2 py-1 text-xs font-semibold text-slate-600 dark:text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-700 transition"
+                  >
                     Cliente
-                  </Botao>
-                  <Botao variant="secondary" :disabled="!item.comprovante_retirada_url" @click="abrirFoto(item.comprovante_retirada_url, 'Foto da retirada')">
-                    Foto retirada
-                  </Botao>
+                  </button>
+                  <button 
+                    :disabled="!item.comprovante_retirada_url" 
+                    @click="abrirFoto(item.comprovante_retirada_url, 'Foto da retirada')"
+                    class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-2 py-1 text-xs font-semibold text-slate-600 dark:text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-700 transition"
+                  >
+                    Retirada
+                  </button>
                 </div>
               </td>
             </tr>
@@ -242,5 +287,5 @@ onMounted(() => {
         </div>
       </template>
     </ModalGlobal>
-  </section>
+  </div>
 </template>

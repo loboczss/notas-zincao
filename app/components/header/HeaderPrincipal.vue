@@ -24,19 +24,20 @@ const irParaRetiradaNotas = async () => {
 </script>
 
 <template>
-  <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
+  <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95">
     <div class="mx-auto max-w-7xl px-3 py-3 md:px-6">
       <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div class="flex items-center justify-between gap-3 md:min-w-[180px] md:justify-start">
           <button
             type="button"
-            class="max-w-[70vw] truncate rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 md:max-w-none"
+            class="max-w-[70vw] truncate rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700 md:max-w-none"
             @click="irParaIndex"
           >
             Notas ZINCÃO
           </button>
 
-          <div class="md:hidden">
+          <div class="flex items-center gap-2 md:hidden">
+            <DarkModeToggle />
             <HeaderMenu />
           </div>
         </div>
@@ -48,7 +49,7 @@ const irParaRetiradaNotas = async () => {
             class="shrink-0 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition focus:outline-none focus:ring-2 focus:ring-blue-500/40 sm:text-sm"
             :class="isActive('/')
               ? 'bg-blue-600 text-white'
-              : 'text-slate-700 hover:bg-slate-100'"
+              : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'"
             @click="irParaIndex"
           >
             Index
@@ -60,7 +61,7 @@ const irParaRetiradaNotas = async () => {
             class="shrink-0 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition focus:outline-none focus:ring-2 focus:ring-blue-500/40 sm:text-sm"
             :class="isActive('/cadastrar-nota')
               ? 'bg-blue-600 text-white'
-              : 'text-slate-700 hover:bg-slate-100'"
+              : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'"
             @click="irParaCadastrarNota"
           >
             Cadastrar nota
@@ -72,7 +73,7 @@ const irParaRetiradaNotas = async () => {
             class="shrink-0 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition focus:outline-none focus:ring-2 focus:ring-blue-500/40 sm:text-sm"
             :class="isActive('/listar-notas')
               ? 'bg-blue-600 text-white'
-              : 'text-slate-700 hover:bg-slate-100'"
+              : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'"
             @click="irParaListarNotas"
           >
             Listar notas
@@ -84,14 +85,15 @@ const irParaRetiradaNotas = async () => {
             class="shrink-0 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition focus:outline-none focus:ring-2 focus:ring-blue-500/40 sm:text-sm"
             :class="isActive('/retirada-notas')
               ? 'bg-blue-600 text-white'
-              : 'text-slate-700 hover:bg-slate-100'"
+              : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'"
             @click="irParaRetiradaNotas"
           >
             Retirada
           </button>
         </nav>
 
-        <div class="hidden md:block md:min-w-[220px] md:text-right">
+        <div class="hidden md:flex md:min-w-[220px] md:items-center md:justify-end md:gap-4 md:text-right">
+          <DarkModeToggle />
           <HeaderMenu />
         </div>
       </div>
