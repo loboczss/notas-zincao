@@ -1,0 +1,1 @@
+export { useNotasStore } from './store'
