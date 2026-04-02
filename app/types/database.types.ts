@@ -1,3 +1,34 @@
+type NotaRetiradaProduto = {
+  nome: string
+  quantidade?: number
+  valor_unitario?: number
+  valor_total?: number
+  unidade?: string
+  tipo_unidade?: string
+  embalagem?: string
+  tipo_produto?: string | null
+  confidence?: number
+  id_produto_estoque?: number | null
+  quantidade_retirada?: number
+  [key: string]: unknown
+}
+
+type NotaRetiradaHistoricoItem = {
+  data: string
+  responsavel_id: string
+  responsavel_nome?: string | null
+  fotos?: string[]
+  itens_retirados?: Array<{
+    index: number
+    quantidade: number
+    quantidade_solicitada?: number
+  }>
+  observacoes?: string | null
+  status_anterior?: 'pendente' | 'parcial' | 'retirada' | 'cancelada' | null
+  status_novo?: 'pendente' | 'parcial' | 'retirada' | 'cancelada'
+  usuario_id?: string
+}
+
 export type Database = {
   public: {
     Tables: {
@@ -16,13 +47,9 @@ export type Database = {
           chave_nfe: string | null
           data_compra: string
           data_prevista_retirada: string | null
-          produtos: {
-            nome: string
-            quantidade?: number
-            valor_unitario?: number
-            unidade?: string
-          }[]
+          produtos: NotaRetiradaProduto[]
           valor_total: number | null
+          desconto_total: number
           observacoes: string | null
           status_retirada: 'pendente' | 'parcial' | 'retirada' | 'cancelada'
           data_retirada: string | null
@@ -30,6 +57,7 @@ export type Database = {
           comprovante_retirada_url: string | null
           criado_em: string
           atualizado_em: string
+          historico_retiradas: NotaRetiradaHistoricoItem[] | null
         }
         Insert: {
           id?: string
@@ -45,13 +73,9 @@ export type Database = {
           chave_nfe?: string | null
           data_compra: string
           data_prevista_retirada?: string | null
-          produtos: {
-            nome: string
-            quantidade?: number
-            valor_unitario?: number
-            unidade?: string
-          }[]
+          produtos: NotaRetiradaProduto[]
           valor_total?: number | null
+          desconto_total?: number
           observacoes?: string | null
           status_retirada?: 'pendente' | 'parcial' | 'retirada' | 'cancelada'
           data_retirada?: string | null
@@ -59,6 +83,7 @@ export type Database = {
           comprovante_retirada_url?: string | null
           criado_em?: string
           atualizado_em?: string
+          historico_retiradas?: NotaRetiradaHistoricoItem[] | null
         }
         Update: {
           id?: string
@@ -74,13 +99,9 @@ export type Database = {
           chave_nfe?: string | null
           data_compra?: string
           data_prevista_retirada?: string | null
-          produtos?: {
-            nome: string
-            quantidade?: number
-            valor_unitario?: number
-            unidade?: string
-          }[]
+          produtos?: NotaRetiradaProduto[]
           valor_total?: number | null
+          desconto_total?: number
           observacoes?: string | null
           status_retirada?: 'pendente' | 'parcial' | 'retirada' | 'cancelada'
           data_retirada?: string | null
@@ -88,6 +109,7 @@ export type Database = {
           comprovante_retirada_url?: string | null
           criado_em?: string
           atualizado_em?: string
+          historico_retiradas?: NotaRetiradaHistoricoItem[] | null
         }
       }
       crm_zincao: {
@@ -143,6 +165,44 @@ export type Database = {
           compras_cliente?: unknown | null
         }
       }
+      bd_estoque_geral: {
+        Row: {
+          IDPRODUTO: number
+          DESCRICAO: string
+          EMBALAGEMSAIDA: string
+          VALPRECOVAREJO: string | null
+          TIPOPRODUTO: string | null
+          QUANTIDADEESTOQUE: number
+          CRIADOEM: string
+          ATUALIZADOEM: string
+          IDPRODUTOPAI: number | null
+          FATORCONVERSAO: number | null
+        }
+        Insert: {
+          IDPRODUTO?: number
+          DESCRICAO: string
+          EMBALAGEMSAIDA: string
+          VALPRECOVAREJO?: string | null
+          TIPOPRODUTO?: string | null
+          QUANTIDADEESTOQUE?: number
+          CRIADOEM?: string
+          ATUALIZADOEM?: string
+          IDPRODUTOPAI?: number | null
+          FATORCONVERSAO?: number | null
+        }
+        Update: {
+          IDPRODUTO?: number
+          DESCRICAO?: string
+          EMBALAGEMSAIDA?: string
+          VALPRECOVAREJO?: string | null
+          TIPOPRODUTO?: string | null
+          QUANTIDADEESTOQUE?: number
+          CRIADOEM?: string
+          ATUALIZADOEM?: string
+          IDPRODUTOPAI?: number | null
+          FATORCONVERSAO?: number | null
+        }
+      }
       profiles: {
         Row: {
           id: string
@@ -194,3 +254,6 @@ export type Database = {
 export type NotaRetiradaRow = Database['public']['Tables']['notas_retirada']['Row']
 export type NotaRetiradaInsert = Database['public']['Tables']['notas_retirada']['Insert']
 export type NotaRetiradaUpdate = Database['public']['Tables']['notas_retirada']['Update']
+export type EstoqueProdutoRow = Database['public']['Tables']['bd_estoque_geral']['Row']
+export type EstoqueProdutoInsert = Database['public']['Tables']['bd_estoque_geral']['Insert']
+export type EstoqueProdutoUpdate = Database['public']['Tables']['bd_estoque_geral']['Update']

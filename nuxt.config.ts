@@ -3,6 +3,13 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: false },
+  app: {
+    head: {
+      link: [
+        { rel: 'icon', type: 'image/x-icon', href: '/logomarca.ico' },
+      ],
+    },
+  },
   modules: [
     '@nuxtjs/tailwindcss',
     '@pinia/nuxt',
@@ -21,9 +28,16 @@ export default defineNuxtConfig({
     redirect: true,
     redirectOptions: {
       login: '/login',
-      callback: '/confirm',
-      exclude: ['/politica'],
+      callback: '/login',
+      exclude: [],
       saveRedirectToCookie: false,
     },
   },
+  vite: {
+    optimizeDeps: {
+      include: [
+        'lucide-vue-next',
+      ]
+    }
+  }
 })

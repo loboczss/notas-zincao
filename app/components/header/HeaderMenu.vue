@@ -1,12 +1,23 @@
+<script lang="ts">
+export default {
+  name: 'HeaderMenu'
+}
+</script>
+
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { navigateTo, useSupabaseClient, useSupabaseUser } from '#imports'
+import { ChevronDown, House, LogOut, UserCircle2 } from 'lucide-vue-next'
+import { useRouter } from 'vue-router'
+import { useSupabaseClient, useSupabaseUser } from '#imports'
+import HeaderDropmenu from './HeaderDropmenu.vue'
+import HeaderNavButton from './HeaderNavButton.vue'
 
-const menuAberto = ref(false)
 const carregandoLogout = ref(false)
 
+const router = useRouter()
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
+const triggerRef = ref<HTMLButtonElement | null>(null)
 
 const nomeUsuario = computed(() => {
   if (!user.value) {
@@ -20,119 +31,106 @@ const nomeUsuario = computed(() => {
     || 'Usuário'
 })
 
-const toggleMenu = () => {
-  menuAberto.value = !menuAberto.value
-}
+const fotoPerfilUrl = computed(() => {
+  if (!user.value) {
+    return ''
+  }
 
-const irParaUsuario = async () => {
-  menuAberto.value = false
-  await navigateTo('/usuario')
-}
+  const metadata = user.value.user_metadata || {}
+  return String(
+    metadata.avatar_url
+    || metadata.picture
+    || metadata.photo_url
+    || '',
+  ).trim()
+})
 
-const irParaCadastrarNota = async () => {
-  menuAberto.value = false
-  await navigateTo('/cadastrar-nota')
-}
+const inicialUsuario = computed(() => {
+  const nome = String(nomeUsuario.value || '').trim()
+  if (!nome) {
+    return 'U'
+  }
 
-const irParaListarNotas = async () => {
-  menuAberto.value = false
-  await navigateTo('/listar-notas')
-}
+  return nome.charAt(0).toUpperCase()
+})
 
-const irParaRetiradaNotas = async () => {
-  menuAberto.value = false
-  await navigateTo('/retirada-notas')
+const irParaInicio = async () => {
+  await router.push('/')
 }
 
 const fazerLogout = async () => {
   carregandoLogout.value = true
   await supabase.auth.signOut()
   carregandoLogout.value = false
-  menuAberto.value = false
-  await navigateTo('/login')
+  await router.push('/login')
+}
+
+const handleCloseAndFocus = (fechar: () => void) => {
+  fechar()
+  triggerRef.value?.focus()
 }
 </script>
 
 <template>
-  <div class="relative">
-    <button
-      id="header-menu-toggle"
-      type="button"
-      class="inline-flex max-w-[72vw] items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 sm:max-w-none"
-      @click="toggleMenu"
-    >
-      <span class="max-w-28 truncate sm:max-w-44">{{ nomeUsuario }}</span>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        class="h-4 w-4 transition-transform"
-        :class="menuAberto ? 'rotate-180' : 'rotate-0'"
+  <HeaderDropmenu width-class="w-[min(19rem,calc(100vw-1.5rem))]">
+    <template #trigger="{ aberto, toggle }">
+      <button
+        id="header-menu-toggle"
+        ref="triggerRef"
+        type="button"
+        class="inline-flex max-w-[74vw] items-center gap-2 rounded-full p-1.5 pr-3 text-sm font-medium text-slate-700 transition-all hover:bg-white/50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-amber-500/40 dark:text-slate-200 dark:hover:bg-slate-800/50 dark:hover:shadow-black/50 sm:max-w-none"
+        aria-haspopup="menu"
+        :aria-expanded="aberto"
+        @click="toggle"
       >
-        <path d="m6 9 6 6 6-6" />
-      </svg>
-    </button>
+        <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-slate-100 text-xs font-semibold text-slate-700 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+          <img
+            v-if="fotoPerfilUrl"
+            :src="fotoPerfilUrl"
+            alt="Foto de perfil"
+            class="h-full w-full object-cover"
+          >
+          <span v-else>{{ inicialUsuario }}</span>
+        </span>
+        <span class="hidden max-w-40 truncate text-sm font-semibold tracking-tight text-slate-700 dark:text-slate-200 sm:inline">
+          {{ nomeUsuario }}
+        </span>
+        <UserCircle2 class="h-4 w-4 text-slate-400 dark:text-slate-500 sm:hidden" />
+        <ChevronDown class="h-4 w-4 transition-transform" :class="aberto ? 'rotate-180' : ''" />
+      </button>
+    </template>
 
-    <div
-      v-if="menuAberto"
-      class="absolute right-0 z-20 mt-2 w-[min(18rem,calc(100vw-1.5rem))] rounded-xl border border-slate-200 bg-white p-2 shadow-lg"
-    >
-      <div class="mb-1 border-b border-slate-200 px-3 py-2">
-        <p class="truncate text-sm font-semibold text-slate-800">
+    <template #default="{ fechar }">
+      <div class="border-b border-slate-200 px-3 py-2 dark:border-slate-700">
+        <p class="truncate text-sm font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           {{ nomeUsuario }}
         </p>
-        <p class="text-xs text-slate-500">
-          Menu da conta
+        <p class="text-xs text-slate-500 dark:text-slate-400">
+          Conta conectada
         </p>
       </div>
 
-      <button
-        id="header-menu-usuario"
-        type="button"
-        class="block w-full rounded-lg px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-100"
-        @click="irParaUsuario"
-      >
-        Página de usuário
-      </button>
+      <div class="mt-2 grid gap-1">
+        <HeaderNavButton
+          id="header-menu-inicio"
+          block
+          @click="async () => { await irParaInicio(); handleCloseAndFocus(fechar) }"
+        >
+          <House class="h-4 w-4" />
+          Página inicial
+        </HeaderNavButton>
 
-      <button
-        id="header-menu-cadastrar-nota"
-        type="button"
-        class="mt-1 block w-full rounded-lg px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-100"
-        @click="irParaCadastrarNota"
-      >
-        Cadastrar nota
-      </button>
-
-      <button
-        id="header-menu-listar-notas"
-        type="button"
-        class="mt-1 block w-full rounded-lg px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-100"
-        @click="irParaListarNotas"
-      >
-        Listar notas
-      </button>
-
-      <button
-        id="header-menu-retirada-notas"
-        type="button"
-        class="mt-1 block w-full rounded-lg px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-100"
-        @click="irParaRetiradaNotas"
-      >
-        Retirada de notas
-      </button>
-
-      <button
-        id="header-menu-logout"
-        type="button"
-        class="mt-1 block w-full rounded-lg px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
-        :disabled="carregandoLogout"
-        @click="fazerLogout"
-      >
-        {{ carregandoLogout ? 'Saindo...' : 'Fazer logout' }}
-      </button>
-    </div>
-  </div>
+        <HeaderNavButton
+          id="header-menu-logout"
+          block
+          danger
+          :disabled="carregandoLogout"
+          @click="async () => { await fazerLogout(); handleCloseAndFocus(fechar) }"
+        >
+          <LogOut class="h-4 w-4" />
+          {{ carregandoLogout ? 'Saindo...' : 'Fazer logout' }}
+        </HeaderNavButton>
+      </div>
+    </template>
+  </HeaderDropmenu>
 </template>

@@ -1,8 +1,9 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { randomUUID } from 'node:crypto'
 import type { NotaRetiradaDraft } from '../../../shared/types/NotasRetirada'
+import { vincularProdutosAoEstoque } from '../../services/estoque/match-produtos'
 
-const requiredFields = ['nome_cliente', 'telefone_cliente', 'numero_nota', 'serie_nota', 'data_compra', 'produtos'] as const
+const requiredFields = ['nome_cliente', 'numero_nota', 'data_compra', 'produtos'] as const
 const storageBucket = 'notas-retirada'
 const allowedStatus = ['pendente', 'parcial', 'retirada', 'cancelada'] as const
 
@@ -24,6 +25,25 @@ const toNumber = (value: unknown) => {
   return undefined
 }
 
+const toInteger = (value: unknown) => {
+  const parsed = toNumber(value)
+  if (parsed === undefined) {
+    return undefined
+  }
+
+  return Number.isFinite(parsed) ? Math.trunc(parsed) : undefined
+}
+
+const normalizeDigits = (value: unknown) => {
+  const raw = String(value || '').trim()
+  if (!raw) {
+    return null
+  }
+
+  const digits = raw.replace(/\D/g, '')
+  return digits || null
+}
+
 const normalizeProdutos = (produtos: NotaRetiradaDraft['produtos']) => {
   if (!Array.isArray(produtos)) {
     return []
@@ -38,13 +58,28 @@ const normalizeProdutos = (produtos: NotaRetiradaDraft['produtos']) => {
 
       const quantidade = toNumber(item?.quantidade)
       const valorUnitario = toNumber(item?.valor_unitario)
-      const unidade = String(item?.unidade || '').trim()
+      const valorTotal = toNumber(item?.valor_total)
+      const unidade = String(item?.unidade || item?.tipo_unidade || '').trim()
+      const embalagem = String(item?.embalagem || '').trim()
+      const tipoUnidade = String(item?.tipo_unidade || unidade || '').trim()
+      const confidence = toNumber(item?.confidence)
+      const idProdutoEstoque = toInteger(item?.id_produto_estoque)
+      const tipoProdutoRaw = item?.tipo_produto
+      const tipoProduto = typeof tipoProdutoRaw === 'string'
+        ? tipoProdutoRaw.trim() || null
+        : null
 
       return {
         nome,
         ...(quantidade !== undefined ? { quantidade } : {}),
         ...(valorUnitario !== undefined ? { valor_unitario: valorUnitario } : {}),
+        ...(valorTotal !== undefined ? { valor_total: valorTotal } : {}),
         ...(unidade ? { unidade } : {}),
+        ...(tipoUnidade ? { tipo_unidade: tipoUnidade } : {}),
+        ...(embalagem ? { embalagem } : {}),
+        ...(confidence !== undefined ? { confidence } : {}),
+        ...(idProdutoEstoque !== undefined ? { id_produto_estoque: idProdutoEstoque } : {}),
+        ...(tipoProduto !== null ? { tipo_produto: tipoProduto } : {}),
       }
     })
     .filter((item): item is NonNullable<typeof item> => item !== null)
@@ -305,9 +340,13 @@ export const notasCreatePostHandler = defineEventHandler(async (event) => {
   }
 
   const body = await readBody<NotaRetiradaDraft>(event)
-  const produtos = normalizeProdutos(body?.produtos)
+  const numeroNota = String(body?.numero_nota || '').trim()
+  const serieNota = String(body?.serie_nota || '').trim() || '1'
+  const produtosBase = normalizeProdutos(body?.produtos)
   const dataCompra = normalizeDate(body?.data_compra)
   const dataPrevistaRetirada = normalizeDate(body?.data_prevista_retirada)
+  const valorTotal = toNumber(body?.valor_total)
+  const descontoTotal = toNumber(body?.desconto_total) ?? 0
   const fotoCupomDataUrl = String(body?.foto_cupom_data_url || '').trim()
   const fotoClienteDataUrl = String(body?.foto_cliente_data_url || '').trim()
   const statusInicial = allowedStatus.includes(body?.status_retirada as any)
@@ -316,7 +355,7 @@ export const notasCreatePostHandler = defineEventHandler(async (event) => {
 
   const missing = requiredFields.filter((field) => {
     if (field === 'produtos') {
-      return produtos.length === 0
+      return produtosBase.length === 0
     }
 
     if (field === 'data_compra') {
@@ -347,6 +386,20 @@ export const notasCreatePostHandler = defineEventHandler(async (event) => {
     })
   }
 
+  if (descontoTotal < 0) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'desconto_total não pode ser negativo.',
+    })
+  }
+
+  if (valorTotal !== undefined && descontoTotal > valorTotal) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'desconto_total não pode ser maior que valor_total.',
+    })
+  }
+
   if (!fotoCupomDataUrl) {
     throw createError({
       statusCode: 400,
@@ -364,13 +417,14 @@ export const notasCreatePostHandler = defineEventHandler(async (event) => {
   }
 
   const client = await serverSupabaseClient(event)
+  const produtos = await vincularProdutosAoEstoque(client as any, produtosBase)
 
   const { data: existingNota, error: existingNotaError } = await (client as any)
     .from('notas_retirada')
     .select('id')
     .eq('owner_user_id', authUid)
-    .eq('numero_nota', body.numero_nota.trim())
-    .eq('serie_nota', body.serie_nota.trim())
+    .eq('numero_nota', numeroNota)
+    .eq('serie_nota', serieNota)
     .maybeSingle()
 
   if (existingNotaError) {
@@ -404,15 +458,16 @@ export const notasCreatePostHandler = defineEventHandler(async (event) => {
     foto_url: fotoCupomUrl,
     ...(fotoClienteUrl ? { foto_cliente_url: fotoClienteUrl } : {}),
     nome_cliente: crmContato.nome,
-    documento_cliente: String(body.documento_cliente || '').trim() || null,
-    telefone_cliente: crmContato.telefone_cliente || String(body.telefone_cliente || '').trim() || null,
-    numero_nota: body.numero_nota.trim(),
-    serie_nota: body.serie_nota.trim(),
+    documento_cliente: normalizeDigits(body.documento_cliente),
+    telefone_cliente: crmContato.telefone_cliente || normalizeDigits(body.telefone_cliente),
+    numero_nota: numeroNota,
+    serie_nota: serieNota,
     chave_nfe: String(body.chave_nfe || '').trim() || null,
     data_compra: dataCompra,
     data_prevista_retirada: dataPrevistaRetirada || null,
     produtos,
-    valor_total: toNumber(body.valor_total) ?? null,
+    valor_total: valorTotal ?? null,
+    desconto_total: descontoTotal,
     observacoes: String(body.observacoes || '').trim() || null,
     status_retirada: statusInicial,
   }

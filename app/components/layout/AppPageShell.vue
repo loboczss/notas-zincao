@@ -17,7 +17,7 @@ const props = withDefaults(
 <template>
   <main class="min-h-screen bg-slate-100 dark:bg-slate-950 p-4 text-slate-800 dark:text-slate-200 md:p-8 transition-colors duration-300">
     <div class="mx-auto space-y-6" :class="props.widthClass">
-      <header class="rounded-[24px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm md:p-7">
+      <header class="rounded-[2.5rem] border border-slate-200 bg-white p-6 dark:border-white/5 dark:bg-slate-900 md:p-8">
         <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div class="max-w-3xl">
             <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">

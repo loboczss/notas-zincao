@@ -1,0 +1,1 @@
+export { useEstoqueStore } from './store'

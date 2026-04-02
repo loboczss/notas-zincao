@@ -1,5 +1,8 @@
 import type { OpenAINotaExtractionResponse } from '../../../shared/types/OpenAI'
 import type { NotaProduto } from '../../../shared/types/NotasRetirada'
+import type { Database } from '../../../app/types/database.types'
+import { serverSupabaseClient } from '#supabase/server'
+import { vincularProdutosAoEstoque } from '../estoque/match-produtos'
 import { getOpenAIClient } from './client'
 
 function toNumber(value: unknown): number | undefined {
@@ -64,7 +67,7 @@ export async function extractNotaFromImage(
       {
         role: 'system',
         content:
-          'Você extrai dados de nota fiscal de loja de material de construção. Responda APENAS JSON com as chaves: nome_cliente, numero_nota, serie_nota, data_compra (YYYY-MM-DD quando possível), produtos (array de {nome, quantidade, valor_unitario, unidade}), valor_total, missingFields (array com: nome_cliente, numero_nota, serie_nota, data_compra, produtos). Se não souber, retorne vazio.',
+          'Você extrai dados de nota/cupom fiscal de loja de material de construção. Responda APENAS JSON com as seguintes chaves textuais/numéricas: nome_cliente, telefone_cliente, documento_cliente (CPF/CNPJ apenas os números), numero_nota, serie_nota, chave_nfe, data_compra (YYYY-MM-DD), valor_total, desconto_total, observacoes. Retorne também "produtos" (array de {nome, quantidade, valor_unitario, unidade}). Retorne também "missingFields" (array com os nomes das chaves listadas acima que NÃO foram encontradas ou estão ilegíveis). Se não encontrar alguma informação, deixe a chave com valor vazio.',
       },
       {
         role: 'user',
@@ -79,32 +82,47 @@ export async function extractNotaFromImage(
   const raw = completion.choices[0]?.message?.content || '{}'
   const parsed = JSON.parse(raw) as {
     nome_cliente?: string
+    telefone_cliente?: string
+    documento_cliente?: string
     numero_nota?: string
     serie_nota?: string
+    chave_nfe?: string
     data_compra?: string
+    observacoes?: string
     produtos?: unknown
     valor_total?: number | string
+    desconto_total?: number | string
     missingFields?: string[]
   }
 
   const produtos = normalizeProdutos(parsed.produtos)
+  const supabase = await serverSupabaseClient<Database>(event as any)
+  const produtosComEstoque = await vincularProdutosAoEstoque(supabase as any, produtos)
 
   const missingFields = [
     !parsed.nome_cliente ? 'nome_cliente' : null,
+    !parsed.telefone_cliente ? 'telefone_cliente' : null,
+    !parsed.documento_cliente ? 'documento_cliente' : null,
     !parsed.numero_nota ? 'numero_nota' : null,
     !parsed.serie_nota ? 'serie_nota' : null,
+    !parsed.chave_nfe ? 'chave_nfe' : null,
     !parsed.data_compra ? 'data_compra' : null,
-    produtos.length === 0 ? 'produtos' : null,
-  ].filter((field): field is 'nome_cliente' | 'numero_nota' | 'serie_nota' | 'data_compra' | 'produtos' => Boolean(field))
+    produtosComEstoque.length === 0 ? 'produtos' : null,
+  ].filter((field): field is any => Boolean(field))
 
   return {
     draft: {
       nome_cliente: String(parsed.nome_cliente || '').trim(),
+      telefone_cliente: String(parsed.telefone_cliente || '').trim(),
+      documento_cliente: String(parsed.documento_cliente || '').trim(),
       numero_nota: String(parsed.numero_nota || '').trim(),
       serie_nota: String(parsed.serie_nota || '').trim() || '1',
+      chave_nfe: String(parsed.chave_nfe || '').trim(),
       data_compra: String(parsed.data_compra || '').trim(),
-      produtos,
+      observacoes: String(parsed.observacoes || '').trim(),
+      produtos: produtosComEstoque,
       ...(toNumber(parsed.valor_total) !== undefined ? { valor_total: toNumber(parsed.valor_total) } : {}),
+      ...(toNumber(parsed.desconto_total) !== undefined ? { desconto_total: toNumber(parsed.desconto_total) } : {}),
     },
     missingFields,
   }

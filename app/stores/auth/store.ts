@@ -119,6 +119,28 @@ export const useAuthStore = defineStore('auth', () => {
     profile.value = null
   }
 
+  const updateProfile = async (data: { nome?: string; foto_perfil?: string }) => {
+    clearError()
+    loading.value = true
+
+    try {
+      const updated = await $fetch<UserProfile>('/api/auth/profile', {
+        method: 'PATCH',
+        body: data,
+      })
+      profile.value = updated
+      return true
+    }
+    catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao atualizar perfil.'
+      errorMessage.value = message
+      return false
+    }
+    finally {
+      loading.value = false
+    }
+  }
+
   return {
     user,
     session,
@@ -132,5 +154,6 @@ export const useAuthStore = defineStore('auth', () => {
     signIn,
     signUp,
     signOut,
+    updateProfile,
   }
 })

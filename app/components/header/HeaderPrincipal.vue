@@ -1,101 +1,76 @@
-<script setup lang="ts">
-import { navigateTo, useRoute } from '#imports'
-import HeaderMenu from './HeaderMenu.vue'
-
-const route = useRoute()
-
-const isActive = (path: string) => route.path === path
-
-const irParaIndex = async () => {
-  await navigateTo('/')
-}
-
-const irParaCadastrarNota = async () => {
-  await navigateTo('/cadastrar-nota')
-}
-
-const irParaListarNotas = async () => {
-  await navigateTo('/listar-notas')
-}
-
-const irParaRetiradaNotas = async () => {
-  await navigateTo('/retirada-notas')
+<script lang="ts">
+export default {
+  name: 'HeaderPrincipal'
 }
 </script>
 
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue'
+import { LayoutDashboard, FilePlus2, FileText, Boxes } from 'lucide-vue-next'
+import { useRoute } from 'vue-router'
+import Logo from './Logo.vue'
+import NavLink from './NavLink.vue'
+import UserActions from './UserActions.vue'
+
+const route = useRoute()
+const isActive = (path: string) => route.path === path || route.path.startsWith(`${path}/`)
+
+const isScrolled = ref(false)
+const handleScroll = () => {
+  isScrolled.value = window.scrollY > 20
+}
+
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll)
+  handleScroll()
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
+</script>
+
 <template>
-  <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95">
-    <div class="mx-auto max-w-7xl px-3 py-3 md:px-6">
-      <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div class="flex items-center justify-between gap-3 md:min-w-[180px] md:justify-start">
-          <button
-            type="button"
-            class="max-w-[70vw] truncate rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700 md:max-w-none"
-            @click="irParaIndex"
-          >
-            Notas ZINCÃO
-          </button>
+  <header 
+    class="sticky top-0 z-40 w-full transition-all duration-500 ease-in-out"
+    :class="[isScrolled ? 'h-16' : 'h-20']"
+  >
+    <!-- Dynamic backdrop -->
+    <div 
+      class="absolute inset-0 transition-all duration-500 ease-in-out"
+      :class="[
+        isScrolled 
+          ? 'bg-white/90 dark:bg-slate-950/95 backdrop-blur-xl border-b border-black/[0.05] dark:border-white/[0.05] shadow-lg shadow-black/5'
+          : 'bg-white/10 dark:bg-slate-900/10 backdrop-blur-sm border-b border-transparent shadow-none'
+      ]"
+    />
+    
+    <div class="relative mx-auto max-w-7xl px-4 sm:px-6 h-16 flex items-center justify-between">
+      <!-- Left: Brand -->
+      <div class="flex items-center">
+        <Logo />
+      </div>
 
-          <div class="flex items-center gap-2 md:hidden">
-            <DarkModeToggle />
-            <HeaderMenu />
-          </div>
-        </div>
+      <!-- Center: Navigation -->
+      <nav class="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-1">
+        <NavLink to="/" :active="isActive('/')" :icon="LayoutDashboard">
+          Dashboard
+        </NavLink>
+        <NavLink to="/notas" :active="isActive('/notas')" :icon="FileText">
+          Notas
+        </NavLink>
+        <NavLink to="/estoque" :active="isActive('/estoque')" :icon="Boxes">
+          Estoque
+        </NavLink>
+        <NavLink to="/cadastrar-nota" :active="isActive('/cadastrar-nota')" :icon="FilePlus2">
+          Cadastrar
+        </NavLink>
+      </nav>
 
-        <nav class="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1 md:mx-0 md:flex-1 md:justify-center md:overflow-visible md:px-0 md:pb-0">
-          <button
-            id="header-index-button"
-            type="button"
-            class="shrink-0 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition focus:outline-none focus:ring-2 focus:ring-blue-500/40 sm:text-sm"
-            :class="isActive('/')
-              ? 'bg-blue-600 text-white'
-              : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'"
-            @click="irParaIndex"
-          >
-            Index
-          </button>
-
-          <button
-            id="header-cadastrar-nota-button"
-            type="button"
-            class="shrink-0 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition focus:outline-none focus:ring-2 focus:ring-blue-500/40 sm:text-sm"
-            :class="isActive('/cadastrar-nota')
-              ? 'bg-blue-600 text-white'
-              : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'"
-            @click="irParaCadastrarNota"
-          >
-            Cadastrar nota
-          </button>
-
-          <button
-            id="header-listar-notas-button"
-            type="button"
-            class="shrink-0 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition focus:outline-none focus:ring-2 focus:ring-blue-500/40 sm:text-sm"
-            :class="isActive('/listar-notas')
-              ? 'bg-blue-600 text-white'
-              : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'"
-            @click="irParaListarNotas"
-          >
-            Listar notas
-          </button>
-
-          <button
-            id="header-retirada-notas-button"
-            type="button"
-            class="shrink-0 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition focus:outline-none focus:ring-2 focus:ring-blue-500/40 sm:text-sm"
-            :class="isActive('/retirada-notas')
-              ? 'bg-blue-600 text-white'
-              : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'"
-            @click="irParaRetiradaNotas"
-          >
-            Retirada
-          </button>
-        </nav>
-
-        <div class="hidden md:flex md:min-w-[220px] md:items-center md:justify-end md:gap-4 md:text-right">
-          <DarkModeToggle />
-          <HeaderMenu />
-        </div>
+      <!-- Right: Actions -->
+      <div class="flex items-center gap-2">
+        <div class="h-6 w-px bg-slate-200 dark:bg-white/10 mx-1 hidden sm:block" />
+        <UserActions />
       </div>
     </div>
   </header>

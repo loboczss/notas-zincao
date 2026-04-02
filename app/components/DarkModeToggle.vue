@@ -1,9 +1,22 @@
+<script lang="ts">
+export default {
+  name: 'DarkModeToggle'
+}
+</script>
+
 <script setup lang="ts">
+import { computed, onMounted, ref } from 'vue'
 import { Sun, Moon } from 'lucide-vue-next'
 // @ts-ignore
 import { useColorMode } from '#imports'
 
 const colorMode = useColorMode()
+const isDark = computed(() => colorMode.value === 'dark')
+const mounted = ref(false)
+
+onMounted(() => {
+  mounted.value = true
+})
 
 const togglePreference = () => {
   // Toggle between specific light and dark modes
@@ -21,25 +34,20 @@ const togglePreference = () => {
     id="theme-toggle"
     type="button"
     @click="togglePreference"
-    class="relative h-10 w-10 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 transition-all duration-300 hover:scale-105 active:scale-95 group shadow-sm"
+    class="relative h-10 w-10 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 transition-all duration-300 hover:scale-105 active:scale-95 shadow-sm"
     title="Alternar Tema"
   >
-    <transition name="fade-icon" mode="out-in">
-      <Sun v-if="colorMode.value === 'dark'" key="sun" class="h-5 w-5 text-amber-500" />
-      <Moon v-else key="moon" class="h-5 w-5 text-indigo-400" />
-    </transition>
+    <Sun
+      v-if="mounted && isDark"
+      class="absolute h-5 w-5 text-amber-500"
+    />
+    <Moon
+      v-else-if="mounted"
+      class="absolute h-5 w-5 text-amber-400"
+    />
   </button>
 </template>
 
 <style scoped>
-.fade-icon-enter-active,
-.fade-icon-leave-active {
-  transition: all 0.3s ease;
-}
-
-.fade-icon-enter-from,
-.fade-icon-leave-to {
-  opacity: 0;
-  transform: rotate(-15deg) scale(0.9);
-}
+/* Sem estilo adicional necessário - v-show com transition-opacity é suficiente */
 </style>

@@ -2,11 +2,20 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { $fetch } from 'ofetch'
 import type {
+  NotaExtractionResponse,
+  NotaRetiradaDraft,
   NotaRegistrarRetiradaRequest,
   NotaRetiradaDetalheItem,
   NotaRetiradaListItem,
   NotaRetiradaStatus,
 } from '../../../shared/types/NotasRetirada'
+
+type NotasListFilters = {
+  search?: string
+  status?: 'todos' | NotaRetiradaStatus
+  data_inicio?: string
+  data_fim?: string
+}
 
 export const useNotasStore = defineStore('notas', () => {
   const notas = ref<NotaRetiradaListItem[]>([])
@@ -14,6 +23,8 @@ export const useNotasStore = defineStore('notas', () => {
 
   const loadingNotas = ref(false)
   const loadingRetirada = ref(false)
+  const extractingNota = ref(false)
+  const creatingNota = ref(false)
   const savingRetirada = ref(false)
   const errorMessage = ref('')
 
@@ -21,7 +32,7 @@ export const useNotasStore = defineStore('notas', () => {
     errorMessage.value = ''
   }
 
-  const fetchNotas = async () => {
+  const fetchNotas = async (filters: NotasListFilters = {}) => {
     loadingNotas.value = true
     clearError()
 
@@ -29,7 +40,14 @@ export const useNotasStore = defineStore('notas', () => {
       const data = await $fetch<{
         success: boolean
         notas: NotaRetiradaListItem[]
-      }>('/api/notas/list')
+      }>('/api/notas/list', {
+        query: {
+          search: filters.search?.trim() || undefined,
+          status: filters.status && filters.status !== 'todos' ? filters.status : undefined,
+          data_inicio: filters.data_inicio?.trim() || undefined,
+          data_fim: filters.data_fim?.trim() || undefined,
+        },
+      })
 
       notas.value = data.notas || []
       return notas.value
@@ -43,7 +61,59 @@ export const useNotasStore = defineStore('notas', () => {
     }
   }
 
-  const fetchNotasRetirada = async () => {
+  const extractNota = async (imageDataUrl: string) => {
+    extractingNota.value = true
+    clearError()
+
+    try {
+      const data = await $fetch<NotaExtractionResponse>('/api/openai/extract-nota', {
+        method: 'POST',
+        body: { imageDataUrl },
+      })
+
+      return data
+    }
+    catch (error) {
+      errorMessage.value = error instanceof Error ? error.message : 'Falha ao analisar a imagem da nota.'
+      return null
+    }
+    finally {
+      extractingNota.value = false
+    }
+  }
+
+  const createNota = async (payload: NotaRetiradaDraft) => {
+    creatingNota.value = true
+    clearError()
+
+    try {
+      const data = await $fetch<{
+        success: boolean
+        nota: {
+          id: string
+          nome_cliente: string
+          numero_nota: string
+          serie_nota: string
+          status_retirada: NotaRetiradaStatus
+        }
+      }>('/api/notas/create', {
+        method: 'POST',
+        body: payload,
+      })
+
+      await fetchNotas()
+      return data
+    }
+    catch (error) {
+      errorMessage.value = error instanceof Error ? error.message : 'Falha ao salvar a nota.'
+      return null
+    }
+    finally {
+      creatingNota.value = false
+    }
+  }
+
+  const fetchNotasRetirada = async (filters: NotasListFilters = {}) => {
     loadingRetirada.value = true
     clearError()
 
@@ -51,7 +121,14 @@ export const useNotasStore = defineStore('notas', () => {
       const data = await $fetch<{
         success: boolean
         notas: NotaRetiradaDetalheItem[]
-      }>('/api/notas/retirada-list')
+      }>('/api/notas/retirada-list', {
+        query: {
+          search: filters.search?.trim() || undefined,
+          status: filters.status && filters.status !== 'todos' ? filters.status : undefined,
+          data_inicio: filters.data_inicio?.trim() || undefined,
+          data_fim: filters.data_fim?.trim() || undefined,
+        },
+      })
 
       notasRetirada.value = data.notas || []
       return notasRetirada.value
@@ -117,11 +194,15 @@ export const useNotasStore = defineStore('notas', () => {
     notasRetirada,
     loadingNotas,
     loadingRetirada,
+    extractingNota,
+    creatingNota,
     savingRetirada,
     errorMessage,
     clearError,
     fetchNotas,
     fetchNotasRetirada,
+    extractNota,
+    createNota,
     registrarRetirada,
     atualizarStatusNota,
   }

@@ -6,8 +6,8 @@ import IndexMetricasGerais from '../components/index/IndexMetricasGerais.vue'
 <template>
   <AppPageShell
     eyebrow="Dashboard"
-    title="Resumo geral das notas"
-    description="Acompanhe volume, valores e andamento das retiradas em um único painel operacional."
+    title="Dashboard Operacional"
+    description="Controle total de volume físico, status de notas e acompanhamento de entregas pendentes."
   >
     <div class="space-y-8">
       <IndexMetricasGerais />

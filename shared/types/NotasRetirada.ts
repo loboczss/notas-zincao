@@ -2,8 +2,32 @@ export type NotaProduto = {
   nome: string
   quantidade?: number
   valor_unitario?: number
+  valor_total?: number
   unidade?: string
+  tipo_unidade?: string
+  embalagem?: string
+  tipo_produto?: string | null
+  confidence?: number
+  id_produto_estoque?: number | null
   quantidade_retirada?: number
+  [key: string]: unknown
+}
+
+export type NotaRetiradaHistoricoItem = {
+  data: string
+  responsavel_id: string
+  responsavel_nome?: string | null
+  fotos?: string[]
+  itens_retirados?: Array<{
+    index: number
+    quantidade: number
+    quantidade_solicitada?: number
+  }>
+  observacoes?: string | null
+  // Campos legados para retrocompatibilidade de registros antigos
+  status_anterior?: NotaRetiradaStatus | null
+  status_novo?: NotaRetiradaStatus
+  usuario_id?: string
 }
 
 export type NotaRetiradaStatus = 'pendente' | 'parcial' | 'retirada' | 'cancelada'
@@ -18,7 +42,7 @@ export type NotaRetiradaDraft = {
   foto_cliente_data_url?: string
   nome_cliente: string
   numero_nota: string
-  serie_nota: string
+  serie_nota?: string
   chave_nfe?: string
   data_compra: string
   data_prevista_retirada?: string
@@ -26,6 +50,7 @@ export type NotaRetiradaDraft = {
   status_retirada?: NotaRetiradaStatus
   produtos: NotaProduto[]
   valor_total?: number | null
+  desconto_total?: number | null
 }
 
 export type NotaRetiradaListItem = {
@@ -37,6 +62,7 @@ export type NotaRetiradaListItem = {
   data_compra: string
   data_retirada?: string | null
   valor_total: number | null
+  desconto_total?: number | null
   status_retirada: NotaRetiradaStatus
   criado_em: string
   produtos?: NotaProduto[]
@@ -47,9 +73,12 @@ export type NotaRetiradaListItem = {
 
 export type NotaRetiradaDetalheItem = NotaRetiradaListItem & {
   produtos: NotaProduto[]
+  historico_retiradas?: NotaRetiradaHistoricoItem[] | null
   foto_url?: string | null
-  foto_cliente_url?: string | null
-  comprovante_retirada_url?: string | null
+  telefone_cliente?: string | null
+  observacoes?: string | null
+  cadastrado_por_nome?: string | null
+  criado_em: string
 }
 
 export type NotaRetiradaProdutoInput = {
@@ -74,8 +103,10 @@ export type NotaRetiradaStatusUpdateRequest = {
 export type NotaMissingField =
   | 'nome_cliente'
   | 'telefone_cliente'
+  | 'documento_cliente'
   | 'numero_nota'
   | 'serie_nota'
+  | 'chave_nfe'
   | 'data_compra'
   | 'produtos'
 

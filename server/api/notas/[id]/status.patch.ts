@@ -1,5 +1,9 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
-import type { NotaRetiradaStatusUpdateRequest } from '../../../../shared/types/NotasRetirada'
+import type {
+  NotaRetiradaHistoricoItem,
+  NotaRetiradaStatus,
+  NotaRetiradaStatusUpdateRequest,
+} from '../../../../shared/types/NotasRetirada'
 
 const allowedStatus = ['pendente', 'parcial', 'retirada', 'cancelada'] as const
 
@@ -42,6 +46,19 @@ export const notasStatusPatchHandler = defineEventHandler(async (event) => {
 
   const client = await serverSupabaseClient(event)
 
+  const { data: notaAtual, error: notaAtualError } = await (client as any)
+    .from('notas_retirada')
+    .select('id, owner_user_id, status_retirada, historico_retiradas')
+    .eq('id', id)
+    .single()
+
+  if (notaAtualError || !notaAtual) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'Nota não encontrada.',
+    })
+  }
+
   const payload: Record<string, unknown> = {
     status_retirada: body.status_retirada,
   }
@@ -53,7 +70,7 @@ export const notasStatusPatchHandler = defineEventHandler(async (event) => {
   if (body.data_retirada !== undefined) {
     payload.data_retirada = body.data_retirada
   }
-  else if (body.status_retirada === 'pendente') {
+  else if (body.status_retirada === 'pendente' || body.status_retirada === 'cancelada') {
     payload.data_retirada = null
   }
   else if (body.status_retirada === 'parcial' || body.status_retirada === 'retirada') {
@@ -63,17 +80,55 @@ export const notasStatusPatchHandler = defineEventHandler(async (event) => {
   if (body.retirada_confirmada_por !== undefined) {
     payload.retirada_confirmada_por = body.retirada_confirmada_por
   }
+  else if (body.status_retirada === 'parcial' || body.status_retirada === 'retirada') {
+    payload.retirada_confirmada_por = authUid
+  }
+  else if (body.status_retirada === 'pendente' || body.status_retirada === 'cancelada') {
+    payload.retirada_confirmada_por = null
+  }
 
   if (body.comprovante_retirada_url !== undefined) {
     payload.comprovante_retirada_url = body.comprovante_retirada_url
   }
+  else if (body.status_retirada === 'pendente' || body.status_retirada === 'cancelada') {
+    payload.comprovante_retirada_url = null
+  }
+
+  const historicoAtual = Array.isArray(notaAtual.historico_retiradas)
+    ? notaAtual.historico_retiradas
+    : []
+
+  const { data: profile } = await (client as any)
+    .from('profiles')
+    .select('nome, email')
+    .eq('auth_uid', authUid)
+    .maybeSingle()
+
+  const responsavelNome = String(profile?.nome || profile?.email || '').trim() || authUid
+  const fotoHistorico = String(
+    body.comprovante_retirada_url
+    ?? payload.comprovante_retirada_url
+    ?? '',
+  ).trim()
+
+  const eventoHistorico: NotaRetiradaHistoricoItem = {
+    data: new Date().toISOString(),
+    responsavel_id: authUid,
+    responsavel_nome: responsavelNome,
+    fotos: fotoHistorico ? [fotoHistorico] : [],
+    itens_retirados: [],
+    status_anterior: (notaAtual.status_retirada || null) as NotaRetiradaStatus | null,
+    status_novo: body.status_retirada,
+    usuario_id: authUid,
+    observacoes: body.observacoes ?? null,
+  }
+  payload.historico_retiradas = [...historicoAtual, eventoHistorico]
 
   const { data, error } = await (client as any)
     .from('notas_retirada')
     .update(payload)
     .eq('id', id)
-    .eq('owner_user_id', authUid)
-    .select('id, status_retirada, data_retirada, atualizado_em')
+    .select('id, status_retirada, data_retirada, historico_retiradas, atualizado_em')
     .single()
 
   if (error) {
