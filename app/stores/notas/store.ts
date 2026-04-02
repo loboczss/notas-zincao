@@ -15,6 +15,8 @@ type NotasListFilters = {
   status?: 'todos' | NotaRetiradaStatus
   data_inicio?: string
   data_fim?: string
+  page?: number
+  page_size?: number
 }
 
 export const useNotasStore = defineStore('notas', () => {
@@ -27,6 +29,10 @@ export const useNotasStore = defineStore('notas', () => {
   const creatingNota = ref(false)
   const savingRetirada = ref(false)
   const errorMessage = ref('')
+  const page = ref(1)
+  const pageSize = ref(20)
+  const totalNotas = ref(0)
+  const totalPaginas = ref(1)
 
   const clearError = () => {
     errorMessage.value = ''
@@ -40,16 +46,28 @@ export const useNotasStore = defineStore('notas', () => {
       const data = await $fetch<{
         success: boolean
         notas: NotaRetiradaListItem[]
+        pagination?: {
+          page: number
+          page_size: number
+          total: number
+          total_pages: number
+        }
       }>('/api/notas/list', {
         query: {
           search: filters.search?.trim() || undefined,
           status: filters.status && filters.status !== 'todos' ? filters.status : undefined,
           data_inicio: filters.data_inicio?.trim() || undefined,
           data_fim: filters.data_fim?.trim() || undefined,
+          page: filters.page || page.value,
+          page_size: filters.page_size || pageSize.value,
         },
       })
 
       notas.value = data.notas || []
+      page.value = data.pagination?.page || 1
+      pageSize.value = data.pagination?.page_size || (filters.page_size || pageSize.value)
+      totalNotas.value = data.pagination?.total || notas.value.length
+      totalPaginas.value = data.pagination?.total_pages || 1
       return notas.value
     }
     catch (error) {
@@ -197,6 +215,10 @@ export const useNotasStore = defineStore('notas', () => {
     extractingNota,
     creatingNota,
     savingRetirada,
+    page,
+    pageSize,
+    totalNotas,
+    totalPaginas,
     errorMessage,
     clearError,
     fetchNotas,

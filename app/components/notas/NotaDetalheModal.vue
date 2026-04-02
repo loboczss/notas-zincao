@@ -1,12 +1,18 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { Calendar, Phone, UserRound, ArrowRight, Package, Wallet, CheckCircle2, Info, Camera, ClipboardList } from 'lucide-vue-next'
-import type { NotaRetiradaDetalheItem, NotaProduto } from '../../../shared/types/NotasRetirada'
+import { computed, ref, watch } from 'vue'
+import { Calendar, Phone, UserRound, ArrowRight, Package, Wallet, CheckCircle2, Info, Camera, ClipboardList, CircleDashed } from 'lucide-vue-next'
+import type { NotaAdminEditRequest, NotaRetiradaDetalheItem, NotaProduto } from '../../../shared/types/NotasRetirada'
 import NotasStatusBadge from './NotasStatusBadge.vue'
 
 const props = withDefaults(defineProps<{
   nota: NotaRetiradaDetalheItem | null
+  isAdmin?: boolean
+  savingEdit?: boolean
 }>(), {})
+
+const emit = defineEmits<{
+  (e: 'save-edit', payload: NotaAdminEditRequest): void
+}>()
 
 const toNumber = (value: unknown) => {
   if (typeof value === 'number' && Number.isFinite(value)) return value
@@ -62,6 +68,89 @@ const saldoItem = (produto: NotaProduto) => {
 }
 
 const previewImage = ref<string | null>(null)
+const editMode = ref(false)
+const editDraft = ref<NotaAdminEditRequest>({
+  nome_cliente: '',
+  documento_cliente: '',
+  telefone_cliente: '',
+  contato_id: '',
+  produtos: [],
+})
+
+const syncDraft = () => {
+  if (!props.nota) return
+  editDraft.value = {
+    nome_cliente: props.nota.nome_cliente || '',
+    documento_cliente: String((props.nota as any).documento_cliente || ''),
+    telefone_cliente: props.nota.telefone_cliente || '',
+    contato_id: String((props.nota as any).contato_id || ''),
+    produtos: Array.isArray(props.nota.produtos)
+      ? props.nota.produtos.map(item => ({ ...item }))
+      : [],
+  }
+}
+
+watch(() => props.nota, () => {
+  editMode.value = false
+  syncDraft()
+}, { immediate: true })
+
+const adicionarProduto = () => {
+  const produtosDraft = Array.isArray(editDraft.value.produtos) ? editDraft.value.produtos : []
+  produtosDraft.push({
+    nome: '',
+    quantidade: 1,
+    quantidade_retirada: 0,
+    valor_unitario: 0,
+    valor_total: 0,
+  })
+  editDraft.value.produtos = produtosDraft
+}
+
+const removerProduto = (index: number) => {
+  if (!Array.isArray(editDraft.value.produtos)) return
+  editDraft.value.produtos = editDraft.value.produtos.filter((_, i) => i !== index)
+}
+
+const cancelarEdicao = () => {
+  editMode.value = false
+  syncDraft()
+}
+
+const salvarEdicao = () => {
+  if (!props.isAdmin) return
+
+  const payload: NotaAdminEditRequest = {
+    nome_cliente: String(editDraft.value.nome_cliente || '').trim(),
+    documento_cliente: String(editDraft.value.documento_cliente || '').trim() || null,
+    telefone_cliente: String(editDraft.value.telefone_cliente || '').trim() || null,
+    contato_id: String(editDraft.value.contato_id || '').trim() || null,
+    produtos: (editDraft.value.produtos || []).map((item) => ({
+      ...item,
+      nome: String(item.nome || '').trim(),
+      quantidade: toNumber(item.quantidade),
+      quantidade_retirada: toNumber(item.quantidade_retirada),
+      valor_unitario: toNumber(item.valor_unitario),
+      valor_total: toNumber(item.valor_total),
+      id_produto_estoque: toNumber(item.id_produto_estoque),
+    })).filter(item => item.nome),
+  }
+
+  emit('save-edit', payload)
+  editMode.value = false
+}
+
+const editStats = computed(() => {
+  const items = Array.isArray(editDraft.value.produtos) ? editDraft.value.produtos : []
+  const totalComprado = items.reduce((acc, p) => acc + Math.max(0, toNumber(p.quantidade)), 0)
+  const totalRetirado = items.reduce((acc, p) => acc + Math.max(0, toNumber(p.quantidade_retirada)), 0)
+  return {
+    totalItens: items.length,
+    totalComprado,
+    totalRetirado,
+    saldo: Math.max(0, totalComprado - totalRetirado),
+  }
+})
 </script>
 
 <template>
@@ -102,6 +191,190 @@ const previewImage = ref<string | null>(null)
         </div>
       </div>
     </div>
+
+    <section v-if="isAdmin" class="glass-card rounded-[2.5rem] border p-6 dark:border-white/5 dark:bg-white/[0.02]">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h4 class="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Edição Administrativa</h4>
+          <p class="mt-1 text-xs font-bold text-slate-500">Somente administradores podem alterar dados da nota e itens.</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button
+            v-if="!editMode"
+            type="button"
+            class="rounded-xl bg-slate-100 px-4 py-2 text-xs font-black text-slate-700 transition hover:bg-slate-200 dark:bg-white/5 dark:text-slate-300"
+            @click="editMode = true"
+          >
+            Editar Nota
+          </button>
+
+          <template v-else>
+            <button
+              type="button"
+              class="rounded-xl bg-amber-600 px-4 py-2 text-xs font-black text-white transition hover:bg-amber-500 disabled:opacity-60"
+              :disabled="!!savingEdit"
+              @click="salvarEdicao"
+            >
+              {{ savingEdit ? 'Salvando...' : 'Salvar Alterações' }}
+            </button>
+            <button
+              type="button"
+              class="rounded-xl bg-slate-100 px-4 py-2 text-xs font-black text-slate-700 transition hover:bg-slate-200 dark:bg-white/5 dark:text-slate-300"
+              :disabled="!!savingEdit"
+              @click="cancelarEdicao"
+            >
+              Cancelar
+            </button>
+          </template>
+        </div>
+      </div>
+
+      <div v-if="editMode" class="mt-5 space-y-4">
+        <div class="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 text-xs text-slate-600 dark:text-slate-300">
+          <p class="font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">Como editar sem erro</p>
+          <p class="mt-1">1. Atualize os dados do cliente, 2. ajuste os itens da nota, 3. confira os totais abaixo e só então clique em salvar.</p>
+          <p class="mt-1">Campos de item: <span class="font-black">Qtd Comprada</span> é o total da nota, <span class="font-black">Qtd Retirada</span> é o que já saiu do pátio, <span class="font-black">ID Estoque</span> vincula ao produto real.</p>
+        </div>
+
+        <div class="grid gap-3 md:grid-cols-4">
+          <div class="rounded-2xl border border-slate-200 bg-white px-4 py-3 dark:border-white/10 dark:bg-white/[0.03]">
+            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Itens</p>
+            <p class="mt-1 text-lg font-black text-slate-900 dark:text-white">{{ editStats.totalItens }}</p>
+          </div>
+          <div class="rounded-2xl border border-slate-200 bg-white px-4 py-3 dark:border-white/10 dark:bg-white/[0.03]">
+            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Qtd Comprada</p>
+            <p class="mt-1 text-lg font-black text-slate-900 dark:text-white">{{ editStats.totalComprado }}</p>
+          </div>
+          <div class="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 dark:border-white/10">
+            <p class="text-[10px] font-black uppercase tracking-widest text-emerald-500">Qtd Retirada</p>
+            <p class="mt-1 text-lg font-black text-emerald-600 dark:text-emerald-400">{{ editStats.totalRetirado }}</p>
+          </div>
+          <div class="rounded-2xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 dark:border-white/10">
+            <p class="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">Saldo</p>
+            <p class="mt-1 text-lg font-black text-amber-600 dark:text-amber-400">{{ editStats.saldo }}</p>
+          </div>
+        </div>
+
+        <div class="grid gap-3 md:grid-cols-2">
+          <label class="space-y-1">
+            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Nome do Cliente</span>
+            <input
+              v-model="editDraft.nome_cliente"
+              type="text"
+              placeholder="Ex.: João da Silva"
+              class="h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 outline-none transition focus:border-amber-500 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-200"
+            >
+          </label>
+          <label class="space-y-1">
+            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">CPF/CNPJ</span>
+            <input
+              v-model="editDraft.documento_cliente"
+              type="text"
+              placeholder="Somente números ou formatado"
+              class="h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 outline-none transition focus:border-amber-500 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-200"
+            >
+          </label>
+          <label class="space-y-1">
+            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Telefone/Contato</span>
+            <input
+              v-model="editDraft.telefone_cliente"
+              type="text"
+              placeholder="Ex.: (11) 99999-0000"
+              class="h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 outline-none transition focus:border-amber-500 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-200"
+            >
+          </label>
+          <label class="space-y-1">
+            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">ID do Contato (CRM)</span>
+            <input
+              v-model="editDraft.contato_id"
+              type="text"
+              placeholder="Ex.: CTT-000123"
+              class="h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 outline-none transition focus:border-amber-500 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-200"
+            >
+          </label>
+        </div>
+
+        <div class="space-y-3 rounded-3xl border border-slate-200 bg-slate-50/50 p-4 dark:border-white/10 dark:bg-white/[0.02]">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-black uppercase tracking-widest text-slate-500">Itens da Nota</span>
+            <button
+              type="button"
+              class="rounded-xl bg-slate-100 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-slate-700 transition hover:bg-slate-200 dark:bg-white/5 dark:text-slate-300"
+              @click="adicionarProduto"
+            >
+              Vincular novo item
+            </button>
+          </div>
+
+          <div class="hidden grid-cols-[2fr_0.8fr_0.8fr_1fr_auto] gap-2 px-2 md:grid">
+            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Produto</span>
+            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Qtd Comprada</span>
+            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Qtd Retirada</span>
+            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">ID Estoque</span>
+            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Ação</span>
+          </div>
+
+          <div class="space-y-2">
+            <div
+              v-for="(produto, index) in editDraft.produtos"
+              :key="`edit-${index}`"
+              class="grid gap-2 rounded-2xl border border-slate-200 bg-white p-3 md:grid-cols-[2fr_0.8fr_0.8fr_1fr_auto] dark:border-white/10 dark:bg-white/[0.03]"
+            >
+              <label class="space-y-1 md:space-y-0">
+                <span class="text-[9px] font-black uppercase tracking-widest text-slate-400 md:hidden">Produto</span>
+                <input
+                  v-model="produto.nome"
+                  type="text"
+                  placeholder="Nome do item"
+                  class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-800 outline-none transition focus:border-amber-500 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-200"
+                >
+              </label>
+              <label class="space-y-1 md:space-y-0">
+                <span class="text-[9px] font-black uppercase tracking-widest text-slate-400 md:hidden">Qtd Comprada</span>
+                <input
+                  v-model.number="produto.quantidade"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="Ex.: 10"
+                  class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-800 outline-none transition focus:border-amber-500 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-200"
+                >
+              </label>
+              <label class="space-y-1 md:space-y-0">
+                <span class="text-[9px] font-black uppercase tracking-widest text-slate-400 md:hidden">Qtd Retirada</span>
+                <input
+                  v-model.number="produto.quantidade_retirada"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="Ex.: 3"
+                  class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-800 outline-none transition focus:border-amber-500 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-200"
+                >
+              </label>
+              <label class="space-y-1 md:space-y-0">
+                <span class="text-[9px] font-black uppercase tracking-widest text-slate-400 md:hidden">ID Estoque</span>
+                <input
+                  v-model.number="produto.id_produto_estoque"
+                  type="number"
+                  min="1"
+                  step="1"
+                  placeholder="Ex.: 1024"
+                  class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-800 outline-none transition focus:border-amber-500 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-200"
+                >
+              </label>
+              <button
+                type="button"
+                class="h-10 rounded-xl bg-rose-500/10 px-3 text-[10px] font-black uppercase tracking-wider text-rose-600 transition hover:bg-rose-500/20"
+                @click="removerProduto(index)"
+              >
+                Remover
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <!-- Layout Principal: Dossiê Organizado -->
     <div class="grid gap-8 lg:grid-cols-[1fr_380px]">
@@ -186,7 +459,7 @@ const previewImage = ref<string | null>(null)
                   </div>
                   <div>
                     <p class="text-sm font-black text-slate-900 dark:text-white">{{ produto.nome }}</p>
-                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">SKU #{{ produto.id_produto_estoque }}</p>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">ID: {{ produto.id_produto_estoque }}</p>
                   </div>
                 </div>
 
@@ -316,17 +589,18 @@ const previewImage = ref<string | null>(null)
           </div>
         </section>
 
-        <!-- CTA Principal -->
-        <div class="sticky top-6 pt-4">
-          <NuxtLink
-            :to="`/notas/${nota.id}/retirada`"
-            class="group flex w-full items-center justify-center gap-3 rounded-[2.5rem] bg-amber-600 py-6 text-lg font-black text-white shadow-2xl shadow-amber-500/30 transition-all hover:-translate-y-1 hover:bg-amber-500 active:scale-95"
-          >
-            Efetuar Retirada
-            <ArrowRight class="h-6 w-6 transition-transform group-hover:translate-x-1" />
-          </NuxtLink>
-        </div>
       </aside>
+    </div>
+
+    <!-- CTA sempre visível durante o scroll do modal -->
+    <div class="sticky bottom-3 z-30 pt-2">
+      <NuxtLink
+        :to="`/notas/${nota.id}/retirada`"
+        class="group flex w-full items-center justify-center gap-3 rounded-[2.5rem] bg-amber-600 py-5 text-lg font-black text-white transition-all hover:bg-amber-500 active:scale-95"
+      >
+        Efetuar Retirada
+        <ArrowRight class="h-6 w-6 transition-transform group-hover:translate-x-1" />
+      </NuxtLink>
     </div>
   </div>
 

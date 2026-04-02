@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { Boxes, ShieldAlert } from 'lucide-vue-next'
+import { ShieldAlert } from 'lucide-vue-next'
 import AppPageShell from '../components/layout/AppPageShell.vue'
 import EstoqueProdutoModal from '../components/estoque/EstoqueProdutoModal.vue'
 import EstoqueTabela from '../components/estoque/EstoqueTabela.vue'
@@ -99,24 +99,6 @@ const salvarProduto = async (payload: EstoqueProdutoDraft) => {
   produtoEmEdicao.value = null
 }
 
-const totalProdutos = computed(() => estoqueStore.totalItens)
-const totalQuantidade = computed(() => Number(estoqueStore.quantidadeTotalEstoque || 0))
-
-const tiposUnicos = computed(() => {
-  return new Set(
-    estoqueStore.produtos
-      .map(item => String(item.tipo_produto || '').trim())
-      .filter(Boolean),
-  ).size
-})
-
-const quantidadeFormatada = (value: number) => {
-  return new Intl.NumberFormat('pt-BR', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 3,
-  }).format(value)
-}
-
 onMounted(async () => {
   if (!authStore.profile) {
     await authStore.getMe()
@@ -132,23 +114,6 @@ onMounted(async () => {
     title="Gestão de estoque"
     description="Consulte os produtos cadastrados e, como administrador, adicione novos itens ou edite os existentes."
   >
-    <div class="grid gap-4 md:grid-cols-3">
-      <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">Produtos</p>
-        <p class="mt-2 text-3xl font-black tracking-tight text-slate-900 dark:text-slate-100">{{ totalProdutos }}</p>
-      </section>
-
-      <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">Quantidade total</p>
-        <p class="mt-2 text-3xl font-black tracking-tight text-slate-900 dark:text-slate-100">{{ quantidadeFormatada(totalQuantidade) }}</p>
-      </section>
-
-      <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">Tipos distintos</p>
-        <p class="mt-2 text-3xl font-black tracking-tight text-slate-900 dark:text-slate-100">{{ tiposUnicos }}</p>
-      </section>
-    </div>
-
     <div v-if="!isAdmin" class="flex items-start gap-3 rounded-3xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 shadow-sm dark:border-amber-900/50 dark:bg-amber-500/10 dark:text-amber-200">
       <ShieldAlert class="mt-0.5 h-5 w-5 shrink-0" />
       <p>Seu perfil está em modo somente leitura nesta tela. Apenas administradores podem adicionar ou editar produtos do estoque.</p>

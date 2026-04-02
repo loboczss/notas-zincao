@@ -72,9 +72,11 @@ export type NotaRetiradaListItem = {
 }
 
 export type NotaRetiradaDetalheItem = NotaRetiradaListItem & {
+  contato_id?: string | null
   produtos: NotaProduto[]
   historico_retiradas?: NotaRetiradaHistoricoItem[] | null
   foto_url?: string | null
+  documento_cliente?: string | null
   telefone_cliente?: string | null
   observacoes?: string | null
   cadastrado_por_nome?: string | null
@@ -97,6 +99,15 @@ export type NotaRetiradaStatusUpdateRequest = {
   data_retirada?: string | null
   retirada_confirmada_por?: string | null
   comprovante_retirada_url?: string | null
+  observacoes?: string | null
+}
+
+export type NotaAdminEditRequest = {
+  contato_id?: string | null
+  nome_cliente?: string
+  documento_cliente?: string | null
+  telefone_cliente?: string | null
+  produtos?: NotaProduto[]
   observacoes?: string | null
 }
 

@@ -1,28 +1,33 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { $fetch } from 'ofetch'
-import type { NotaRetiradaStatus } from '../../../shared/types/NotasRetirada'
+import type { NotaAdminEditRequest, NotaRetiradaStatus } from '../../../shared/types/NotasRetirada'
 import { CheckCircle2, Package, LayoutDashboard, Wallet, Plus } from 'lucide-vue-next'
 import AppPageShell from '../../components/layout/AppPageShell.vue'
 import ModalGlobal from '../../components/ModalGlobal.vue'
 import NotaDetalheModal from '../../components/notas/NotaDetalheModal.vue'
 import NotasTabela from '../../components/notas/NotasTabela.vue'
 import NotasToolbar from '../../components/notas/NotasToolbar.vue'
-import { useNotasStore } from '../../stores'
+import { useAuthStore, useNotasStore } from '../../stores'
 
 definePageMeta({
   middleware: 'auth',
 })
 
 const notasStore = useNotasStore()
+const authStore = useAuthStore()
 const searchTerm = ref('')
 const statusFilter = ref<'todos' | NotaRetiradaStatus>('todos')
 const dataInicio = ref('')
 const dataFim = ref('')
+const paginaAtual = ref(1)
+const itensPorPagina = ref(20)
 const modalAberto = ref(false)
 const notaDetalhe = ref<any | null>(null)
 const loadingDetalhe = ref(false)
+const savingEdicao = ref(false)
 const exportLoading = ref<'csv' | 'pdf' | false>(false)
+const isAdmin = computed(() => String(authStore.profile?.role || '').trim().toLowerCase() === 'admin')
 
 const carregarNotas = async () => {
   await notasStore.fetchNotas({
@@ -30,7 +35,11 @@ const carregarNotas = async () => {
     status: statusFilter.value,
     data_inicio: dataInicio.value,
     data_fim: dataFim.value,
+    page: paginaAtual.value,
+    page_size: itensPorPagina.value,
   })
+
+  paginaAtual.value = notasStore.page
 }
 
 const carregarDetalhe = async (id: string) => {
@@ -51,6 +60,27 @@ const abrirDetalheNota = async (id: string) => {
 
 const fecharDetalheNota = () => {
   modalAberto.value = false
+}
+
+const salvarEdicaoNota = async (payload: NotaAdminEditRequest) => {
+  if (!notaDetalhe.value?.id || !isAdmin.value || savingEdicao.value) return
+
+  savingEdicao.value = true
+  try {
+    await $fetch(`/api/notas/${notaDetalhe.value.id}/edit`, {
+      method: 'PATCH',
+      body: payload,
+    })
+
+    await carregarDetalhe(notaDetalhe.value.id)
+    await carregarNotas()
+  }
+  catch (err) {
+    console.error('[salvarEdicaoNota]', err)
+  }
+  finally {
+    savingEdicao.value = false
+  }
 }
 
 const exportarRelatorio = async (format: 'csv' | 'pdf') => {
@@ -89,10 +119,42 @@ onMounted(async () => {
 })
 
 const aplicarFiltros = async () => {
+  paginaAtual.value = 1
+  await carregarNotas()
+}
+
+const irPaginaAnterior = async () => {
+  if (paginaAtual.value <= 1 || notasStore.loadingNotas) return
+  paginaAtual.value -= 1
+  await carregarNotas()
+}
+
+const irProximaPagina = async () => {
+  if (paginaAtual.value >= notasStore.totalPaginas || notasStore.loadingNotas) return
+  paginaAtual.value += 1
+  await carregarNotas()
+}
+
+const mudarItensPorPagina = async (value: string) => {
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed) || parsed < 1) return
+  itensPorPagina.value = Math.min(100, Math.trunc(parsed))
+  paginaAtual.value = 1
   await carregarNotas()
 }
 
 const notasFiltradas = computed(() => notasStore.notas)
+
+const intervaloNotas = computed(() => {
+  const total = notasStore.totalNotas
+  if (!total) {
+    return { inicio: 0, fim: 0 }
+  }
+
+  const inicio = (notasStore.page - 1) * notasStore.pageSize + 1
+  const fim = Math.min(notasStore.page * notasStore.pageSize, total)
+  return { inicio, fim }
+})
 
 // Métricas Reativas
 const stats = computed(() => {
@@ -172,27 +234,70 @@ const formatCurrency = (value: number) => {
       </div>
 
       <!-- Toolbar de Controle: Fora do Header para Descompressão Visual -->
-      <div class="xl:max-w-6xl mx-auto w-full">
-        <NotasToolbar
-          :search-term="searchTerm"
-          :status-filter="statusFilter"
-          :data-inicio="dataInicio"
-          :data-fim="dataFim"
-          :total-count="notasStore.notas.length"
-          :result-count="notasFiltradas.length"
-          :loading="notasStore.loadingNotas"
-          :export-loading="exportLoading"
-          @update:search-term="searchTerm = $event"
-          @update:status-filter="statusFilter = $event"
-          @update:data-inicio="dataInicio = $event"
-          @update:data-fim="dataFim = $event"
-          @apply="aplicarFiltros"
-          @refresh="carregarNotas"
-          @export="exportarRelatorio"
-        />
-      </div>
+      <NotasToolbar
+        :search-term="searchTerm"
+        :status-filter="statusFilter"
+        :data-inicio="dataInicio"
+        :data-fim="dataFim"
+        :total-count="notasStore.totalNotas"
+        :result-count="notasFiltradas.length"
+        :loading="notasStore.loadingNotas"
+        :export-loading="exportLoading"
+        @update:search-term="searchTerm = $event"
+        @update:status-filter="statusFilter = $event"
+        @update:data-inicio="dataInicio = $event"
+        @update:data-fim="dataFim = $event"
+        @apply="aplicarFiltros"
+        @refresh="carregarNotas"
+        @export="exportarRelatorio"
+      />
 
       <div class="space-y-8">
+        <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm dark:border-white/10 dark:bg-white/[0.02]">
+          <div class="flex flex-col">
+            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">Navegação</span>
+            <p class="text-slate-700 dark:text-slate-200">
+              Página <span class="font-black">{{ notasStore.page }}</span> de <span class="font-black">{{ notasStore.totalPaginas }}</span>
+            </p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">
+              Exibindo <span class="font-bold">{{ intervaloNotas.inicio }}-{{ intervaloNotas.fim }}</span> de <span class="font-bold">{{ notasStore.totalNotas }}</span> notas
+            </p>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <label class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Itens por página</label>
+            <select
+              :value="String(itensPorPagina)"
+              class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition-colors focus:border-amber-400 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:[color-scheme:dark]"
+              @change="mudarItensPorPagina(($event.target as HTMLSelectElement).value)"
+            >
+              <option class="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100" value="10">10</option>
+              <option class="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100" value="20">20</option>
+              <option class="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100" value="30">30</option>
+              <option class="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100" value="50">50</option>
+              <option class="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100" value="100">100</option>
+            </select>
+
+            <button
+              type="button"
+              class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-100 disabled:opacity-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5"
+              :disabled="notasStore.loadingNotas || notasStore.page <= 1"
+              @click="irPaginaAnterior"
+            >
+              Anterior
+            </button>
+
+            <button
+              type="button"
+              class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-100 disabled:opacity-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5"
+              :disabled="notasStore.loadingNotas || notasStore.page >= notasStore.totalPaginas"
+              @click="irProximaPagina"
+            >
+              Próxima
+            </button>
+          </div>
+        </div>
+
         <NotasTabela
           :notas="notasFiltradas"
           :loading="notasStore.loadingNotas"
@@ -218,7 +323,7 @@ const formatCurrency = (value: number) => {
       <!-- Modal de Detalhes Modernizado -->
       <ModalGlobal
         v-model="modalAberto"
-        title="Dossiê da Nota"
+        title=""
         max-width-class="max-w-6xl"
         content-class="p-0"
         :show-footer="false"
@@ -234,6 +339,9 @@ const formatCurrency = (value: number) => {
         <div v-else class="p-6 md:p-10">
           <NotaDetalheModal
             :nota="notaDetalhe"
+            :is-admin="isAdmin"
+            :saving-edit="savingEdicao"
+            @save-edit="salvarEdicaoNota"
           />
         </div>
       </ModalGlobal>

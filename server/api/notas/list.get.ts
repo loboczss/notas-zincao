@@ -95,10 +95,16 @@ export const notasListGetHandler = defineEventHandler(async (event) => {
   const status = String(query.status || '').trim().toLowerCase()
   const dataInicio = String(query.data_inicio || query.date_from || '').trim()
   const dataFim = String(query.data_fim || query.date_to || '').trim()
+  const pageRaw = Number(String(query.page || '1').trim())
+  const pageSizeRaw = Number(String(query.page_size || '20').trim())
+  const page = Number.isFinite(pageRaw) && pageRaw > 0 ? Math.trunc(pageRaw) : 1
+  const pageSize = Number.isFinite(pageSizeRaw) && pageSizeRaw > 0
+    ? Math.min(100, Math.trunc(pageSizeRaw))
+    : 20
 
   let request = (client as any)
     .from('notas_retirada')
-    .select('id, contato_id, nome_cliente, numero_nota, serie_nota, data_compra, data_retirada, valor_total, desconto_total, status_retirada, criado_em, produtos, foto_url, foto_cliente_url, comprovante_retirada_url, historico_retiradas')
+    .select('id, contato_id, nome_cliente, numero_nota, serie_nota, data_compra, data_retirada, valor_total, desconto_total, status_retirada, criado_em, produtos, foto_url, foto_cliente_url, comprovante_retirada_url, historico_retiradas', { count: 'exact' })
     .order('criado_em', { ascending: false })
 
   if ((allowedStatus as readonly string[]).includes(status)) {
@@ -113,7 +119,15 @@ export const notasListGetHandler = defineEventHandler(async (event) => {
     request = request.lte('data_compra', dataFim)
   }
 
-  const { data, error } = await request
+  const isSearching = Boolean(search)
+
+  if (!isSearching) {
+    const from = (page - 1) * pageSize
+    const to = from + pageSize - 1
+    request = request.range(from, to)
+  }
+
+  const { data, error, count } = await request
 
   if (error) {
     console.error('[api/notas/list] error:', error.message)
@@ -132,9 +146,22 @@ export const notasListGetHandler = defineEventHandler(async (event) => {
       .map(item => item.nota)
     : notasBase
 
+  const total = isSearching ? notasFiltradas.length : Number(count || 0)
+  const totalPages = Math.max(1, Math.ceil(total / pageSize))
+  const safePage = Math.min(page, totalPages)
+  const pagedNotas = isSearching
+    ? notasFiltradas.slice((safePage - 1) * pageSize, safePage * pageSize)
+    : notasFiltradas
+
   return {
     success: true,
-    notas: notasFiltradas,
+    notas: pagedNotas,
+    pagination: {
+      page: safePage,
+      page_size: pageSize,
+      total,
+      total_pages: totalPages,
+    },
   }
 })
 
