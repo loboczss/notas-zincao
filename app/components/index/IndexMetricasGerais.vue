@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
+import { $fetch } from 'ofetch'
 import {
   ReceiptText,
   CircleDashed,
@@ -14,8 +15,23 @@ import {
 import Botao from '../Botao.vue'
 import { useNotasStore } from '../../stores'
 
+type DashboardProduto10Response = {
+  success: boolean
+  produto: {
+    id: number
+    nome: string
+    saldo_estoque: number
+    notas_pendentes_com_produto: number
+    quantidade_pendente_notas: number
+    percentual_comprometido: number
+    quantidade_filhos: number
+  }
+}
+
 const notasStore = useNotasStore()
 const { notas, loadingNotas, errorMessage } = storeToRefs(notasStore)
+const produtoId10 = ref<DashboardProduto10Response['produto'] | null>(null)
+const loadingProdutoId10 = ref(false)
 
 // Helper para converter string em número com segurança
 const toNumber = (val: any) => {
@@ -36,12 +52,14 @@ const metricas = computed(() => {
   // Volume Físico (Soma de Peças)
   let pecasCompradas = 0
   let pecasEntregues = 0
-
   notas.value.forEach(nota => {
     if (nota.produtos && Array.isArray(nota.produtos)) {
       nota.produtos.forEach((p: any) => {
-        pecasCompradas += toNumber(p.quantidade)
-        pecasEntregues += toNumber(p.quantidade_retirada)
+        const quantidade = toNumber(p.quantidade)
+        const retirada = toNumber(p.quantidade_retirada)
+
+        pecasCompradas += quantidade
+        pecasEntregues += retirada
       })
     }
   })
@@ -62,8 +80,40 @@ const metricas = computed(() => {
   }
 })
 
+const metricasProdutoId10 = computed(() => {
+  const produto = produtoId10.value
+
+  return {
+    id: produto?.id || 10,
+    nome: String(produto?.nome || 'Produto ID 10'),
+    saldoEstoque: Number(produto?.saldo_estoque || 0),
+    notasPendentes: Number(produto?.notas_pendentes_com_produto || 0),
+    quantidadePendenteNotas: Number(produto?.quantidade_pendente_notas || 0),
+    percentualComprometido: Number(produto?.percentual_comprometido || 0),
+    quantidadeFilhos: Number(produto?.quantidade_filhos || 0),
+  }
+})
+
+const carregarProdutoId10 = async () => {
+  loadingProdutoId10.value = true
+  try {
+    const response = await $fetch<DashboardProduto10Response>('/api/dashboard/produto-10')
+    produtoId10.value = response.produto || null
+  }
+  catch (error) {
+    console.error('[dashboard/produto-id-10]', error)
+    produtoId10.value = null
+  }
+  finally {
+    loadingProdutoId10.value = false
+  }
+}
+
 const carregarMetricas = async () => {
-  await notasStore.fetchNotas()
+  await Promise.all([
+    notasStore.fetchNotas(),
+    carregarProdutoId10(),
+  ])
 }
 
 onMounted(() => {
@@ -135,6 +185,67 @@ onMounted(() => {
         <div>
           <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Concluídas</span>
           <div class="mt-1 text-3xl font-black text-emerald-600 dark:text-emerald-400">{{ metricas.notasRetiradas }}</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Card específico do Produto ID 10 (separado para não afetar o grid principal) -->
+    <div class="glass-card rounded-[2.5rem] border p-6 dark:border-white/5 dark:bg-white/[0.02]">
+      <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-500/10 text-brand-500">
+        <Box class="h-6 w-6" />
+      </div>
+      <div class="mt-4">
+        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Produto ID {{ metricasProdutoId10.id }} (Estoque)</span>
+        <div class="mt-1 text-lg font-black text-slate-900 dark:text-white">{{ metricasProdutoId10.nome }}</div>
+
+        <div v-if="loadingProdutoId10" class="mt-3 text-xs font-bold text-slate-400">Carregando dados da tabela de estoque...</div>
+
+        <div v-else class="mt-3 grid grid-cols-2 gap-3 text-xs md:grid-cols-4">
+          <div>
+            <p class="font-black uppercase tracking-wider text-amber-500">Saldo em Estoque</p>
+            <p class="text-base font-black text-amber-600 dark:text-amber-400">{{ metricasProdutoId10.saldoEstoque }}</p>
+          </div>
+          <div>
+            <p class="font-black uppercase tracking-wider text-slate-400">Notas Pendentes</p>
+            <p class="text-base font-black text-slate-800 dark:text-slate-200">{{ metricasProdutoId10.notasPendentes }}</p>
+          </div>
+          <div>
+            <p class="font-black uppercase tracking-wider text-slate-400">Filhos Considerados</p>
+            <p class="text-base font-black text-slate-800 dark:text-slate-200">{{ metricasProdutoId10.quantidadeFilhos }}</p>
+          </div>
+          <div>
+            <p class="font-black uppercase tracking-wider text-slate-400">Comprometido</p>
+            <p class="text-base font-black text-slate-800 dark:text-slate-200">{{ metricasProdutoId10.percentualComprometido }}%</p>
+          </div>
+
+          <div class="col-span-2 md:col-span-4">
+            <p class="font-black uppercase tracking-wider text-slate-400">Quantidade total de zinco em notas pendentes</p>
+            <p class="text-base font-black text-slate-800 dark:text-slate-200">{{ metricasProdutoId10.quantidadePendenteNotas }}</p>
+          </div>
+        </div>
+
+        <div class="mt-4 rounded-2xl border border-brand-500/20 bg-brand-500/5 p-4">
+          <div class="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
+            <span class="text-brand-500">Progresso Estoque x Pendente</span>
+            <span class="text-brand-500">{{ metricasProdutoId10.percentualComprometido }}%</span>
+          </div>
+          <div class="mt-2 h-3 w-full overflow-hidden rounded-full bg-slate-200/70 dark:bg-white/10">
+            <div
+              class="h-full rounded-full bg-brand-500 transition-all duration-700"
+              :style="{ width: `${metricasProdutoId10.percentualComprometido}%` }"
+            />
+          </div>
+          <div class="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs font-bold">
+            <div>
+              <p class="uppercase tracking-wider text-slate-400">Total em estoque</p>
+              <p class="text-slate-900 dark:text-white">{{ metricasProdutoId10.saldoEstoque }}</p>
+            </div>
+            <div class="text-right">
+              <p class="uppercase tracking-wider text-slate-400">Pendente a entregar</p>
+              <p class="text-brand-500">{{ metricasProdutoId10.quantidadePendenteNotas }}</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
