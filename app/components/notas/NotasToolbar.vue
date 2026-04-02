@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Search, RotateCw } from 'lucide-vue-next'
+import { Search, RotateCw, FileDown, Loader2 } from 'lucide-vue-next'
 import type { NotaRetiradaStatus } from '../../../shared/types/NotasRetirada'
 
 const props = withDefaults(defineProps<{
@@ -10,8 +10,10 @@ const props = withDefaults(defineProps<{
   totalCount: number
   resultCount: number
   loading?: boolean
+  exportLoading?: 'csv' | 'pdf' | false
 }>(), {
   loading: false,
+  exportLoading: false,
 })
 
 const emit = defineEmits<{
@@ -21,6 +23,7 @@ const emit = defineEmits<{
   (e: 'update:dataFim', value: string): void
   (e: 'apply'): void
   (e: 'refresh'): void
+  (e: 'export', format: 'csv' | 'pdf'): void
 }>()
 </script>
 
@@ -96,6 +99,30 @@ const emit = defineEmits<{
           @click="emit('refresh')"
         >
           <RotateCw class="h-4 w-4" :class="props.loading ? 'animate-spin' : ''" />
+        </button>
+
+        <button
+          type="button"
+          class="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl bg-slate-100 px-4 text-xs font-bold text-slate-700 transition-all hover:bg-slate-200 active:scale-95 disabled:opacity-50 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10"
+          :disabled="!!props.exportLoading"
+          title="Exportar CSV"
+          @click="emit('export', 'csv')"
+        >
+          <Loader2 v-if="props.exportLoading === 'csv'" class="h-3.5 w-3.5 animate-spin" />
+          <FileDown v-else class="h-3.5 w-3.5" />
+          CSV
+        </button>
+
+        <button
+          type="button"
+          class="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl bg-slate-100 px-4 text-xs font-bold text-slate-700 transition-all hover:bg-slate-200 active:scale-95 disabled:opacity-50 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10"
+          :disabled="!!props.exportLoading"
+          title="Exportar PDF"
+          @click="emit('export', 'pdf')"
+        >
+          <Loader2 v-if="props.exportLoading === 'pdf'" class="h-3.5 w-3.5 animate-spin" />
+          <FileDown v-else class="h-3.5 w-3.5" />
+          PDF
         </button>
 
         <button

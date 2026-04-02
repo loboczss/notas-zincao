@@ -22,6 +22,7 @@ const dataFim = ref('')
 const modalAberto = ref(false)
 const notaDetalhe = ref<any | null>(null)
 const loadingDetalhe = ref(false)
+const exportLoading = ref<'csv' | 'pdf' | false>(false)
 
 const carregarNotas = async () => {
   await notasStore.fetchNotas({
@@ -50,6 +51,37 @@ const abrirDetalheNota = async (id: string) => {
 
 const fecharDetalheNota = () => {
   modalAberto.value = false
+}
+
+const exportarRelatorio = async (format: 'csv' | 'pdf') => {
+  if (exportLoading.value) return
+  exportLoading.value = format
+  try {
+    const params = new URLSearchParams({ format })
+    if (searchTerm.value) params.set('search', searchTerm.value)
+    if (statusFilter.value !== 'todos') params.set('status', statusFilter.value)
+    if (dataInicio.value) params.set('data_inicio', dataInicio.value)
+    if (dataFim.value) params.set('data_fim', dataFim.value)
+
+    const res = await fetch(`/api/notas/export?${params.toString()}`)
+    if (!res.ok) throw new Error('Erro ao exportar relatório')
+
+    const blob = await res.blob()
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `notas-zincao-${new Date().toISOString().split('T')[0]}.${format}`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+  catch (err) {
+    console.error('[exportarRelatorio]', err)
+  }
+  finally {
+    exportLoading.value = false
+  }
 }
 
 onMounted(async () => {
@@ -149,12 +181,14 @@ const formatCurrency = (value: number) => {
           :total-count="notasStore.notas.length"
           :result-count="notasFiltradas.length"
           :loading="notasStore.loadingNotas"
+          :export-loading="exportLoading"
           @update:search-term="searchTerm = $event"
           @update:status-filter="statusFilter = $event"
           @update:data-inicio="dataInicio = $event"
           @update:data-fim="dataFim = $event"
           @apply="aplicarFiltros"
           @refresh="carregarNotas"
+          @export="exportarRelatorio"
         />
       </div>
 

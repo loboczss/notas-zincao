@@ -17,6 +17,7 @@
     "lucide-vue-next": "^0.577.0",
     "nuxt": "^4.4.2",
     "openai": "^6.32.0",
+    "pdfkit": "^0.18.0",
     "pinia": "^3.0.4",
     "vue": "^3.5.30",
     "vue-router": "^5.0.3"
@@ -24,6 +25,7 @@
   "devDependencies": {
     "@cspell/dict-pt-br": "^2.4.2",
     "@nuxtjs/color-mode": "^4.0.0",
+    "@types/pdfkit": "^0.17.5",
     "@vue/language-core": "^3.2.6"
   }
 }
