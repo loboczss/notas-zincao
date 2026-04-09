@@ -15,7 +15,7 @@ const label = computed(() => {
 
 const badgeClass = computed(() => {
   if (props.status === 'pendente') {
-    return 'border-amber-500/20 bg-amber-500/10 text-amber-600 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-400 shadow-[0_0_12px_-4px_rgba(245,158,11,0.2)]'
+    return 'border-brand-500/20 bg-brand-500/10 text-brand-600 dark:border-brand-400/20 dark:bg-brand-400/10 dark:text-brand-400 shadow-[0_0_12px_-4px_rgba(245,158,11,0.2)]'
   }
 
   if (props.status === 'parcial') {

@@ -27,7 +27,7 @@ const emit = defineEmits<{
           :value="props.searchTerm"
           type="text"
           placeholder="Buscar por descrição ou ID do produto"
-          class="w-full rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-amber-400 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+          class="w-full rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-brand-400 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
           @input="emit('update:searchTerm', ($event.target as HTMLInputElement).value)"
           @keyup.enter="emit('search')"
         >
@@ -48,7 +48,7 @@ const emit = defineEmits<{
       <button
         v-if="props.canEdit"
         type="button"
-        class="inline-flex items-center gap-2 rounded-xl bg-amber-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-amber-500 disabled:opacity-60"
+        class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-brand-500 disabled:opacity-60"
         :disabled="props.loading"
         @click="emit('new')"
       >

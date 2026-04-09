@@ -36,7 +36,7 @@ const emit = defineEmits<{
     </div>
 
     <div class="mt-5 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-      <label class="flex min-h-56 cursor-pointer flex-col items-center justify-center rounded-[24px] border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center transition-colors hover:border-amber-400 hover:bg-amber-50/40 dark:border-slate-700 dark:bg-slate-950 dark:hover:border-amber-500 dark:hover:bg-slate-900">
+      <label class="flex min-h-56 cursor-pointer flex-col items-center justify-center rounded-[24px] border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center transition-colors hover:border-brand-400 hover:bg-brand-50/40 dark:border-slate-700 dark:bg-slate-950 dark:hover:border-brand-500 dark:hover:bg-slate-900">
         <input type="file" accept="image/*" class="hidden" @change="emit('selectImage', $event)">
         <Camera class="h-8 w-8 text-slate-400 dark:text-slate-500" />
         <p class="mt-3 text-sm font-semibold text-slate-800 dark:text-slate-200">
@@ -60,7 +60,7 @@ const emit = defineEmits<{
     <div class="mt-4 flex justify-end">
       <button
         type="button"
-        class="inline-flex items-center gap-2 rounded-2xl bg-amber-600 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-amber-500 disabled:opacity-50"
+        class="inline-flex items-center gap-2 rounded-2xl bg-brand-600 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-brand-500 disabled:opacity-50"
         :disabled="!props.previewUrl || props.loading"
         @click="emit('analyze')"
       >

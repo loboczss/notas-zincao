@@ -1,16 +1,11 @@
 <script setup lang="ts">
-import AppPageShell from '../components/layout/AppPageShell.vue'
 import IndexMetricasGerais from '../components/index/IndexMetricasGerais.vue'
 </script>
 
 <template>
-  <AppPageShell
-    eyebrow="Dashboard"
-    title="Dashboard Operacional"
-    description="Controle total de volume físico, status de notas e acompanhamento de entregas pendentes."
-  >
-    <div class="space-y-8">
+  <main class="min-h-screen bg-slate-100 p-4 text-slate-800 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-200 md:p-8">
+    <div class="mx-auto max-w-7xl space-y-8">
       <IndexMetricasGerais />
     </div>
-  </AppPageShell>
+  </main>
 </template>

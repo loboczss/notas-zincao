@@ -61,7 +61,7 @@ const salvarSenha = async () => {
               type="password"
               autocomplete="new-password"
               placeholder="Mínimo 6 caracteres"
-              class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition-colors placeholder:text-slate-400 dark:placeholder:text-slate-600"
+              class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/40 transition-colors placeholder:text-slate-400 dark:placeholder:text-slate-600"
             />
           </div>
 
@@ -74,7 +74,7 @@ const salvarSenha = async () => {
               type="password"
               autocomplete="new-password"
               placeholder="Repita a nova senha"
-              class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition-colors placeholder:text-slate-400 dark:placeholder:text-slate-600"
+              class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/40 transition-colors placeholder:text-slate-400 dark:placeholder:text-slate-600"
             />
           </div>
 

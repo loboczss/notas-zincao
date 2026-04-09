@@ -53,7 +53,7 @@ const onInput = (event: Event) => {
       :type="inputType"
       :placeholder="props.placeholder"
       :disabled="props.disabled"
-      class="w-full rounded-2xl border border-slate-200 dark:border-white/10 bg-white/50 dark:bg-slate-900/40 px-4 py-3 text-sm text-slate-950 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 backdrop-blur-sm outline-none transition-all duration-300 focus:border-amber-500/50 dark:focus:border-amber-400/50 focus:ring-4 focus:ring-amber-500/10 dark:focus:ring-amber-400/10 disabled:cursor-not-allowed disabled:opacity-50"
+      class="w-full rounded-2xl border border-slate-200 dark:border-white/10 bg-white/50 dark:bg-slate-900/40 px-4 py-3 text-sm text-slate-950 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 backdrop-blur-sm outline-none transition-all duration-300 focus:border-brand-500/50 dark:focus:border-brand-400/50 focus:ring-4 focus:ring-brand-500/10 dark:focus:ring-brand-400/10 disabled:cursor-not-allowed disabled:opacity-50"
       :class="isPasswordField ? 'pr-12' : ''"
       @input="onInput"
     >
@@ -61,7 +61,7 @@ const onInput = (event: Event) => {
     <button
       v-if="isPasswordField"
       type="button"
-      class="absolute inset-y-0 right-0 flex items-center px-4 text-slate-400 transition-colors hover:text-amber-500 dark:hover:text-amber-400"
+      class="absolute inset-y-0 right-0 flex items-center px-4 text-slate-400 transition-colors hover:text-brand-500 dark:hover:text-brand-400"
       :aria-label="exibirSenha ? 'Ocultar senha' : 'Mostrar senha'"
       @click="exibirSenha = !exibirSenha"
     >

@@ -78,7 +78,7 @@ const handleCloseAndFocus = (fechar: () => void) => {
         id="header-menu-toggle"
         ref="triggerRef"
         type="button"
-        class="inline-flex max-w-[74vw] items-center gap-2 rounded-full p-1.5 pr-3 text-sm font-medium text-slate-700 transition-all hover:bg-white/50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-amber-500/40 dark:text-slate-200 dark:hover:bg-slate-800/50 dark:hover:shadow-black/50 sm:max-w-none"
+        class="inline-flex max-w-[74vw] items-center gap-2 rounded-full p-1.5 pr-3 text-sm font-medium text-slate-700 transition-all hover:bg-white/50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-brand-500/40 dark:text-slate-200 dark:hover:bg-slate-800/50 dark:hover:shadow-black/50 sm:max-w-none"
         aria-haspopup="menu"
         :aria-expanded="aberto"
         @click="toggle"

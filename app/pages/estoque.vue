@@ -114,7 +114,7 @@ onMounted(async () => {
     title="Gestão de estoque"
     description="Consulte os produtos cadastrados e, como administrador, adicione novos itens ou edite os existentes."
   >
-    <div v-if="!isAdmin" class="flex items-start gap-3 rounded-3xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 shadow-sm dark:border-amber-900/50 dark:bg-amber-500/10 dark:text-amber-200">
+    <div v-if="!isAdmin" class="flex items-start gap-3 rounded-3xl border border-brand-200 bg-brand-50 p-4 text-sm text-brand-800 shadow-sm dark:border-brand-900/50 dark:bg-brand-500/10 dark:text-brand-200">
       <ShieldAlert class="mt-0.5 h-5 w-5 shrink-0" />
       <p>Seu perfil está em modo somente leitura nesta tela. Apenas administradores podem adicionar ou editar produtos do estoque.</p>
     </div>
@@ -138,7 +138,7 @@ onMounted(async () => {
         <label class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Itens por página</label>
         <select
           :value="String(itensPorPagina)"
-          class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition-colors focus:border-amber-400 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+          class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition-colors focus:border-brand-400 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
           @change="mudarItensPorPagina(($event.target as HTMLSelectElement).value)"
         >
           <option value="20">20</option>

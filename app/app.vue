@@ -5,6 +5,26 @@ import HeaderPrincipal from './components/header/HeaderPrincipal.vue'
 
 const route = useRoute()
 const exibirHeader = computed(() => route.path !== '/login')
+
+const pageTitle = computed(() => {
+  const path = route.path
+
+  if (path === '/') return 'Dashboard'
+  if (path === '/login') return 'Login'
+  if (path === '/confirm') return 'Confirmacao de Conta'
+  if (path === '/notas') return 'Notas de Retirada'
+  if (path === '/notas/index') return 'Notas de Retirada'
+  if (path.startsWith('/notas/') && path.endsWith('/retirada')) return 'Retirada da Nota'
+  if (path === '/estoque') return 'Estoque'
+  if (path === '/cadastrar-nota') return 'Cadastrar Nota'
+  if (path === '/profile') return 'Perfil'
+
+  return 'Notas Zincao'
+})
+
+useHead(() => ({
+  title: `${pageTitle.value} | Notas Zincao`,
+}))
 </script>
 
 <template>

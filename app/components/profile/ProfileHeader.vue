@@ -75,13 +75,13 @@ const salvar = async () => {
     <div class="absolute inset-0 bg-white/40 dark:bg-slate-900/40 backdrop-blur-3xl border border-white/20 dark:border-white/5" />
 
     <!-- Decorative blobs -->
-    <div class="absolute -top-24 -right-24 w-64 h-64 bg-amber-400/10 rounded-full blur-3xl anim-blob pointer-events-none" />
+    <div class="absolute -top-24 -right-24 w-64 h-64 bg-brand-400/10 rounded-full blur-3xl anim-blob pointer-events-none" />
     <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-slate-400/10 rounded-full blur-3xl anim-blob-delayed pointer-events-none" />
 
     <div class="relative flex flex-col md:flex-row items-center gap-8">
       <!-- Avatar -->
       <div class="relative group shrink-0">
-        <div class="absolute -inset-1 bg-gradient-to-tr from-amber-400/35 to-slate-400/25 rounded-full blur opacity-20 group-hover:opacity-40 transition duration-700" />
+        <div class="absolute -inset-1 bg-gradient-to-tr from-brand-400/35 to-slate-400/25 rounded-full blur opacity-20 group-hover:opacity-40 transition duration-700" />
         <div class="relative flex items-center justify-center w-32 h-32 rounded-full bg-slate-100 dark:bg-slate-800 border-4 border-white dark:border-slate-900 shadow-xl overflow-hidden">
           <img v-if="fotoPerfil" :src="fotoPerfil" alt="Foto de perfil" class="h-full w-full object-cover" />
           <span v-else class="text-4xl font-black text-slate-900 dark:text-white">{{ inicial }}</span>
@@ -95,7 +95,7 @@ const salvar = async () => {
           <h1 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white capitalize">
             {{ nome }}
           </h1>
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-300 text-xs font-bold tracking-wide">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-300 text-xs font-bold tracking-wide">
             <ShieldCheck class="w-3.5 h-3.5" />
             {{ roleLabel }}
           </span>
@@ -113,7 +113,7 @@ const salvar = async () => {
         <div v-else class="flex items-center gap-2 mb-2">
           <input
             v-model="novoNome"
-            class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3 py-1.5 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition-colors w-full max-w-xs"
+            class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3 py-1.5 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-brand-500/40 transition-colors w-full max-w-xs"
             placeholder="Seu nome"
             maxlength="120"
             @keyup.enter="salvar"

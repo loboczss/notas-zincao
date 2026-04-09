@@ -459,7 +459,7 @@ await notasStore.fetchNotas()
           </button>
           <button
             type="button"
-            class="inline-flex items-center justify-center rounded-2xl bg-amber-600 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-amber-500"
+            class="inline-flex items-center justify-center rounded-2xl bg-brand-600 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-brand-500"
             @click="router.push('/notas')"
           >
             Ir para listagem

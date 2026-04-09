@@ -233,7 +233,7 @@ await carregarDetalhe()
           <textarea
             v-model="observacoesRetirada"
             rows="4"
-            class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition-colors focus:border-amber-400 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+            class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition-colors focus:border-brand-400 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
             placeholder="Opcional"
           />
         </label>
@@ -243,7 +243,7 @@ await carregarDetalhe()
         <div class="flex flex-col gap-3 sm:flex-row">
           <button
             type="button"
-            class="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-amber-600 px-4 py-3 text-base font-bold text-white transition-colors hover:bg-amber-500 disabled:opacity-60"
+            class="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-brand-600 px-4 py-3 text-base font-bold text-white transition-colors hover:bg-brand-500 disabled:opacity-60"
             :disabled="saving"
             @click="submitRetirada"
           >

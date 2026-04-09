@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { $fetch } from 'ofetch'
 import type { NotaAdminEditRequest, NotaRetiradaStatus } from '../../../shared/types/NotasRetirada'
 import { CheckCircle2, Package, LayoutDashboard, Wallet, Plus } from 'lucide-vue-next'
 import AppPageShell from '../../components/layout/AppPageShell.vue'
+import Botao from '../../components/Botao.vue'
 import ModalGlobal from '../../components/ModalGlobal.vue'
 import NotaDetalheModal from '../../components/notas/NotaDetalheModal.vue'
 import NotasTabela from '../../components/notas/NotasTabela.vue'
@@ -27,17 +29,46 @@ const notaDetalhe = ref<any | null>(null)
 const loadingDetalhe = ref(false)
 const savingEdicao = ref(false)
 const exportLoading = ref<'csv' | 'pdf' | false>(false)
+const resumoNotas = ref<{
+  total_notas: number
+  pendentes: number
+  parciais: number
+  retiradas: number
+} | null>(null)
+const router = useRouter()
 const isAdmin = computed(() => String(authStore.profile?.role || '').trim().toLowerCase() === 'admin')
 
+const carregarResumoNotas = async () => {
+  try {
+    const response = await $fetch<{
+      success: boolean
+      resumo: {
+        total_notas: number
+        pendentes: number
+        parciais: number
+        retiradas: number
+      }
+    }>('/api/dashboard/notas-resumo')
+
+    resumoNotas.value = response?.resumo || null
+  }
+  catch (err) {
+    console.error('[carregarResumoNotas]', err)
+  }
+}
+
 const carregarNotas = async () => {
-  await notasStore.fetchNotas({
-    search: searchTerm.value,
-    status: statusFilter.value,
-    data_inicio: dataInicio.value,
-    data_fim: dataFim.value,
-    page: paginaAtual.value,
-    page_size: itensPorPagina.value,
-  })
+  await Promise.all([
+    notasStore.fetchNotas({
+      search: searchTerm.value,
+      status: statusFilter.value,
+      data_inicio: dataInicio.value,
+      data_fim: dataFim.value,
+      page: paginaAtual.value,
+      page_size: itensPorPagina.value,
+    }),
+    carregarResumoNotas(),
+  ])
 
   paginaAtual.value = notasStore.page
 }
@@ -159,11 +190,13 @@ const intervaloNotas = computed(() => {
 // Métricas Reativas
 const stats = computed(() => {
   const todas = notasStore.notas
+  const resumo = resumoNotas.value
+
   return {
-    total: todas.length,
-    pendentes: todas.filter(n => n.status_retirada === 'pendente').length,
-    parciais: todas.filter(n => n.status_retirada === 'parcial').length,
-    concluidas: todas.filter(n => n.status_retirada === 'retirada').length,
+    total: Number(resumo?.total_notas ?? notasStore.totalNotas),
+    pendentes: Number(resumo?.pendentes ?? todas.filter(n => n.status_retirada === 'pendente').length),
+    parciais: Number(resumo?.parciais ?? todas.filter(n => n.status_retirada === 'parcial').length),
+    concluidas: Number(resumo?.retiradas ?? todas.filter(n => n.status_retirada === 'retirada').length),
     valorTotal: todas.reduce((acc, n) => acc + (n.valor_total || 0), 0)
   }
 })
@@ -182,53 +215,62 @@ const formatCurrency = (value: number) => {
     <template #headerAside>
       <NuxtLink
         to="/cadastrar-nota"
-        class="group relative flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-[2rem] bg-amber-600 px-8 py-4 text-sm font-black text-white transition-all hover:bg-amber-500 active:scale-95"
+        class="group relative flex shrink-0 items-center justify-center gap-2.5 overflow-hidden rounded-[2.2rem] bg-gradient-to-br from-brand-400 via-brand-500 to-brand-600 px-8 py-4 text-sm font-black text-white shadow-lg shadow-brand-500/25 transition-all duration-300 hover:scale-[1.03] hover:shadow-brand-500/40 active:scale-95"
       >
-        <Plus width="18" height="18" stroke-width="3" />
-        Nova Nota
+        <div class="absolute inset-0 bg-white/10 opacity-0 transition-opacity group-hover:opacity-100" />
+        <Plus width="20" height="20" stroke-width="3" class="transition-transform duration-500 group-hover:rotate-90" />
+        <span class="relative">Nova Nota</span>
       </NuxtLink>
     </template>
 
     <div class="animate-in fade-in slide-in-from-bottom-4 duration-700 space-y-8">
       <!-- Bento Grid de Métricas: Organização Superior com Ícones -->
       <div class="grid grid-cols-2 gap-4 md:grid-cols-4 lg:gap-6">
-        <div class="glass-card group flex flex-col justify-center rounded-[2.5rem] border p-6 transition-all hover:bg-white/[0.05] dark:border-white/5 dark:bg-white/[0.02]">
+        <!-- Total de Notas -->
+        <div class="glass-card group relative flex flex-col justify-center overflow-hidden rounded-[2.5rem] border border-white/40 bg-white/40 p-6 transition-all duration-500 hover:scale-[1.02] hover:bg-white/60 dark:border-white/5 dark:bg-white/[0.02] dark:hover:bg-white/[0.05]">
+          <div class="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-slate-500/5 blur-2xl transition-opacity group-hover:opacity-100" />
           <div class="flex items-center gap-2">
-            <Package class="h-3 w-3 text-brand-500 opacity-60" />
-            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Total de Notas</span>
+            <Package class="h-4 w-4 text-slate-400" />
+            <span class="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">Total Geral</span>
           </div>
-          <div class="mt-2 flex items-baseline gap-2">
-            <span class="text-3xl font-black text-slate-900 dark:text-white">{{ stats.total }}</span>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span class="text-4xl font-black tracking-tight text-slate-900 dark:text-white">{{ stats.total }}</span>
           </div>
         </div>
 
-        <div class="glass-card group flex flex-col justify-center rounded-[2.5rem] border p-6 transition-all hover:bg-white/[0.05] dark:border-white/5 dark:bg-white/[0.02]">
+        <!-- Pendentes -->
+        <div class="glass-card group relative flex flex-col justify-center overflow-hidden rounded-[2.5rem] border border-brand-500/20 bg-brand-50/30 p-6 transition-all duration-500 hover:scale-[1.02] hover:bg-brand-50/50 dark:border-brand-500/10 dark:bg-brand-500/5 dark:hover:bg-brand-500/10">
+          <div class="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-brand-500/10 blur-2xl transition-opacity group-hover:opacity-100" />
           <div class="flex items-center gap-2">
-            <div class="h-1.5 w-1.5 rounded-full bg-rose-500" />
-            <span class="text-[10px] font-bold uppercase tracking-widest text-rose-500">Pendentes</span>
+            <div class="h-2 w-2 animate-pulse rounded-full bg-brand-500 shadow-[0_0_8px_rgba(254,199,20,0.5)]" />
+            <span class="text-[10px] font-black uppercase tracking-[0.15em] text-brand-600 dark:text-brand-400">Pendentes</span>
           </div>
-          <div class="mt-2 flex items-baseline gap-2">
-            <span class="text-3xl font-black text-rose-600 dark:text-rose-400">{{ stats.pendentes }}</span>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span class="text-4xl font-black tracking-tight text-brand-700 dark:text-brand-300">{{ stats.pendentes }}</span>
           </div>
         </div>
 
-        <div class="glass-card group flex flex-col justify-center rounded-[2.5rem] border p-6 transition-all hover:bg-white/[0.05] dark:border-white/5 dark:bg-white/[0.02]">
+        <!-- Parciais -->
+        <div class="glass-card group relative flex flex-col justify-center overflow-hidden rounded-[2.5rem] border border-blue-500/20 bg-blue-50/30 p-6 transition-all duration-500 hover:scale-[1.02] hover:bg-blue-50/50 dark:border-blue-500/10 dark:bg-blue-500/5 dark:hover:bg-blue-500/10">
+          <div class="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-blue-500/10 blur-2xl transition-opacity group-hover:opacity-100" />
           <div class="flex items-center gap-2">
-            <div class="h-1.5 w-1.5 rounded-full bg-amber-500" />
-            <span class="text-[10px] font-bold uppercase tracking-widest text-amber-500">Parciais</span>
+            <div class="h-2 w-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+            <span class="text-[10px] font-black uppercase tracking-[0.15em] text-blue-600 dark:text-blue-400">Parciais</span>
           </div>
-          <div class="mt-2 flex items-baseline gap-2">
-            <span class="text-3xl font-black text-amber-600 dark:text-amber-400">{{ stats.parciais }}</span>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span class="text-4xl font-black tracking-tight text-blue-700 dark:text-blue-300">{{ stats.parciais }}</span>
           </div>
         </div>
 
-        <div class="glass-card group flex flex-col justify-center rounded-[2.5rem] border p-6 transition-all hover:bg-white/[0.05] dark:border-white/5 dark:bg-white/[0.02]">
+        <!-- Concluídas -->
+        <div class="glass-card group relative flex flex-col justify-center overflow-hidden rounded-[2.5rem] border border-emerald-500/20 bg-emerald-50/30 p-6 transition-all duration-500 hover:scale-[1.02] hover:bg-emerald-50/50 dark:border-emerald-500/10 dark:bg-emerald-500/5 dark:hover:bg-emerald-500/10">
+          <div class="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-emerald-500/10 blur-2xl transition-opacity group-hover:opacity-100" />
           <div class="flex items-center gap-2">
-            <CheckCircle2 class="h-3 w-3 text-emerald-500 opacity-60" />
-            <span class="text-[10px] font-bold uppercase tracking-widest text-emerald-500">Concluídas</span>
+            <CheckCircle2 class="h-4 w-4 text-emerald-500" />
+            <span class="text-[10px] font-black uppercase tracking-[0.15em] text-emerald-600 dark:text-emerald-400">Concluídas</span>
           </div>
-          <div class="mt-2 flex items-baseline gap-2">
-            <span class="text-3xl font-black text-emerald-600 dark:text-emerald-400">{{ stats.concluidas }}</span>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span class="text-4xl font-black tracking-tight text-emerald-700 dark:text-emerald-300">{{ stats.concluidas }}</span>
           </div>
         </div>
       </div>
@@ -268,7 +310,7 @@ const formatCurrency = (value: number) => {
             <label class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Itens por página</label>
             <select
               :value="String(itensPorPagina)"
-              class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition-colors focus:border-amber-400 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:[color-scheme:dark]"
+              class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition-colors focus:border-brand-400 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:[color-scheme:dark]"
               @change="mudarItensPorPagina(($event.target as HTMLSelectElement).value)"
             >
               <option class="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100" value="10">10</option>

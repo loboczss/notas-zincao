@@ -12,21 +12,21 @@ export default {
     extend: {
       colors: {
         brand: {
-          50: '#fffbeb',
-          100: '#fef3c7',
-          200: '#fde68a',
-          300: '#fcd34d',
-          400: '#fbbf24',
-          500: '#f59e0b',
-          600: '#d97706',
-          700: '#b45309',
-          800: '#92400e',
-          900: '#78350f',
+          50: '#fffdf2',
+          100: '#fff9d4',
+          200: '#fff4a3',
+          300: '#feef72',
+          400: '#fee941',
+          500: '#fec714',
+          600: '#e5b110',
+          700: '#b28b0d',
+          800: '#7f6309',
+          900: '#4c3b05',
         },
       },
       backgroundImage: {
-        'mesh-light': 'linear-gradient(-45deg, rgba(245, 158, 11, 0.18), rgba(234, 179, 8, 0.16), rgba(251, 191, 36, 0.12), rgba(249, 115, 22, 0.1))',
-        'mesh-dark': 'linear-gradient(-45deg, rgba(180, 83, 9, 0.45), rgba(161, 98, 7, 0.35), rgba(146, 64, 14, 0.4), rgba(120, 53, 15, 0.32))',
+        'mesh-light': 'linear-gradient(-45deg, rgba(254, 199, 20, 0.18), rgba(229, 177, 16, 0.16), rgba(254, 233, 65, 0.12), rgba(254, 199, 20, 0.1))',
+        'mesh-dark': 'linear-gradient(-45deg, rgba(178, 139, 13, 0.45), rgba(127, 99, 9, 0.35), rgba(112, 87, 8, 0.4), rgba(76, 59, 5, 0.32))',
       },
       keyframes: {
         mesh: {

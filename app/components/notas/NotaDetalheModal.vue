@@ -158,7 +158,7 @@ const editStats = computed(() => {
     <!-- StatusBar Coesa: Métricas compactas e modernas -->
     <div class="glass-card flex flex-wrap items-center justify-between gap-4 rounded-[2.5rem] border px-10 py-6 dark:border-white/5 dark:bg-white/[0.02]">
       <div class="flex items-center gap-4">
-        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-500/10 text-brand-500">
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-500/10 text-slate-500">
           <Package class="h-6 w-6" />
         </div>
         <div>
@@ -170,12 +170,12 @@ const editStats = computed(() => {
       <div class="h-10 w-px bg-slate-100 dark:bg-white/5 hidden md:block" />
 
       <div class="flex items-center gap-4">
-        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-500">
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-500/10 text-brand-500">
           <CircleDashed class="h-6 w-6" />
         </div>
         <div>
           <span class="block text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Pendentes</span>
-          <span class="text-xl font-black text-amber-600 dark:text-amber-400">{{ stats.saldoPendente }}</span>
+          <span class="text-xl font-black text-brand-600 dark:text-brand-400">{{ stats.saldoPendente }}</span>
         </div>
       </div>
 
@@ -212,7 +212,7 @@ const editStats = computed(() => {
           <template v-else>
             <button
               type="button"
-              class="rounded-xl bg-amber-600 px-4 py-2 text-xs font-black text-white transition hover:bg-amber-500 disabled:opacity-60"
+              class="rounded-xl bg-brand-600 px-4 py-2 text-xs font-black text-white transition hover:bg-brand-500 disabled:opacity-60"
               :disabled="!!savingEdit"
               @click="salvarEdicao"
             >
@@ -231,8 +231,8 @@ const editStats = computed(() => {
       </div>
 
       <div v-if="editMode" class="mt-5 space-y-4">
-        <div class="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 text-xs text-slate-600 dark:text-slate-300">
-          <p class="font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">Como editar sem erro</p>
+        <div class="rounded-2xl border border-brand-500/20 bg-brand-500/5 p-4 text-xs text-slate-600 dark:text-slate-300">
+          <p class="font-black uppercase tracking-wider text-brand-600 dark:text-brand-400">Como editar sem erro</p>
           <p class="mt-1">1. Atualize os dados do cliente, 2. ajuste os itens da nota, 3. confira os totais abaixo e só então clique em salvar.</p>
           <p class="mt-1">Campos de item: <span class="font-black">Qtd Comprada</span> é o total da nota, <span class="font-black">Qtd Retirada</span> é o que já saiu do pátio, <span class="font-black">ID Estoque</span> vincula ao produto real.</p>
         </div>
@@ -250,9 +250,9 @@ const editStats = computed(() => {
             <p class="text-[10px] font-black uppercase tracking-widest text-emerald-500">Qtd Retirada</p>
             <p class="mt-1 text-lg font-black text-emerald-600 dark:text-emerald-400">{{ editStats.totalRetirado }}</p>
           </div>
-          <div class="rounded-2xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 dark:border-white/10">
-            <p class="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">Saldo</p>
-            <p class="mt-1 text-lg font-black text-amber-600 dark:text-amber-400">{{ editStats.saldo }}</p>
+          <div class="rounded-2xl border border-brand-500/20 bg-brand-500/5 px-4 py-3 dark:border-white/10">
+            <p class="text-[10px] font-black uppercase tracking-widest text-brand-600 dark:text-brand-400">Saldo</p>
+            <p class="mt-1 text-lg font-black text-brand-600 dark:text-brand-400">{{ editStats.saldo }}</p>
           </div>
         </div>
 
@@ -263,7 +263,7 @@ const editStats = computed(() => {
               v-model="editDraft.nome_cliente"
               type="text"
               placeholder="Ex.: João da Silva"
-              class="h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 outline-none transition focus:border-amber-500 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-200"
+              class="h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 outline-none transition focus:border-brand-500 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-200"
             >
           </label>
           <label class="space-y-1">
@@ -272,7 +272,7 @@ const editStats = computed(() => {
               v-model="editDraft.documento_cliente"
               type="text"
               placeholder="Somente números ou formatado"
-              class="h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 outline-none transition focus:border-amber-500 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-200"
+              class="h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 outline-none transition focus:border-brand-500 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-200"
             >
           </label>
           <label class="space-y-1">
@@ -281,7 +281,7 @@ const editStats = computed(() => {
               v-model="editDraft.telefone_cliente"
               type="text"
               placeholder="Ex.: (11) 99999-0000"
-              class="h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 outline-none transition focus:border-amber-500 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-200"
+              class="h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 outline-none transition focus:border-brand-500 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-200"
             >
           </label>
           <label class="space-y-1">
@@ -290,7 +290,7 @@ const editStats = computed(() => {
               v-model="editDraft.contato_id"
               type="text"
               placeholder="Ex.: CTT-000123"
-              class="h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 outline-none transition focus:border-amber-500 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-200"
+              class="h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 outline-none transition focus:border-brand-500 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-200"
             >
           </label>
         </div>
@@ -327,7 +327,7 @@ const editStats = computed(() => {
                   v-model="produto.nome"
                   type="text"
                   placeholder="Nome do item"
-                  class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-800 outline-none transition focus:border-amber-500 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-200"
+                  class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-800 outline-none transition focus:border-brand-500 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-200"
                 >
               </label>
               <label class="space-y-1 md:space-y-0">
@@ -338,7 +338,7 @@ const editStats = computed(() => {
                   min="0"
                   step="0.01"
                   placeholder="Ex.: 10"
-                  class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-800 outline-none transition focus:border-amber-500 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-200"
+                  class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-800 outline-none transition focus:border-brand-500 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-200"
                 >
               </label>
               <label class="space-y-1 md:space-y-0">
@@ -349,7 +349,7 @@ const editStats = computed(() => {
                   min="0"
                   step="0.01"
                   placeholder="Ex.: 3"
-                  class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-800 outline-none transition focus:border-amber-500 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-200"
+                  class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-800 outline-none transition focus:border-brand-500 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-200"
                 >
               </label>
               <label class="space-y-1 md:space-y-0">
@@ -360,7 +360,7 @@ const editStats = computed(() => {
                   min="1"
                   step="1"
                   placeholder="Ex.: 1024"
-                  class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-800 outline-none transition focus:border-amber-500 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-200"
+                  class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-800 outline-none transition focus:border-brand-500 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-200"
                 >
               </label>
               <button
@@ -386,9 +386,9 @@ const editStats = computed(() => {
           <div class="relative">
             <div class="mb-8 flex items-center justify-between border-b border-slate-100 pb-6 dark:border-white/5">
               <div>
-                <h4 class="text-xs font-black uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">Dossiê de Origem</h4>
+                <h4 class="text-xs font-black uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">ID DA NOTA:</h4>
                 <div class="mt-2 flex items-center gap-3">
-                  <span class="text-3xl font-black tracking-tighter text-slate-900 dark:text-white">#{{ nota.numero_nota }}</span>
+                  <span class="text-3xl font-black tracking-tighter text-slate-900 dark:text-white">{{ nota.numero_nota }}</span>
                   <NotasStatusBadge :status="nota.status_retirada" />
                 </div>
               </div>
@@ -402,7 +402,7 @@ const editStats = computed(() => {
               <div class="space-y-6">
                 <!-- Titular -->
                 <div class="flex items-center gap-5">
-                  <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-3xl bg-brand-500/10 text-brand-500">
+                  <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-3xl bg-slate-500/10 text-slate-500">
                     <UserRound class="h-7 w-7" />
                   </div>
                   <div class="min-w-0">
@@ -419,7 +419,7 @@ const editStats = computed(() => {
               <div class="space-y-6">
                 <!-- Registro -->
                 <div class="flex items-center gap-5">
-                  <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-3xl bg-amber-500/10 text-amber-500">
+                  <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-3xl bg-slate-500/10 text-slate-500">
                     <Calendar class="h-7 w-7" />
                   </div>
                   <div>
@@ -473,8 +473,8 @@ const editStats = computed(() => {
                     <p class="text-xs font-black text-emerald-600 tracking-tight">{{ toNumber(produto.quantidade_retirada) || 0 }}</p>
                   </div>
                   <div>
-                    <p class="text-[10px] font-bold uppercase tracking-widest text-amber-500">Saldo</p>
-                    <p class="text-xs font-black text-amber-600 tracking-tight">{{ saldoItem(produto) }}</p>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-brand-500">Saldo</p>
+                    <p class="text-xs font-black text-brand-600 tracking-tight">{{ saldoItem(produto) }}</p>
                   </div>
                 </div>
               </div>
@@ -596,7 +596,7 @@ const editStats = computed(() => {
     <div class="sticky bottom-3 z-30 pt-2">
       <NuxtLink
         :to="`/notas/${nota.id}/retirada`"
-        class="group flex w-full items-center justify-center gap-3 rounded-[2.5rem] bg-amber-600 py-5 text-lg font-black text-white transition-all hover:bg-amber-500 active:scale-95"
+        class="group flex w-full items-center justify-center gap-3 rounded-[2.5rem] bg-brand-600 py-5 text-lg font-black text-white transition-all hover:bg-brand-500 active:scale-95"
       >
         Efetuar Retirada
         <ArrowRight class="h-6 w-6 transition-transform group-hover:translate-x-1" />

@@ -69,12 +69,12 @@ const formatCurrency = (value: number | null | undefined) => {
         >
           <div class="flex flex-col">
             <span class="text-sm font-bold text-slate-900 dark:text-white">{{ nota.serie_nota }}-{{ nota.numero_nota }}</span>
-            <span class="text-[10px] text-slate-400 dark:text-slate-500">Ref: {{ nota.id.slice(0, 8) }}</span>
+            <span class="text-[10px] text-slate-400 dark:text-slate-500">ID: {{ nota.numero_nota }}</span>
           </div>
 
           <div class="flex flex-col truncate">
             <span class="truncate text-sm font-semibold text-slate-700 dark:text-slate-300">{{ nota.nome_cliente }}</span>
-            <span class="text-[10px] text-slate-400 dark:text-slate-500">Filial: {{ nota.serie_nota }}</span>
+            <span class="text-[10px] text-slate-400 dark:text-slate-500">Serie: {{ nota.serie_nota }}</span>
           </div>
 
           <div class="text-sm font-medium text-slate-600 dark:text-slate-400">
@@ -95,7 +95,7 @@ const formatCurrency = (value: number | null | undefined) => {
               :href="nota.foto_url"
               target="_blank"
               rel="noopener noreferrer"
-              class="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-400 transition-all hover:border-amber-500 hover:bg-amber-500 hover:text-white dark:border-white/10 dark:hover:border-amber-500"
+              class="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-400 transition-all hover:border-brand-500 hover:bg-brand-500 hover:text-white dark:border-white/10 dark:hover:border-brand-500"
               title="Ver cupom"
               @click.stop
             >

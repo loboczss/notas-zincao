@@ -21,7 +21,7 @@ const emit = defineEmits<{
     <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Validacao</p>
     <h2 class="mt-2 text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Salvar nota</h2>
 
-    <div v-if="props.duplicateNota" class="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-900/50 dark:bg-amber-500/10 dark:text-amber-200">
+    <div v-if="props.duplicateNota" class="mt-4 rounded-2xl border border-brand-200 bg-brand-50 p-4 text-sm text-brand-800 dark:border-brand-900/50 dark:bg-brand-500/10 dark:text-brand-200">
       Duplicidade encontrada: nota {{ props.duplicateNota.serie_nota }}-{{ props.duplicateNota.numero_nota }} ja cadastrada para {{ props.duplicateNota.nome_cliente }}.
     </div>
 

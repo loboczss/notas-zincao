@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { storeToRefs } from 'pinia'
 import { $fetch } from 'ofetch'
 import {
   ReceiptText,
@@ -13,7 +12,6 @@ import {
   AlertCircle
 } from 'lucide-vue-next'
 import Botao from '../Botao.vue'
-import { useNotasStore } from '../../stores'
 
 type DashboardProduto10Response = {
   success: boolean
@@ -28,57 +26,59 @@ type DashboardProduto10Response = {
   }
 }
 
-const notasStore = useNotasStore()
-const { notas, loadingNotas, errorMessage } = storeToRefs(notasStore)
+type DashboardNotasResumoResponse = {
+  success: boolean
+  resumo: {
+    total_notas: number
+    pendentes: number
+    parciais: number
+    retiradas: number
+    canceladas: number
+    pecas_compradas: number
+    pecas_entregues: number
+    pecas_pendentes: number
+    percentual_entrega: number
+  }
+}
+
+const loadingResumo = ref(false)
+const errorMessage = ref('')
+const resumoNotas = ref<DashboardNotasResumoResponse['resumo'] | null>(null)
 const produtoId10 = ref<DashboardProduto10Response['produto'] | null>(null)
 const loadingProdutoId10 = ref(false)
 
-// Helper para converter string em número com segurança
-const toNumber = (val: any) => {
-  if (typeof val === 'number') return val
-  if (!val) return 0
-  const n = parseFloat(String(val).replace(',', '.'))
-  return isNaN(n) ? 0 : n
-}
-
 const metricas = computed(() => {
-  const totalNotas = notas.value.length
-  
-  // Status das Notas
-  const notasRetiradas = notas.value.filter(item => item.status_retirada === 'retirada').length
-  const notasParciais = notas.value.filter(item => item.status_retirada === 'parcial').length
-  const notasPendentes = notas.value.filter(item => item.status_retirada === 'pendente').length
-  
-  // Volume Físico (Soma de Peças)
-  let pecasCompradas = 0
-  let pecasEntregues = 0
-  notas.value.forEach(nota => {
-    if (nota.produtos && Array.isArray(nota.produtos)) {
-      nota.produtos.forEach((p: any) => {
-        const quantidade = toNumber(p.quantidade)
-        const retirada = toNumber(p.quantidade_retirada)
-
-        pecasCompradas += quantidade
-        pecasEntregues += retirada
-      })
-    }
-  })
-
-  const pecasCompradasRounded = Math.round(pecasCompradas * 100) / 100
-  const pecasEntreguesRounded = Math.round(pecasEntregues * 100) / 100
-  const percentualEntrega = pecasCompradas > 0 ? Math.round((pecasEntregues / pecasCompradas) * 100) : 0
+  const resumo = resumoNotas.value
 
   return {
-    totalNotas,
-    notasRetiradas,
-    notasParciais,
-    notasPendentes,
-    pecasCompradas: pecasCompradasRounded,
-    pecasEntregues: pecasEntreguesRounded,
-    pecasPendentes: Math.max(0, Math.round((pecasCompradas - pecasEntregues) * 100) / 100),
-    percentualEntrega
+    totalNotas: Number(resumo?.total_notas || 0),
+    notasRetiradas: Number(resumo?.retiradas || 0),
+    notasParciais: Number(resumo?.parciais || 0),
+    notasPendentes: Number(resumo?.pendentes || 0),
+    pecasCompradas: Number(resumo?.pecas_compradas || 0),
+    pecasEntregues: Number(resumo?.pecas_entregues || 0),
+    pecasPendentes: Number(resumo?.pecas_pendentes || 0),
+    percentualEntrega: Number(resumo?.percentual_entrega || 0),
   }
 })
+
+const carregarResumoNotas = async () => {
+  loadingResumo.value = true
+  errorMessage.value = ''
+
+  try {
+    const response = await $fetch<DashboardNotasResumoResponse>('/api/dashboard/notas-resumo')
+    resumoNotas.value = response?.resumo || null
+  }
+  catch (error) {
+    console.error('[dashboard/notas-resumo]', error)
+    resumoNotas.value = null
+    errorMessage.value = error instanceof Error ? error.message : 'Falha ao carregar resumo de notas.'
+  }
+  finally {
+    loadingResumo.value = false
+  }
+}
 
 const metricasProdutoId10 = computed(() => {
   const produto = produtoId10.value
@@ -111,7 +111,7 @@ const carregarProdutoId10 = async () => {
 
 const carregarMetricas = async () => {
   await Promise.all([
-    notasStore.fetchNotas(),
+    carregarResumoNotas(),
     carregarProdutoId10(),
   ])
 }
@@ -140,9 +140,9 @@ onMounted(() => {
         </div>
       </div>
 
-      <Botao variant="secondary" :disabled="loadingNotas" class="rounded-2xl" @click="carregarMetricas">
-        <RefreshCw class="h-4 w-4" :class="loadingNotas ? 'animate-spin' : ''" />
-        <span class="ml-2">{{ loadingNotas ? 'Atualizando...' : 'Atualizar Dados' }}</span>
+      <Botao variant="secondary" :disabled="loadingResumo" class="rounded-2xl" @click="carregarMetricas">
+        <RefreshCw class="h-4 w-4" :class="loadingResumo ? 'animate-spin' : ''" />
+        <span class="ml-2">{{ loadingResumo ? 'Atualizando...' : 'Atualizar Dados' }}</span>
       </Botao>
     </div>
 
@@ -169,12 +169,12 @@ onMounted(() => {
       </div>
 
       <div class="glass-card flex flex-col gap-4 rounded-[2.5rem] border p-6 dark:border-white/5 dark:bg-white/[0.02]">
-        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-500">
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-500/10 text-brand-500">
           <Truck class="h-6 w-6" />
         </div>
         <div>
           <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Parciais</span>
-          <div class="mt-1 text-3xl font-black text-amber-600 dark:text-amber-400">{{ metricas.notasParciais }}</div>
+          <div class="mt-1 text-3xl font-black text-brand-600 dark:text-brand-400">{{ metricas.notasParciais }}</div>
         </div>
       </div>
 
@@ -203,8 +203,8 @@ onMounted(() => {
 
         <div v-else class="mt-3 grid grid-cols-2 gap-3 text-xs md:grid-cols-4">
           <div>
-            <p class="font-black uppercase tracking-wider text-amber-500">Saldo em Estoque</p>
-            <p class="text-base font-black text-amber-600 dark:text-amber-400">{{ metricasProdutoId10.saldoEstoque }}</p>
+            <p class="font-black uppercase tracking-wider text-brand-500">Saldo em Estoque</p>
+            <p class="text-base font-black text-brand-600 dark:text-brand-400">{{ metricasProdutoId10.saldoEstoque }}</p>
           </div>
           <div>
             <p class="font-black uppercase tracking-wider text-slate-400">Notas Pendentes</p>
@@ -297,7 +297,7 @@ onMounted(() => {
 
         <div class="space-y-4">
           <div class="flex items-center gap-4 rounded-3xl border border-slate-100 p-5 dark:border-white/5">
-            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-500">
+            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-500/10 text-brand-500">
               <Box class="h-6 w-6" />
             </div>
             <div>

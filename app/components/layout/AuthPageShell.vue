@@ -30,7 +30,7 @@ onMounted(() => {
     <div class="bg-mesh-light dark:bg-mesh-dark bg-[length:400%_400%] animate-mesh absolute inset-0 z-0 opacity-100 dark:opacity-80 transition-colors duration-1000" />
 
     <!-- Subtle Glow Elements -->
-    <div class="absolute top-1/4 left-1/4 h-96 w-96 rounded-full bg-amber-500/10 blur-[128px] dark:bg-amber-500/20 animate-pulse pointer-events-none" />
+    <div class="absolute top-1/4 left-1/4 h-96 w-96 rounded-full bg-brand-500/10 blur-[128px] dark:bg-brand-500/20 animate-pulse pointer-events-none" />
     <div class="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-blue-500/10 blur-[128px] dark:bg-blue-500/20 animate-pulse pointer-events-none" style="animation-delay: 2s;" />
 
     <section

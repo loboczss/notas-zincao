@@ -39,11 +39,11 @@ const togglePreference = () => {
   >
     <Sun
       v-if="mounted && isDark"
-      class="absolute h-5 w-5 text-amber-500"
+      class="absolute h-5 w-5 text-brand-500"
     />
     <Moon
       v-else-if="mounted"
-      class="absolute h-5 w-5 text-amber-400"
+      class="absolute h-5 w-5 text-brand-400"
     />
   </button>
 </template>

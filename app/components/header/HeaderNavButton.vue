@@ -23,7 +23,7 @@ const buttonClass = computed(() => {
   }
 
   if (props.active) {
-    return 'bg-amber-600 text-white shadow-md shadow-amber-500/20 dark:bg-amber-500 dark:shadow-amber-500/10'
+    return 'bg-brand-600 text-white shadow-md shadow-brand-500/20 dark:bg-brand-500 dark:shadow-brand-500/10'
   }
 
   return 'text-slate-700 hover:bg-slate-100/60 dark:text-slate-300 dark:hover:bg-slate-800/40 hover:shadow-sm'

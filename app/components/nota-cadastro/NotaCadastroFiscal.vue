@@ -73,7 +73,7 @@ const emit = defineEmits<{
         <textarea
           :value="props.observacoes"
           rows="5"
-          class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition-colors focus:border-amber-400 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+          class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition-colors focus:border-brand-400 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
           placeholder="Avisos da IA, conferencias e observacoes adicionais"
           @input="emit('update:observacoes', ($event.target as HTMLTextAreaElement).value)"
         />

@@ -71,7 +71,7 @@ defineExpose({
     >
       <div
         v-if="aberto"
-        class="absolute right-0 z-40 mt-2 rounded-3xl border border-white/40 bg-white/80 p-2 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/80 dark:shadow-black/60"
+        class="absolute right-0 z-40 mt-3 rounded-2xl border border-white/40 bg-white/80 p-2 shadow-[0_20px_50px_rgba(0,0,0,0.15)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/90 dark:shadow-black/60"
         :class="props.widthClass"
       >
         <slot :fechar="fechar" />
