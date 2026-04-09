@@ -190,60 +190,142 @@ onMounted(() => {
 
     </div>
 
-    <!-- Card específico do Produto ID 10 (separado para não afetar o grid principal) -->
-    <div class="glass-card rounded-[2.5rem] border p-6 dark:border-white/5 dark:bg-white/[0.02]">
-      <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-500/10 text-brand-500">
-        <Box class="h-6 w-6" />
-      </div>
-      <div class="mt-4">
-        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Produto ID {{ metricasProdutoId10.id }} (Estoque)</span>
-        <div class="mt-1 text-lg font-black text-slate-900 dark:text-white">{{ metricasProdutoId10.nome }}</div>
-
-        <div v-if="loadingProdutoId10" class="mt-3 text-xs font-bold text-slate-400">Carregando dados da tabela de estoque...</div>
-
-        <div v-else class="mt-3 grid grid-cols-2 gap-3 text-xs md:grid-cols-4">
-          <div>
-            <p class="font-black uppercase tracking-wider text-brand-500">Saldo em Estoque</p>
-            <p class="text-base font-black text-brand-600 dark:text-brand-400">{{ metricasProdutoId10.saldoEstoque }}</p>
-          </div>
-          <div>
-            <p class="font-black uppercase tracking-wider text-slate-400">Notas Pendentes</p>
-            <p class="text-base font-black text-slate-800 dark:text-slate-200">{{ metricasProdutoId10.notasPendentes }}</p>
-          </div>
-          <div>
-            <p class="font-black uppercase tracking-wider text-slate-400">Filhos Considerados</p>
-            <p class="text-base font-black text-slate-800 dark:text-slate-200">{{ metricasProdutoId10.quantidadeFilhos }}</p>
-          </div>
-          <div>
-            <p class="font-black uppercase tracking-wider text-slate-400">Comprometido</p>
-            <p class="text-base font-black text-slate-800 dark:text-slate-200">{{ metricasProdutoId10.percentualComprometido }}%</p>
+    <!-- Painel de Controle de Zinco: Foco Industrial e Precisão Operacional -->
+    <div class="glass-card group relative overflow-hidden rounded-[3rem] border border-white/40 bg-white/40 shadow-2xl transition-all duration-500 hover:shadow-brand-500/10 dark:border-white/5 dark:bg-white/[0.02]">
+      <!-- Efeito Glow de Fundo -->
+      <div class="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-brand-500/5 blur-[100px] transition-opacity duration-700 group-hover:opacity-100" />
+      
+      <div class="relative p-8 md:p-10">
+        <!-- Header do Painel -->
+        <div class="flex flex-wrap items-center justify-between gap-6">
+          <div class="flex items-center gap-5">
+            <div class="flex h-16 w-16 items-center justify-center rounded-[2rem] bg-gradient-to-br from-brand-400 to-brand-600 text-white shadow-lg shadow-brand-500/20">
+              <Box class="h-8 w-8" />
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Controle de Estoque Prioritário</span>
+                <span class="flex h-5 items-center rounded-full bg-brand-500/10 px-2.5 text-[10px] font-black uppercase tracking-widest text-brand-600 dark:text-brand-400">ID {{ metricasProdutoId10.id }}</span>
+              </div>
+              <h2 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">{{ metricasProdutoId10.nome }}</h2>
+            </div>
           </div>
 
-          <div class="col-span-2 md:col-span-4">
-            <p class="font-black uppercase tracking-wider text-slate-400">Quantidade total de zinco em notas pendentes</p>
-            <p class="text-base font-black text-slate-800 dark:text-slate-200">{{ metricasProdutoId10.quantidadePendenteNotas }}</p>
+          <!-- Status de Saúde do Estoque -->
+          <div class="flex items-center gap-3 rounded-2xl bg-slate-100/50 px-5 py-3 dark:bg-white/[0.03]">
+            <div 
+              class="h-2.5 w-2.5 animate-pulse rounded-full"
+              :class="metricasProdutoId10.percentualComprometido > 90 ? 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]' : 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]'"
+            />
+            <span class="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
+              {{ metricasProdutoId10.percentualComprometido > 90 ? 'Estoque Crítico' : 'Fluxo Operacional Estável' }}
+            </span>
           </div>
         </div>
 
-        <div class="mt-4 rounded-2xl border border-brand-500/20 bg-brand-500/5 p-4">
-          <div class="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
-            <span class="text-brand-500">Progresso Estoque x Pendente</span>
-            <span class="text-brand-500">{{ metricasProdutoId10.percentualComprometido }}%</span>
+        <div v-if="loadingProdutoId10" class="mt-12 flex items-center justify-center py-10">
+          <div class="flex flex-col items-center gap-4">
+            <div class="h-10 w-10 animate-spin rounded-full border-4 border-brand-500 border-t-transparent" />
+            <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Sincronizando pátio...</p>
           </div>
-          <div class="mt-2 h-3 w-full overflow-hidden rounded-full bg-slate-200/70 dark:bg-white/10">
-            <div
-              class="h-full rounded-full bg-brand-500 transition-all duration-700"
-              :style="{ width: `${metricasProdutoId10.percentualComprometido}%` }"
-            />
-          </div>
-          <div class="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs font-bold">
-            <div>
-              <p class="uppercase tracking-wider text-slate-400">Total em estoque</p>
-              <p class="text-slate-900 dark:text-white">{{ metricasProdutoId10.saldoEstoque }}</p>
+        </div>
+
+        <div v-else class="mt-12 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_400px]">
+          <!-- Coluna 1: Barra de Progresso e Métricas de Volume -->
+          <div class="space-y-10">
+            <!-- Barra de Progresso Segmentada e Industrial -->
+            <div class="relative">
+              <div class="mb-4 flex items-end justify-between">
+                <div>
+                  <h3 class="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white">Ocupação Logística por Zinco</h3>
+                  <p class="text-xs font-bold text-slate-400">Volume vendido aguardando carregamento</p>
+                </div>
+                <div class="text-right">
+                  <span class="text-4xl font-black tracking-tighter text-brand-500">{{ metricasProdutoId10.percentualComprometido }}%</span>
+                  <span class="ml-1 text-[10px] font-black uppercase tracking-widest text-slate-400">Comprometido</span>
+                </div>
+              </div>
+
+              <!-- Container da Barra -->
+              <div class="relative h-10 w-full overflow-hidden rounded-3xl border border-slate-200 bg-slate-100 p-1.5 dark:border-white/5 dark:bg-white/[0.03]">
+                <!-- Gradiente de Fundo Metálico -->
+                <div class="absolute inset-0 bg-gradient-to-r from-slate-200/50 to-transparent dark:from-white/[0.02]" />
+                
+                <!-- Fill da Barra -->
+                <div
+                  class="relative h-full rounded-2xl bg-gradient-to-r from-brand-400 to-brand-600 shadow-lg shadow-brand-500/20 transition-all duration-1000 ease-out"
+                  :style="{ width: `${metricasProdutoId10.percentualComprometido}%` }"
+                >
+                  <!-- Efeito de Textura Industrial na Barra -->
+                  <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.2)_0%,_transparent_100%)] opacity-30" />
+                  <div class="absolute inset-y-0 right-0 w-[2px] bg-white/40 shadow-[0_0_15px_rgba(255,255,255,0.8)]" />
+                </div>
+              </div>
+
+              <!-- Marcadores de Referência -->
+              <div class="mt-3 flex justify-between px-1 text-[9px] font-black uppercase tracking-widest text-slate-400">
+                <span>0%</span>
+                <span>25%</span>
+                <span>50%</span>
+                <span>75%</span>
+                <span>100%</span>
+              </div>
             </div>
-            <div class="text-right">
-              <p class="uppercase tracking-wider text-slate-400">Pendente a entregar</p>
-              <p class="text-brand-500">{{ metricasProdutoId10.quantidadePendenteNotas }}</p>
+
+            <!-- Dashboard Interno de Volumes -->
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
+              <div class="rounded-[2rem] border border-slate-100 bg-slate-50/50 p-6 transition-colors hover:bg-slate-50 dark:border-white/5 dark:bg-white/[0.01]">
+                <span class="block text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Saldo Total em Pátio</span>
+                <span class="mt-2 block text-2xl font-black text-slate-900 dark:text-white">{{ metricasProdutoId10.saldoEstoque }} <span class="text-[10px] text-slate-400">m²</span></span>
+              </div>
+              <div class="rounded-[2rem] border border-brand-500/10 bg-brand-500/5 p-6 transition-colors hover:bg-brand-500/10">
+                <span class="block text-[10px] font-black uppercase tracking-[0.2em] text-brand-500">Pendente a Entregar</span>
+                <span class="mt-2 block text-2xl font-black text-brand-600 dark:text-brand-400">{{ metricasProdutoId10.quantidadePendenteNotas }} <span class="text-[10px] opacity-60">m²</span></span>
+              </div>
+              <div class="rounded-[2rem] border border-emerald-500/10 bg-emerald-500/5 p-6 transition-colors hover:bg-emerald-500/10">
+                <span class="block text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500 uppercase">Saldo Livre Real</span>
+                <span class="mt-2 block text-2xl font-black text-emerald-600 dark:text-emerald-400">
+                  {{ Math.max(0, metricasProdutoId10.saldoEstoque - metricasProdutoId10.quantidadePendenteNotas).toFixed(2) }}
+                  <span class="text-[10px] opacity-60">m²</span>
+                </span>
+                <p class="mt-1 text-[9px] font-bold text-emerald-500/60 uppercase">Disponível para venda</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Coluna 2: Métricas Secundárias e Cards de Operação -->
+          <div class="grid grid-cols-2 gap-4 lg:flex lg:flex-col lg:justify-between lg:border-l lg:border-slate-100 lg:pl-10 lg:dark:border-white/5">
+            <div class="flex items-center gap-4">
+              <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-white/5 dark:bg-white/[0.03]">
+                <ReceiptText class="h-5 w-5 text-slate-400" />
+              </div>
+              <div>
+                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Notas em Aberto</p>
+                <p class="text-xl font-black text-slate-900 dark:text-white">{{ metricasProdutoId10.notasPendentes }}</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+              <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-white/5 dark:bg-white/[0.03]">
+                <Box class="h-5 w-5 text-slate-400" />
+              </div>
+              <div>
+                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Filhos Vinculados</p>
+                <p class="text-xl font-black text-slate-900 dark:text-white">{{ metricasProdutoId10.quantidadeFilhos }}</p>
+              </div>
+            </div>
+
+            <!-- Card de Alerta/Ação Operacional -->
+            <div class="col-span-2 mt-4 rounded-3xl border border-slate-100 p-5 dark:border-white/5">
+              <div class="flex items-start gap-4">
+                <AlertCircle class="h-5 w-5 shrink-0 text-brand-500" />
+                <div>
+                  <h4 class="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">Leitura de Disponibilidade</h4>
+                  <p class="mt-1 text-[11px] font-bold leading-relaxed text-slate-400">
+                    O volume comprometido representa <span class="text-brand-500">{{ metricasProdutoId10.percentualComprometido }}%</span> do seu pátio atual de Telha Zinco.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -252,37 +334,49 @@ onMounted(() => {
 
     <!-- Seção de Peças e Volume Físico -->
     <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
-      <!-- Painel de Progresso Físico -->
-      <article class="flex flex-col justify-between rounded-[2.5rem] border border-slate-200 bg-white p-8 dark:border-white/5 dark:bg-slate-900">
+      <!-- Painel de Progresso Físico: Eficiência de Carregamento -->
+      <article class="flex flex-col justify-between rounded-[2.5rem] border border-slate-200 bg-white p-8 dark:border-white/5 dark:bg-slate-900 shadow-sm transition-all duration-300 hover:shadow-lg">
         <div>
-          <h3 class="text-xl font-black text-slate-900 dark:text-white">Eficiência de Entrega Física</h3>
-          <p class="mt-1 text-sm font-bold text-slate-400">Total de peças compradas vs. volume já retirado pelo cliente.</p>
+          <div class="flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500/10 text-brand-500">
+              <Truck class="h-5 w-5" />
+            </div>
+            <h3 class="text-xl font-black text-slate-900 dark:text-white">Eficiência de Entrega Física</h3>
+          </div>
+          <p class="mt-2 text-sm font-bold text-slate-400">Relação entre peças faturadas e volume já carregado.</p>
         </div>
 
         <div class="mt-10 space-y-6">
           <div class="flex items-end justify-between">
-            <div class="text-5xl font-black text-brand-500">{{ metricas.percentualEntrega }}%</div>
+            <div class="flex flex-col">
+              <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Status de Entrega</span>
+              <div class="text-5xl font-black tracking-tighter text-brand-500">{{ metricas.percentualEntrega }}%</div>
+            </div>
             <div class="text-right">
-              <span class="block text-[10px] font-black uppercase tracking-widest text-slate-400">Peças Pendentes</span>
-              <span class="text-2xl font-black text-slate-900 dark:text-white">{{ metricas.pecasPendentes }}</span>
+              <span class="block text-[10px] font-black uppercase tracking-widest text-slate-400">Restante a Entregar</span>
+              <span class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">{{ metricas.pecasPendentes }} <span class="text-xs text-slate-400">UN</span></span>
             </div>
           </div>
 
-          <div class="h-4 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-white/5">
+          <!-- Barra de Progresso Robusta -->
+          <div class="relative h-6 w-full overflow-hidden rounded-2xl bg-slate-100 p-1 dark:bg-white/5">
             <div 
-              class="h-full rounded-full bg-brand-500 transition-all duration-1000" 
+              class="relative h-full rounded-xl bg-gradient-to-r from-brand-400 to-brand-600 shadow-md shadow-brand-500/10 transition-all duration-1000 ease-out" 
               :style="{ width: `${metricas.percentualEntrega}%` }"
-            />
+            >
+              <!-- Textura Industrial -->
+              <div class="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.1)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.1)_50%,rgba(255,255,255,0.1)_75%,transparent_75%,transparent)] bg-[length:20px_20px] opacity-20" />
+            </div>
           </div>
 
           <div class="grid grid-cols-2 gap-4 pt-4">
-            <div class="rounded-3xl border border-slate-100 bg-slate-50/50 p-4 dark:border-white/5 dark:bg-white/[0.02]">
-              <span class="block text-[10px] font-black uppercase tracking-widest text-slate-400">Total Vendido</span>
-              <span class="text-xl font-black text-slate-700 dark:text-slate-300">{{ metricas.pecasCompradas }}</span>
+            <div class="rounded-3xl border border-slate-100 bg-slate-50/50 p-5 transition-colors hover:bg-slate-100 dark:border-white/5 dark:bg-white/[0.02]">
+              <span class="block text-[10px] font-black uppercase tracking-widest text-slate-400">Volume Total</span>
+              <span class="text-2xl font-black text-slate-700 dark:text-slate-300">{{ metricas.pecasCompradas }} <span class="text-[10px] opacity-50">PCS</span></span>
             </div>
-            <div class="rounded-3xl border border-emerald-500/10 bg-emerald-500/5 p-4 dark:border-white/5 dark:bg-emerald-500/5">
-              <span class="block text-[10px] font-black uppercase tracking-widest text-emerald-500">Total Entregue</span>
-              <span class="text-xl font-black text-emerald-600 dark:text-emerald-400">{{ metricas.pecasEntregues }}</span>
+            <div class="rounded-3xl border border-emerald-500/10 bg-emerald-500/5 p-5 transition-colors hover:bg-emerald-500/10 dark:border-white/5 dark:bg-emerald-500/5">
+              <span class="block text-[10px] font-black uppercase tracking-widest text-emerald-500">Já Entregue</span>
+              <span class="text-2xl font-black text-emerald-600 dark:text-emerald-400">{{ metricas.pecasEntregues }} <span class="text-[10px] opacity-50">PCS</span></span>
             </div>
           </div>
         </div>
