@@ -26,7 +26,7 @@ const irParaIndex = async () => {
       <img
         src="/logomarca.png"
         alt="Notas ZINCÃO"
-        class="relative h-9 w-auto object-contain drop-shadow-[0_0_3px_rgba(2,6,23,0.70)] drop-shadow-[0_4px_14px_rgba(2,6,23,0.50)] drop-shadow-[0_6px_18px_rgba(254,199,20,0.35)] dark:drop-shadow-[0_3px_14px_rgba(255,255,255,0.15)] md:h-10"
+        class="relative h-9 w-auto object-contain drop-shadow-[0_0_3px_rgba(2,6,23,0.70),0_4px_14px_rgba(2,6,23,0.50),0_6px_18px_rgba(254,199,20,0.35)] dark:drop-shadow-[0_3px_14px_rgba(255,255,255,0.15)] md:h-10"
       >
     </div>
   </button>

@@ -283,7 +283,7 @@ onMounted(() => {
                 <span class="mt-2 block text-2xl font-black text-brand-600 dark:text-brand-400">{{ metricasProdutoId10.quantidadePendenteNotas }} <span class="text-[10px] opacity-60">m²</span></span>
               </div>
               <div class="rounded-[2rem] border border-emerald-500/10 bg-emerald-500/5 p-6 transition-colors hover:bg-emerald-500/10">
-                <span class="block text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500 uppercase">Saldo Livre Real</span>
+                <span class="block text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500">Saldo Livre Real</span>
                 <span class="mt-2 block text-2xl font-black text-emerald-600 dark:text-emerald-400">
                   {{ Math.max(0, metricasProdutoId10.saldoEstoque - metricasProdutoId10.quantidadePendenteNotas).toFixed(2) }}
                   <span class="text-[10px] opacity-60">m²</span>

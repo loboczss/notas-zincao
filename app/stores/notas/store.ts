@@ -207,11 +207,82 @@ export const useNotasStore = defineStore('notas', () => {
     }
   }
 
+  const loadingLixeira = ref(false)
+  const loadingHistorico = ref(false)
+  const lixeira = ref<NotaRetiradaListItem[]>([])
+  const historicoAtual = ref<any[]>([])
+
+  const fetchLixeira = async () => {
+    loadingLixeira.value = true
+    clearError()
+
+    try {
+      const data = await $fetch<{
+        success: boolean
+        notas: NotaRetiradaListItem[]
+      }>('/api/notas/lixeira')
+
+      lixeira.value = data.notas || []
+      return lixeira.value
+    }
+    catch (error) {
+      errorMessage.value = error instanceof Error ? error.message : 'Falha ao carregar a lixeira.'
+      return []
+    }
+    finally {
+      loadingLixeira.value = false
+    }
+  }
+
+  const fetchHistorico = async (notaId: string) => {
+    loadingHistorico.value = true
+    clearError()
+
+    try {
+      const data = await $fetch<{
+        success: boolean
+        historico: any[]
+      }>(`/api/notas/${notaId}/historico`)
+
+      historicoAtual.value = data.historico || []
+      return historicoAtual.value
+    }
+    catch (error) {
+      errorMessage.value = error instanceof Error ? error.message : 'Falha ao carregar o histórico da nota.'
+      return []
+    }
+    finally {
+      loadingHistorico.value = false
+    }
+  }
+
+  const deleteNota = async (notaId: string) => {
+    clearError()
+
+    try {
+      const data = await $fetch<{ success: boolean }>(`/api/notas/${notaId}/delete`, {
+        method: 'DELETE',
+      })
+      
+      // Remove from current list after soft delete
+      notas.value = notas.value.filter(n => n.id !== notaId)
+      return data.success
+    }
+    catch (error) {
+      errorMessage.value = error instanceof Error ? error.message : 'Falha ao excluir a nota.'
+      return false
+    }
+  }
+
   return {
     notas,
     notasRetirada,
+    lixeira,
+    historicoAtual,
     loadingNotas,
     loadingRetirada,
+    loadingLixeira,
+    loadingHistorico,
     extractingNota,
     creatingNota,
     savingRetirada,
@@ -223,9 +294,12 @@ export const useNotasStore = defineStore('notas', () => {
     clearError,
     fetchNotas,
     fetchNotasRetirada,
+    fetchLixeira,
+    fetchHistorico,
     extractNota,
     createNota,
     registrarRetirada,
     atualizarStatusNota,
+    deleteNota,
   }
 })

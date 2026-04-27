@@ -128,7 +128,7 @@ export const notasStatusPatchHandler = defineEventHandler(async (event) => {
     .from('notas_retirada')
     .update(payload)
     .eq('id', id)
-    .select('id, status_retirada, data_retirada, historico_retiradas, atualizado_em')
+    .select()
     .single()
 
   if (error) {
@@ -145,6 +145,15 @@ export const notasStatusPatchHandler = defineEventHandler(async (event) => {
       statusMessage: 'Nota não encontrada.',
     })
   }
+
+  await (client as any)
+    .from('notas_historico_edicao')
+    .insert({
+      nota_id: id,
+      user_id: authUid,
+      dados_anteriores: notaAtual,
+      dados_novos: payload
+    })
 
   return {
     success: true,

@@ -306,6 +306,7 @@ export default defineEventHandler(async (event) => {
   let req = (client as any)
     .from('notas_retirada')
     .select('id, nome_cliente, numero_nota, serie_nota, data_compra, data_retirada, valor_total, status_retirada, produtos')
+    .is('deleted_at', null)
     .order('criado_em', { ascending: false })
 
   if ((allowedStatus as readonly string[]).includes(status)) req = req.eq('status_retirada', status)

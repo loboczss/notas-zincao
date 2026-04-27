@@ -6,7 +6,7 @@ export default {
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { LayoutDashboard, FilePlus2, FileText, Boxes } from 'lucide-vue-next'
+import { LayoutDashboard, FilePlus2, FileText, Boxes, Trash2 } from 'lucide-vue-next'
 import { useRoute } from 'vue-router'
 import Logo from './Logo.vue'
 import NavLink from './NavLink.vue'
@@ -64,6 +64,9 @@ onUnmounted(() => {
         </NavLink>
         <NavLink to="/cadastrar-nota" :active="isActive('/cadastrar-nota')" :icon="FilePlus2">
           Cadastrar
+        </NavLink>
+        <NavLink to="/admin/lixeira" :active="isActive('/admin/lixeira')" :icon="Trash2">
+          Auditoria
         </NavLink>
       </nav>
 

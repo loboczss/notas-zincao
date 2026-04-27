@@ -1,3 +1,15 @@
+export type NotaHistoricoEdicao = {
+  id: string
+  nota_id: string
+  user_id: string | null
+  created_at: string
+  dados_anteriores: Record<string, any> | null
+  dados_novos: Record<string, any> | null
+  profiles?: {
+    nome: string | null
+  }
+}
+
 export type NotaProduto = {
   nome: string
   quantidade?: number

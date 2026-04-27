@@ -18,6 +18,8 @@ const pageTitle = computed(() => {
   if (path === '/estoque') return 'Estoque'
   if (path === '/cadastrar-nota') return 'Cadastrar Nota'
   if (path === '/profile') return 'Perfil'
+  if (path === '/admin/lixeira') return 'Lixeira de Auditoria'
+  if (path.includes('/historico')) return 'Histórico de Auditoria'
 
   return 'Notas Zincao'
 })

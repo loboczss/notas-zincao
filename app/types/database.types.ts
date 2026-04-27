@@ -58,6 +58,8 @@ export type Database = {
           criado_em: string
           atualizado_em: string
           historico_retiradas: NotaRetiradaHistoricoItem[] | null
+          deleted_at: string | null
+          deleted_by: string | null
         }
         Insert: {
           id?: string
@@ -84,6 +86,8 @@ export type Database = {
           criado_em?: string
           atualizado_em?: string
           historico_retiradas?: NotaRetiradaHistoricoItem[] | null
+          deleted_at?: string | null
+          deleted_by?: string | null
         }
         Update: {
           id?: string
@@ -110,6 +114,34 @@ export type Database = {
           criado_em?: string
           atualizado_em?: string
           historico_retiradas?: NotaRetiradaHistoricoItem[] | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+        }
+      }
+      notas_historico_edicao: {
+        Row: {
+          id: string
+          nota_id: string
+          user_id: string | null
+          created_at: string | null
+          dados_anteriores: unknown | null
+          dados_novos: unknown | null
+        }
+        Insert: {
+          id?: string
+          nota_id: string
+          user_id?: string | null
+          created_at?: string | null
+          dados_anteriores?: unknown | null
+          dados_novos?: unknown | null
+        }
+        Update: {
+          id?: string
+          nota_id?: string
+          user_id?: string | null
+          created_at?: string | null
+          dados_anteriores?: unknown | null
+          dados_novos?: unknown | null
         }
       }
       crm_zincao: {
@@ -247,6 +279,18 @@ export type Database = {
           foto_perfil?: string | null
         }
       }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }
