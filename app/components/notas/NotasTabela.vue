@@ -49,13 +49,13 @@ const formatCurrency = (value: number | null | undefined) => {
       <div class="hidden md:block">
         <div class="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden dark:border-slate-800 dark:bg-slate-900">
           <!-- Header -->
-          <div class="grid grid-cols-[100px_1fr_120px_120px_140px_80px] items-center gap-4 border-b border-slate-200 bg-slate-50 px-6 py-3 dark:border-slate-800 dark:bg-slate-800/50">
+          <div class="grid grid-cols-[100px_1fr_120px_120px_140px] items-center gap-4 border-b border-slate-200 bg-slate-50 px-6 py-3 dark:border-slate-800 dark:bg-slate-800/50">
             <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Nº Nota</span>
             <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Cliente</span>
             <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Data</span>
             <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Valor</span>
             <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Status</span>
-            <span class="text-right text-xs font-medium text-slate-500 dark:text-slate-400">Ação</span>
+
           </div>
 
           <!-- Rows -->
@@ -63,7 +63,7 @@ const formatCurrency = (value: number | null | undefined) => {
             <div
               v-for="nota in props.notas"
               :key="nota.id"
-              class="group grid grid-cols-[100px_1fr_120px_120px_140px_80px] items-center gap-4 px-6 py-3 transition-colors hover:bg-slate-50 cursor-pointer dark:hover:bg-slate-800/50"
+              class="group grid grid-cols-[100px_1fr_120px_120px_140px] items-center gap-4 px-6 py-3 transition-colors hover:bg-slate-50 cursor-pointer dark:hover:bg-slate-800/50"
               @click="emit('open', nota.id)"
             >
               <div class="flex flex-col">
@@ -87,22 +87,7 @@ const formatCurrency = (value: number | null | undefined) => {
                 <NotasStatusBadge :status="nota.status_retirada" />
               </div>
 
-              <div class="flex justify-end">
-                <a
-                  v-if="nota.foto_url"
-                  :href="nota.foto_url"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 text-slate-400 transition-colors hover:border-brand-500 hover:bg-brand-50 hover:text-brand-600 dark:border-slate-700 dark:hover:border-brand-500 dark:hover:bg-brand-500/10 dark:hover:text-brand-400"
-                  title="Ver cupom"
-                  @click.stop
-                >
-                  <ReceiptText class="h-4 w-4" />
-                </a>
-                <div v-else class="flex h-8 items-center text-xs text-slate-400">
-                  -
-                </div>
-              </div>
+
             </div>
           </div>
         </div>

@@ -14,11 +14,16 @@ const emit = defineEmits<{
 
 <template>
   <div class="relative pb-4 last:pb-0 font-sans">
-    <div class="absolute -left-[17px] top-1 flex h-2 w-2 items-center justify-center rounded-full bg-emerald-500" />
+    <div 
+      class="absolute -left-[17px] top-1 flex h-2 w-2 items-center justify-center rounded-full"
+      :class="item.itens_retirados?.length ? 'bg-emerald-500' : 'bg-amber-500'" 
+    />
     
     <div class="space-y-1">
       <span class="block text-[10px] font-medium text-slate-400">{{ formatDateTime(item.data) }}</span>
-      <p class="text-xs font-semibold text-slate-900 dark:text-white">Retirada Efetuada</p>
+      <p class="text-xs font-semibold text-slate-900 dark:text-white">
+        {{ item.itens_retirados?.length ? 'Retirada Efetuada' : 'Edição dos Dados' }}
+      </p>
       
       <div class="rounded-lg border border-slate-100 bg-slate-50 p-2 text-xs dark:border-slate-800 dark:bg-slate-950">
         <p class="text-[10px] text-slate-500 font-medium">Por: {{ item.responsavel_nome || 'Sistema' }}</p>

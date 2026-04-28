@@ -62,17 +62,7 @@ const valorFormatado = computed(() => {
         </span>
 
         <div class="flex gap-2">
-          <a
-            v-if="nota.foto_url"
-            :href="nota.foto_url"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="flex h-8 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-            @click.stop
-          >
-            <ReceiptText class="h-3.5 w-3.5" />
-            <span>Cupom</span>
-          </a>
+
           <button
             class="flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
           >

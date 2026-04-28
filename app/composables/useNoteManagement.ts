@@ -1,13 +1,17 @@
 
+import { ref, computed } from 'vue'
 import { useNotasStore } from '../stores'
 import type { NotaRetiradaDraft, NotaMissingField } from '../../shared/types/NotasRetirada'
+import { useToast } from './useToast'
 
 export const useNoteManagement = () => {
   const notasStore = useNotasStore()
+  const { success: showSuccess, error: showError } = useToast()
   
   const loadingIA = ref(false)
   const lastError = ref('')
   const lastSuccess = ref('')
+
 
   const clearMessages = () => {
     lastError.value = ''
@@ -26,9 +30,12 @@ export const useNoteManagement = () => {
         method: 'POST',
         body: { imageDataUrl },
       })
+      showSuccess('Imagem processada com sucesso!', 'IA')
       return data
     } catch (error) {
-      lastError.value = error instanceof Error ? error.message : 'Falha ao processar imagem.'
+      const msg = error instanceof Error ? error.message : 'Falha ao processar imagem.'
+      lastError.value = msg
+      showError(msg, 'Erro na IA')
       return null
     } finally {
       loadingIA.value = false
@@ -42,13 +49,18 @@ export const useNoteManagement = () => {
         method: 'POST',
         body: nota,
       })
-      lastSuccess.value = 'Nota cadastrada com sucesso!'
+      const msg = 'Nota cadastrada com sucesso!'
+      lastSuccess.value = msg
+      showSuccess(msg)
       return true
     } catch (error) {
-      lastError.value = error instanceof Error ? error.message : 'Falha ao salvar nota.'
+      const msg = error instanceof Error ? error.message : 'Falha ao salvar nota.'
+      lastError.value = msg
+      showError(msg)
       return false
     }
   }
+
 
   return {
     loadingIA,

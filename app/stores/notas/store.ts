@@ -1,6 +1,8 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { $fetch } from 'ofetch'
+import { useToast } from '../../composables/useToast'
+
 import type {
   NotaExtractionResponse,
   NotaRetiradaDraft,
@@ -22,6 +24,8 @@ type NotasListFilters = {
 export const useNotasStore = defineStore('notas', () => {
   const notas = ref<NotaRetiradaListItem[]>([])
   const notasRetirada = ref<NotaRetiradaDetalheItem[]>([])
+  const { success: showSuccess, error: showError } = useToast()
+
 
   const loadingNotas = ref(false)
   const loadingRetirada = ref(false)
@@ -171,12 +175,16 @@ export const useNotasStore = defineStore('notas', () => {
       })
 
       await fetchNotasRetirada()
+      showSuccess('Retirada registrada com sucesso!')
       return data
     }
     catch (error) {
-      errorMessage.value = error instanceof Error ? error.message : 'Falha ao registrar retirada.'
+      const msg = error instanceof Error ? error.message : 'Falha ao registrar retirada.'
+      errorMessage.value = msg
+      showError(msg)
       return null
     }
+
     finally {
       savingRetirada.value = false
     }
@@ -196,12 +204,16 @@ export const useNotasStore = defineStore('notas', () => {
       })
 
       await fetchNotasRetirada()
+      showSuccess('Status da nota atualizado com sucesso!')
       return data
     }
     catch (error) {
-      errorMessage.value = error instanceof Error ? error.message : 'Falha ao atualizar status da nota.'
+      const msg = error instanceof Error ? error.message : 'Falha ao atualizar status da nota.'
+      errorMessage.value = msg
+      showError(msg)
       return null
     }
+
     finally {
       savingRetirada.value = false
     }
@@ -266,13 +278,17 @@ export const useNotasStore = defineStore('notas', () => {
       
       // Remove from current list after soft delete
       notas.value = notas.value.filter(n => n.id !== notaId)
+      showSuccess('Nota excluída com sucesso!')
       return data.success
     }
     catch (error) {
-      errorMessage.value = error instanceof Error ? error.message : 'Falha ao excluir a nota.'
+      const msg = error instanceof Error ? error.message : 'Falha ao excluir a nota.'
+      errorMessage.value = msg
+      showError(msg)
       return false
     }
   }
+
 
   return {
     notas,

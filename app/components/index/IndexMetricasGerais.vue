@@ -9,9 +9,17 @@ import {
   LayoutDashboard,
   Box,
   Truck,
-  AlertCircle
+  AlertCircle,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-vue-next'
+
 import Botao from '../Botao.vue'
+import ModalGlobal from '../ModalGlobal.vue'
+import NotaDetalheModal from '../notas/NotaDetalheModal.vue'
 
 type DashboardProduto10Response = {
   success: boolean
@@ -109,12 +117,133 @@ const carregarProdutoId10 = async () => {
   }
 }
 
+const historicoRetiradas = ref<any[]>([])
+const loadingHistorico = ref(false)
+const modalAberto = ref(false)
+const notaDetalhe = ref<any | null>(null)
+const loadingDetalhe = ref(false)
+const totalHistorico = ref(0)
+const totalPages = ref(1)
+
+const carregarHistoricoRetiradas = async () => {
+  loadingHistorico.value = true
+  try {
+    const response = await $fetch<{
+      success: boolean
+      historico: any[]
+      pagination?: {
+        page: number
+        page_size: number
+        total: number
+        total_pages: number
+      }
+    }>('/api/dashboard/retiradas-historico', {
+      query: {
+        page: currentPage.value,
+        page_size: pageSize.value,
+        sort_key: sortKey.value,
+        sort_order: sortOrder.value,
+      },
+    })
+
+    historicoRetiradas.value = response.historico || []
+    totalHistorico.value = Number(response.pagination?.total || 0)
+    totalPages.value = Number(response.pagination?.total_pages || 1)
+    currentPage.value = Number(response.pagination?.page || 1)
+  }
+  catch (error) {
+    console.error('[dashboard/retiradas-historico]', error)
+    historicoRetiradas.value = []
+    totalHistorico.value = 0
+    totalPages.value = 1
+  }
+  finally {
+    loadingHistorico.value = false
+  }
+}
+
+const formatDateTime = (value?: string) => {
+  if (!value) return '-'
+  return new Date(value).toLocaleString('pt-BR')
+}
+
 const carregarMetricas = async () => {
   await Promise.all([
     carregarResumoNotas(),
     carregarProdutoId10(),
+    carregarHistoricoRetiradas(),
   ])
 }
+
+const abrirDetalheNotaPorHistorico = async (evento: any) => {
+  const notaId = String(evento?.id_nota || '').trim()
+  if (!notaId) return
+
+  modalAberto.value = true
+  loadingDetalhe.value = true
+
+  try {
+    const response = await $fetch<{ success: boolean; nota: any }>(`/api/notas/${notaId}/detail`)
+    notaDetalhe.value = response?.nota || null
+  }
+  catch (error) {
+    console.error('[dashboard/nota-detalhe]', error)
+    notaDetalhe.value = null
+  }
+  finally {
+    loadingDetalhe.value = false
+  }
+}
+
+const fecharDetalheNota = () => {
+  modalAberto.value = false
+}
+
+// Ordenação
+const sortKey = ref<string>('data')
+const sortOrder = ref<'asc' | 'desc'>('desc')
+
+const toggleSort = async (key: string) => {
+  if (sortKey.value === key) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
+  }
+  else {
+    sortKey.value = key
+    sortOrder.value = 'desc'
+  }
+  currentPage.value = 1
+  await carregarHistoricoRetiradas()
+}
+
+// Paginação
+const currentPage = ref(1)
+const pageSize = ref(5)
+
+const nextPage = async () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++
+    await carregarHistoricoRetiradas()
+  }
+}
+
+const prevPage = async () => {
+  if (currentPage.value > 1) {
+    currentPage.value--
+    await carregarHistoricoRetiradas()
+  }
+}
+
+const historicoInicio = computed(() => {
+  if (!totalHistorico.value) return 0
+  return (currentPage.value - 1) * pageSize.value + 1
+})
+
+const historicoFim = computed(() => {
+  if (!totalHistorico.value) return 0
+  return Math.min(currentPage.value * pageSize.value, totalHistorico.value)
+})
+
+
 
 onMounted(() => {
   carregarMetricas()
@@ -386,5 +515,146 @@ onMounted(() => {
         </div>
       </article>
     </div>
+    <!-- Histórico de Retiradas -->
+    <div class="rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+      <div class="p-6 border-b border-slate-100 dark:border-slate-800">
+        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Histórico de Retiradas Recentes</h3>
+        <p class="text-sm text-slate-500">Últimas entregas efetuadas e impacto no Zinco (Cód. #10)</p>
+      </div>
+
+      <div class="overflow-x-auto">
+        <div v-if="loadingHistorico" class="flex items-center justify-center py-8 text-sm text-slate-500">
+          Carregando histórico...
+        </div>
+        <div v-else-if="!totalHistorico" class="flex items-center justify-center py-8 text-sm text-slate-400 italic">
+          Nenhuma retirada registrada até o momento.
+        </div>
+        <table v-else class="w-full min-w-[600px] text-left text-xs">
+          <thead class="bg-slate-50/75 dark:bg-slate-800/40 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-100 dark:border-slate-800">
+            <tr>
+              <th class="px-6 py-3.5 cursor-pointer select-none hover:bg-slate-100/80 dark:hover:bg-slate-800/60 transition-colors" @click="toggleSort('data')">
+                <div class="flex items-center gap-1.5">
+                  <span>Data / Operador</span>
+                  <ArrowUp v-if="sortKey === 'data' && sortOrder === 'asc'" class="h-3.5 w-3.5 text-brand-600" />
+                  <ArrowDown v-else-if="sortKey === 'data' && sortOrder === 'desc'" class="h-3.5 w-3.5 text-brand-600" />
+                  <ArrowUpDown v-else class="h-3.5 w-3.5 text-slate-300 dark:text-slate-600" />
+                </div>
+              </th>
+              <th class="px-6 py-3.5 cursor-pointer select-none hover:bg-slate-100/80 dark:hover:bg-slate-800/60 transition-colors" @click="toggleSort('nome_cliente')">
+                <div class="flex items-center gap-1.5">
+                  <span>Cliente / Nota</span>
+                  <ArrowUp v-if="sortKey === 'nome_cliente' && sortOrder === 'asc'" class="h-3.5 w-3.5 text-brand-600" />
+                  <ArrowDown v-else-if="sortKey === 'nome_cliente' && sortOrder === 'desc'" class="h-3.5 w-3.5 text-brand-600" />
+                  <ArrowUpDown v-else class="h-3.5 w-3.5 text-slate-300 dark:text-slate-600" />
+                </div>
+              </th>
+              <th class="px-6 py-3.5 cursor-pointer select-none hover:bg-slate-100/80 dark:hover:bg-slate-800/60 transition-colors" @click="toggleSort('itens')">
+                <div class="flex items-center gap-1.5">
+                  <span>Itens Retirados</span>
+                  <ArrowUp v-if="sortKey === 'itens' && sortOrder === 'asc'" class="h-3.5 w-3.5 text-brand-600" />
+                  <ArrowDown v-else-if="sortKey === 'itens' && sortOrder === 'desc'" class="h-3.5 w-3.5 text-brand-600" />
+                  <ArrowUpDown v-else class="h-3.5 w-3.5 text-slate-300 dark:text-slate-600" />
+                </div>
+              </th>
+              <th class="px-6 py-3.5 cursor-pointer select-none hover:bg-slate-100/80 dark:hover:bg-slate-800/60 transition-colors" @click="toggleSort('reducao_zinco_10')">
+                <div class="flex items-center justify-end gap-1.5">
+                  <span>Baixa Zinco (m²)</span>
+                  <ArrowUp v-if="sortKey === 'reducao_zinco_10' && sortOrder === 'asc'" class="h-3.5 w-3.5 text-brand-600" />
+                  <ArrowDown v-else-if="sortKey === 'reducao_zinco_10' && sortOrder === 'desc'" class="h-3.5 w-3.5 text-brand-600" />
+                  <ArrowUpDown v-else class="h-3.5 w-3.5 text-slate-300 dark:text-slate-600" />
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+            <tr 
+              v-for="(event, eIdx) in historicoRetiradas" 
+              :key="eIdx"
+              class="cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-950/30 transition-colors"
+              @click="abrirDetalheNotaPorHistorico(event)"
+            >
+              <td class="px-6 py-4">
+                <div class="font-medium text-slate-900 dark:text-slate-100">{{ formatDateTime(event.data) }}</div>
+                <div class="text-[10px] text-slate-400 mt-0.5">{{ event.responsavel_nome }}</div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="font-medium text-slate-900 dark:text-slate-200">{{ event.nome_cliente }}</div>
+                <div class="text-[10px] text-slate-400 mt-0.5 uppercase tracking-wider">Nota: {{ event.serie_nota }}-{{ event.numero_nota }}</div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex flex-wrap gap-1">
+                  <span 
+                    v-for="(it, iIdx) in event.itens" 
+                    :key="iIdx"
+                    class="inline-flex items-center rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                  >
+                    {{ it.nome }} ({{ it.quantidade }})
+                  </span>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-right font-bold" :class="event.reducao_zinco_10 > 0 ? 'text-brand-600 dark:text-brand-400' : 'text-slate-400'">
+                {{ event.reducao_zinco_10 > 0 ? `-${event.reducao_zinco_10}` : '0' }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Paginação -->
+        <div v-if="totalHistorico > 0" class="flex items-center justify-between border-t border-slate-100 px-6 py-4 dark:border-slate-800">
+          <div class="text-xs text-slate-500">
+            Mostrando <span class="font-medium text-slate-700 dark:text-slate-300">{{ historicoInicio }}</span> até 
+            <span class="font-medium text-slate-700 dark:text-slate-300">{{ historicoFim }}</span> de 
+            <span class="font-medium text-slate-700 dark:text-slate-300">{{ totalHistorico }}</span> registros.
+          </div>
+          
+          <div class="flex items-center gap-2">
+            <button 
+              @click="prevPage" 
+              :disabled="currentPage === 1"
+              class="inline-flex h-8 w-8 items-center justify-center rounded border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 disabled:opacity-50 disabled:hover:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800"
+            >
+              <ChevronLeft class="h-4 w-4" />
+            </button>
+            
+            <span class="text-xs text-slate-600 dark:text-slate-400">
+              Página <span class="font-semibold text-slate-900 dark:text-white">{{ currentPage }}</span> de {{ totalPages }}
+            </span>
+            
+            <button 
+              @click="nextPage" 
+              :disabled="currentPage === totalPages"
+              class="inline-flex h-8 w-8 items-center justify-center rounded border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 disabled:opacity-50 disabled:hover:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800"
+            >
+              <ChevronRight class="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <ModalGlobal
+      v-model="modalAberto"
+      title=""
+      max-width-class="max-w-6xl"
+      content-class="p-0"
+      :show-footer="false"
+      @update:model-value="(value) => { if (!value) fecharDetalheNota() }"
+    >
+      <div v-if="loadingDetalhe" class="flex min-h-[400px] flex-col items-center justify-center gap-4 py-20 text-center">
+        <div class="h-8 w-8 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
+        <p class="text-xs text-slate-500">
+          Carregando detalhes...
+        </p>
+      </div>
+
+      <div v-else class="p-6 md:p-8">
+        <NotaDetalheModal
+          :nota="notaDetalhe"
+          :is-admin="false"
+        />
+      </div>
+    </ModalGlobal>
   </section>
+
 </template>

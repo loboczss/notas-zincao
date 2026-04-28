@@ -141,6 +141,31 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  const resetPassword = async (email: string) => {
+    clearError()
+    loading.value = true
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/confirm`,
+      })
+
+      if (error) {
+        errorMessage.value = error.message
+        return false
+      }
+
+      return true
+    }
+    catch (error) {
+      errorMessage.value = error instanceof Error ? error.message : 'Erro ao solicitar recuperacao de senha.'
+      return false
+    }
+    finally {
+      loading.value = false
+    }
+  }
+
   return {
     user,
     session,
@@ -155,5 +180,6 @@ export const useAuthStore = defineStore('auth', () => {
     signUp,
     signOut,
     updateProfile,
+    resetPassword,
   }
 })

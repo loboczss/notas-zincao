@@ -139,7 +139,7 @@ const salvarEdicao = () => {
       quantidade_retirada: toNumber(item.quantidade_retirada),
       valor_unitario: toNumber(item.valor_unitario),
       valor_total: toNumber(item.valor_total),
-      id_produto_estoque: toNumber(item.id_produto_estoque),
+      id_produto_estoque: item.id_produto_estoque ? toNumber(item.id_produto_estoque) : null,
     })).filter(item => item.nome),
   }
 
@@ -164,7 +164,7 @@ const editStats = computed(() => {
   <div v-if="nota" class="animate-fade-in flex flex-col max-h-[calc(90vh-6rem)] text-slate-700 dark:text-slate-300 font-sans">
     
     <!-- Área de Conteúdo Rolável -->
-    <div class="flex-1 overflow-y-auto space-y-6 pr-2 pb-4">
+    <div class="flex-1 overflow-y-auto custom-scrollbar space-y-6 pr-2 pb-4">
       
       <!-- StatusBar: Componentes Reutilizáveis -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -189,164 +189,7 @@ const editStats = computed(() => {
         />
       </div>
 
-      <!-- Edição Administrativa -->
-      <section v-if="isAdmin" class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-3 dark:border-slate-800">
-          <div>
-            <h4 class="text-sm font-semibold text-slate-900 dark:text-white">Edição Administrativa</h4>
-            <p class="text-xs text-slate-500">Alterar dados da nota e itens.</p>
-          </div>
 
-          <div class="flex items-center gap-2">
-            <button
-              v-if="!editMode"
-              type="button"
-              class="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-              @click="editMode = true"
-            >
-              Editar Nota
-            </button>
-
-            <template v-else>
-              <button
-                type="button"
-                class="rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-brand-500 disabled:opacity-60"
-                :disabled="!!savingEdit"
-                @click="salvarEdicao"
-              >
-                {{ savingEdit ? 'Salvando...' : 'Salvar Alterações' }}
-              </button>
-              <button
-                type="button"
-                class="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-                :disabled="!!savingEdit"
-                @click="cancelarEdicao"
-              >
-                Cancelar
-              </button>
-            </template>
-          </div>
-        </div>
-
-        <div v-if="editMode" class="mt-4 space-y-4">
-          <div class="grid gap-3 grid-cols-2 md:grid-cols-4">
-            <div class="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-950">
-              <p class="text-xs font-medium text-slate-500">Itens</p>
-              <p class="text-sm font-semibold text-slate-900 dark:text-white">{{ editStats.totalItens }}</p>
-            </div>
-            <div class="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-950">
-              <p class="text-xs font-medium text-slate-500">Qtd Comprada</p>
-              <p class="text-sm font-semibold text-slate-900 dark:text-white">{{ editStats.totalComprado }}</p>
-            </div>
-            <div class="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-950">
-              <p class="text-xs font-medium text-emerald-600 dark:text-emerald-400">Qtd Retirada</p>
-              <p class="text-sm font-semibold text-emerald-600 dark:text-emerald-400">{{ editStats.totalRetirado }}</p>
-            </div>
-            <div class="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-950">
-              <p class="text-xs font-medium text-brand-600 dark:text-brand-400">Saldo</p>
-              <p class="text-sm font-semibold text-brand-600 dark:text-brand-400">{{ editStats.saldo }}</p>
-            </div>
-          </div>
-
-          <div class="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
-            <label class="space-y-1">
-              <span class="text-xs font-medium text-slate-500">Nome do Cliente</span>
-              <input
-                v-model="editDraft.nome_cliente"
-                type="text"
-                class="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-800 outline-none transition focus:border-brand-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
-              >
-            </label>
-            <label class="space-y-1">
-              <span class="text-xs font-medium text-slate-500">CPF/CNPJ</span>
-              <input
-                v-model="editDraft.documento_cliente"
-                type="text"
-                class="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-800 outline-none transition focus:border-brand-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
-              >
-            </label>
-            <label class="space-y-1">
-              <span class="text-xs font-medium text-slate-500">Telefone</span>
-              <input
-                v-model="editDraft.telefone_cliente"
-                type="text"
-                class="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-800 outline-none transition focus:border-brand-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
-              >
-            </label>
-            <label class="space-y-1">
-              <span class="text-xs font-medium text-slate-500">ID Contato (CRM)</span>
-              <input
-                v-model="editDraft.contato_id"
-                type="text"
-                class="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-800 outline-none transition focus:border-brand-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
-              >
-            </label>
-          </div>
-
-          <div class="space-y-2 rounded-lg border border-slate-100 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950">
-            <div class="flex items-center justify-between border-b border-slate-200 pb-2 dark:border-slate-800">
-              <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Itens da Nota</span>
-              <button
-                type="button"
-                class="rounded-lg bg-slate-200 px-2 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-                @click="adicionarProduto"
-              >
-                + Novo Item
-              </button>
-            </div>
-
-            <div class="space-y-2">
-              <div
-                v-for="(produto, index) in editDraft.produtos"
-                :key="`edit-${index}`"
-                class="grid gap-2 grid-cols-1 sm:grid-cols-[2fr_1fr_1fr_1fr_auto] items-end bg-white p-2 rounded-lg border border-slate-100 dark:bg-slate-900 dark:border-slate-800"
-              >
-                <label class="space-y-1">
-                  <span class="text-[10px] font-medium text-slate-400 sm:hidden">Produto</span>
-                  <input
-                    v-model="produto.nome"
-                    type="text"
-                    class="h-8 w-full rounded-lg border border-slate-200 bg-white px-2 text-xs font-medium text-slate-800 outline-none focus:border-brand-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
-                  >
-                </label>
-                <label class="space-y-1">
-                  <span class="text-[10px] font-medium text-slate-400 sm:hidden">Qtd Comprada</span>
-                  <input
-                    v-model.number="produto.quantidade"
-                    type="number"
-                    step="0.01"
-                    class="h-8 w-full rounded-lg border border-slate-200 bg-white px-2 text-xs font-medium text-slate-800 outline-none focus:border-brand-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
-                  >
-                </label>
-                <label class="space-y-1">
-                  <span class="text-[10px] font-medium text-slate-400 sm:hidden">Qtd Retirada</span>
-                  <input
-                    v-model.number="produto.quantidade_retirada"
-                    type="number"
-                    step="0.01"
-                    class="h-8 w-full rounded-lg border border-slate-200 bg-white px-2 text-xs font-medium text-slate-800 outline-none focus:border-brand-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
-                  >
-                </label>
-                <label class="space-y-1">
-                  <span class="text-[10px] font-medium text-slate-400 sm:hidden">ID Estoque</span>
-                  <input
-                    v-model.number="produto.id_produto_estoque"
-                    type="number"
-                    class="h-8 w-full rounded-lg border border-slate-200 bg-white px-2 text-xs font-medium text-slate-800 outline-none focus:border-brand-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
-                  >
-                </label>
-                <button
-                  type="button"
-                  class="h-8 rounded-lg bg-rose-50 px-2 text-xs font-medium text-rose-600 transition hover:bg-rose-100 dark:bg-rose-950/50 dark:text-rose-400"
-                  @click="removerProduto(index)"
-                >
-                  Remover
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       <!-- Layout Principal -->
       <div class="grid gap-6 grid-cols-1 lg:grid-cols-[1fr_320px]">
@@ -355,16 +198,47 @@ const editStats = computed(() => {
           <!-- Bloco: Contexto da Nota -->
           <section class="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
             <div class="mb-4 flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4 dark:border-slate-800">
-              <div>
-                <span class="text-xs font-medium text-slate-500">ID DA NOTA</span>
-                <div class="mt-1 flex items-center gap-2">
-                  <span class="text-xl font-bold text-slate-900 dark:text-white">{{ nota.numero_nota }}</span>
-                  <NotasStatusBadge :status="nota.status_retirada" />
+              <div class="flex items-center gap-4">
+                <div>
+                  <span class="text-xs font-medium text-slate-500">ID DA NOTA</span>
+                  <div class="mt-1 flex items-center gap-2">
+                    <span class="text-xl font-bold text-slate-900 dark:text-white">{{ nota.numero_nota }}</span>
+                    <NotasStatusBadge :status="nota.status_retirada" />
+                  </div>
+                </div>
+                <div>
+                  <span class="block text-xs font-medium text-slate-500">Série</span>
+                  <span class="text-base font-bold text-brand-600 dark:text-brand-400">{{ nota.serie_nota }}</span>
                 </div>
               </div>
-              <div class="text-right">
-                <span class="block text-xs font-medium text-slate-500">Série</span>
-                <span class="text-base font-bold text-brand-600 dark:text-brand-400">{{ nota.serie_nota }}</span>
+              
+              <!-- Ações Administrativas Inline -->
+              <div v-if="isAdmin" class="flex items-center gap-2">
+                <button
+                  v-if="!editMode"
+                  type="button"
+                  class="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                  @click="editMode = true"
+                >
+                  Editar Nota
+                </button>
+                <template v-else>
+                  <button
+                    type="button"
+                    class="rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-brand-500 disabled:opacity-60"
+                    :disabled="!!savingEdit"
+                    @click="salvarEdicao"
+                  >
+                    {{ savingEdit ? 'Salvando...' : 'Salvar Alterações' }}
+                  </button>
+                  <button
+                    type="button"
+                    class="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
+                    @click="cancelarEdicao"
+                  >
+                    Cancelar
+                  </button>
+                </template>
               </div>
             </div>
 
@@ -374,10 +248,28 @@ const editStats = computed(() => {
                 <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
                   <UserRound class="h-4 w-4" />
                 </div>
-                <div class="min-w-0">
+                <div class="w-full min-w-0" v-if="!editMode">
                   <span class="text-xs font-medium text-slate-500">Titular</span>
                   <p class="truncate text-sm font-semibold text-slate-900 dark:text-white">{{ nota.nome_cliente }}</p>
                   <p v-if="nota.telefone_cliente" class="mt-0.5 text-xs text-slate-500">{{ nota.telefone_cliente }}</p>
+                </div>
+                <div class="w-full space-y-2" v-else>
+                  <label class="block">
+                    <span class="text-[10px] font-medium text-slate-500 block">NOME DO CLIENTE</span>
+                    <input 
+                      v-model="editDraft.nome_cliente" 
+                      type="text" 
+                      class="h-8 w-full rounded-lg border border-slate-200 bg-white px-2 text-xs font-semibold text-slate-900 outline-none focus:border-brand-500 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+                    />
+                  </label>
+                  <label class="block">
+                    <span class="text-[10px] font-medium text-slate-500 block">TELEFONE</span>
+                    <input 
+                      v-model="editDraft.telefone_cliente" 
+                      type="text" 
+                      class="h-8 w-full rounded-lg border border-slate-200 bg-white px-2 text-xs text-slate-900 outline-none focus:border-brand-500 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+                    />
+                  </label>
                 </div>
               </div>
 
@@ -386,11 +278,24 @@ const editStats = computed(() => {
                 <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
                   <Calendar class="h-4 w-4" />
                 </div>
-                <div>
+                <div v-if="!editMode">
                   <span class="text-xs font-medium text-slate-500">Registro</span>
                   <p class="text-sm font-semibold text-slate-900 dark:text-white">Compra: {{ formatDate(nota.data_compra) }}</p>
                   <p class="mt-0.5 text-[10px] text-slate-400">Cadastrado em {{ formatDateTime(nota.criado_em) }}</p>
                   <p v-if="nota.cadastrado_por_nome" class="mt-0.5 text-[10px] font-medium text-brand-600 dark:text-brand-400">Por: {{ nota.cadastrado_por_nome }}</p>
+                </div>
+                <div class="w-full space-y-2" v-else>
+                  <div class="text-xs font-medium text-slate-500">
+                    Compra: <span class="font-semibold text-slate-900 dark:text-white">{{ formatDate(nota.data_compra) }}</span>
+                  </div>
+                  <label class="block mt-2">
+                    <span class="text-[10px] font-medium text-slate-500 block">ID CONTATO (CRM)</span>
+                    <input 
+                      v-model="editDraft.contato_id" 
+                      type="text" 
+                      class="h-8 w-full rounded-lg border border-slate-200 bg-white px-2 text-xs text-slate-900 outline-none focus:border-brand-500 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+                    />
+                  </label>
                 </div>
               </div>
             </div>
@@ -400,15 +305,85 @@ const editStats = computed(() => {
           <section class="space-y-3">
             <div class="flex items-center justify-between px-1">
               <h4 class="text-sm font-semibold text-slate-900 dark:text-white">Itens do Pedido</h4>
-              <span class="text-xs text-slate-500">{{ nota.produtos?.length || 0 }} itens</span>
+              <div class="flex items-center gap-2">
+                <button
+                  v-if="editMode"
+                  type="button"
+                  class="rounded-lg bg-brand-50 px-2.5 py-1 text-xs font-medium text-brand-700 transition hover:bg-brand-100 dark:bg-brand-950/30 dark:text-brand-400 dark:hover:bg-brand-950/50"
+                  @click="adicionarProduto"
+                >
+                  + Novo Item
+                </button>
+                <span class="text-xs text-slate-500">{{ editMode ? (editDraft.produtos?.length || 0) : (nota.produtos?.length || 0) }} itens</span>
+              </div>
             </div>
             
             <div class="space-y-2">
-              <NotaItemCard 
-                v-for="(produto, index) in nota.produtos" 
-                :key="index"
-                :produto="produto"
-              />
+              <template v-if="!editMode">
+                <NotaItemCard 
+                  v-for="(produto, index) in nota.produtos" 
+                  :key="index"
+                  :produto="produto"
+                />
+              </template>
+              <template v-else>
+                <!-- Cabeçalho dos Itens (Edição) -->
+                <div class="hidden sm:grid sm:grid-cols-[2fr_1fr_1fr_1fr_auto] gap-3 px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  <div>Produto</div>
+                  <div>Qtd Comprada</div>
+                  <div>Qtd Retirada</div>
+                  <div>ID Estoque</div>
+                  <div class="w-[60px]"></div>
+                </div>
+                <!-- Lista Editável -->
+                <div 
+                  v-for="(produto, index) in (editDraft.produtos || [])" 
+                  :key="`inline-edit-${index}`"
+                  class="grid gap-2 grid-cols-1 sm:grid-cols-[2fr_1fr_1fr_1fr_auto] items-center bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 p-2 rounded-xl"
+                >
+                  <label class="space-y-1">
+                    <span class="text-[10px] font-medium text-slate-400 sm:hidden block">Produto</span>
+                    <input
+                      v-model="produto.nome"
+                      type="text"
+                      class="h-8 w-full rounded-lg border border-slate-200 bg-slate-50 px-2 text-xs font-medium text-slate-800 outline-none focus:border-brand-500 focus:bg-white dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
+                    >
+                  </label>
+                  <label class="space-y-1">
+                    <span class="text-[10px] font-medium text-slate-400 sm:hidden block">Qtd Comprada</span>
+                    <input
+                      v-model.number="produto.quantidade"
+                      type="number"
+                      step="0.01"
+                      class="h-8 w-full rounded-lg border border-slate-200 bg-slate-50 px-2 text-xs font-medium text-slate-800 outline-none focus:border-brand-500 focus:bg-white dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
+                    >
+                  </label>
+                  <label class="space-y-1">
+                    <span class="text-[10px] font-medium text-slate-400 sm:hidden block">Qtd Retirada</span>
+                    <input
+                      v-model.number="produto.quantidade_retirada"
+                      type="number"
+                      step="0.01"
+                      class="h-8 w-full rounded-lg border border-slate-200 bg-slate-50 px-2 text-xs font-medium text-slate-800 outline-none focus:border-brand-500 focus:bg-white dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
+                    >
+                  </label>
+                  <label class="space-y-1">
+                    <span class="text-[10px] font-medium text-slate-400 sm:hidden block">ID Estoque</span>
+                    <input
+                      v-model.number="produto.id_produto_estoque"
+                      type="number"
+                      class="h-8 w-full rounded-lg border border-slate-200 bg-slate-50 px-2 text-xs font-medium text-slate-800 outline-none focus:border-brand-500 focus:bg-white dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
+                    >
+                  </label>
+                  <button
+                    type="button"
+                    class="h-8 px-2 rounded-lg text-xs font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors w-full sm:w-[60px] text-center"
+                    @click="removerProduto(index)"
+                  >
+                    Remover
+                  </button>
+                </div>
+              </template>
             </div>
           </section>
         </div>
@@ -502,3 +477,30 @@ const editStats = computed(() => {
     </Transition>
   </Teleport>
 </template>
+
+<style scoped>
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 20px;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #334155;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #475569;
+}
+</style>

@@ -2,6 +2,8 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import HeaderPrincipal from './components/header/HeaderPrincipal.vue'
+import Toast from './components/Toast.vue'
+
 
 const route = useRoute()
 const exibirHeader = computed(() => route.path !== '/login')
@@ -34,5 +36,7 @@ useHead(() => ({
     <NuxtRouteAnnouncer />
     <HeaderPrincipal v-if="exibirHeader" />
     <NuxtPage />
+    <Toast />
   </div>
+
 </template>

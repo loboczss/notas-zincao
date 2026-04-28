@@ -1,4 +1,5 @@
 export { useAuthStore } from './auth'
+export { useAdminUsersStore } from './admin'
 export { useNotasStore } from './notas'
 export { useCrmStore } from './crm'
 export { useEstoqueStore } from './estoque'

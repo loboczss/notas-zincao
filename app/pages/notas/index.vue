@@ -11,6 +11,8 @@ import NotaDetalheModal from '../../components/notas/NotaDetalheModal.vue'
 import NotasTabela from '../../components/notas/NotasTabela.vue'
 import NotasToolbar from '../../components/notas/NotasToolbar.vue'
 import { useAuthStore, useNotasStore } from '../../stores'
+import { useToast } from '../../composables/useToast'
+
 
 definePageMeta({
   middleware: 'auth',
@@ -18,6 +20,8 @@ definePageMeta({
 
 const notasStore = useNotasStore()
 const authStore = useAuthStore()
+const { success: showSuccess, error: showError } = useToast()
+
 const searchTerm = ref('')
 const statusFilter = ref<'todos' | NotaRetiradaStatus>('todos')
 const dataInicio = ref('')
@@ -105,14 +109,17 @@ const salvarEdicaoNota = async (payload: NotaAdminEditRequest) => {
 
     await carregarDetalhe(notaDetalhe.value.id)
     await carregarNotas()
+    showSuccess('Nota atualizada com sucesso!')
   }
   catch (err) {
     console.error('[salvarEdicaoNota]', err)
+    showError(err instanceof Error ? err.message : 'Falha ao atualizar nota.')
   }
   finally {
     savingEdicao.value = false
   }
 }
+
 
 const exportarRelatorio = async (format: 'csv' | 'pdf') => {
   if (exportLoading.value) return
@@ -281,7 +288,7 @@ const formatCurrency = (value: number) => {
         :loading="notasStore.loadingNotas"
         :export-loading="exportLoading"
         @update:search-term="searchTerm = $event"
-        @update:status-filter="statusFilter = $event"
+        @update:status-filter="statusFilter = $event; aplicarFiltros()"
         @update:data-inicio="dataInicio = $event"
         @update:data-fim="dataFim = $event"
         @apply="aplicarFiltros"

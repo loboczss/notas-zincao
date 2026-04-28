@@ -162,6 +162,69 @@ export default defineEventHandler(async (event) => {
     payload.produtos = produtosVinculados
   }
 
+  const alteracoes: string[] = []
+  if (body.nome_cliente !== undefined && notaAtual.nome_cliente !== payload.nome_cliente) {
+    alteracoes.push(`Nome: "${notaAtual.nome_cliente || 'Vazio'}" -> "${payload.nome_cliente || 'Vazio'}"`)
+  }
+  if (body.documento_cliente !== undefined && notaAtual.documento_cliente !== payload.documento_cliente) {
+    alteracoes.push(`Doc: "${notaAtual.documento_cliente || 'Vazio'}" -> "${payload.documento_cliente || 'Vazio'}"`)
+  }
+  if (body.telefone_cliente !== undefined && notaAtual.telefone_cliente !== payload.telefone_cliente) {
+    alteracoes.push(`Tel: "${notaAtual.telefone_cliente || 'Vazio'}" -> "${payload.telefone_cliente || 'Vazio'}"`)
+  }
+  if (body.contato_id !== undefined && notaAtual.contato_id !== payload.contato_id) {
+    alteracoes.push(`Contato ID: "${notaAtual.contato_id || 'Vazio'}" -> "${payload.contato_id || 'Vazio'}"`)
+  }
+  if (body.observacoes !== undefined && notaAtual.observacoes !== payload.observacoes) {
+    alteracoes.push(`Obs: "${notaAtual.observacoes || 'Vazio'}" -> "${payload.observacoes || 'Vazio'}"`)
+  }
+  if (body.produtos !== undefined) {
+    const oldProducts = Array.isArray(notaAtual.produtos) ? (notaAtual.produtos as any[]) : []
+    const newProducts = Array.isArray(payload.produtos) ? (payload.produtos as any[]) : []
+    const prodDiffs: string[] = []
+
+    newProducts.forEach((newP, idx) => {
+      const oldP = oldProducts.find(p => p.nome === newP.nome) || oldProducts[idx]
+      if (!oldP) {
+        prodDiffs.push(`+ Adicionado: ${newP.nome} (${newP.quantidade || 0} Qtd)`)
+      } else {
+        const details: string[] = []
+        if (newP.quantidade !== undefined && Number(oldP.quantidade) !== Number(newP.quantidade)) {
+          details.push(`Qtd: ${oldP.quantidade ?? 0} -> ${newP.quantidade}`)
+        }
+        if (newP.quantidade_retirada !== undefined && Number(oldP.quantidade_retirada) !== Number(newP.quantidade_retirada)) {
+          details.push(`Entregue: ${oldP.quantidade_retirada ?? 0} -> ${newP.quantidade_retirada}`)
+        }
+        if (newP.valor_unitario !== undefined && Number(oldP.valor_unitario) !== Number(newP.valor_unitario)) {
+          details.push(`Preço: ${oldP.valor_unitario ?? 0} -> ${newP.valor_unitario}`)
+        }
+        if (newP.id_produto_estoque !== undefined && oldP.id_produto_estoque !== newP.id_produto_estoque) {
+          details.push(`Vínculo: #${oldP.id_produto_estoque ?? 'Nenhum'} -> #${newP.id_produto_estoque}`)
+        }
+        
+        if (details.length > 0) {
+          prodDiffs.push(`"${newP.nome}": [${details.join(', ')}]`)
+        }
+      }
+    })
+
+    oldProducts.forEach(oldP => {
+      const stillExists = newProducts.some(newP => newP.nome === oldP.nome)
+      if (!stillExists) {
+        prodDiffs.push(`- Removido: ${oldP.nome}`)
+      }
+    })
+
+    if (prodDiffs.length > 0) {
+      alteracoes.push(`Itens: (${prodDiffs.join(' | ')})`)
+    }
+  }
+
+
+  const descricaoLog = alteracoes.length > 0 
+    ? `Edição dos dados da nota. Alterações: ${alteracoes.join('; ')}` 
+    : 'Edição administrativa dos dados da nota.'
+
   const historicoAtual = Array.isArray(notaAtual.historico_retiradas)
     ? notaAtual.historico_retiradas
     : []
@@ -173,9 +236,10 @@ export default defineEventHandler(async (event) => {
     responsavel_nome: responsavelNome,
     fotos: [],
     itens_retirados: [],
-    observacoes: body.observacoes ?? 'Edição administrativa dos dados da nota.',
+    observacoes: descricaoLog,
     usuario_id: authUid,
   }
+
 
   payload.historico_retiradas = [...historicoAtual, eventoHistorico]
 
@@ -191,7 +255,18 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 500, statusMessage: 'Não foi possível salvar as alterações da nota.' })
   }
 
+  await (client as any)
+
+    .from('notas_historico_edicao')
+    .insert({
+      nota_id: id,
+      user_id: authUid,
+      dados_anteriores: notaAtual,
+      dados_novos: payload
+    })
+
   return {
+
     success: true,
     nota: data,
   }

@@ -15,7 +15,7 @@ import AppPageShell from '~~/app/components/layout/AppPageShell.vue'
 import Card from '~~/app/components/Card.vue'
 
 definePageMeta({
-  middleware: 'auth'
+  middleware: ['auth', 'admin']
 })
 
 const notasStore = useNotasStore()
