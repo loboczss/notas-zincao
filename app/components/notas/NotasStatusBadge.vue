@@ -15,27 +15,27 @@ const label = computed(() => {
 
 const badgeClass = computed(() => {
   if (props.status === 'pendente') {
-    return 'border-brand-500/20 bg-brand-500/10 text-brand-600 dark:border-brand-400/20 dark:bg-brand-400/10 dark:text-brand-400 shadow-[0_0_12px_-4px_rgba(245,158,11,0.2)]'
+    return 'bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-400'
   }
 
   if (props.status === 'parcial') {
-    return 'border-blue-500/20 bg-blue-500/10 text-blue-600 dark:border-blue-400/20 dark:bg-blue-400/10 dark:text-blue-400 shadow-[0_0_12px_-4px_rgba(59,130,246,0.2)]'
+    return 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
   }
 
   if (props.status === 'retirada') {
-    return 'border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-400 shadow-[0_0_12px_-4px_rgba(16,185,129,0.2)]'
+    return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
   }
 
-  return 'border-rose-500/20 bg-rose-500/10 text-rose-600 dark:border-rose-400/20 dark:bg-rose-400/10 dark:text-rose-400 shadow-[0_0_12px_-4px_rgba(244,63,94,0.2)]'
+  return 'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400'
 })
 </script>
 
 <template>
   <span
-    class="glass-sm inline-flex items-center rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition-all duration-300"
+    class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium transition-colors"
     :class="badgeClass"
   >
-    <span class="mr-1.5 h-1.5 w-1.5 rounded-full bg-current" />
+    <span class="mr-1.5 h-1.5 w-1.5 rounded-full bg-current opacity-70" />
     {{ label }}
   </span>
 </template>

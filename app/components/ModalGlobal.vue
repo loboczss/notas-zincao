@@ -35,10 +35,10 @@ const fecharModal = () => {
       leave-to-class="opacity-0"
     >
       <div v-if="props.modelValue" class="fixed inset-0 z-[100] flex items-end justify-center p-3 md:items-center md:p-4 font-sans">
-        <!-- Glassmorphism Overlay -->
+        <!-- Simple Overlay -->
         <button
           type="button"
-          class="absolute inset-0 bg-slate-950/40 backdrop-blur-md transition-opacity"
+          class="fixed inset-0 h-screen w-screen bg-slate-900/30 backdrop-blur-sm transition-opacity"
           aria-label="Fechar modal"
           @click="fecharModal"
         />

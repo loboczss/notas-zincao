@@ -29,27 +29,27 @@ const formatQuantidade = (value: number) => {
 
 <template>
   <section>
-    <div v-if="props.loading" class="rounded-3xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
+    <div v-if="props.loading" class="rounded-xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
       Carregando produtos do estoque...
     </div>
 
-    <div v-else-if="!hasProdutos" class="rounded-3xl border border-slate-200 bg-white p-10 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <div v-else-if="!hasProdutos" class="rounded-xl border border-slate-200 bg-white p-10 text-center dark:border-slate-800 dark:bg-slate-900">
       <h3 class="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100">Nenhum produto encontrado</h3>
       <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Ajuste a busca ou cadastre um novo item no estoque.</p>
     </div>
 
     <div v-else class="space-y-4">
-      <div class="overflow-x-auto rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
         <table class="hidden min-w-full text-left md:table">
           <thead>
-            <tr class="border-b border-slate-200 bg-slate-50/80 text-xs uppercase tracking-[0.14em] text-slate-500 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-400">
-              <th class="px-4 py-3 font-semibold">ID</th>
-              <th class="px-4 py-3 font-semibold">Descrição</th>
-              <th class="px-4 py-3 font-semibold">Tipo</th>
-              <th class="px-4 py-3 font-semibold">Embalagem</th>
-              <th class="px-4 py-3 font-semibold">Estoque</th>
-              <th class="px-4 py-3 font-semibold">Pai</th>
-              <th class="px-4 py-3 font-semibold text-right">Ações</th>
+            <tr class="border-b border-slate-200 bg-slate-50/80 text-xs font-medium text-slate-500 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-400">
+              <th class="px-4 py-3">ID</th>
+              <th class="px-4 py-3">Descrição</th>
+              <th class="px-4 py-3">Tipo</th>
+              <th class="px-4 py-3">Embalagem</th>
+              <th class="px-4 py-3">Estoque</th>
+              <th class="px-4 py-3">Pai</th>
+              <th class="px-4 py-3 text-right">Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -68,7 +68,7 @@ const formatQuantidade = (value: number) => {
                 <button
                   v-if="props.canEdit"
                   type="button"
-                  class="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                  class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
                   @click="emit('edit', produto.id_produto)"
                 >
                   <Pencil class="h-4 w-4" />

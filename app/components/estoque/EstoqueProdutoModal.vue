@@ -87,44 +87,71 @@ const submit = () => {
     content-class="p-5 md:p-6"
     @update:model-value="emit('update:modelValue', $event)"
   >
-    <div class="grid gap-4 md:grid-cols-2">
-      <div class="md:col-span-2">
-        <label class="mb-1 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Descrição</label>
-        <Input v-model="form.descricao" placeholder="Nome do produto" />
+    <div class="space-y-6">
+      <!-- Seção 1: Identificação -->
+      <div class="rounded-xl border border-slate-200 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-950/20">
+        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Identificação e Categoria</h4>
+        <div class="grid gap-4 md:grid-cols-2">
+          <div class="md:col-span-2">
+            <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Descrição do Produto</label>
+            <Input v-model="form.descricao" placeholder="Ex: Cimento CP-II 50kg" />
+            <span class="mt-1 block text-[10px] text-slate-400 dark:text-slate-500">Nome completo que será exibido nas notas e relatórios.</span>
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Tipo / Categoria</label>
+            <Input v-model="form.tipo_produto" placeholder="Ex: Ferragens, Tintas, Hidráulica" />
+            <span class="mt-1 block text-[10px] text-slate-400 dark:text-slate-500">Facilita o agrupamento de produtos do mesmo setor.</span>
+          </div>
+        </div>
       </div>
 
-      <div>
-        <label class="mb-1 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Embalagem de saída</label>
-        <Input v-model="form.embalagem_saida" placeholder="Ex: saco, un, m3" />
+      <!-- Seção 2: Unidades e Valores -->
+      <div class="rounded-xl border border-slate-200 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-950/20">
+        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Estoque e Comercial</h4>
+        <div class="grid gap-4 md:grid-cols-3">
+          <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Qtd. em Estoque</label>
+            <Input v-model="form.quantidade_estoque" type="number" min="0" step="0.001" placeholder="0" />
+            <span class="mt-1 block text-[10px] text-slate-400 dark:text-slate-500">Volume físico atual.</span>
+          </div>
+
+          <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Embalagem (Saída)</label>
+            <Input v-model="form.embalagem_saida" placeholder="Ex: UN, SACO, KG, M³" />
+            <span class="mt-1 block text-[10px] text-slate-400 dark:text-slate-500">Unidade de medida.</span>
+          </div>
+
+          <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Preço Varejo (R$)</label>
+            <Input v-model="form.valor_preco_varejo" placeholder="Ex: 45.90" />
+            <span class="mt-1 block text-[10px] text-slate-400 dark:text-slate-500">Valor padrão de venda.</span>
+          </div>
+        </div>
       </div>
 
-      <div>
-        <label class="mb-1 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Tipo do produto</label>
-        <Input v-model="form.tipo_produto" placeholder="Ex: cimento, acabamento" />
-      </div>
+      <!-- Seção 3: Configurações Avançadas -->
+      <div class="rounded-xl border border-slate-200 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-950/20">
+        <h4 class="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Associação / Fracionamento</h4>
+        <span class="mb-3 block text-[10px] text-slate-400 dark:text-slate-500">Preencha apenas se este produto for gerado a partir de outro maior (ex: vender por UN um item de CAIXA).</span>
+        
+        <div class="grid gap-4 md:grid-cols-2">
+          <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">ID do Produto Pai</label>
+            <Input v-model="form.id_produto_pai" type="number" min="1" step="1" placeholder="Opcional" />
+            <span class="mt-1 block text-[10px] text-slate-400 dark:text-slate-500">ID do produto que dá origem a este.</span>
+          </div>
 
-      <div>
-        <label class="mb-1 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Quantidade em estoque</label>
-        <Input v-model="form.quantidade_estoque" type="number" min="0" step="0.001" placeholder="0" />
-      </div>
-
-      <div>
-        <label class="mb-1 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Valor preço varejo</label>
-        <Input v-model="form.valor_preco_varejo" placeholder="Ex: 49,90" />
-      </div>
-
-      <div>
-        <label class="mb-1 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">ID produto pai</label>
-        <Input v-model="form.id_produto_pai" type="number" min="1" step="1" placeholder="Opcional" />
-      </div>
-
-      <div>
-        <label class="mb-1 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Fator de conversão</label>
-        <Input v-model="form.fator_conversao" type="number" min="0.001" step="0.001" placeholder="1" />
+          <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Fator de Conversão</label>
+            <Input v-model="form.fator_conversao" type="number" min="0.001" step="0.001" placeholder="1" />
+            <span class="mt-1 block text-[10px] text-slate-400 dark:text-slate-500">Qtd. gerada de filhos para cada 1 unidade do pai.</span>
+          </div>
+        </div>
       </div>
     </div>
 
-    <p v-if="props.errorMessage" class="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-500/10 dark:text-rose-300">
+    <p v-if="props.errorMessage" class="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-500/10 dark:text-rose-300">
       {{ props.errorMessage }}
     </p>
 

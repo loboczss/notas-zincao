@@ -84,8 +84,8 @@ const fazerLogout = async () => {
     <div ref="menuRef" class="relative">
       <button
         @click="toggleMenu"
-        class="group flex items-center gap-2 rounded-full border border-white/40 bg-white/40 dark:border-white/10 dark:bg-white/5 p-1 pr-3 shadow-sm backdrop-blur-md transition-all duration-500 hover:shadow-xl hover:shadow-brand-500/10 hover:border-brand-500/30 active:scale-95 focus:outline-none"
-        :class="[aberto ? 'ring-4 ring-brand-500/10 shadow-lg border-brand-500/40' : '']"
+        class="group flex items-center gap-2 rounded-full border border-slate-200 bg-white p-1 pr-3 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800 focus:outline-none"
+        :class="[aberto ? 'bg-slate-50 dark:bg-slate-800 ring-2 ring-brand-500/20' : '']"
       >
         <div class="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full ring-2 ring-white dark:ring-slate-800 transition-all duration-500 group-hover:ring-brand-400 dark:group-hover:ring-brand-500/30">
           <img v-if="fotoPerfilUrl" :src="fotoPerfilUrl" class="h-full w-full object-cover">
@@ -111,7 +111,7 @@ const fazerLogout = async () => {
         leave-from-class="opacity-100 translate-y-0 scale-100"
         leave-to-class="opacity-0 translate-y-2 scale-95"
       >
-        <div v-if="aberto" class="absolute right-0 top-full z-50 mt-3 w-56 origin-top-right rounded-2xl border border-white/40 dark:border-white/10 bg-white/80 dark:bg-slate-900/90 p-2 shadow-2xl backdrop-blur-2xl">
+        <div v-if="aberto" class="absolute right-0 top-full z-50 mt-2 w-56 origin-top-right rounded-xl border border-slate-200 bg-white p-2 shadow-lg dark:border-slate-800 dark:bg-slate-900">
           <div class="px-3 py-2 sm:hidden border-b border-slate-100 dark:border-white/5 mb-1">
              <div class="flex items-center justify-between">
                 <span class="text-xs font-bold text-slate-400 uppercase tracking-tighter">Tema</span>

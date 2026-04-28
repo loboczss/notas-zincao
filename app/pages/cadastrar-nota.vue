@@ -7,7 +7,7 @@ import NotaCadastroCaptura from '../components/nota-cadastro/NotaCadastroCaptura
 import NotaCadastroCliente from '../components/nota-cadastro/NotaCadastroCliente.vue'
 import NotaCadastroFiscal from '../components/nota-cadastro/NotaCadastroFiscal.vue'
 import NotaCadastroProdutos from '../components/nota-cadastro/NotaCadastroProdutos.vue'
-import NotaCadastroResumo from '../components/nota-cadastro/NotaCadastroResumo.vue'
+import Botao from '../components/Botao.vue'
 import type { CrmContato } from '../../shared/types/CRM'
 import type { NotaProduto, NotaRetiradaDraft, NotaRetiradaListItem } from '../../shared/types/NotasRetirada'
 import { useCrmStore, useNotasStore } from '../stores'
@@ -384,62 +384,75 @@ await notasStore.fetchNotas()
     title="Cadastrar nota de retirada"
     description="Capture o cupom, valide os dados extraídos pela IA e registre a nota com segurança."
   >
-    <div class="space-y-6">
-      <NotaCadastroCaptura
-        :preview-url="imageDataUrl"
-        :loading="notasStore.extractingNota"
-        @select-image="selecionarImagem"
-        @analyze="analisarImagem"
-      />
+    <template #headerAside>
+      <Botao :disabled="notasStore.creatingNota || !!duplicateNota" @click="saveNota">
+        {{ notasStore.creatingNota ? 'Salvando...' : 'Salvar nota' }}
+      </Botao>
+    </template>
 
-      <NotaCadastroCliente
-        :nome-cliente="form.nome_cliente"
-        :telefone-cliente="form.telefone_cliente || ''"
-        :documento-cliente="form.documento_cliente || ''"
-        :contatos="crmStore.contatos"
-        :loading-search="crmStore.loadingContatos"
-        :show-suggestions="showCrmSuggestions"
-        :show-no-results="showCrmNoResults"
-        :errors="errors"
-        @update:nome-cliente="atualizarNomeCliente"
-        @update:telefone-cliente="form.telefone_cliente = formatPhone($event)"
-        @update:documento-cliente="form.documento_cliente = formatDocument($event)"
-        @search-contato="buscarContato"
-        @select-contato="selecionarContato"
-      />
+    <!-- Mensagens de Validação -->
+    <div v-if="duplicateNota" class="mb-4 rounded-xl border border-brand-200 bg-brand-50 p-4 text-sm text-brand-800 dark:border-brand-900/50 dark:bg-brand-500/10 dark:text-brand-200">
+      Duplicidade encontrada: nota {{ duplicateNota.serie_nota }}-{{ duplicateNota.numero_nota }} já cadastrada para {{ duplicateNota.nome_cliente }}.
+    </div>
 
-      <NotaCadastroFiscal
-        :numero-nota="form.numero_nota"
-        :serie-nota="form.serie_nota || '1'"
-        :chave-nfe="String(form.chave_nfe || '')"
-        :data-compra="form.data_compra"
-        :valor-total="totalProdutos.toFixed(2)"
-        :desconto-total="String(form.desconto_total ?? '')"
-        :valor-liquido="valorLiquido.toFixed(2)"
-        :observacoes="String(form.observacoes || '')"
-        :errors="errors"
-        @update:numero-nota="form.numero_nota = $event"
-        @update:serie-nota="form.serie_nota = $event"
-        @update:chave-nfe="form.chave_nfe = digitsOnly($event)"
-        @update:data-compra="form.data_compra = $event"
-        @update:desconto-total="form.desconto_total = toNumber($event)"
-        @update:observacoes="form.observacoes = $event"
-      />
+    <div v-if="notasStore.errorMessage" class="mb-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 dark:border-rose-900/50 dark:bg-rose-500/10 dark:text-rose-300">
+      {{ notasStore.errorMessage }}
+    </div>
 
-      <NotaCadastroProdutos
-        :produtos="form.produtos"
-        :errors="errors"
-        @add-produto="addProduto"
-        @remove-produto="removeProduto"
-        @update-produto="updateProduto"
-      />
+    <div class="grid gap-4 xl:grid-cols-[1fr_2fr]">
+      <!-- Coluna da Esquerda (Menor) -->
+      <div class="space-y-4">
+        <NotaCadastroCaptura
+          :preview-url="imageDataUrl"
+          :loading="notasStore.extractingNota"
+          @select-image="selecionarImagem"
+          @analyze="analisarImagem"
+        />
+        <NotaCadastroCliente
+          :nome-cliente="form.nome_cliente"
+          :telefone-cliente="form.telefone_cliente || ''"
+          :documento-cliente="form.documento_cliente || ''"
+          :contatos="crmStore.contatos"
+          :loading-search="crmStore.loadingContatos"
+          :show-suggestions="showCrmSuggestions"
+          :show-no-results="showCrmNoResults"
+          :errors="errors"
+          @update:nome-cliente="atualizarNomeCliente"
+          @update:telefone-cliente="form.telefone_cliente = formatPhone($event)"
+          @update:documento-cliente="form.documento_cliente = formatDocument($event)"
+          @search-contato="buscarContato"
+          @select-contato="selecionarContato"
+        />
+      </div>
 
-      <NotaCadastroResumo
-        :duplicate-nota="duplicateNota"
-        :loading="notasStore.creatingNota"
-        :error-message="notasStore.errorMessage"
-        @save="saveNota"
-      />
+      <!-- Coluna da Direita (Maior) -->
+      <div class="space-y-4">
+        <NotaCadastroFiscal
+          :numero-nota="form.numero_nota"
+          :serie-nota="form.serie_nota || '1'"
+          :chave-nfe="String(form.chave_nfe || '')"
+          :data-compra="form.data_compra"
+          :valor-total="totalProdutos.toFixed(2)"
+          :desconto-total="String(form.desconto_total ?? '')"
+          :valor-liquido="valorLiquido.toFixed(2)"
+          :observacoes="String(form.observacoes || '')"
+          :errors="errors"
+          @update:numero-nota="form.numero_nota = $event"
+          @update:serie-nota="form.serie_nota = $event"
+          @update:chave-nfe="form.chave_nfe = digitsOnly($event)"
+          @update:data-compra="form.data_compra = $event"
+          @update:desconto-total="form.desconto_total = toNumber($event)"
+          @update:observacoes="form.observacoes = $event"
+        />
+
+        <NotaCadastroProdutos
+          :produtos="form.produtos"
+          :errors="errors"
+          @add-produto="addProduto"
+          @remove-produto="removeProduto"
+          @update-produto="updateProduto"
+        />
+      </div>
     </div>
 
     <ModalGlobal v-model="successModalOpen" title="Nota salva com sucesso" max-width-class="max-w-md">

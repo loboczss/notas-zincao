@@ -19,7 +19,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="flex w-full flex-col gap-3 rounded-[20px] border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900 lg:flex-row lg:items-center lg:justify-between">
+  <div class="flex w-full flex-col gap-3 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900 lg:flex-row lg:items-center lg:justify-between">
     <div class="grid w-full gap-3 lg:max-w-3xl lg:grid-cols-[1fr_auto]">
       <label class="relative block min-w-0">
         <Search class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -35,11 +35,11 @@ const emit = defineEmits<{
 
       <button
         type="button"
-        class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-emerald-500 disabled:opacity-60"
+        class="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-emerald-500 disabled:opacity-60"
         :disabled="props.loading"
         @click="emit('search')"
       >
-        <Play class="h-4 w-4" />
+        <Search class="h-4 w-4" />
         Pesquisar
       </button>
     </div>

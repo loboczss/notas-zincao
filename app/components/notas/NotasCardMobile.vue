@@ -29,38 +29,35 @@ const valorFormatado = computed(() => {
 
 <template>
   <article
-    class="glass group relative overflow-hidden rounded-[2rem] border p-5 transition-all duration-300 active:scale-[0.98] dark:border-white/5"
+    class="relative overflow-hidden rounded-lg border border-slate-200 bg-white p-4 transition-colors hover:bg-slate-50 cursor-pointer active:scale-[0.99] dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800/50"
     @click="emit('open', nota.id)"
   >
-    <!-- Background Glow -->
-    <div class="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-brand-500/5 blur-2xl transition-opacity group-hover:opacity-100" />
-
     <div class="relative">
       <div class="flex items-start justify-between gap-3">
         <div class="flex flex-col">
-          <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+          <span class="text-xs font-medium text-slate-500 dark:text-slate-400">
             Nota {{ nota.serie_nota }}-{{ nota.numero_nota }}
           </span>
-          <h3 class="mt-1 line-clamp-1 text-base font-bold tracking-tight text-slate-900 dark:text-white">
+          <h3 class="mt-1 line-clamp-1 text-sm font-medium text-slate-900 dark:text-slate-200">
             {{ nota.nome_cliente }}
           </h3>
         </div>
         <NotasStatusBadge :status="nota.status_retirada" />
       </div>
 
-      <div class="mt-6 grid grid-cols-2 gap-4">
+      <div class="mt-4 grid grid-cols-2 gap-4">
         <div class="flex flex-col gap-1">
-          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 text-opacity-80">Data Compra</span>
-          <span class="text-xs font-bold text-slate-700 dark:text-slate-300">{{ dataCompra }}</span>
+          <span class="text-xs text-slate-500">Data Compra</span>
+          <span class="text-sm font-medium text-slate-900 dark:text-slate-200">{{ dataCompra }}</span>
         </div>
         <div class="flex flex-col gap-1">
-          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 text-opacity-80">Valor Total</span>
-          <span class="text-xs font-bold text-brand-600 dark:text-brand-400">{{ valorFormatado }}</span>
+          <span class="text-xs text-slate-500">Valor Total</span>
+          <span class="text-sm font-medium text-slate-900 dark:text-slate-200">{{ valorFormatado }}</span>
         </div>
       </div>
 
-      <div class="mt-6 flex items-center justify-between border-t border-slate-100 pt-4 dark:border-white/5">
-        <span class="text-[10px] font-medium text-slate-400 dark:text-slate-500">
+      <div class="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 dark:border-slate-800">
+        <span class="text-xs text-slate-400 dark:text-slate-500">
           Ref: {{ nota.id.slice(0, 8) }}
         </span>
 
@@ -70,16 +67,16 @@ const valorFormatado = computed(() => {
             :href="nota.foto_url"
             target="_blank"
             rel="noopener noreferrer"
-            class="flex h-9 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-[10px] font-bold text-slate-600 transition-all hover:bg-slate-50 active:scale-95 dark:border-white/10 dark:bg-white/5 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
+            class="flex h-8 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
             @click.stop
           >
-            <ReceiptText class="h-3.5 w-3.5 text-brand-500" />
-            Cupom
+            <ReceiptText class="h-3.5 w-3.5" />
+            <span>Cupom</span>
           </a>
           <button
-            class="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-white transition-all hover:bg-brand-600 active:scale-95 dark:bg-brand-600 dark:hover:bg-brand-500"
+            class="flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right"><path d="m9 18 6-6-6-6"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right"><path d="m9 18 6-6-6-6"/></svg>
           </button>
         </div>
       </div>

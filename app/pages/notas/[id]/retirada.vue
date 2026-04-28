@@ -165,45 +165,49 @@ await carregarDetalhe()
 <template>
   <AppPageShell
     eyebrow="Retirada"
-    title="Registrar retirada da nota"
-    description="Informe os itens entregues e anexe a evidencia da retirada."
+    title="Registrar Retirada da Nota"
+    description="Informe os itens entregues e anexe a evidência da retirada."
   >
-    <div v-if="loading" class="rounded-3xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
+    <div v-if="loading" class="rounded-xl border border-slate-200 bg-white p-6 text-center text-sm font-medium text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
       Carregando nota...
     </div>
 
     <div v-else-if="nota" class="space-y-6">
-      <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div class="mb-3 flex items-start justify-between gap-2">
-          <NotasStatusBadge :status="nota.status_retirada" />
-          <p class="text-xs text-slate-500 dark:text-slate-400">Nota {{ nota.serie_nota }}-{{ nota.numero_nota }}</p>
+      <section class="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+        <div class="mb-2 flex flex-wrap items-center justify-between gap-4">
+          <div class="flex items-center gap-2">
+            <h2 class="text-lg font-bold text-slate-900 dark:text-white">{{ nota.nome_cliente }}</h2>
+            <NotasStatusBadge :status="nota.status_retirada" />
+          </div>
+          <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Nota {{ nota.serie_nota }}-{{ nota.numero_nota }}</p>
         </div>
-        <h2 class="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100">{{ nota.nome_cliente }}</h2>
-        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Data da compra: {{ formatDate(nota.data_compra) }}</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Data da compra: {{ formatDate(nota.data_compra) }}</p>
       </section>
 
-      <section class="space-y-3 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <h3 class="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Itens para retirada</h3>
+      <section class="space-y-4 rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+        <h3 class="text-sm font-semibold text-slate-900 dark:text-white border-b border-slate-100 pb-3 dark:border-slate-800">Itens para Retirada</h3>
         <div class="space-y-3">
           <div
             v-for="(produto, index) in produtos"
             :key="`${nota.id}-${index}`"
-            class="rounded-2xl border border-slate-200 p-4 dark:border-slate-700"
+            class="rounded-lg border border-slate-200 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-950/50"
           >
-            <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
-                <p class="font-semibold text-slate-900 dark:text-slate-100">{{ produto.nome || 'Produto sem nome' }}</p>
-                <p v-if="produto.id_produto_estoque" class="text-xs font-medium text-emerald-700 dark:text-emerald-300">
-                  ID do estoque: #{{ produto.id_produto_estoque }}
+                <p class="font-semibold text-slate-900 text-sm dark:text-white">{{ produto.nome || 'Produto sem nome' }}</p>
+                <p v-if="produto.id_produto_estoque" class="text-xs font-medium text-slate-500 dark:text-slate-400">
+                  ID: #{{ produto.id_produto_estoque }}
                 </p>
-                <p class="text-sm text-slate-500 dark:text-slate-400">
-                  Comprado: {{ toNumber(produto.quantidade) }} | Entregue: {{ toNumber(produto.quantidade_retirada) }} | Saldo: {{ saldoItem(produto) }}
-                </p>
-                <p class="text-sm text-slate-600 dark:text-slate-300">Valor unitario: {{ formatCurrency(produto.valor_unitario) }}</p>
+                <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600 dark:text-slate-400">
+                  <span>Comprado: <strong class="text-slate-900 dark:text-slate-200">{{ toNumber(produto.quantidade) }}</strong></span>
+                  <span>Entregue: <strong class="text-emerald-600 dark:text-emerald-400">{{ toNumber(produto.quantidade_retirada) }}</strong></span>
+                  <span>Saldo: <strong class="text-brand-600 dark:text-brand-400">{{ saldoItem(produto) }}</strong></span>
+                  <span>V. Unit: {{ formatCurrency(produto.valor_unitario) }}</span>
+                </div>
               </div>
 
-              <div class="w-full md:w-40">
-                <label class="mb-1 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Quantidade</label>
+              <div class="w-full md:w-32 shrink-0">
+                <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Quantidade</label>
                 <Input
                   v-model="retirarForm[index]"
                   type="number"
@@ -211,6 +215,7 @@ await carregarDetalhe()
                   step="0.5"
                   :max="String(saldoItem(produto))"
                   placeholder="0"
+                  class="h-9 text-sm"
                 />
               </div>
             </div>
@@ -218,41 +223,45 @@ await carregarDetalhe()
         </div>
       </section>
 
-      <section class="space-y-3 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <label class="block space-y-1">
-          <span class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Foto da retirada</span>
-          <input type="file" accept="image/*" class="block w-full text-sm text-slate-700 dark:text-slate-300" @change="onSelecionarFoto">
-        </label>
+      <section class="space-y-4 rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+        <h3 class="text-sm font-semibold text-slate-900 dark:text-white border-b border-slate-100 pb-3 dark:border-slate-800">Evidência e Observações</h3>
+        
+        <div class="grid gap-6 md:grid-cols-2">
+          <label class="block space-y-2">
+            <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Foto da Retirada</span>
+            <input type="file" accept="image/*" class="block w-full text-sm text-slate-700 dark:text-slate-300" @change="onSelecionarFoto">
+          </label>
 
-        <div v-if="fotoPreviewUrl" class="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700">
-          <img :src="fotoPreviewUrl" alt="Preview da retirada" class="max-h-52 w-full object-cover">
+          <label class="block space-y-2">
+            <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Observações (Opcional)</span>
+            <textarea
+              v-model="observacoesRetirada"
+              rows="3"
+              class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition-colors focus:border-brand-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
+              placeholder="Ex: Entregue ao motorista João"
+            />
+          </label>
         </div>
 
-        <label class="block space-y-1">
-          <span class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Observacoes</span>
-          <textarea
-            v-model="observacoesRetirada"
-            rows="4"
-            class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition-colors focus:border-brand-400 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
-            placeholder="Opcional"
-          />
-        </label>
+        <div v-if="fotoPreviewUrl" class="mt-4 overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800">
+          <img :src="fotoPreviewUrl" alt="Preview da retirada" class="max-h-48 w-auto object-contain bg-slate-50 dark:bg-slate-950">
+        </div>
 
-        <p v-if="erroLocal" class="text-sm text-rose-600 dark:text-rose-400">{{ erroLocal }}</p>
+        <p v-if="erroLocal" class="text-sm font-medium text-rose-600 dark:text-rose-400">{{ erroLocal }}</p>
 
-        <div class="flex flex-col gap-3 sm:flex-row">
+        <div class="mt-6 flex flex-col gap-3 sm:flex-row border-t border-slate-100 pt-6 dark:border-slate-800">
           <button
             type="button"
-            class="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-brand-600 px-4 py-3 text-base font-bold text-white transition-colors hover:bg-brand-500 disabled:opacity-60"
+            class="inline-flex items-center justify-center rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-500 disabled:opacity-60"
             :disabled="saving"
             @click="submitRetirada"
           >
-            {{ saving ? 'Enviando...' : 'Confirmar retirada' }}
+            {{ saving ? 'Enviando...' : 'Confirmar Retirada' }}
           </button>
 
           <button
             type="button"
-            class="inline-flex items-center justify-center rounded-2xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+            class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
             @click="router.push('/notas')"
           >
             Cancelar

@@ -37,11 +37,11 @@ onUnmounted(() => {
   >
     <!-- Dynamic backdrop -->
     <div 
-      class="absolute inset-0 transition-all duration-500 ease-in-out"
+      class="absolute inset-0 transition-colors duration-300"
       :class="[
         isScrolled 
-          ? 'bg-white/90 dark:bg-slate-950/95 backdrop-blur-xl border-b border-black/[0.05] dark:border-white/[0.05] shadow-lg shadow-black/5'
-          : 'bg-white/10 dark:bg-slate-900/10 backdrop-blur-sm border-b border-transparent shadow-none'
+          ? 'bg-white border-b border-slate-200 dark:bg-slate-950 dark:border-slate-800'
+          : 'bg-transparent border-b border-transparent'
       ]"
     />
     
