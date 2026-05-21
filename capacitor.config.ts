@@ -1,5 +1,5 @@
 import type { CapacitorConfig } from '@capacitor/cli'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'fs'
 
 type CapacitorServerFile = {
   url?: string
