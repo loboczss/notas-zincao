@@ -24,11 +24,11 @@
     "hash": "fbaf7cc870c663eb52dcf218531c439d"
   },
   "D:\\dev\\notas-zincao\\android\\app\\src\\main\\assets\\public\\cordova.js": {
-    "mtime": 1779404368.9614973,
+    "mtime": 1779405316.6300707,
     "hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "D:\\dev\\notas-zincao\\android\\app\\src\\main\\assets\\public\\cordova_plugins.js": {
-    "mtime": 1779404368.9614973,
+    "mtime": 1779405316.6300707,
     "hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "D:\\dev\\notas-zincao\\android\\app\\src\\main\\java\\br\\com\\zincao\\notas\\MainActivity.java": {
@@ -172,8 +172,8 @@
     "hash": "0243778fc0be32d6b66b384a9fb18ac4"
   },
   "D:\\dev\\notas-zincao\\app\\components\\nota-cadastro\\NotaCadastroCaptura.vue": {
-    "mtime": 1779388024.3939223,
-    "hash": "638c5a58f98267f57111233ef65a9858"
+    "mtime": 1779405134.9324791,
+    "hash": "618ae28efb1b5a24b47200d1a55754eb"
   },
   "D:\\dev\\notas-zincao\\app\\components\\nota-cadastro\\NotaCadastroCliente.vue": {
     "mtime": 1779386304.014287,
@@ -344,8 +344,8 @@
     "hash": "ca87baf3aa2ad673a22a0caf451ee2cb"
   },
   "D:\\dev\\notas-zincao\\app\\pages\\cadastrar-nota.vue": {
-    "mtime": 1779389203.8124733,
-    "hash": "c832edab6033c02fa7b41014eceba337"
+    "mtime": 1779405276.3977451,
+    "hash": "defedac5b4888b6b92fc8ef61739e9db"
   },
   "D:\\dev\\notas-zincao\\app\\pages\\confirm.vue": {
     "mtime": 1775747273.4976315,
@@ -372,8 +372,8 @@
     "hash": "6add3d767feabab5404e30ba0cd21d97"
   },
   "D:\\dev\\notas-zincao\\app\\pages\\sincronizacao.vue": {
-    "mtime": 1779402542.1640227,
-    "hash": "9211088dd1527c11cb7b83450a0763f5"
+    "mtime": 1779404887.288695,
+    "hash": "2d58975c85caa02fe34f9d61b8f28dbe"
   },
   "D:\\dev\\notas-zincao\\app\\pages\\admin\\lixeira.vue": {
     "mtime": 1779373357.9710116,

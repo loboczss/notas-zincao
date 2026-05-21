@@ -1399,7 +1399,7 @@
       "label": "if()",
       "file_type": "code",
       "source_file": "app/pages/sincronizacao.vue",
-      "source_location": "L38",
+      "source_location": "L37",
       "id": "pages_sincronizacao_if",
       "community": 34,
       "norm_label": "if()"
@@ -7199,9 +7199,9 @@
       "source_file": "app/stores/notas/store.ts",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_stores_notas_store_ts",
-      "target": "utils_offline_notas_sync_hydratenotaofflinemediafromcache",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_hydratenotaofflinemediafromcache"
     },
     {
       "relation": "imports",
@@ -7210,9 +7210,9 @@
       "source_file": "app/stores/notas/store.ts",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_stores_notas_store_ts",
-      "target": "utils_offline_notas_sync_preservenotaofflinemediadataurls",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_preservenotaofflinemediadataurls"
     },
     {
       "relation": "imports",
@@ -8254,9 +8254,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L186",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_notas_sync_isdataurl",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_isdataurl"
     },
     {
       "relation": "contains",
@@ -8264,9 +8264,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L188",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_notas_sync_getofflinestorageobjectpath",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_getofflinestorageobjectpath"
     },
     {
       "relation": "contains",
@@ -8274,9 +8274,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L246",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_notas_sync_getnotamediacandidates",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_getnotamediacandidates"
     },
     {
       "relation": "contains",
@@ -8334,9 +8334,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L337",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_notas_sync_preservenotaofflinemediadataurls",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_preservenotaofflinemediadataurls"
     },
     {
       "relation": "contains",
@@ -8344,9 +8344,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L364",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_notas_sync_hydratenotaofflinemediafromcache",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_hydratenotaofflinemediafromcache"
     },
     {
       "relation": "contains",
@@ -8476,9 +8476,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L343",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_notas_sync_preservenotaofflinemediadataurls",
-      "target": "utils_offline_notas_sync_clonejson",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_clonejson"
     },
     {
       "relation": "calls",
@@ -8487,9 +8487,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L367",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_notas_sync_hydratenotaofflinemediafromcache",
-      "target": "utils_offline_notas_sync_clonejson",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_clonejson"
     },
     {
       "relation": "calls",
@@ -8564,9 +8564,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L194",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_notas_sync_getofflinestorageobjectpath",
-      "target": "utils_offline_notas_sync_isdataurl",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_isdataurl"
     },
     {
       "relation": "calls",
@@ -8575,9 +8575,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L353",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_notas_sync_preservenotaofflinemediadataurls",
-      "target": "utils_offline_notas_sync_isdataurl",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_isdataurl"
     },
     {
       "relation": "calls",
@@ -8586,9 +8586,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L370",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_notas_sync_hydratenotaofflinemediafromcache",
-      "target": "utils_offline_notas_sync_isdataurl",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_isdataurl"
     },
     {
       "relation": "calls",
@@ -8597,9 +8597,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L372",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_notas_sync_hydratenotaofflinemediafromcache",
-      "target": "utils_offline_notas_sync_getofflinestorageobjectpath",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_getofflinestorageobjectpath"
     },
     {
       "relation": "calls",
@@ -8608,9 +8608,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L345",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_notas_sync_preservenotaofflinemediadataurls",
-      "target": "utils_offline_notas_sync_getnotamediacandidates",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_getnotamediacandidates"
     },
     {
       "relation": "calls",
@@ -8619,9 +8619,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L369",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_notas_sync_hydratenotaofflinemediafromcache",
-      "target": "utils_offline_notas_sync_getnotamediacandidates",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_getnotamediacandidates"
     },
     {
       "relation": "calls",
@@ -8652,9 +8652,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L375",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_notas_sync_hydratenotaofflinemediafromcache",
-      "target": "utils_offline_notas_sync_assetcachekey",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_assetcachekey"
     },
     {
       "relation": "calls",
@@ -8696,9 +8696,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L357",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_notas_sync_preservenotaofflinemediadataurls",
-      "target": "utils_offline_notas_sync_setfieldvalue",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_setfieldvalue"
     },
     {
       "relation": "calls",
@@ -8707,9 +8707,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L381",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_notas_sync_hydratenotaofflinemediafromcache",
-      "target": "utils_offline_notas_sync_setfieldvalue",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_setfieldvalue"
     },
     {
       "relation": "calls",

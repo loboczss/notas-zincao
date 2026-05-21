@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
-import { RefreshCw } from 'lucide-vue-next'
 import AppPageShell from '../components/layout/AppPageShell.vue'
 import InfiniteScrollTrigger from '../components/InfiniteScrollTrigger.vue'
 import OfflineQueueList from '../components/offline/OfflineQueueList.vue'
@@ -79,18 +78,6 @@ onMounted(async () => {
     title="Sincronizacao"
     description="Acompanhe notas, retiradas e alteracoes salvas no aparelho aguardando envio."
   >
-    <template #headerAside>
-      <button
-        type="button"
-        class="inline-flex items-center justify-center gap-2 rounded-md bg-brand-600 px-4 py-2 text-xs font-medium text-white transition hover:bg-brand-500 active:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
-        :disabled="notasSync.running.value || !offline.isOnline.value"
-        @click="() => syncNow()"
-      >
-        <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': notasSync.running.value }" />
-        <span>Sincronizar tudo</span>
-      </button>
-    </template>
-
     <div class="space-y-5">
       <OfflineNotasSyncPanel
         :is-online="offline.isOnline.value"

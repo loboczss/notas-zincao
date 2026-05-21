@@ -1,7 +1,7 @@
 # Graph Report - notas-zincao  (2026-05-21)
 
 ## Corpus Check
-- 189 files · ~81,994 words
+- 189 files · ~82,141 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import AppPageShell from '../components/layout/AppPageShell.vue'
 import ModalGlobal from '../components/ModalGlobal.vue'
@@ -274,16 +274,20 @@ const selecionarImagem = async (event: Event) => {
   const file = target.files?.[0]
 
   if (!file) {
-    imageDataUrl.value = ''
+    target.value = ''
     return
   }
 
   const reader = new FileReader()
-  imageDataUrl.value = await new Promise<string>((resolve, reject) => {
-    reader.onload = () => resolve(String(reader.result || ''))
-    reader.onerror = () => reject(new Error('Falha ao ler imagem'))
-    reader.readAsDataURL(file)
-  })
+  try {
+    imageDataUrl.value = await new Promise<string>((resolve, reject) => {
+      reader.onload = () => resolve(String(reader.result || ''))
+      reader.onerror = () => reject(new Error('Falha ao ler imagem'))
+      reader.readAsDataURL(file)
+    })
+  } finally {
+    target.value = ''
+  }
 }
 
 const normalizeProduto = (produto: NotaProduto): NotaProduto => {
@@ -416,9 +420,12 @@ const cadastrarOutra = async () => {
   form.desconto_total = 0
   resetErrors()
   crmStore.clearContatos()
-  await notasStore.fetchNotas()
+  void notasStore.fetchNotas()
 }
-await notasStore.fetchNotas()
+
+onMounted(() => {
+  void notasStore.fetchNotas()
+})
 </script>
 
 <template>
