@@ -15,7 +15,11 @@ import {
   NOTAS_LIXEIRA_CACHE_KEY,
   NOTAS_RETIRADA_CACHE_KEY,
 } from '../../utils/offline-cache-keys'
-import { queryOfflineNotasLocal } from '../../utils/offline-notas-sync'
+import {
+  hydrateNotaOfflineMediaFromCache,
+  preserveNotaOfflineMediaDataUrls,
+  queryOfflineNotasLocal,
+} from '../../utils/offline-notas-sync'
 
 import type {
   NotaExtractionResponse,
@@ -55,8 +59,8 @@ const createOfflineNota = (payload: NotaRetiradaDraft, id = createOfflineNotaId(
   status_retirada: payload.status_retirada || 'pendente',
   criado_em: new Date().toISOString(),
   produtos: payload.produtos,
-  foto_url: payload.foto_url || null,
-  foto_cliente_url: payload.foto_cliente_url || null,
+  foto_url: payload.foto_url || payload.foto_cupom_data_url || null,
+  foto_cliente_url: payload.foto_cliente_url || payload.foto_cliente_data_url || null,
   comprovante_retirada_url: null,
   _offlineStatus: 'pending_create',
 } as NotaRetiradaListItem)
@@ -191,9 +195,17 @@ export const useNotasStore = defineStore('notas', () => {
     await setOfflineCache(NOTAS_RETIRADA_CACHE_KEY, notasRetirada.value)
   }
 
-  const persistNotaDetailCache = async (nota: NotaRetiradaListItem | NotaRetiradaDetalheItem) => {
+  const prepareNotaForOfflineCache = async (nota: NotaRetiradaListItem | NotaRetiradaDetalheItem) => {
     const detalhe = toDetalheNota(nota)
+    const cached = await getOfflineCache<NotaRetiradaDetalheItem>(`${NOTAS_DETAIL_CACHE_PREFIX}${detalhe.id}`)
+    const preserved = preserveNotaOfflineMediaDataUrls(detalhe, cached)
+    return await hydrateNotaOfflineMediaFromCache(preserved)
+  }
+
+  const persistNotaDetailCache = async (nota: NotaRetiradaListItem | NotaRetiradaDetalheItem) => {
+    const detalhe = await prepareNotaForOfflineCache(nota)
     await setOfflineCache(`${NOTAS_DETAIL_CACHE_PREFIX}${detalhe.id}`, detalhe)
+    return detalhe
   }
 
   const findNotaLocal = (notaId: string) => {
@@ -272,7 +284,9 @@ export const useNotasStore = defineStore('notas', () => {
         },
       })
 
-      const incomingNotas = data.notas || []
+      const incomingNotas = await Promise.all(
+        (data.notas || []).map(nota => prepareNotaForOfflineCache(nota)),
+      )
       notas.value = options.append
         ? mergeNotas(notas.value, incomingNotas)
         : incomingNotas
@@ -315,7 +329,10 @@ export const useNotasStore = defineStore('notas', () => {
       }>(NOTAS_CACHE_KEY)
 
       if (cached) {
-        const filtered = filterLocalNotas(cached.notas || [], filters)
+        const cachedNotas = await Promise.all(
+          (cached.notas || []).map(nota => prepareNotaForOfflineCache(nota)),
+        )
+        const filtered = filterLocalNotas(cachedNotas, filters)
         const localPage = paginateLocalNotas(
           filtered,
           filters.page || page.value,
@@ -412,6 +429,20 @@ export const useNotasStore = defineStore('notas', () => {
       })
 
       await fetchNotas()
+      if (data?.nota?.id) {
+        const createdLocalNota = createOfflineNota({
+          ...payload,
+          status_retirada: data.nota.status_retirada,
+          serie_nota: data.nota.serie_nota,
+          numero_nota: data.nota.numero_nota,
+        }, data.nota.id)
+
+        await replaceNotaInCaches(toDetalheNota({
+          ...createdLocalNota,
+          id: data.nota.id,
+          nome_cliente: data.nota.nome_cliente || createdLocalNota.nome_cliente,
+        }))
+      }
       return data
     }
     catch (error) {
@@ -442,7 +473,9 @@ export const useNotasStore = defineStore('notas', () => {
         },
       })
 
-      notasRetirada.value = data.notas || []
+      notasRetirada.value = await Promise.all(
+        (data.notas || []).map(nota => prepareNotaForOfflineCache(nota)),
+      )
       await persistRetiradaCache()
       await Promise.all(notasRetirada.value.map(persistNotaDetailCache))
       return notasRetirada.value
@@ -450,7 +483,7 @@ export const useNotasStore = defineStore('notas', () => {
     catch (error) {
       const cached = await getOfflineCache<NotaRetiradaDetalheItem[]>(NOTAS_RETIRADA_CACHE_KEY)
       if (cached) {
-        notasRetirada.value = cached
+        notasRetirada.value = await Promise.all(cached.map(nota => prepareNotaForOfflineCache(nota)))
         errorMessage.value = 'Modo offline: exibindo retiradas salvas no aparelho.'
         return notasRetirada.value
       }
@@ -474,14 +507,15 @@ export const useNotasStore = defineStore('notas', () => {
         nota: NotaRetiradaDetalheItem
       }>(`/api/notas/${id}/detail`)
 
-      notaDetalheAtual.value = toDetalheNota(data.nota)
-      await persistNotaDetailCache(notaDetalheAtual.value)
+      notaDetalheAtual.value = await prepareNotaForOfflineCache(data.nota)
+      await setOfflineCache(`${NOTAS_DETAIL_CACHE_PREFIX}${notaDetalheAtual.value.id}`, notaDetalheAtual.value)
       return notaDetalheAtual.value
     }
     catch (error) {
       const cached = await getOfflineCache<NotaRetiradaDetalheItem>(`${NOTAS_DETAIL_CACHE_PREFIX}${id}`)
       if (cached) {
-        notaDetalheAtual.value = toDetalheNota(cached)
+        notaDetalheAtual.value = await prepareNotaForOfflineCache(cached)
+        await setOfflineCache(`${NOTAS_DETAIL_CACHE_PREFIX}${notaDetalheAtual.value.id}`, notaDetalheAtual.value)
         errorMessage.value = 'Modo offline: exibindo detalhe salvo no aparelho.'
         return notaDetalheAtual.value
       }
@@ -601,7 +635,27 @@ export const useNotasStore = defineStore('notas', () => {
       })
 
       if (data?.nota) {
-        await replaceNotaInCaches(toDetalheNota(data.nota))
+        const notaAtualizada = toDetalheNota(data.nota)
+
+        if (payload.foto_cliente_retirada_data_url) {
+          notaAtualizada.comprovante_retirada_url = payload.foto_cliente_retirada_data_url
+
+          const historico = Array.isArray(notaAtualizada.historico_retiradas)
+            ? [...notaAtualizada.historico_retiradas]
+            : []
+          const ultimoIndice = historico.length - 1
+          const ultimoEvento = ultimoIndice >= 0 ? historico[ultimoIndice] : null
+
+          if (ultimoEvento) {
+            historico[ultimoIndice] = {
+              ...ultimoEvento,
+              fotos: [payload.foto_cliente_retirada_data_url],
+            }
+            notaAtualizada.historico_retiradas = historico
+          }
+        }
+
+        await replaceNotaInCaches(notaAtualizada)
       }
       await fetchNotasRetirada()
       showSuccess('Retirada registrada com sucesso!')
@@ -711,7 +765,9 @@ export const useNotasStore = defineStore('notas', () => {
         notas: NotaRetiradaListItem[]
       }>('/api/notas/lixeira')
 
-      lixeira.value = data.notas || []
+      lixeira.value = await Promise.all(
+        (data.notas || []).map(nota => prepareNotaForOfflineCache(nota)),
+      )
       await setOfflineCache(NOTAS_LIXEIRA_CACHE_KEY, lixeira.value)
       await Promise.all(lixeira.value.map(persistNotaDetailCache))
       return lixeira.value
@@ -719,7 +775,7 @@ export const useNotasStore = defineStore('notas', () => {
     catch (error) {
       const cached = await getOfflineCache<NotaRetiradaListItem[]>(NOTAS_LIXEIRA_CACHE_KEY)
       if (cached) {
-        lixeira.value = cached
+        lixeira.value = await Promise.all(cached.map(nota => prepareNotaForOfflineCache(nota)))
         errorMessage.value = 'Modo offline: exibindo lixeira salva no aparelho.'
         return lixeira.value
       }

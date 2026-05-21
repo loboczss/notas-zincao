@@ -106,14 +106,15 @@ const getNotaAssetCandidates = (nota: Partial<NotaRetiradaRow>): NotaAssetCandid
 export const collectNotaOfflineAssets = (
   nota: Partial<NotaRetiradaRow> & { id: string },
 ): OfflineNotaAsset[] => {
-  const seenPaths = new Set<string>()
+  const seenFields = new Set<string>()
   const assets: OfflineNotaAsset[] = []
 
   for (const candidate of getNotaAssetCandidates(nota)) {
     const path = getNotasRetiradaStoragePath(candidate.value)
-    if (!path || seenPaths.has(path)) continue
+    const fieldKey = `${candidate.field}:${path}`
+    if (!path || seenFields.has(fieldKey)) continue
 
-    seenPaths.add(path)
+    seenFields.add(fieldKey)
     assets.push({
       id: `${nota.id}:${candidate.field}`,
       nota_id: nota.id,
@@ -161,7 +162,6 @@ export const createSignedUrlMap = async (
           const signedUrl = String(item?.signedUrl || '').trim()
           if (path && signedUrl) signedUrlByPath.set(path, signedUrl)
         })
-        continue
       }
 
       if (error) {
@@ -169,7 +169,9 @@ export const createSignedUrlMap = async (
       }
     }
 
-    await Promise.all(pathChunk.map(async (path) => {
+    const missingPaths = pathChunk.filter(path => !signedUrlByPath.has(path))
+
+    await Promise.all(missingPaths.map(async (path) => {
       const { data, error } = await storage.createSignedUrl(path, expiresIn)
       if (error) {
         console.error(`[sync/notas] signed url error for ${path}:`, error.message)

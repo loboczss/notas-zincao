@@ -1095,7 +1095,7 @@
       "source_file": "app/composables/useNoteManagement.ts",
       "source_location": "L1",
       "id": "app_composables_usenotemanagement_ts",
-      "community": 6,
+      "community": 8,
       "norm_label": "usenotemanagement.ts"
     },
     {
@@ -1104,7 +1104,7 @@
       "source_file": "app/composables/useNoteManagement.ts",
       "source_location": "L7",
       "id": "composables_usenotemanagement_usenotemanagement",
-      "community": 6,
+      "community": 8,
       "norm_label": "usenotemanagement()"
     },
     {
@@ -1113,7 +1113,7 @@
       "source_file": "app/composables/useOfflineNotasSync.ts",
       "source_location": "L1",
       "id": "app_composables_useofflinenotassync_ts",
-      "community": 2,
+      "community": 8,
       "norm_label": "useofflinenotassync.ts"
     },
     {
@@ -1122,7 +1122,7 @@
       "source_file": "app/composables/useOfflineNotasSync.ts",
       "source_location": "L72",
       "id": "composables_useofflinenotassync_resetrunstate",
-      "community": 2,
+      "community": 8,
       "norm_label": "resetrunstate()"
     },
     {
@@ -1131,7 +1131,7 @@
       "source_file": "app/composables/useOfflineNotasSync.ts",
       "source_location": "L103",
       "id": "composables_useofflinenotassync_notelabel",
-      "community": 2,
+      "community": 8,
       "norm_label": "notelabel()"
     },
     {
@@ -1140,7 +1140,7 @@
       "source_file": "app/composables/useOfflineNotasSync.ts",
       "source_location": "L109",
       "id": "composables_useofflinenotassync_upsertnote",
-      "community": 2,
+      "community": 8,
       "norm_label": "upsertnote()"
     },
     {
@@ -1149,7 +1149,7 @@
       "source_file": "app/composables/useOfflineNotasSync.ts",
       "source_location": "L145",
       "id": "composables_useofflinenotassync_applyprogress",
-      "community": 2,
+      "community": 8,
       "norm_label": "applyprogress()"
     },
     {
@@ -1158,7 +1158,7 @@
       "source_file": "app/composables/useOfflineNotasSync.ts",
       "source_location": "L221",
       "id": "composables_useofflinenotassync_refreshlocalsnapshot",
-      "community": 2,
+      "community": 8,
       "norm_label": "refreshlocalsnapshot()"
     },
     {
@@ -1167,7 +1167,7 @@
       "source_file": "app/composables/useOfflineNotasSync.ts",
       "source_location": "L231",
       "id": "composables_useofflinenotassync_syncallnotas",
-      "community": 2,
+      "community": 8,
       "norm_label": "syncallnotas()"
     },
     {
@@ -1176,7 +1176,7 @@
       "source_file": "app/composables/useOfflineNotasSync.ts",
       "source_location": "L261",
       "id": "composables_useofflinenotassync_autosyncifneeded",
-      "community": 2,
+      "community": 8,
       "norm_label": "autosyncifneeded()"
     },
     {
@@ -1185,7 +1185,7 @@
       "source_file": "app/composables/useOfflineNotasSync.ts",
       "source_location": "L283",
       "id": "composables_useofflinenotassync_useofflinenotassync",
-      "community": 6,
+      "community": 8,
       "norm_label": "useofflinenotassync()"
     },
     {
@@ -1230,7 +1230,7 @@
       "source_file": "app/composables/useRetiradasHistorico.ts",
       "source_location": "L1",
       "id": "app_composables_useretiradashistorico_ts",
-      "community": 6,
+      "community": 0,
       "norm_label": "useretiradashistorico.ts"
     },
     {
@@ -1239,7 +1239,7 @@
       "source_file": "app/composables/useRetiradasHistorico.ts",
       "source_location": "L22",
       "id": "composables_useretiradashistorico_useretiradashistorico",
-      "community": 6,
+      "community": 0,
       "norm_label": "useretiradashistorico()"
     },
     {
@@ -1248,7 +1248,7 @@
       "source_file": "app/composables/useToast.ts",
       "source_location": "L1",
       "id": "app_composables_usetoast_ts",
-      "community": 6,
+      "community": 8,
       "norm_label": "usetoast.ts"
     },
     {
@@ -1257,7 +1257,7 @@
       "source_file": "app/composables/useToast.ts",
       "source_location": "L13",
       "id": "composables_usetoast_usetoast",
-      "community": 6,
+      "community": 8,
       "norm_label": "usetoast()"
     },
     {
@@ -1527,7 +1527,7 @@
       "source_file": "app/plugins/offline-sync.client.ts",
       "source_location": "L1",
       "id": "app_plugins_offline_sync_client_ts",
-      "community": 6,
+      "community": 8,
       "norm_label": "offline-sync.client.ts"
     },
     {
@@ -1536,7 +1536,7 @@
       "source_file": "app/plugins/offline-sync.client.ts",
       "source_location": "L11",
       "id": "plugins_offline_sync_client_syncnotasifneeded",
-      "community": 6,
+      "community": 8,
       "norm_label": "syncnotasifneeded()"
     },
     {
@@ -1545,7 +1545,7 @@
       "source_file": "app/plugins/offline-sync.client.ts",
       "source_location": "L26",
       "id": "plugins_offline_sync_client_refreshandsync",
-      "community": 6,
+      "community": 8,
       "norm_label": "refreshandsync()"
     },
     {
@@ -1590,7 +1590,7 @@
       "source_file": "app/stores/admin/users/store.ts",
       "source_location": "L1",
       "id": "app_stores_admin_users_store_ts",
-      "community": 6,
+      "community": 8,
       "norm_label": "store.ts"
     },
     {
@@ -1608,7 +1608,7 @@
       "source_file": "app/stores/auth/store.ts",
       "source_location": "L1",
       "id": "app_stores_auth_store_ts",
-      "community": 6,
+      "community": 0,
       "norm_label": "store.ts"
     },
     {
@@ -1644,7 +1644,7 @@
       "source_file": "app/stores/crm/store.ts",
       "source_location": "L1",
       "id": "app_stores_crm_store_ts",
-      "community": 6,
+      "community": 0,
       "norm_label": "store.ts"
     },
     {
@@ -1698,88 +1698,88 @@
       "source_file": "app/stores/notas/store.ts",
       "source_location": "L1",
       "id": "app_stores_notas_store_ts",
-      "community": 6,
+      "community": 0,
       "norm_label": "store.ts"
     },
     {
       "label": "createOfflineNotaId()",
       "file_type": "code",
       "source_file": "app/stores/notas/store.ts",
-      "source_location": "L43",
+      "source_location": "L47",
       "id": "notas_store_createofflinenotaid",
-      "community": 6,
+      "community": 0,
       "norm_label": "createofflinenotaid()"
     },
     {
       "label": "createOfflineNota()",
       "file_type": "code",
       "source_file": "app/stores/notas/store.ts",
-      "source_location": "L45",
+      "source_location": "L49",
       "id": "notas_store_createofflinenota",
-      "community": 6,
+      "community": 0,
       "norm_label": "createofflinenota()"
     },
     {
       "label": "toNumber()",
       "file_type": "code",
       "source_file": "app/stores/notas/store.ts",
-      "source_location": "L64",
+      "source_location": "L68",
       "id": "notas_store_tonumber",
-      "community": 6,
+      "community": 0,
       "norm_label": "tonumber()"
     },
     {
       "label": "normalizeSearchText()",
       "file_type": "code",
       "source_file": "app/stores/notas/store.ts",
-      "source_location": "L74",
+      "source_location": "L78",
       "id": "notas_store_normalizesearchtext",
-      "community": 6,
+      "community": 0,
       "norm_label": "normalizesearchtext()"
     },
     {
       "label": "isInsideDateRange()",
       "file_type": "code",
       "source_file": "app/stores/notas/store.ts",
-      "source_location": "L82",
+      "source_location": "L86",
       "id": "notas_store_isinsidedaterange",
-      "community": 6,
+      "community": 0,
       "norm_label": "isinsidedaterange()"
     },
     {
       "label": "filterLocalNotas()",
       "file_type": "code",
       "source_file": "app/stores/notas/store.ts",
-      "source_location": "L90",
+      "source_location": "L94",
       "id": "notas_store_filterlocalnotas",
-      "community": 6,
+      "community": 0,
       "norm_label": "filterlocalnotas()"
     },
     {
       "label": "paginateLocalNotas()",
       "file_type": "code",
       "source_file": "app/stores/notas/store.ts",
-      "source_location": "L117",
+      "source_location": "L121",
       "id": "notas_store_paginatelocalnotas",
-      "community": 6,
+      "community": 0,
       "norm_label": "paginatelocalnotas()"
     },
     {
       "label": "toDetalheNota()",
       "file_type": "code",
       "source_file": "app/stores/notas/store.ts",
-      "source_location": "L137",
+      "source_location": "L141",
       "id": "notas_store_todetalhenota",
-      "community": 6,
+      "community": 0,
       "norm_label": "todetalhenota()"
     },
     {
       "label": "getStatusFromProdutos()",
       "file_type": "code",
       "source_file": "app/stores/notas/store.ts",
-      "source_location": "L147",
+      "source_location": "L151",
       "id": "notas_store_getstatusfromprodutos",
-      "community": 6,
+      "community": 0,
       "norm_label": "getstatusfromprodutos()"
     },
     {
@@ -1797,7 +1797,7 @@
       "source_file": "app/utils/api-fetch.ts",
       "source_location": "L1",
       "id": "app_utils_api_fetch_ts",
-      "community": 6,
+      "community": 0,
       "norm_label": "api-fetch.ts"
     },
     {
@@ -1806,7 +1806,7 @@
       "source_file": "app/utils/api-fetch.ts",
       "source_location": "L4",
       "id": "utils_api_fetch_getapifetch",
-      "community": 6,
+      "community": 0,
       "norm_label": "getapifetch()"
     },
     {
@@ -1914,7 +1914,7 @@
       "source_file": "app/utils/offline-db.ts",
       "source_location": "L230",
       "id": "utils_offline_db_setofflinecache",
-      "community": 2,
+      "community": 0,
       "norm_label": "setofflinecache()"
     },
     {
@@ -2085,205 +2085,250 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L1",
       "id": "app_utils_offline_notas_sync_ts",
-      "community": 2,
+      "community": 0,
       "norm_label": "offline-notas-sync.ts"
     },
     {
       "label": "emptyMeta()",
       "file_type": "code",
       "source_file": "app/utils/offline-notas-sync.ts",
-      "source_location": "L123",
+      "source_location": "L124",
       "id": "utils_offline_notas_sync_emptymeta",
-      "community": 2,
+      "community": 0,
       "norm_label": "emptymeta()"
     },
     {
       "label": "cloneJson()",
       "file_type": "code",
       "source_file": "app/utils/offline-notas-sync.ts",
-      "source_location": "L140",
+      "source_location": "L141",
       "id": "utils_offline_notas_sync_clonejson",
-      "community": 2,
+      "community": 0,
       "norm_label": "clonejson()"
     },
     {
       "label": "yieldToBrowser()",
       "file_type": "code",
       "source_file": "app/utils/offline-notas-sync.ts",
-      "source_location": "L148",
+      "source_location": "L149",
       "id": "utils_offline_notas_sync_yieldtobrowser",
-      "community": 2,
+      "community": 0,
       "norm_label": "yieldtobrowser()"
     },
     {
       "label": "normalizeSearchText()",
       "file_type": "code",
       "source_file": "app/utils/offline-notas-sync.ts",
-      "source_location": "L162",
+      "source_location": "L163",
       "id": "utils_offline_notas_sync_normalizesearchtext",
-      "community": 2,
+      "community": 0,
       "norm_label": "normalizesearchtext()"
     },
     {
       "label": "isInsideDateRange()",
       "file_type": "code",
       "source_file": "app/utils/offline-notas-sync.ts",
-      "source_location": "L170",
+      "source_location": "L171",
       "id": "utils_offline_notas_sync_isinsidedaterange",
-      "community": 2,
+      "community": 0,
       "norm_label": "isinsidedaterange()"
     },
     {
       "label": "blobToDataUrl()",
       "file_type": "code",
       "source_file": "app/utils/offline-notas-sync.ts",
-      "source_location": "L178",
+      "source_location": "L179",
       "id": "utils_offline_notas_sync_blobtodataurl",
-      "community": 2,
+      "community": 0,
       "norm_label": "blobtodataurl()"
+    },
+    {
+      "label": "isDataUrl()",
+      "file_type": "code",
+      "source_file": "app/utils/offline-notas-sync.ts",
+      "source_location": "L186",
+      "id": "utils_offline_notas_sync_isdataurl",
+      "community": 0,
+      "norm_label": "isdataurl()"
+    },
+    {
+      "label": "getOfflineStorageObjectPath()",
+      "file_type": "code",
+      "source_file": "app/utils/offline-notas-sync.ts",
+      "source_location": "L188",
+      "id": "utils_offline_notas_sync_getofflinestorageobjectpath",
+      "community": 0,
+      "norm_label": "getofflinestorageobjectpath()"
+    },
+    {
+      "label": "getNotaMediaCandidates()",
+      "file_type": "code",
+      "source_file": "app/utils/offline-notas-sync.ts",
+      "source_location": "L246",
+      "id": "utils_offline_notas_sync_getnotamediacandidates",
+      "community": 0,
+      "norm_label": "getnotamediacandidates()"
     },
     {
       "label": "assetCacheKey()",
       "file_type": "code",
       "source_file": "app/utils/offline-notas-sync.ts",
-      "source_location": "L185",
+      "source_location": "L270",
       "id": "utils_offline_notas_sync_assetcachekey",
-      "community": 2,
+      "community": 0,
       "norm_label": "assetcachekey()"
     },
     {
       "label": "getCachedAsset()",
       "file_type": "code",
       "source_file": "app/utils/offline-notas-sync.ts",
-      "source_location": "L189",
+      "source_location": "L274",
       "id": "utils_offline_notas_sync_getcachedasset",
-      "community": 2,
+      "community": 0,
       "norm_label": "getcachedasset()"
     },
     {
       "label": "saveAssetCache()",
       "file_type": "code",
       "source_file": "app/utils/offline-notas-sync.ts",
-      "source_location": "L193",
+      "source_location": "L278",
       "id": "utils_offline_notas_sync_saveassetcache",
-      "community": 2,
+      "community": 0,
       "norm_label": "saveassetcache()"
     },
     {
       "label": "resolveAssetDataUrl()",
       "file_type": "code",
       "source_file": "app/utils/offline-notas-sync.ts",
-      "source_location": "L209",
+      "source_location": "L294",
       "id": "utils_offline_notas_sync_resolveassetdataurl",
-      "community": 2,
+      "community": 0,
       "norm_label": "resolveassetdataurl()"
     },
     {
       "label": "setFieldValue()",
       "file_type": "code",
       "source_file": "app/utils/offline-notas-sync.ts",
-      "source_location": "L235",
+      "source_location": "L320",
       "id": "utils_offline_notas_sync_setfieldvalue",
-      "community": 2,
+      "community": 0,
       "norm_label": "setfieldvalue()"
+    },
+    {
+      "label": "preserveNotaOfflineMediaDataUrls()",
+      "file_type": "code",
+      "source_file": "app/utils/offline-notas-sync.ts",
+      "source_location": "L337",
+      "id": "utils_offline_notas_sync_preservenotaofflinemediadataurls",
+      "community": 0,
+      "norm_label": "preservenotaofflinemediadataurls()"
+    },
+    {
+      "label": "hydrateNotaOfflineMediaFromCache()",
+      "file_type": "code",
+      "source_file": "app/utils/offline-notas-sync.ts",
+      "source_location": "L364",
+      "id": "utils_offline_notas_sync_hydratenotaofflinemediafromcache",
+      "community": 0,
+      "norm_label": "hydratenotaofflinemediafromcache()"
     },
     {
       "label": "toListItem()",
       "file_type": "code",
       "source_file": "app/utils/offline-notas-sync.ts",
-      "source_location": "L252",
+      "source_location": "L388",
       "id": "utils_offline_notas_sync_tolistitem",
-      "community": 2,
+      "community": 0,
       "norm_label": "tolistitem()"
     },
     {
       "label": "toDetailItem()",
       "file_type": "code",
       "source_file": "app/utils/offline-notas-sync.ts",
-      "source_location": "L271",
+      "source_location": "L407",
       "id": "utils_offline_notas_sync_todetailitem",
-      "community": 2,
+      "community": 0,
       "norm_label": "todetailitem()"
     },
     {
       "label": "isRetiradaAberta()",
       "file_type": "code",
       "source_file": "app/utils/offline-notas-sync.ts",
-      "source_location": "L285",
+      "source_location": "L421",
       "id": "utils_offline_notas_sync_isretiradaaberta",
-      "community": 2,
+      "community": 0,
       "norm_label": "isretiradaaberta()"
     },
     {
       "label": "createNotaCacheEntries()",
       "file_type": "code",
       "source_file": "app/utils/offline-notas-sync.ts",
-      "source_location": "L289",
+      "source_location": "L425",
       "id": "utils_offline_notas_sync_createnotacacheentries",
-      "community": 2,
+      "community": 0,
       "norm_label": "createnotacacheentries()"
     },
     {
       "label": "persistNotasCollectionsPreview()",
       "file_type": "code",
       "source_file": "app/utils/offline-notas-sync.ts",
-      "source_location": "L307",
+      "source_location": "L443",
       "id": "utils_offline_notas_sync_persistnotascollectionspreview",
-      "community": 2,
+      "community": 0,
       "norm_label": "persistnotascollectionspreview()"
     },
     {
       "label": "matchesLocalNotaFilters()",
       "file_type": "code",
       "source_file": "app/utils/offline-notas-sync.ts",
-      "source_location": "L353",
+      "source_location": "L489",
       "id": "utils_offline_notas_sync_matcheslocalnotafilters",
-      "community": 2,
+      "community": 0,
       "norm_label": "matcheslocalnotafilters()"
     },
     {
       "label": "queryOfflineNotasLocal()",
       "file_type": "code",
       "source_file": "app/utils/offline-notas-sync.ts",
-      "source_location": "L387",
+      "source_location": "L523",
       "id": "utils_offline_notas_sync_queryofflinenotaslocal",
-      "community": 2,
+      "community": 0,
       "norm_label": "queryofflinenotaslocal()"
     },
     {
       "label": "fetchNotasSyncPage()",
       "file_type": "code",
       "source_file": "app/utils/offline-notas-sync.ts",
-      "source_location": "L444",
+      "source_location": "L580",
       "id": "utils_offline_notas_sync_fetchnotassyncpage",
-      "community": 2,
+      "community": 0,
       "norm_label": "fetchnotassyncpage()"
     },
     {
       "label": "getOfflineNotasSyncMeta()",
       "file_type": "code",
       "source_file": "app/utils/offline-notas-sync.ts",
-      "source_location": "L454",
+      "source_location": "L590",
       "id": "utils_offline_notas_sync_getofflinenotassyncmeta",
-      "community": 2,
+      "community": 0,
       "norm_label": "getofflinenotassyncmeta()"
     },
     {
       "label": "getOfflineNotasLocalSnapshot()",
       "file_type": "code",
       "source_file": "app/utils/offline-notas-sync.ts",
-      "source_location": "L458",
+      "source_location": "L594",
       "id": "utils_offline_notas_sync_getofflinenotaslocalsnapshot",
-      "community": 2,
+      "community": 8,
       "norm_label": "getofflinenotaslocalsnapshot()"
     },
     {
       "label": "syncOfflineNotasCompleto()",
       "file_type": "code",
       "source_file": "app/utils/offline-notas-sync.ts",
-      "source_location": "L483",
+      "source_location": "L619",
       "id": "utils_offline_notas_sync_syncofflinenotascompleto",
-      "community": 2,
+      "community": 0,
       "norm_label": "syncofflinenotascompleto()"
     },
     {
@@ -2391,7 +2436,7 @@
       "source_file": "server/api/admin/users/health.get.ts",
       "source_location": "L1",
       "id": "server_api_admin_users_health_get_ts",
-      "community": 4,
+      "community": 5,
       "norm_label": "health.get.ts"
     },
     {
@@ -2400,7 +2445,7 @@
       "source_file": "server/api/admin/users/index.get.ts",
       "source_location": "L1",
       "id": "server_api_admin_users_index_get_ts",
-      "community": 4,
+      "community": 5,
       "norm_label": "index.get.ts"
     },
     {
@@ -2409,7 +2454,7 @@
       "source_file": "server/api/admin/users/invite.post.ts",
       "source_location": "L1",
       "id": "server_api_admin_users_invite_post_ts",
-      "community": 4,
+      "community": 5,
       "norm_label": "invite.post.ts"
     },
     {
@@ -2418,7 +2463,7 @@
       "source_file": "server/api/admin/users/invite.post.ts",
       "source_location": "L11",
       "id": "users_invite_post_isvalidemail",
-      "community": 4,
+      "community": 5,
       "norm_label": "isvalidemail()"
     },
     {
@@ -2427,7 +2472,7 @@
       "source_file": "server/api/admin/users/invite.post.ts",
       "source_location": "L20",
       "id": "users_invite_post_buildinviteemailhtml",
-      "community": 4,
+      "community": 5,
       "norm_label": "buildinviteemailhtml()"
     },
     {
@@ -2436,7 +2481,7 @@
       "source_file": "server/api/admin/users/[authUid]/index.delete.ts",
       "source_location": "L1",
       "id": "server_api_admin_users_authuid_index_delete_ts",
-      "community": 4,
+      "community": 5,
       "norm_label": "index.delete.ts"
     },
     {
@@ -2445,7 +2490,7 @@
       "source_file": "server/api/admin/users/[authUid]/role.patch.ts",
       "source_location": "L1",
       "id": "server_api_admin_users_authuid_role_patch_ts",
-      "community": 4,
+      "community": 5,
       "norm_label": "role.patch.ts"
     },
     {
@@ -2454,7 +2499,7 @@
       "source_file": "server/api/admin/users/[authUid]/status.patch.ts",
       "source_location": "L1",
       "id": "server_api_admin_users_authuid_status_patch_ts",
-      "community": 4,
+      "community": 5,
       "norm_label": "status.patch.ts"
     },
     {
@@ -2562,7 +2607,7 @@
       "source_file": "server/api/estoque/create.post.ts",
       "source_location": "L1",
       "id": "server_api_estoque_create_post_ts",
-      "community": 5,
+      "community": 6,
       "norm_label": "create.post.ts"
     },
     {
@@ -2571,7 +2616,7 @@
       "source_file": "server/api/estoque/list.get.ts",
       "source_location": "L1",
       "id": "server_api_estoque_list_get_ts",
-      "community": 5,
+      "community": 6,
       "norm_label": "list.get.ts"
     },
     {
@@ -2580,7 +2625,7 @@
       "source_file": "server/api/estoque/search.get.ts",
       "source_location": "L1",
       "id": "server_api_estoque_search_get_ts",
-      "community": 5,
+      "community": 6,
       "norm_label": "search.get.ts"
     },
     {
@@ -2589,7 +2634,7 @@
       "source_file": "server/api/estoque/[id].get.ts",
       "source_location": "L1",
       "id": "server_api_estoque_id_get_ts",
-      "community": 5,
+      "community": 6,
       "norm_label": "[id].get.ts"
     },
     {
@@ -2598,7 +2643,7 @@
       "source_file": "server/api/estoque/[id].patch.ts",
       "source_location": "L1",
       "id": "server_api_estoque_id_patch_ts",
-      "community": 5,
+      "community": 6,
       "norm_label": "[id].patch.ts"
     },
     {
@@ -2958,7 +3003,7 @@
       "source_file": "server/api/notas/lixeira.get.ts",
       "source_location": "L1",
       "id": "server_api_notas_lixeira_get_ts",
-      "community": 0,
+      "community": 2,
       "norm_label": "lixeira.get.ts"
     },
     {
@@ -3030,7 +3075,7 @@
       "source_file": "server/api/notas/[id]/delete.delete.ts",
       "source_location": "L1",
       "id": "server_api_notas_id_delete_delete_ts",
-      "community": 0,
+      "community": 2,
       "norm_label": "delete.delete.ts"
     },
     {
@@ -3039,7 +3084,7 @@
       "source_file": "server/api/notas/[id]/delete.delete.ts",
       "source_location": "L34",
       "id": "id_delete_delete_normalizenoteid",
-      "community": 0,
+      "community": 2,
       "norm_label": "normalizenoteid()"
     },
     {
@@ -3048,7 +3093,7 @@
       "source_file": "server/api/notas/[id]/delete.delete.ts",
       "source_location": "L47",
       "id": "id_delete_delete_assertemptydeletepayload",
-      "community": 0,
+      "community": 2,
       "norm_label": "assertemptydeletepayload()"
     },
     {
@@ -3057,7 +3102,7 @@
       "source_file": "server/api/notas/[id]/detail.get.ts",
       "source_location": "L1",
       "id": "server_api_notas_id_detail_get_ts",
-      "community": 0,
+      "community": 4,
       "norm_label": "detail.get.ts"
     },
     {
@@ -3066,7 +3111,7 @@
       "source_file": "server/api/notas/[id]/edit.patch.ts",
       "source_location": "L1",
       "id": "server_api_notas_id_edit_patch_ts",
-      "community": 0,
+      "community": 4,
       "norm_label": "edit.patch.ts"
     },
     {
@@ -3075,7 +3120,7 @@
       "source_file": "server/api/notas/[id]/edit.patch.ts",
       "source_location": "L7",
       "id": "id_edit_patch_tonumber",
-      "community": 0,
+      "community": 4,
       "norm_label": "tonumber()"
     },
     {
@@ -3084,7 +3129,7 @@
       "source_file": "server/api/notas/[id]/edit.patch.ts",
       "source_location": "L18",
       "id": "id_edit_patch_tointeger",
-      "community": 0,
+      "community": 4,
       "norm_label": "tointeger()"
     },
     {
@@ -3093,7 +3138,7 @@
       "source_file": "server/api/notas/[id]/edit.patch.ts",
       "source_location": "L24",
       "id": "id_edit_patch_normalizedigits",
-      "community": 0,
+      "community": 4,
       "norm_label": "normalizedigits()"
     },
     {
@@ -3102,7 +3147,7 @@
       "source_file": "server/api/notas/[id]/edit.patch.ts",
       "source_location": "L32",
       "id": "id_edit_patch_normalizeprodutos",
-      "community": 0,
+      "community": 4,
       "norm_label": "normalizeprodutos()"
     },
     {
@@ -3111,7 +3156,7 @@
       "source_file": "server/api/notas/[id]/historico.get.ts",
       "source_location": "L1",
       "id": "server_api_notas_id_historico_get_ts",
-      "community": 0,
+      "community": 2,
       "norm_label": "historico.get.ts"
     },
     {
@@ -3120,7 +3165,7 @@
       "source_file": "server/api/notas/[id]/retirada.patch.ts",
       "source_location": "L1",
       "id": "server_api_notas_id_retirada_patch_ts",
-      "community": 0,
+      "community": 2,
       "norm_label": "retirada.patch.ts"
     },
     {
@@ -3129,7 +3174,7 @@
       "source_file": "server/api/notas/[id]/retirada.patch.ts",
       "source_location": "L25",
       "id": "id_retirada_patch_tonumber",
-      "community": 0,
+      "community": 2,
       "norm_label": "tonumber()"
     },
     {
@@ -3138,7 +3183,7 @@
       "source_file": "server/api/notas/[id]/retirada.patch.ts",
       "source_location": "L43",
       "id": "id_retirada_patch_parseimagedataurl",
-      "community": 0,
+      "community": 2,
       "norm_label": "parseimagedataurl()"
     },
     {
@@ -3147,7 +3192,7 @@
       "source_file": "server/api/notas/[id]/retirada.patch.ts",
       "source_location": "L60",
       "id": "id_retirada_patch_getextensionfrommime",
-      "community": 0,
+      "community": 2,
       "norm_label": "getextensionfrommime()"
     },
     {
@@ -3156,7 +3201,7 @@
       "source_file": "server/api/notas/[id]/retirada.patch.ts",
       "source_location": "L75",
       "id": "id_retirada_patch_uploadretiradaphoto",
-      "community": 0,
+      "community": 2,
       "norm_label": "uploadretiradaphoto()"
     },
     {
@@ -3165,7 +3210,7 @@
       "source_file": "server/api/notas/[id]/status.patch.ts",
       "source_location": "L1",
       "id": "server_api_notas_id_status_patch_ts",
-      "community": 0,
+      "community": 2,
       "norm_label": "status.patch.ts"
     },
     {
@@ -3174,7 +3219,7 @@
       "source_file": "server/api/openai/chat.post.ts",
       "source_location": "L1",
       "id": "server_api_openai_chat_post_ts",
-      "community": 8,
+      "community": 4,
       "norm_label": "chat.post.ts"
     },
     {
@@ -3210,7 +3255,7 @@
       "source_file": "server/api/sync/notas.get.ts",
       "source_location": "L1",
       "id": "server_api_sync_notas_get_ts",
-      "community": 0,
+      "community": 2,
       "norm_label": "notas.get.ts"
     },
     {
@@ -3228,7 +3273,7 @@
       "source_file": "server/services/email/resend.ts",
       "source_location": "L1",
       "id": "server_services_email_resend_ts",
-      "community": 4,
+      "community": 5,
       "norm_label": "resend.ts"
     },
     {
@@ -3237,7 +3282,7 @@
       "source_file": "server/services/email/resend.ts",
       "source_location": "L16",
       "id": "email_resend_isresendconfigured",
-      "community": 4,
+      "community": 5,
       "norm_label": "isresendconfigured()"
     },
     {
@@ -3246,7 +3291,7 @@
       "source_file": "server/services/email/resend.ts",
       "source_location": "L20",
       "id": "email_resend_sendemailwithresend",
-      "community": 4,
+      "community": 5,
       "norm_label": "sendemailwithresend()"
     },
     {
@@ -3255,7 +3300,7 @@
       "source_file": "server/services/estoque/match-produtos.ts",
       "source_location": "L1",
       "id": "server_services_estoque_match_produtos_ts",
-      "community": 8,
+      "community": 4,
       "norm_label": "match-produtos.ts"
     },
     {
@@ -3264,7 +3309,7 @@
       "source_file": "server/services/estoque/match-produtos.ts",
       "source_location": "L10",
       "id": "estoque_match_produtos_mapestoquetonotaproduto",
-      "community": 8,
+      "community": 4,
       "norm_label": "mapestoquetonotaproduto()"
     },
     {
@@ -3273,7 +3318,7 @@
       "source_file": "server/services/estoque/match-produtos.ts",
       "source_location": "L18",
       "id": "estoque_match_produtos_normalizetext",
-      "community": 8,
+      "community": 4,
       "norm_label": "normalizetext()"
     },
     {
@@ -3282,7 +3327,7 @@
       "source_file": "server/services/estoque/match-produtos.ts",
       "source_location": "L28",
       "id": "estoque_match_produtos_tokenize",
-      "community": 8,
+      "community": 4,
       "norm_label": "tokenize()"
     },
     {
@@ -3291,7 +3336,7 @@
       "source_file": "server/services/estoque/match-produtos.ts",
       "source_location": "L34",
       "id": "estoque_match_produtos_getscore",
-      "community": 8,
+      "community": 4,
       "norm_label": "getscore()"
     },
     {
@@ -3300,7 +3345,7 @@
       "source_file": "server/services/estoque/match-produtos.ts",
       "source_location": "L86",
       "id": "estoque_match_produtos_buildsearchterms",
-      "community": 8,
+      "community": 4,
       "norm_label": "buildsearchterms()"
     },
     {
@@ -3309,7 +3354,7 @@
       "source_file": "server/services/estoque/match-produtos.ts",
       "source_location": "L97",
       "id": "estoque_match_produtos_buscarsugestoesprodutoestoque",
-      "community": 8,
+      "community": 4,
       "norm_label": "buscarsugestoesprodutoestoque()"
     },
     {
@@ -3318,7 +3363,7 @@
       "source_file": "server/services/estoque/match-produtos.ts",
       "source_location": "L127",
       "id": "estoque_match_produtos_buscarprodutosestoqueporids",
-      "community": 8,
+      "community": 4,
       "norm_label": "buscarprodutosestoqueporids()"
     },
     {
@@ -3327,7 +3372,7 @@
       "source_file": "server/services/estoque/match-produtos.ts",
       "source_location": "L151",
       "id": "estoque_match_produtos_encontrarprodutoestoque",
-      "community": 8,
+      "community": 4,
       "norm_label": "encontrarprodutoestoque()"
     },
     {
@@ -3336,7 +3381,7 @@
       "source_file": "server/services/estoque/match-produtos.ts",
       "source_location": "L171",
       "id": "estoque_match_produtos_vincularprodutosaoestoque",
-      "community": 8,
+      "community": 4,
       "norm_label": "vincularprodutosaoestoque()"
     },
     {
@@ -3345,7 +3390,7 @@
       "source_file": "server/services/estoque/match-produtos.ts",
       "source_location": "L209",
       "id": "estoque_match_produtos_canonicalizarprodutosporidestoque",
-      "community": 8,
+      "community": 4,
       "norm_label": "canonicalizarprodutosporidestoque()"
     },
     {
@@ -3354,7 +3399,7 @@
       "source_file": "server/services/openai/chat.ts",
       "source_location": "L1",
       "id": "server_services_openai_chat_ts",
-      "community": 8,
+      "community": 4,
       "norm_label": "chat.ts"
     },
     {
@@ -3363,7 +3408,7 @@
       "source_file": "server/services/openai/chat.ts",
       "source_location": "L5",
       "id": "openai_chat_createopenaichat",
-      "community": 8,
+      "community": 4,
       "norm_label": "createopenaichat()"
     },
     {
@@ -3372,7 +3417,7 @@
       "source_file": "server/services/openai/client.ts",
       "source_location": "L1",
       "id": "server_services_openai_client_ts",
-      "community": 8,
+      "community": 4,
       "norm_label": "client.ts"
     },
     {
@@ -3381,7 +3426,7 @@
       "source_file": "server/services/openai/client.ts",
       "source_location": "L3",
       "id": "openai_client_getopenaiclient",
-      "community": 8,
+      "community": 4,
       "norm_label": "getopenaiclient()"
     },
     {
@@ -3390,7 +3435,7 @@
       "source_file": "server/services/openai/extract-nota.ts",
       "source_location": "L1",
       "id": "server_services_openai_extract_nota_ts",
-      "community": 8,
+      "community": 4,
       "norm_label": "extract-nota.ts"
     },
     {
@@ -3399,7 +3444,7 @@
       "source_file": "server/services/openai/extract-nota.ts",
       "source_location": "L102",
       "id": "openai_extract_nota_isnotamissingfield",
-      "community": 8,
+      "community": 4,
       "norm_label": "isnotamissingfield()"
     },
     {
@@ -3408,7 +3453,7 @@
       "source_file": "server/services/openai/extract-nota.ts",
       "source_location": "L106",
       "id": "openai_extract_nota_tonumber",
-      "community": 8,
+      "community": 4,
       "norm_label": "tonumber()"
     },
     {
@@ -3417,7 +3462,7 @@
       "source_file": "server/services/openai/extract-nota.ts",
       "source_location": "L124",
       "id": "openai_extract_nota_normalizeprodutos",
-      "community": 8,
+      "community": 4,
       "norm_label": "normalizeprodutos()"
     },
     {
@@ -3426,7 +3471,7 @@
       "source_file": "server/services/openai/extract-nota.ts",
       "source_location": "L162",
       "id": "openai_extract_nota_extractnotafromimage",
-      "community": 8,
+      "community": 4,
       "norm_label": "extractnotafromimage()"
     },
     {
@@ -3444,7 +3489,7 @@
       "source_file": "server/services/sync/notas-offline.ts",
       "source_location": "L1",
       "id": "server_services_sync_notas_offline_ts",
-      "community": 0,
+      "community": 2,
       "norm_label": "notas-offline.ts"
     },
     {
@@ -3453,7 +3498,7 @@
       "source_file": "server/services/sync/notas-offline.ts",
       "source_location": "L53",
       "id": "sync_notas_offline_normalizesyncpage",
-      "community": 0,
+      "community": 2,
       "norm_label": "normalizesyncpage()"
     },
     {
@@ -3462,7 +3507,7 @@
       "source_file": "server/services/sync/notas-offline.ts",
       "source_location": "L58",
       "id": "sync_notas_offline_normalizesyncpagesize",
-      "community": 0,
+      "community": 2,
       "norm_label": "normalizesyncpagesize()"
     },
     {
@@ -3471,7 +3516,7 @@
       "source_file": "server/services/sync/notas-offline.ts",
       "source_location": "L65",
       "id": "sync_notas_offline_normalizesyncsince",
-      "community": 0,
+      "community": 2,
       "norm_label": "normalizesyncsince()"
     },
     {
@@ -3480,7 +3525,7 @@
       "source_file": "server/services/sync/notas-offline.ts",
       "source_location": "L75",
       "id": "sync_notas_offline_normalizesyncboolean",
-      "community": 0,
+      "community": 2,
       "norm_label": "normalizesyncboolean()"
     },
     {
@@ -3489,7 +3534,7 @@
       "source_file": "server/services/sync/notas-offline.ts",
       "source_location": "L80",
       "id": "sync_notas_offline_getnotaassetcandidates",
-      "community": 0,
+      "community": 2,
       "norm_label": "getnotaassetcandidates()"
     },
     {
@@ -3498,52 +3543,52 @@
       "source_file": "server/services/sync/notas-offline.ts",
       "source_location": "L106",
       "id": "sync_notas_offline_collectnotaofflineassets",
-      "community": 0,
+      "community": 2,
       "norm_label": "collectnotaofflineassets()"
     },
     {
       "label": "chunk()",
       "file_type": "code",
       "source_file": "server/services/sync/notas-offline.ts",
-      "source_location": "L133",
+      "source_location": "L134",
       "id": "sync_notas_offline_chunk",
-      "community": 0,
+      "community": 2,
       "norm_label": "chunk()"
     },
     {
       "label": "createSignedUrlMap()",
       "file_type": "code",
       "source_file": "server/services/sync/notas-offline.ts",
-      "source_location": "L141",
+      "source_location": "L142",
       "id": "sync_notas_offline_createsignedurlmap",
-      "community": 0,
+      "community": 2,
       "norm_label": "createsignedurlmap()"
     },
     {
       "label": "attachSignedUrlsToAssets()",
       "file_type": "code",
       "source_file": "server/services/sync/notas-offline.ts",
-      "source_location": "L187",
+      "source_location": "L189",
       "id": "sync_notas_offline_attachsignedurlstoassets",
-      "community": 0,
+      "community": 2,
       "norm_label": "attachsignedurlstoassets()"
     },
     {
       "label": "buildOfflineNotaSyncItem()",
       "file_type": "code",
       "source_file": "server/services/sync/notas-offline.ts",
-      "source_location": "L196",
+      "source_location": "L198",
       "id": "sync_notas_offline_buildofflinenotasyncitem",
-      "community": 0,
+      "community": 2,
       "norm_label": "buildofflinenotasyncitem()"
     },
     {
       "label": "attachCreatorNamesForSync()",
       "file_type": "code",
       "source_file": "server/services/sync/notas-offline.ts",
-      "source_location": "L242",
+      "source_location": "L244",
       "id": "sync_notas_offline_attachcreatornamesforsync",
-      "community": 0,
+      "community": 2,
       "norm_label": "attachcreatornamesforsync()"
     },
     {
@@ -3552,7 +3597,7 @@
       "source_file": "server/utils/admin-users.ts",
       "source_location": "L1",
       "id": "server_utils_admin_users_ts",
-      "community": 4,
+      "community": 5,
       "norm_label": "admin-users.ts"
     },
     {
@@ -3561,7 +3606,7 @@
       "source_file": "server/utils/admin-users.ts",
       "source_location": "L18",
       "id": "utils_admin_users_getcurrentauthuid",
-      "community": 4,
+      "community": 5,
       "norm_label": "getcurrentauthuid()"
     },
     {
@@ -3570,7 +3615,7 @@
       "source_file": "server/utils/admin-users.ts",
       "source_location": "L40",
       "id": "utils_admin_users_getadminusersclient",
-      "community": 4,
+      "community": 5,
       "norm_label": "getadminusersclient()"
     },
     {
@@ -3579,7 +3624,7 @@
       "source_file": "server/utils/admin-users.ts",
       "source_location": "L44",
       "id": "utils_admin_users_assertadminaccess",
-      "community": 4,
+      "community": 5,
       "norm_label": "assertadminaccess()"
     },
     {
@@ -3588,7 +3633,7 @@
       "source_file": "server/utils/admin-users.ts",
       "source_location": "L68",
       "id": "utils_admin_users_toadminuserrecord",
-      "community": 4,
+      "community": 5,
       "norm_label": "toadminuserrecord()"
     },
     {
@@ -3597,7 +3642,7 @@
       "source_file": "server/utils/admin-users.ts",
       "source_location": "L79",
       "id": "utils_admin_users_normalizeroleinputorthrow",
-      "community": 4,
+      "community": 5,
       "norm_label": "normalizeroleinputorthrow()"
     },
     {
@@ -3606,7 +3651,7 @@
       "source_file": "server/utils/admin-users.ts",
       "source_location": "L98",
       "id": "utils_admin_users_getsupabaseadminconfigorthrow",
-      "community": 4,
+      "community": 5,
       "norm_label": "getsupabaseadminconfigorthrow()"
     },
     {
@@ -3615,7 +3660,7 @@
       "source_file": "server/utils/estoque-api.ts",
       "source_location": "L1",
       "id": "server_utils_estoque_api_ts",
-      "community": 5,
+      "community": 6,
       "norm_label": "estoque-api.ts"
     },
     {
@@ -3624,7 +3669,7 @@
       "source_file": "server/utils/estoque-api.ts",
       "source_location": "L25",
       "id": "utils_estoque_api_applyestoquesearchfilters",
-      "community": 5,
+      "community": 6,
       "norm_label": "applyestoquesearchfilters()"
     },
     {
@@ -3633,7 +3678,7 @@
       "source_file": "server/utils/estoque-api.ts",
       "source_location": "L54",
       "id": "utils_estoque_api_tonumber",
-      "community": 5,
+      "community": 6,
       "norm_label": "tonumber()"
     },
     {
@@ -3642,7 +3687,7 @@
       "source_file": "server/utils/estoque-api.ts",
       "source_location": "L72",
       "id": "utils_estoque_api_tointeger",
-      "community": 5,
+      "community": 6,
       "norm_label": "tointeger()"
     },
     {
@@ -3651,7 +3696,7 @@
       "source_file": "server/utils/estoque-api.ts",
       "source_location": "L81",
       "id": "utils_estoque_api_normalizetext",
-      "community": 5,
+      "community": 6,
       "norm_label": "normalizetext()"
     },
     {
@@ -3660,7 +3705,7 @@
       "source_file": "server/utils/estoque-api.ts",
       "source_location": "L85",
       "id": "utils_estoque_api_normalizenullabletext",
-      "community": 5,
+      "community": 6,
       "norm_label": "normalizenullabletext()"
     },
     {
@@ -3669,7 +3714,7 @@
       "source_file": "server/utils/estoque-api.ts",
       "source_location": "L90",
       "id": "utils_estoque_api_mapestoquerow",
-      "community": 5,
+      "community": 6,
       "norm_label": "mapestoquerow()"
     },
     {
@@ -3678,7 +3723,7 @@
       "source_file": "server/utils/estoque-api.ts",
       "source_location": "L109",
       "id": "utils_estoque_api_fetchprodutospaimap",
-      "community": 5,
+      "community": 6,
       "norm_label": "fetchprodutospaimap()"
     },
     {
@@ -3687,7 +3732,7 @@
       "source_file": "server/utils/estoque-api.ts",
       "source_location": "L143",
       "id": "utils_estoque_api_assertestoqueadminaccess",
-      "community": 5,
+      "community": 6,
       "norm_label": "assertestoqueadminaccess()"
     },
     {
@@ -3696,7 +3741,7 @@
       "source_file": "server/utils/estoque-api.ts",
       "source_location": "L167",
       "id": "utils_estoque_api_assertprodutopaiexists",
-      "community": 5,
+      "community": 6,
       "norm_label": "assertprodutopaiexists()"
     },
     {
@@ -3705,7 +3750,7 @@
       "source_file": "server/utils/estoque-api.ts",
       "source_location": "L197",
       "id": "utils_estoque_api_normalizeestoquepayload",
-      "community": 5,
+      "community": 6,
       "norm_label": "normalizeestoquepayload()"
     },
     {
@@ -3714,7 +3759,7 @@
       "source_file": "server/utils/permissions.ts",
       "source_location": "L1",
       "id": "server_utils_permissions_ts",
-      "community": 0,
+      "community": 2,
       "norm_label": "permissions.ts"
     },
     {
@@ -3723,7 +3768,7 @@
       "source_file": "server/utils/permissions.ts",
       "source_location": "L15",
       "id": "utils_permissions_getauthuidorthrow",
-      "community": 0,
+      "community": 2,
       "norm_label": "getauthuidorthrow()"
     },
     {
@@ -3732,7 +3777,7 @@
       "source_file": "server/utils/permissions.ts",
       "source_location": "L28",
       "id": "utils_permissions_getactiveprofilerole",
-      "community": 0,
+      "community": 2,
       "norm_label": "getactiveprofilerole()"
     },
     {
@@ -3741,7 +3786,7 @@
       "source_file": "server/utils/permissions.ts",
       "source_location": "L50",
       "id": "utils_permissions_assertactiveprofilerole",
-      "community": 0,
+      "community": 2,
       "norm_label": "assertactiveprofilerole()"
     },
     {
@@ -3750,7 +3795,7 @@
       "source_file": "server/utils/permissions.ts",
       "source_location": "L68",
       "id": "utils_permissions_assertcancreatenota",
-      "community": 0,
+      "community": 2,
       "norm_label": "assertcancreatenota()"
     },
     {
@@ -3759,7 +3804,7 @@
       "source_file": "server/utils/storage.ts",
       "source_location": "L1",
       "id": "server_utils_storage_ts",
-      "community": 0,
+      "community": 2,
       "norm_label": "storage.ts"
     },
     {
@@ -3768,41 +3813,41 @@
       "source_file": "server/utils/storage.ts",
       "source_location": "L5",
       "id": "utils_storage_getstorageobjectpath",
-      "community": 0,
+      "community": 2,
       "norm_label": "getstorageobjectpath()"
     },
     {
       "label": "getNotasRetiradaStoragePath()",
       "file_type": "code",
       "source_file": "server/utils/storage.ts",
-      "source_location": "L56",
+      "source_location": "L63",
       "id": "utils_storage_getnotasretiradastoragepath",
-      "community": 0,
+      "community": 2,
       "norm_label": "getnotasretiradastoragepath()"
     },
     {
       "label": "createSignedStorageUrl()",
       "file_type": "code",
       "source_file": "server/utils/storage.ts",
-      "source_location": "L60",
+      "source_location": "L67",
       "id": "utils_storage_createsignedstorageurl",
-      "community": 0,
+      "community": 2,
       "norm_label": "createsignedstorageurl()"
     },
     {
       "label": "signNotaStorageUrls()",
       "file_type": "code",
       "source_file": "server/utils/storage.ts",
-      "source_location": "L84",
+      "source_location": "L91",
       "id": "utils_storage_signnotastorageurls",
-      "community": 0,
+      "community": 2,
       "norm_label": "signnotastorageurls()"
     },
     {
       "label": "signNotasStorageUrls()",
       "file_type": "code",
       "source_file": "server/utils/storage.ts",
-      "source_location": "L108",
+      "source_location": "L115",
       "id": "utils_storage_signnotasstorageurls",
       "community": 10,
       "norm_label": "signnotasstorageurls()"
@@ -3813,7 +3858,7 @@
       "source_file": "shared/constants/OpenAIModels.ts",
       "source_location": "L1",
       "id": "shared_constants_openaimodels_ts",
-      "community": 8,
+      "community": 4,
       "norm_label": "openaimodels.ts"
     },
     {
@@ -3822,7 +3867,7 @@
       "source_file": "shared/constants/OpenAIModels.ts",
       "source_location": "L28",
       "id": "constants_openaimodels_isopenaimodelsupported",
-      "community": 8,
+      "community": 4,
       "norm_label": "isopenaimodelsupported()"
     },
     {
@@ -3831,7 +3876,7 @@
       "source_file": "shared/types/AdminUsers.ts",
       "source_location": "L1",
       "id": "shared_types_adminusers_ts",
-      "community": 4,
+      "community": 5,
       "norm_label": "adminusers.ts"
     },
     {
@@ -3840,7 +3885,7 @@
       "source_file": "shared/types/AdminUsers.ts",
       "source_location": "L92",
       "id": "types_adminusers_isadminuserroleinput",
-      "community": 4,
+      "community": 5,
       "norm_label": "isadminuserroleinput()"
     },
     {
@@ -3849,7 +3894,7 @@
       "source_file": "shared/types/AdminUsers.ts",
       "source_location": "L97",
       "id": "types_adminusers_normalizeadminrole",
-      "community": 4,
+      "community": 5,
       "norm_label": "normalizeadminrole()"
     },
     {
@@ -3858,7 +3903,7 @@
       "source_file": "shared/types/AdminUsers.ts",
       "source_location": "L119",
       "id": "types_adminusers_getadminuserstatus",
-      "community": 4,
+      "community": 5,
       "norm_label": "getadminuserstatus()"
     },
     {
@@ -3938,7 +3983,7 @@
       "file_type": "code",
       "source_file": "server/api/admin/users/_helpers.ts",
       "source_location": "L1",
-      "community": 4,
+      "community": 5,
       "norm_label": "_helpers.ts",
       "id": "server_api_admin_users_helpers_ts"
     },
@@ -3947,7 +3992,7 @@
       "file_type": "code",
       "source_file": "server/api/admin/users/_helpers.ts",
       "source_location": "L18",
-      "community": 4,
+      "community": 5,
       "norm_label": "getcurrentauthuid()",
       "id": "users_helpers_getcurrentauthuid"
     },
@@ -3956,7 +4001,7 @@
       "file_type": "code",
       "source_file": "server/api/admin/users/_helpers.ts",
       "source_location": "L40",
-      "community": 4,
+      "community": 5,
       "norm_label": "getadminusersclient()",
       "id": "users_helpers_getadminusersclient"
     },
@@ -3965,7 +4010,7 @@
       "file_type": "code",
       "source_file": "server/api/admin/users/_helpers.ts",
       "source_location": "L44",
-      "community": 4,
+      "community": 5,
       "norm_label": "assertadminaccess()",
       "id": "users_helpers_assertadminaccess"
     },
@@ -3974,7 +4019,7 @@
       "file_type": "code",
       "source_file": "server/api/admin/users/_helpers.ts",
       "source_location": "L68",
-      "community": 4,
+      "community": 5,
       "norm_label": "toadminuserrecord()",
       "id": "users_helpers_toadminuserrecord"
     },
@@ -3983,7 +4028,7 @@
       "file_type": "code",
       "source_file": "server/api/admin/users/_helpers.ts",
       "source_location": "L79",
-      "community": 4,
+      "community": 5,
       "norm_label": "normalizeroleinputorthrow()",
       "id": "users_helpers_normalizeroleinputorthrow"
     },
@@ -3992,7 +4037,7 @@
       "file_type": "code",
       "source_file": "server/api/admin/users/_helpers.ts",
       "source_location": "L98",
-      "community": 4,
+      "community": 5,
       "norm_label": "getsupabaseadminconfigorthrow()",
       "id": "users_helpers_getsupabaseadminconfigorthrow"
     },
@@ -4001,7 +4046,7 @@
       "file_type": "code",
       "source_file": "server/api/estoque/_helpers.ts",
       "source_location": "L1",
-      "community": 5,
+      "community": 6,
       "norm_label": "_helpers.ts",
       "id": "server_api_estoque_helpers_ts"
     },
@@ -4010,7 +4055,7 @@
       "file_type": "code",
       "source_file": "server/api/estoque/_helpers.ts",
       "source_location": "L25",
-      "community": 5,
+      "community": 6,
       "norm_label": "applyestoquesearchfilters()",
       "id": "estoque_helpers_applyestoquesearchfilters"
     },
@@ -4019,7 +4064,7 @@
       "file_type": "code",
       "source_file": "server/api/estoque/_helpers.ts",
       "source_location": "L54",
-      "community": 5,
+      "community": 6,
       "norm_label": "tonumber()",
       "id": "estoque_helpers_tonumber"
     },
@@ -4028,7 +4073,7 @@
       "file_type": "code",
       "source_file": "server/api/estoque/_helpers.ts",
       "source_location": "L72",
-      "community": 5,
+      "community": 6,
       "norm_label": "tointeger()",
       "id": "estoque_helpers_tointeger"
     },
@@ -4037,7 +4082,7 @@
       "file_type": "code",
       "source_file": "server/api/estoque/_helpers.ts",
       "source_location": "L81",
-      "community": 5,
+      "community": 6,
       "norm_label": "normalizetext()",
       "id": "estoque_helpers_normalizetext"
     },
@@ -4046,7 +4091,7 @@
       "file_type": "code",
       "source_file": "server/api/estoque/_helpers.ts",
       "source_location": "L85",
-      "community": 5,
+      "community": 6,
       "norm_label": "normalizenullabletext()",
       "id": "estoque_helpers_normalizenullabletext"
     },
@@ -4055,7 +4100,7 @@
       "file_type": "code",
       "source_file": "server/api/estoque/_helpers.ts",
       "source_location": "L90",
-      "community": 5,
+      "community": 6,
       "norm_label": "mapestoquerow()",
       "id": "estoque_helpers_mapestoquerow"
     },
@@ -4064,7 +4109,7 @@
       "file_type": "code",
       "source_file": "server/api/estoque/_helpers.ts",
       "source_location": "L109",
-      "community": 5,
+      "community": 6,
       "norm_label": "fetchprodutospaimap()",
       "id": "estoque_helpers_fetchprodutospaimap"
     },
@@ -4073,7 +4118,7 @@
       "file_type": "code",
       "source_file": "server/api/estoque/_helpers.ts",
       "source_location": "L143",
-      "community": 5,
+      "community": 6,
       "norm_label": "assertadminaccess()",
       "id": "estoque_helpers_assertadminaccess"
     },
@@ -4082,7 +4127,7 @@
       "file_type": "code",
       "source_file": "server/api/estoque/_helpers.ts",
       "source_location": "L167",
-      "community": 5,
+      "community": 6,
       "norm_label": "assertprodutopaiexists()",
       "id": "estoque_helpers_assertprodutopaiexists"
     },
@@ -4091,7 +4136,7 @@
       "file_type": "code",
       "source_file": "server/api/estoque/_helpers.ts",
       "source_location": "L197",
-      "community": 5,
+      "community": 6,
       "norm_label": "normalizeestoquepayload()",
       "id": "estoque_helpers_normalizeestoquepayload"
     },
@@ -5988,9 +6033,9 @@
       "source_file": "app/composables/useOfflineNotasSync.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_composables_useofflinenotassync_ts",
-      "target": "utils_offline_notas_sync_getofflinenotaslocalsnapshot",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_getofflinenotaslocalsnapshot"
     },
     {
       "relation": "imports",
@@ -5999,9 +6044,9 @@
       "source_file": "app/composables/useOfflineNotasSync.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_composables_useofflinenotassync_ts",
-      "target": "utils_offline_notas_sync_syncofflinenotascompleto",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_syncofflinenotascompleto"
     },
     {
       "relation": "imports",
@@ -6010,9 +6055,9 @@
       "source_file": "app/composables/useOfflineNotasSync.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_composables_useofflinenotassync_ts",
-      "target": "utils_offline_db_getonlinestatus",
-      "confidence_score": 1.0
+      "target": "utils_offline_db_getonlinestatus"
     },
     {
       "relation": "contains",
@@ -6020,9 +6065,9 @@
       "source_file": "app/composables/useOfflineNotasSync.ts",
       "source_location": "L72",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_composables_useofflinenotassync_ts",
-      "target": "composables_useofflinenotassync_resetrunstate",
-      "confidence_score": 1.0
+      "target": "composables_useofflinenotassync_resetrunstate"
     },
     {
       "relation": "contains",
@@ -6030,9 +6075,9 @@
       "source_file": "app/composables/useOfflineNotasSync.ts",
       "source_location": "L103",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_composables_useofflinenotassync_ts",
-      "target": "composables_useofflinenotassync_notelabel",
-      "confidence_score": 1.0
+      "target": "composables_useofflinenotassync_notelabel"
     },
     {
       "relation": "contains",
@@ -6040,9 +6085,9 @@
       "source_file": "app/composables/useOfflineNotasSync.ts",
       "source_location": "L109",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_composables_useofflinenotassync_ts",
-      "target": "composables_useofflinenotassync_upsertnote",
-      "confidence_score": 1.0
+      "target": "composables_useofflinenotassync_upsertnote"
     },
     {
       "relation": "contains",
@@ -6050,9 +6095,9 @@
       "source_file": "app/composables/useOfflineNotasSync.ts",
       "source_location": "L145",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_composables_useofflinenotassync_ts",
-      "target": "composables_useofflinenotassync_applyprogress",
-      "confidence_score": 1.0
+      "target": "composables_useofflinenotassync_applyprogress"
     },
     {
       "relation": "contains",
@@ -6060,9 +6105,9 @@
       "source_file": "app/composables/useOfflineNotasSync.ts",
       "source_location": "L221",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_composables_useofflinenotassync_ts",
-      "target": "composables_useofflinenotassync_refreshlocalsnapshot",
-      "confidence_score": 1.0
+      "target": "composables_useofflinenotassync_refreshlocalsnapshot"
     },
     {
       "relation": "contains",
@@ -6070,9 +6115,9 @@
       "source_file": "app/composables/useOfflineNotasSync.ts",
       "source_location": "L231",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_composables_useofflinenotassync_ts",
-      "target": "composables_useofflinenotassync_syncallnotas",
-      "confidence_score": 1.0
+      "target": "composables_useofflinenotassync_syncallnotas"
     },
     {
       "relation": "contains",
@@ -6080,9 +6125,9 @@
       "source_file": "app/composables/useOfflineNotasSync.ts",
       "source_location": "L261",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_composables_useofflinenotassync_ts",
-      "target": "composables_useofflinenotassync_autosyncifneeded",
-      "confidence_score": 1.0
+      "target": "composables_useofflinenotassync_autosyncifneeded"
     },
     {
       "relation": "contains",
@@ -6090,9 +6135,9 @@
       "source_file": "app/composables/useOfflineNotasSync.ts",
       "source_location": "L283",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_composables_useofflinenotassync_ts",
-      "target": "composables_useofflinenotassync_useofflinenotassync",
-      "confidence_score": 1.0
+      "target": "composables_useofflinenotassync_useofflinenotassync"
     },
     {
       "relation": "calls",
@@ -6101,9 +6146,9 @@
       "source_file": "app/composables/useOfflineNotasSync.ts",
       "source_location": "L235",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_useofflinenotassync_syncallnotas",
-      "target": "composables_useofflinenotassync_resetrunstate",
-      "confidence_score": 1.0
+      "target": "composables_useofflinenotassync_resetrunstate"
     },
     {
       "relation": "calls",
@@ -6112,9 +6157,9 @@
       "source_file": "app/composables/useOfflineNotasSync.ts",
       "source_location": "L182",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_useofflinenotassync_applyprogress",
-      "target": "composables_useofflinenotassync_notelabel",
-      "confidence_score": 1.0
+      "target": "composables_useofflinenotassync_notelabel"
     },
     {
       "relation": "calls",
@@ -6123,9 +6168,9 @@
       "source_file": "app/composables/useOfflineNotasSync.ts",
       "source_location": "L181",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_useofflinenotassync_applyprogress",
-      "target": "composables_useofflinenotassync_upsertnote",
-      "confidence_score": 1.0
+      "target": "composables_useofflinenotassync_upsertnote"
     },
     {
       "relation": "calls",
@@ -6134,9 +6179,9 @@
       "source_file": "app/composables/useOfflineNotasSync.ts",
       "source_location": "L248",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_useofflinenotassync_syncallnotas",
-      "target": "composables_useofflinenotassync_refreshlocalsnapshot",
-      "confidence_score": 1.0
+      "target": "composables_useofflinenotassync_refreshlocalsnapshot"
     },
     {
       "relation": "calls",
@@ -6145,9 +6190,9 @@
       "source_file": "app/composables/useOfflineNotasSync.ts",
       "source_location": "L264",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_useofflinenotassync_autosyncifneeded",
-      "target": "composables_useofflinenotassync_refreshlocalsnapshot",
-      "confidence_score": 1.0
+      "target": "composables_useofflinenotassync_refreshlocalsnapshot"
     },
     {
       "relation": "calls",
@@ -6167,9 +6212,9 @@
       "source_file": "app/composables/useOfflineNotasSync.ts",
       "source_location": "L275",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_useofflinenotassync_autosyncifneeded",
-      "target": "composables_useofflinenotassync_syncallnotas",
-      "confidence_score": 1.0
+      "target": "composables_useofflinenotassync_syncallnotas"
     },
     {
       "relation": "calls",
@@ -6200,9 +6245,9 @@
       "source_file": "app/plugins/offline-sync.client.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_plugins_offline_sync_client_ts",
-      "target": "composables_useofflinenotassync_useofflinenotassync",
-      "confidence_score": 1.0
+      "target": "composables_useofflinenotassync_useofflinenotassync"
     },
     {
       "relation": "imports",
@@ -6546,9 +6591,9 @@
       "source_file": "app/pages/sincronizacao.vue",
       "source_location": "L38",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_pages_sincronizacao_vue",
-      "target": "pages_sincronizacao_if",
-      "confidence_score": 1.0
+      "target": "pages_sincronizacao_if"
     },
     {
       "relation": "contains",
@@ -6938,9 +6983,9 @@
       "source_file": "app/plugins/offline-sync.client.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_plugins_offline_sync_client_ts",
-      "target": "plugins_offline_sync_client_syncnotasifneeded",
-      "confidence_score": 1.0
+      "target": "plugins_offline_sync_client_syncnotasifneeded"
     },
     {
       "relation": "contains",
@@ -6959,9 +7004,9 @@
       "source_file": "app/plugins/offline-sync.client.ts",
       "source_location": "L31",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plugins_offline_sync_client_refreshandsync",
-      "target": "plugins_offline_sync_client_syncnotasifneeded",
-      "confidence_score": 1.0
+      "target": "plugins_offline_sync_client_syncnotasifneeded"
     },
     {
       "relation": "imports",
@@ -7155,8 +7200,30 @@
       "source_location": "L18",
       "weight": 1.0,
       "source": "app_stores_notas_store_ts",
-      "target": "utils_offline_notas_sync_queryofflinenotaslocal",
+      "target": "utils_offline_notas_sync_hydratenotaofflinemediafromcache",
       "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/stores/notas/store.ts",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "app_stores_notas_store_ts",
+      "target": "utils_offline_notas_sync_preservenotaofflinemediadataurls",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/stores/notas/store.ts",
+      "source_location": "L18",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_stores_notas_store_ts",
+      "target": "utils_offline_notas_sync_queryofflinenotaslocal"
     },
     {
       "relation": "contains",
@@ -7194,9 +7261,9 @@
       "source_file": "app/stores/notas/store.ts",
       "source_location": "L74",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_stores_notas_store_ts",
-      "target": "notas_store_normalizesearchtext",
-      "confidence_score": 1.0
+      "target": "notas_store_normalizesearchtext"
     },
     {
       "relation": "contains",
@@ -7204,9 +7271,9 @@
       "source_file": "app/stores/notas/store.ts",
       "source_location": "L82",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_stores_notas_store_ts",
-      "target": "notas_store_isinsidedaterange",
-      "confidence_score": 1.0
+      "target": "notas_store_isinsidedaterange"
     },
     {
       "relation": "contains",
@@ -7214,9 +7281,9 @@
       "source_file": "app/stores/notas/store.ts",
       "source_location": "L90",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_stores_notas_store_ts",
-      "target": "notas_store_filterlocalnotas",
-      "confidence_score": 1.0
+      "target": "notas_store_filterlocalnotas"
     },
     {
       "relation": "contains",
@@ -7224,9 +7291,9 @@
       "source_file": "app/stores/notas/store.ts",
       "source_location": "L117",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_stores_notas_store_ts",
-      "target": "notas_store_paginatelocalnotas",
-      "confidence_score": 1.0
+      "target": "notas_store_paginatelocalnotas"
     },
     {
       "relation": "contains",
@@ -7255,9 +7322,9 @@
       "source_file": "app/stores/notas/store.ts",
       "source_location": "L91",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "notas_store_filterlocalnotas",
-      "target": "notas_store_normalizesearchtext",
-      "confidence_score": 1.0
+      "target": "notas_store_normalizesearchtext"
     },
     {
       "relation": "contains",
@@ -7287,9 +7354,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_api_fetch_getapifetch",
-      "confidence_score": 1.0
+      "target": "utils_api_fetch_getapifetch"
     },
     {
       "relation": "calls",
@@ -7419,9 +7486,9 @@
       "source_file": "app/utils/offline-db.ts",
       "source_location": "L242",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_db_ts",
-      "target": "utils_offline_db_setofflinecaches",
-      "confidence_score": 1.0
+      "target": "utils_offline_db_setofflinecaches"
     },
     {
       "relation": "contains",
@@ -7439,9 +7506,9 @@
       "source_file": "app/utils/offline-db.ts",
       "source_location": "L279",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_db_ts",
-      "target": "utils_offline_db_scanofflinecachebyprefix",
-      "confidence_score": 1.0
+      "target": "utils_offline_db_scanofflinecachebyprefix"
     },
     {
       "relation": "contains",
@@ -7666,9 +7733,9 @@
       "source_file": "app/utils/offline-db.ts",
       "source_location": "L245",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_db_setofflinecaches",
-      "target": "utils_offline_db_opendb",
-      "confidence_score": 1.0
+      "target": "utils_offline_db_opendb"
     },
     {
       "relation": "calls",
@@ -7677,9 +7744,9 @@
       "source_file": "app/utils/offline-db.ts",
       "source_location": "L285",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_db_scanofflinecachebyprefix",
-      "target": "utils_offline_db_opendb",
-      "confidence_score": 1.0
+      "target": "utils_offline_db_opendb"
     },
     {
       "relation": "calls",
@@ -7699,9 +7766,9 @@
       "source_file": "app/utils/offline-db.ts",
       "source_location": "L243",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_db_setofflinecaches",
-      "target": "utils_offline_db_isofflinestorageavailable",
-      "confidence_score": 1.0
+      "target": "utils_offline_db_isofflinestorageavailable"
     },
     {
       "relation": "calls",
@@ -7721,9 +7788,9 @@
       "source_file": "app/utils/offline-db.ts",
       "source_location": "L283",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_db_scanofflinecachebyprefix",
-      "target": "utils_offline_db_isofflinestorageavailable",
-      "confidence_score": 1.0
+      "target": "utils_offline_db_isofflinestorageavailable"
     },
     {
       "relation": "calls",
@@ -7787,9 +7854,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_db_getonlinestatus",
-      "confidence_score": 1.0
+      "target": "utils_offline_db_getonlinestatus"
     },
     {
       "relation": "calls",
@@ -7842,9 +7909,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_db_setofflinecache",
-      "confidence_score": 1.0
+      "target": "utils_offline_db_setofflinecache"
     },
     {
       "relation": "calls",
@@ -7886,9 +7953,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_db_setofflinecaches",
-      "confidence_score": 1.0
+      "target": "utils_offline_db_setofflinecaches"
     },
     {
       "relation": "imports",
@@ -7897,9 +7964,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_db_getofflinecache",
-      "confidence_score": 1.0
+      "target": "utils_offline_db_getofflinecache"
     },
     {
       "relation": "calls",
@@ -7919,9 +7986,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_db_scanofflinecachebyprefix",
-      "confidence_score": 1.0
+      "target": "utils_offline_db_scanofflinecachebyprefix"
     },
     {
       "relation": "calls",
@@ -7963,9 +8030,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_db_getofflinequeue",
-      "confidence_score": 1.0
+      "target": "utils_offline_db_getofflinequeue"
     },
     {
       "relation": "calls",
@@ -8106,9 +8173,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_db_syncofflinequeue",
-      "confidence_score": 1.0
+      "target": "utils_offline_db_syncofflinequeue"
     },
     {
       "relation": "calls",
@@ -8127,9 +8194,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L123",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_notas_sync_emptymeta",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_emptymeta"
     },
     {
       "relation": "contains",
@@ -8137,9 +8204,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L140",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_notas_sync_clonejson",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_clonejson"
     },
     {
       "relation": "contains",
@@ -8147,9 +8214,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L148",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_notas_sync_yieldtobrowser",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_yieldtobrowser"
     },
     {
       "relation": "contains",
@@ -8157,9 +8224,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L162",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_notas_sync_normalizesearchtext",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_normalizesearchtext"
     },
     {
       "relation": "contains",
@@ -8167,9 +8234,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L170",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_notas_sync_isinsidedaterange",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_isinsidedaterange"
     },
     {
       "relation": "contains",
@@ -8177,8 +8244,38 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L178",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_notas_sync_blobtodataurl",
+      "target": "utils_offline_notas_sync_blobtodataurl"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/utils/offline-notas-sync.ts",
+      "source_location": "L186",
+      "weight": 1.0,
+      "source": "app_utils_offline_notas_sync_ts",
+      "target": "utils_offline_notas_sync_isdataurl",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/utils/offline-notas-sync.ts",
+      "source_location": "L188",
+      "weight": 1.0,
+      "source": "app_utils_offline_notas_sync_ts",
+      "target": "utils_offline_notas_sync_getofflinestorageobjectpath",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/utils/offline-notas-sync.ts",
+      "source_location": "L246",
+      "weight": 1.0,
+      "source": "app_utils_offline_notas_sync_ts",
+      "target": "utils_offline_notas_sync_getnotamediacandidates",
       "confidence_score": 1.0
     },
     {
@@ -8187,9 +8284,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L185",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_notas_sync_assetcachekey",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_assetcachekey"
     },
     {
       "relation": "contains",
@@ -8197,9 +8294,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L189",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_notas_sync_getcachedasset",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_getcachedasset"
     },
     {
       "relation": "contains",
@@ -8207,9 +8304,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L193",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_notas_sync_saveassetcache",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_saveassetcache"
     },
     {
       "relation": "contains",
@@ -8217,9 +8314,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L209",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_notas_sync_resolveassetdataurl",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_resolveassetdataurl"
     },
     {
       "relation": "contains",
@@ -8227,8 +8324,28 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L235",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_notas_sync_setfieldvalue",
+      "target": "utils_offline_notas_sync_setfieldvalue"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/utils/offline-notas-sync.ts",
+      "source_location": "L337",
+      "weight": 1.0,
+      "source": "app_utils_offline_notas_sync_ts",
+      "target": "utils_offline_notas_sync_preservenotaofflinemediadataurls",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/utils/offline-notas-sync.ts",
+      "source_location": "L364",
+      "weight": 1.0,
+      "source": "app_utils_offline_notas_sync_ts",
+      "target": "utils_offline_notas_sync_hydratenotaofflinemediafromcache",
       "confidence_score": 1.0
     },
     {
@@ -8237,9 +8354,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L252",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_notas_sync_tolistitem",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_tolistitem"
     },
     {
       "relation": "contains",
@@ -8247,9 +8364,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L271",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_notas_sync_todetailitem",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_todetailitem"
     },
     {
       "relation": "contains",
@@ -8257,9 +8374,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L285",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_notas_sync_isretiradaaberta",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_isretiradaaberta"
     },
     {
       "relation": "contains",
@@ -8267,9 +8384,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L289",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_notas_sync_createnotacacheentries",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_createnotacacheentries"
     },
     {
       "relation": "contains",
@@ -8277,9 +8394,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L307",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_notas_sync_persistnotascollectionspreview",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_persistnotascollectionspreview"
     },
     {
       "relation": "contains",
@@ -8287,9 +8404,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L353",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_notas_sync_matcheslocalnotafilters",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_matcheslocalnotafilters"
     },
     {
       "relation": "contains",
@@ -8297,9 +8414,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L387",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_notas_sync_queryofflinenotaslocal",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_queryofflinenotaslocal"
     },
     {
       "relation": "contains",
@@ -8307,9 +8424,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L444",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_notas_sync_fetchnotassyncpage",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_fetchnotassyncpage"
     },
     {
       "relation": "contains",
@@ -8317,9 +8434,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L454",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_notas_sync_getofflinenotassyncmeta",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_getofflinenotassyncmeta"
     },
     {
       "relation": "contains",
@@ -8327,9 +8444,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L458",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_notas_sync_getofflinenotaslocalsnapshot",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_getofflinenotaslocalsnapshot"
     },
     {
       "relation": "contains",
@@ -8337,9 +8454,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L483",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_utils_offline_notas_sync_ts",
-      "target": "utils_offline_notas_sync_syncofflinenotascompleto",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_syncofflinenotascompleto"
     },
     {
       "relation": "calls",
@@ -8348,52 +8465,19 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L498",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_notas_sync_syncofflinenotascompleto",
-      "target": "utils_offline_notas_sync_emptymeta",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_emptymeta"
     },
     {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "app/utils/offline-notas-sync.ts",
-      "source_location": "L548",
+      "source_location": "L343",
       "weight": 1.0,
-      "source": "utils_offline_notas_sync_syncofflinenotascompleto",
+      "source": "utils_offline_notas_sync_preservenotaofflinemediadataurls",
       "target": "utils_offline_notas_sync_clonejson",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "app/utils/offline-notas-sync.ts",
-      "source_location": "L620",
-      "weight": 1.0,
-      "source": "utils_offline_notas_sync_syncofflinenotascompleto",
-      "target": "utils_offline_notas_sync_yieldtobrowser",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "app/utils/offline-notas-sync.ts",
-      "source_location": "L364",
-      "weight": 1.0,
-      "source": "utils_offline_notas_sync_matcheslocalnotafilters",
-      "target": "utils_offline_notas_sync_normalizesearchtext",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "app/utils/offline-notas-sync.ts",
-      "source_location": "L397",
-      "weight": 1.0,
-      "source": "utils_offline_notas_sync_queryofflinenotaslocal",
-      "target": "utils_offline_notas_sync_normalizesearchtext",
       "confidence_score": 1.0
     },
     {
@@ -8403,9 +8487,64 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L367",
       "weight": 1.0,
-      "source": "utils_offline_notas_sync_matcheslocalnotafilters",
-      "target": "utils_offline_notas_sync_isinsidedaterange",
+      "source": "utils_offline_notas_sync_hydratenotaofflinemediafromcache",
+      "target": "utils_offline_notas_sync_clonejson",
       "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/utils/offline-notas-sync.ts",
+      "source_location": "L548",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "utils_offline_notas_sync_syncofflinenotascompleto",
+      "target": "utils_offline_notas_sync_clonejson"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/utils/offline-notas-sync.ts",
+      "source_location": "L620",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "utils_offline_notas_sync_syncofflinenotascompleto",
+      "target": "utils_offline_notas_sync_yieldtobrowser"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/utils/offline-notas-sync.ts",
+      "source_location": "L364",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "utils_offline_notas_sync_matcheslocalnotafilters",
+      "target": "utils_offline_notas_sync_normalizesearchtext"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/utils/offline-notas-sync.ts",
+      "source_location": "L397",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "utils_offline_notas_sync_queryofflinenotaslocal",
+      "target": "utils_offline_notas_sync_normalizesearchtext"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/utils/offline-notas-sync.ts",
+      "source_location": "L367",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "utils_offline_notas_sync_matcheslocalnotafilters",
+      "target": "utils_offline_notas_sync_isinsidedaterange"
     },
     {
       "relation": "calls",
@@ -8414,8 +8553,74 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L230",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_notas_sync_resolveassetdataurl",
-      "target": "utils_offline_notas_sync_blobtodataurl",
+      "target": "utils_offline_notas_sync_blobtodataurl"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/utils/offline-notas-sync.ts",
+      "source_location": "L194",
+      "weight": 1.0,
+      "source": "utils_offline_notas_sync_getofflinestorageobjectpath",
+      "target": "utils_offline_notas_sync_isdataurl",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/utils/offline-notas-sync.ts",
+      "source_location": "L353",
+      "weight": 1.0,
+      "source": "utils_offline_notas_sync_preservenotaofflinemediadataurls",
+      "target": "utils_offline_notas_sync_isdataurl",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/utils/offline-notas-sync.ts",
+      "source_location": "L370",
+      "weight": 1.0,
+      "source": "utils_offline_notas_sync_hydratenotaofflinemediafromcache",
+      "target": "utils_offline_notas_sync_isdataurl",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/utils/offline-notas-sync.ts",
+      "source_location": "L372",
+      "weight": 1.0,
+      "source": "utils_offline_notas_sync_hydratenotaofflinemediafromcache",
+      "target": "utils_offline_notas_sync_getofflinestorageobjectpath",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/utils/offline-notas-sync.ts",
+      "source_location": "L345",
+      "weight": 1.0,
+      "source": "utils_offline_notas_sync_preservenotaofflinemediadataurls",
+      "target": "utils_offline_notas_sync_getnotamediacandidates",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/utils/offline-notas-sync.ts",
+      "source_location": "L369",
+      "weight": 1.0,
+      "source": "utils_offline_notas_sync_hydratenotaofflinemediafromcache",
+      "target": "utils_offline_notas_sync_getnotamediacandidates",
       "confidence_score": 1.0
     },
     {
@@ -8425,9 +8630,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L190",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_notas_sync_getcachedasset",
-      "target": "utils_offline_notas_sync_assetcachekey",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_assetcachekey"
     },
     {
       "relation": "calls",
@@ -8436,7 +8641,18 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L195",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_notas_sync_saveassetcache",
+      "target": "utils_offline_notas_sync_assetcachekey"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/utils/offline-notas-sync.ts",
+      "source_location": "L375",
+      "weight": 1.0,
+      "source": "utils_offline_notas_sync_hydratenotaofflinemediafromcache",
       "target": "utils_offline_notas_sync_assetcachekey",
       "confidence_score": 1.0
     },
@@ -8447,9 +8663,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L210",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_notas_sync_resolveassetdataurl",
-      "target": "utils_offline_notas_sync_getcachedasset",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_getcachedasset"
     },
     {
       "relation": "calls",
@@ -8458,9 +8674,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L216",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_notas_sync_resolveassetdataurl",
-      "target": "utils_offline_notas_sync_saveassetcache",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_saveassetcache"
     },
     {
       "relation": "calls",
@@ -8469,8 +8685,30 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L559",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_notas_sync_syncofflinenotascompleto",
-      "target": "utils_offline_notas_sync_resolveassetdataurl",
+      "target": "utils_offline_notas_sync_resolveassetdataurl"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/utils/offline-notas-sync.ts",
+      "source_location": "L357",
+      "weight": 1.0,
+      "source": "utils_offline_notas_sync_preservenotaofflinemediadataurls",
+      "target": "utils_offline_notas_sync_setfieldvalue",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/utils/offline-notas-sync.ts",
+      "source_location": "L381",
+      "weight": 1.0,
+      "source": "utils_offline_notas_sync_hydratenotaofflinemediafromcache",
+      "target": "utils_offline_notas_sync_setfieldvalue",
       "confidence_score": 1.0
     },
     {
@@ -8480,9 +8718,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L561",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_notas_sync_syncofflinenotascompleto",
-      "target": "utils_offline_notas_sync_setfieldvalue",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_setfieldvalue"
     },
     {
       "relation": "calls",
@@ -8491,9 +8729,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L272",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_notas_sync_todetailitem",
-      "target": "utils_offline_notas_sync_tolistitem",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_tolistitem"
     },
     {
       "relation": "calls",
@@ -8502,9 +8740,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L290",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_notas_sync_createnotacacheentries",
-      "target": "utils_offline_notas_sync_todetailitem",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_todetailitem"
     },
     {
       "relation": "calls",
@@ -8513,9 +8751,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L594",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_notas_sync_syncofflinenotascompleto",
-      "target": "utils_offline_notas_sync_createnotacacheentries",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_createnotacacheentries"
     },
     {
       "relation": "calls",
@@ -8524,9 +8762,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L625",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_notas_sync_syncofflinenotascompleto",
-      "target": "utils_offline_notas_sync_persistnotascollectionspreview",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_persistnotascollectionspreview"
     },
     {
       "relation": "calls",
@@ -8535,9 +8773,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L395",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_notas_sync_queryofflinenotaslocal",
-      "target": "utils_offline_notas_sync_getofflinenotassyncmeta",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_getofflinenotassyncmeta"
     },
     {
       "relation": "calls",
@@ -8546,9 +8784,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L529",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_notas_sync_syncofflinenotascompleto",
-      "target": "utils_offline_notas_sync_fetchnotassyncpage",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_fetchnotassyncpage"
     },
     {
       "relation": "calls",
@@ -8557,9 +8795,9 @@
       "source_file": "app/utils/offline-notas-sync.ts",
       "source_location": "L464",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_offline_notas_sync_getofflinenotaslocalsnapshot",
-      "target": "utils_offline_notas_sync_getofflinenotassyncmeta",
-      "confidence_score": 1.0
+      "target": "utils_offline_notas_sync_getofflinenotassyncmeta"
     },
     {
       "relation": "contains",
@@ -8702,9 +8940,9 @@
       "source_file": "server/api/admin/users/health.get.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_admin_users_health_get_ts",
-      "target": "utils_admin_users_assertadminaccess",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_assertadminaccess"
     },
     {
       "relation": "imports",
@@ -8713,9 +8951,9 @@
       "source_file": "server/api/admin/users/health.get.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_admin_users_health_get_ts",
-      "target": "utils_admin_users_getadminusersclient",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_getadminusersclient"
     },
     {
       "relation": "imports",
@@ -8724,9 +8962,9 @@
       "source_file": "server/api/admin/users/health.get.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_admin_users_health_get_ts",
-      "target": "utils_admin_users_getcurrentauthuid",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_getcurrentauthuid"
     },
     {
       "relation": "imports",
@@ -8735,9 +8973,9 @@
       "source_file": "server/api/admin/users/health.get.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_admin_users_health_get_ts",
-      "target": "utils_admin_users_getsupabaseadminconfigorthrow",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_getsupabaseadminconfigorthrow"
     },
     {
       "relation": "imports",
@@ -8790,9 +9028,9 @@
       "source_file": "server/api/admin/users/index.get.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_admin_users_index_get_ts",
-      "target": "utils_admin_users_assertadminaccess",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_assertadminaccess"
     },
     {
       "relation": "imports",
@@ -8801,9 +9039,9 @@
       "source_file": "server/api/admin/users/index.get.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_admin_users_index_get_ts",
-      "target": "utils_admin_users_getadminusersclient",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_getadminusersclient"
     },
     {
       "relation": "imports",
@@ -8812,9 +9050,9 @@
       "source_file": "server/api/admin/users/index.get.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_admin_users_index_get_ts",
-      "target": "utils_admin_users_getcurrentauthuid",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_getcurrentauthuid"
     },
     {
       "relation": "imports",
@@ -8823,9 +9061,9 @@
       "source_file": "server/api/admin/users/index.get.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_admin_users_index_get_ts",
-      "target": "utils_admin_users_toadminuserrecord",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_toadminuserrecord"
     },
     {
       "relation": "imports",
@@ -8878,9 +9116,9 @@
       "source_file": "server/api/admin/users/invite.post.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_admin_users_invite_post_ts",
-      "target": "utils_admin_users_assertadminaccess",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_assertadminaccess"
     },
     {
       "relation": "imports",
@@ -8889,9 +9127,9 @@
       "source_file": "server/api/admin/users/invite.post.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_admin_users_invite_post_ts",
-      "target": "utils_admin_users_getadminusersclient",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_getadminusersclient"
     },
     {
       "relation": "imports",
@@ -8900,9 +9138,9 @@
       "source_file": "server/api/admin/users/invite.post.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_admin_users_invite_post_ts",
-      "target": "utils_admin_users_getcurrentauthuid",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_getcurrentauthuid"
     },
     {
       "relation": "imports",
@@ -8911,9 +9149,9 @@
       "source_file": "server/api/admin/users/invite.post.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_admin_users_invite_post_ts",
-      "target": "utils_admin_users_getsupabaseadminconfigorthrow",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_getsupabaseadminconfigorthrow"
     },
     {
       "relation": "imports",
@@ -8922,9 +9160,9 @@
       "source_file": "server/api/admin/users/invite.post.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_admin_users_invite_post_ts",
-      "target": "utils_admin_users_normalizeroleinputorthrow",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_normalizeroleinputorthrow"
     },
     {
       "relation": "imports",
@@ -9030,9 +9268,9 @@
       "source_file": "server/api/admin/users/[authUid]/index.delete.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_admin_users_authuid_index_delete_ts",
-      "target": "utils_admin_users_assertadminaccess",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_assertadminaccess"
     },
     {
       "relation": "imports",
@@ -9041,9 +9279,9 @@
       "source_file": "server/api/admin/users/[authUid]/index.delete.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_admin_users_authuid_index_delete_ts",
-      "target": "utils_admin_users_getadminusersclient",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_getadminusersclient"
     },
     {
       "relation": "imports",
@@ -9052,9 +9290,9 @@
       "source_file": "server/api/admin/users/[authUid]/index.delete.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_admin_users_authuid_index_delete_ts",
-      "target": "utils_admin_users_getcurrentauthuid",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_getcurrentauthuid"
     },
     {
       "relation": "imports",
@@ -9063,9 +9301,9 @@
       "source_file": "server/api/admin/users/[authUid]/index.delete.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_admin_users_authuid_index_delete_ts",
-      "target": "utils_admin_users_getsupabaseadminconfigorthrow",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_getsupabaseadminconfigorthrow"
     },
     {
       "relation": "imports",
@@ -9118,9 +9356,9 @@
       "source_file": "server/api/admin/users/[authUid]/role.patch.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_admin_users_authuid_role_patch_ts",
-      "target": "utils_admin_users_assertadminaccess",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_assertadminaccess"
     },
     {
       "relation": "imports",
@@ -9129,9 +9367,9 @@
       "source_file": "server/api/admin/users/[authUid]/role.patch.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_admin_users_authuid_role_patch_ts",
-      "target": "utils_admin_users_getadminusersclient",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_getadminusersclient"
     },
     {
       "relation": "imports",
@@ -9140,9 +9378,9 @@
       "source_file": "server/api/admin/users/[authUid]/role.patch.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_admin_users_authuid_role_patch_ts",
-      "target": "utils_admin_users_getcurrentauthuid",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_getcurrentauthuid"
     },
     {
       "relation": "imports",
@@ -9151,9 +9389,9 @@
       "source_file": "server/api/admin/users/[authUid]/role.patch.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_admin_users_authuid_role_patch_ts",
-      "target": "utils_admin_users_normalizeroleinputorthrow",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_normalizeroleinputorthrow"
     },
     {
       "relation": "imports",
@@ -9162,9 +9400,9 @@
       "source_file": "server/api/admin/users/[authUid]/role.patch.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_admin_users_authuid_role_patch_ts",
-      "target": "utils_admin_users_toadminuserrecord",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_toadminuserrecord"
     },
     {
       "relation": "imports",
@@ -9228,9 +9466,9 @@
       "source_file": "server/api/admin/users/[authUid]/status.patch.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_admin_users_authuid_status_patch_ts",
-      "target": "utils_admin_users_assertadminaccess",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_assertadminaccess"
     },
     {
       "relation": "imports",
@@ -9239,9 +9477,9 @@
       "source_file": "server/api/admin/users/[authUid]/status.patch.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_admin_users_authuid_status_patch_ts",
-      "target": "utils_admin_users_getadminusersclient",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_getadminusersclient"
     },
     {
       "relation": "imports",
@@ -9250,9 +9488,9 @@
       "source_file": "server/api/admin/users/[authUid]/status.patch.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_admin_users_authuid_status_patch_ts",
-      "target": "utils_admin_users_getcurrentauthuid",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_getcurrentauthuid"
     },
     {
       "relation": "imports",
@@ -9261,9 +9499,9 @@
       "source_file": "server/api/admin/users/[authUid]/status.patch.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_admin_users_authuid_status_patch_ts",
-      "target": "utils_admin_users_toadminuserrecord",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_toadminuserrecord"
     },
     {
       "relation": "imports",
@@ -9346,9 +9584,9 @@
       "source_file": "server/api/estoque/create.post.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_estoque_create_post_ts",
-      "target": "utils_estoque_api_assertestoqueadminaccess",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_assertestoqueadminaccess"
     },
     {
       "relation": "imports",
@@ -9357,9 +9595,9 @@
       "source_file": "server/api/estoque/create.post.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_estoque_create_post_ts",
-      "target": "utils_estoque_api_assertprodutopaiexists",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_assertprodutopaiexists"
     },
     {
       "relation": "imports",
@@ -9368,9 +9606,9 @@
       "source_file": "server/api/estoque/create.post.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_estoque_create_post_ts",
-      "target": "utils_estoque_api_fetchprodutospaimap",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_fetchprodutospaimap"
     },
     {
       "relation": "imports",
@@ -9379,9 +9617,9 @@
       "source_file": "server/api/estoque/create.post.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_estoque_create_post_ts",
-      "target": "utils_estoque_api_mapestoquerow",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_mapestoquerow"
     },
     {
       "relation": "imports",
@@ -9390,9 +9628,9 @@
       "source_file": "server/api/estoque/create.post.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_estoque_create_post_ts",
-      "target": "utils_estoque_api_normalizeestoquepayload",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_normalizeestoquepayload"
     },
     {
       "relation": "imports",
@@ -9456,9 +9694,9 @@
       "source_file": "server/api/estoque/list.get.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_estoque_list_get_ts",
-      "target": "utils_estoque_api_applyestoquesearchfilters",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_applyestoquesearchfilters"
     },
     {
       "relation": "imports",
@@ -9467,9 +9705,9 @@
       "source_file": "server/api/estoque/list.get.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_estoque_list_get_ts",
-      "target": "utils_estoque_api_fetchprodutospaimap",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_fetchprodutospaimap"
     },
     {
       "relation": "imports",
@@ -9478,9 +9716,9 @@
       "source_file": "server/api/estoque/list.get.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_estoque_list_get_ts",
-      "target": "utils_estoque_api_mapestoquerow",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_mapestoquerow"
     },
     {
       "relation": "imports",
@@ -9522,9 +9760,9 @@
       "source_file": "server/api/estoque/search.get.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_estoque_search_get_ts",
-      "target": "utils_estoque_api_applyestoquesearchfilters",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_applyestoquesearchfilters"
     },
     {
       "relation": "imports",
@@ -9533,9 +9771,9 @@
       "source_file": "server/api/estoque/search.get.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_estoque_search_get_ts",
-      "target": "utils_estoque_api_fetchprodutospaimap",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_fetchprodutospaimap"
     },
     {
       "relation": "imports",
@@ -9544,9 +9782,9 @@
       "source_file": "server/api/estoque/search.get.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_estoque_search_get_ts",
-      "target": "utils_estoque_api_mapestoquerow",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_mapestoquerow"
     },
     {
       "relation": "imports",
@@ -9588,9 +9826,9 @@
       "source_file": "server/api/estoque/[id].get.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_estoque_id_get_ts",
-      "target": "utils_estoque_api_fetchprodutospaimap",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_fetchprodutospaimap"
     },
     {
       "relation": "imports",
@@ -9599,9 +9837,9 @@
       "source_file": "server/api/estoque/[id].get.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_estoque_id_get_ts",
-      "target": "utils_estoque_api_mapestoquerow",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_mapestoquerow"
     },
     {
       "relation": "imports",
@@ -9632,9 +9870,9 @@
       "source_file": "server/api/estoque/[id].patch.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_estoque_id_patch_ts",
-      "target": "utils_estoque_api_assertestoqueadminaccess",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_assertestoqueadminaccess"
     },
     {
       "relation": "imports",
@@ -9643,9 +9881,9 @@
       "source_file": "server/api/estoque/[id].patch.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_estoque_id_patch_ts",
-      "target": "utils_estoque_api_assertprodutopaiexists",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_assertprodutopaiexists"
     },
     {
       "relation": "imports",
@@ -9654,9 +9892,9 @@
       "source_file": "server/api/estoque/[id].patch.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_estoque_id_patch_ts",
-      "target": "utils_estoque_api_fetchprodutospaimap",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_fetchprodutospaimap"
     },
     {
       "relation": "imports",
@@ -9665,9 +9903,9 @@
       "source_file": "server/api/estoque/[id].patch.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_estoque_id_patch_ts",
-      "target": "utils_estoque_api_mapestoquerow",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_mapestoquerow"
     },
     {
       "relation": "imports",
@@ -9676,9 +9914,9 @@
       "source_file": "server/api/estoque/[id].patch.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_estoque_id_patch_ts",
-      "target": "utils_estoque_api_normalizeestoquepayload",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_normalizeestoquepayload"
     },
     {
       "relation": "imports",
@@ -10801,9 +11039,9 @@
       "source_file": "server/api/sync/notas.get.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_sync_notas_get_ts",
-      "target": "sync_notas_offline_attachcreatornamesforsync",
-      "confidence_score": 1.0
+      "target": "sync_notas_offline_attachcreatornamesforsync"
     },
     {
       "relation": "imports",
@@ -10812,9 +11050,9 @@
       "source_file": "server/api/sync/notas.get.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_sync_notas_get_ts",
-      "target": "sync_notas_offline_buildofflinenotasyncitem",
-      "confidence_score": 1.0
+      "target": "sync_notas_offline_buildofflinenotasyncitem"
     },
     {
       "relation": "imports",
@@ -10823,9 +11061,9 @@
       "source_file": "server/api/sync/notas.get.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_sync_notas_get_ts",
-      "target": "sync_notas_offline_collectnotaofflineassets",
-      "confidence_score": 1.0
+      "target": "sync_notas_offline_collectnotaofflineassets"
     },
     {
       "relation": "imports",
@@ -10834,9 +11072,9 @@
       "source_file": "server/api/sync/notas.get.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_sync_notas_get_ts",
-      "target": "sync_notas_offline_createsignedurlmap",
-      "confidence_score": 1.0
+      "target": "sync_notas_offline_createsignedurlmap"
     },
     {
       "relation": "imports",
@@ -10845,9 +11083,9 @@
       "source_file": "server/api/sync/notas.get.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_sync_notas_get_ts",
-      "target": "sync_notas_offline_normalizesyncboolean",
-      "confidence_score": 1.0
+      "target": "sync_notas_offline_normalizesyncboolean"
     },
     {
       "relation": "imports",
@@ -10856,9 +11094,9 @@
       "source_file": "server/api/sync/notas.get.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_sync_notas_get_ts",
-      "target": "sync_notas_offline_normalizesyncpage",
-      "confidence_score": 1.0
+      "target": "sync_notas_offline_normalizesyncpage"
     },
     {
       "relation": "imports",
@@ -10867,9 +11105,9 @@
       "source_file": "server/api/sync/notas.get.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_sync_notas_get_ts",
-      "target": "sync_notas_offline_normalizesyncpagesize",
-      "confidence_score": 1.0
+      "target": "sync_notas_offline_normalizesyncpagesize"
     },
     {
       "relation": "imports",
@@ -10878,9 +11116,9 @@
       "source_file": "server/api/sync/notas.get.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_sync_notas_get_ts",
-      "target": "sync_notas_offline_normalizesyncsince",
-      "confidence_score": 1.0
+      "target": "sync_notas_offline_normalizesyncsince"
     },
     {
       "relation": "imports",
@@ -10889,9 +11127,9 @@
       "source_file": "server/api/sync/notas.get.ts",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_sync_notas_get_ts",
-      "target": "utils_permissions_assertactiveprofilerole",
-      "confidence_score": 1.0
+      "target": "utils_permissions_assertactiveprofilerole"
     },
     {
       "relation": "imports",
@@ -10900,9 +11138,9 @@
       "source_file": "server/api/sync/notas.get.ts",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_api_sync_notas_get_ts",
-      "target": "utils_permissions_getauthuidorthrow",
-      "confidence_score": 1.0
+      "target": "utils_permissions_getauthuidorthrow"
     },
     {
       "relation": "contains",
@@ -11333,9 +11571,9 @@
       "source_file": "server/services/sync/notas-offline.ts",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_services_sync_notas_offline_ts",
-      "target": "utils_storage_getnotasretiradastoragepath",
-      "confidence_score": 1.0
+      "target": "utils_storage_getnotasretiradastoragepath"
     },
     {
       "relation": "contains",
@@ -11343,9 +11581,9 @@
       "source_file": "server/services/sync/notas-offline.ts",
       "source_location": "L53",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_services_sync_notas_offline_ts",
-      "target": "sync_notas_offline_normalizesyncpage",
-      "confidence_score": 1.0
+      "target": "sync_notas_offline_normalizesyncpage"
     },
     {
       "relation": "contains",
@@ -11353,9 +11591,9 @@
       "source_file": "server/services/sync/notas-offline.ts",
       "source_location": "L58",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_services_sync_notas_offline_ts",
-      "target": "sync_notas_offline_normalizesyncpagesize",
-      "confidence_score": 1.0
+      "target": "sync_notas_offline_normalizesyncpagesize"
     },
     {
       "relation": "contains",
@@ -11363,9 +11601,9 @@
       "source_file": "server/services/sync/notas-offline.ts",
       "source_location": "L65",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_services_sync_notas_offline_ts",
-      "target": "sync_notas_offline_normalizesyncsince",
-      "confidence_score": 1.0
+      "target": "sync_notas_offline_normalizesyncsince"
     },
     {
       "relation": "contains",
@@ -11373,9 +11611,9 @@
       "source_file": "server/services/sync/notas-offline.ts",
       "source_location": "L75",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_services_sync_notas_offline_ts",
-      "target": "sync_notas_offline_normalizesyncboolean",
-      "confidence_score": 1.0
+      "target": "sync_notas_offline_normalizesyncboolean"
     },
     {
       "relation": "contains",
@@ -11383,9 +11621,9 @@
       "source_file": "server/services/sync/notas-offline.ts",
       "source_location": "L80",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_services_sync_notas_offline_ts",
-      "target": "sync_notas_offline_getnotaassetcandidates",
-      "confidence_score": 1.0
+      "target": "sync_notas_offline_getnotaassetcandidates"
     },
     {
       "relation": "contains",
@@ -11393,9 +11631,9 @@
       "source_file": "server/services/sync/notas-offline.ts",
       "source_location": "L106",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_services_sync_notas_offline_ts",
-      "target": "sync_notas_offline_collectnotaofflineassets",
-      "confidence_score": 1.0
+      "target": "sync_notas_offline_collectnotaofflineassets"
     },
     {
       "relation": "contains",
@@ -11403,9 +11641,9 @@
       "source_file": "server/services/sync/notas-offline.ts",
       "source_location": "L133",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_services_sync_notas_offline_ts",
-      "target": "sync_notas_offline_chunk",
-      "confidence_score": 1.0
+      "target": "sync_notas_offline_chunk"
     },
     {
       "relation": "contains",
@@ -11413,9 +11651,9 @@
       "source_file": "server/services/sync/notas-offline.ts",
       "source_location": "L141",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_services_sync_notas_offline_ts",
-      "target": "sync_notas_offline_createsignedurlmap",
-      "confidence_score": 1.0
+      "target": "sync_notas_offline_createsignedurlmap"
     },
     {
       "relation": "contains",
@@ -11423,9 +11661,9 @@
       "source_file": "server/services/sync/notas-offline.ts",
       "source_location": "L187",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_services_sync_notas_offline_ts",
-      "target": "sync_notas_offline_attachsignedurlstoassets",
-      "confidence_score": 1.0
+      "target": "sync_notas_offline_attachsignedurlstoassets"
     },
     {
       "relation": "contains",
@@ -11433,9 +11671,9 @@
       "source_file": "server/services/sync/notas-offline.ts",
       "source_location": "L196",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_services_sync_notas_offline_ts",
-      "target": "sync_notas_offline_buildofflinenotasyncitem",
-      "confidence_score": 1.0
+      "target": "sync_notas_offline_buildofflinenotasyncitem"
     },
     {
       "relation": "contains",
@@ -11443,9 +11681,9 @@
       "source_file": "server/services/sync/notas-offline.ts",
       "source_location": "L242",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_services_sync_notas_offline_ts",
-      "target": "sync_notas_offline_attachcreatornamesforsync",
-      "confidence_score": 1.0
+      "target": "sync_notas_offline_attachcreatornamesforsync"
     },
     {
       "relation": "calls",
@@ -11454,9 +11692,9 @@
       "source_file": "server/services/sync/notas-offline.ts",
       "source_location": "L112",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sync_notas_offline_collectnotaofflineassets",
-      "target": "sync_notas_offline_getnotaassetcandidates",
-      "confidence_score": 1.0
+      "target": "sync_notas_offline_getnotaassetcandidates"
     },
     {
       "relation": "calls",
@@ -11465,9 +11703,9 @@
       "source_file": "server/services/sync/notas-offline.ts",
       "source_location": "L200",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sync_notas_offline_buildofflinenotasyncitem",
-      "target": "sync_notas_offline_collectnotaofflineassets",
-      "confidence_score": 1.0
+      "target": "sync_notas_offline_collectnotaofflineassets"
     },
     {
       "relation": "calls",
@@ -11487,9 +11725,9 @@
       "source_file": "server/services/sync/notas-offline.ts",
       "source_location": "L152",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sync_notas_offline_createsignedurlmap",
-      "target": "sync_notas_offline_chunk",
-      "confidence_score": 1.0
+      "target": "sync_notas_offline_chunk"
     },
     {
       "relation": "calls",
@@ -11498,9 +11736,9 @@
       "source_file": "server/services/sync/notas-offline.ts",
       "source_location": "L200",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sync_notas_offline_buildofflinenotasyncitem",
-      "target": "sync_notas_offline_attachsignedurlstoassets",
-      "confidence_score": 1.0
+      "target": "sync_notas_offline_attachsignedurlstoassets"
     },
     {
       "relation": "imports",
@@ -11509,9 +11747,9 @@
       "source_file": "server/utils/admin-users.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_utils_admin_users_ts",
-      "target": "types_adminusers_getadminuserstatus",
-      "confidence_score": 1.0
+      "target": "types_adminusers_getadminuserstatus"
     },
     {
       "relation": "imports",
@@ -11520,9 +11758,9 @@
       "source_file": "server/utils/admin-users.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_utils_admin_users_ts",
-      "target": "types_adminusers_isadminuserroleinput",
-      "confidence_score": 1.0
+      "target": "types_adminusers_isadminuserroleinput"
     },
     {
       "relation": "imports",
@@ -11531,9 +11769,9 @@
       "source_file": "server/utils/admin-users.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_utils_admin_users_ts",
-      "target": "types_adminusers_normalizeadminrole",
-      "confidence_score": 1.0
+      "target": "types_adminusers_normalizeadminrole"
     },
     {
       "relation": "contains",
@@ -11541,9 +11779,9 @@
       "source_file": "server/utils/admin-users.ts",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_utils_admin_users_ts",
-      "target": "utils_admin_users_getcurrentauthuid",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_getcurrentauthuid"
     },
     {
       "relation": "contains",
@@ -11551,9 +11789,9 @@
       "source_file": "server/utils/admin-users.ts",
       "source_location": "L40",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_utils_admin_users_ts",
-      "target": "utils_admin_users_getadminusersclient",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_getadminusersclient"
     },
     {
       "relation": "contains",
@@ -11561,9 +11799,9 @@
       "source_file": "server/utils/admin-users.ts",
       "source_location": "L44",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_utils_admin_users_ts",
-      "target": "utils_admin_users_assertadminaccess",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_assertadminaccess"
     },
     {
       "relation": "contains",
@@ -11571,9 +11809,9 @@
       "source_file": "server/utils/admin-users.ts",
       "source_location": "L68",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_utils_admin_users_ts",
-      "target": "utils_admin_users_toadminuserrecord",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_toadminuserrecord"
     },
     {
       "relation": "contains",
@@ -11581,9 +11819,9 @@
       "source_file": "server/utils/admin-users.ts",
       "source_location": "L79",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_utils_admin_users_ts",
-      "target": "utils_admin_users_normalizeroleinputorthrow",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_normalizeroleinputorthrow"
     },
     {
       "relation": "contains",
@@ -11591,9 +11829,9 @@
       "source_file": "server/utils/admin-users.ts",
       "source_location": "L98",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_utils_admin_users_ts",
-      "target": "utils_admin_users_getsupabaseadminconfigorthrow",
-      "confidence_score": 1.0
+      "target": "utils_admin_users_getsupabaseadminconfigorthrow"
     },
     {
       "relation": "calls",
@@ -11645,9 +11883,9 @@
       "source_file": "server/utils/estoque-api.ts",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_utils_estoque_api_ts",
-      "target": "utils_estoque_api_applyestoquesearchfilters",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_applyestoquesearchfilters"
     },
     {
       "relation": "contains",
@@ -11655,9 +11893,9 @@
       "source_file": "server/utils/estoque-api.ts",
       "source_location": "L54",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_utils_estoque_api_ts",
-      "target": "utils_estoque_api_tonumber",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_tonumber"
     },
     {
       "relation": "contains",
@@ -11665,9 +11903,9 @@
       "source_file": "server/utils/estoque-api.ts",
       "source_location": "L72",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_utils_estoque_api_ts",
-      "target": "utils_estoque_api_tointeger",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_tointeger"
     },
     {
       "relation": "contains",
@@ -11675,9 +11913,9 @@
       "source_file": "server/utils/estoque-api.ts",
       "source_location": "L81",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_utils_estoque_api_ts",
-      "target": "utils_estoque_api_normalizetext",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_normalizetext"
     },
     {
       "relation": "contains",
@@ -11685,9 +11923,9 @@
       "source_file": "server/utils/estoque-api.ts",
       "source_location": "L85",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_utils_estoque_api_ts",
-      "target": "utils_estoque_api_normalizenullabletext",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_normalizenullabletext"
     },
     {
       "relation": "contains",
@@ -11695,9 +11933,9 @@
       "source_file": "server/utils/estoque-api.ts",
       "source_location": "L90",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_utils_estoque_api_ts",
-      "target": "utils_estoque_api_mapestoquerow",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_mapestoquerow"
     },
     {
       "relation": "contains",
@@ -11705,9 +11943,9 @@
       "source_file": "server/utils/estoque-api.ts",
       "source_location": "L109",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_utils_estoque_api_ts",
-      "target": "utils_estoque_api_fetchprodutospaimap",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_fetchprodutospaimap"
     },
     {
       "relation": "contains",
@@ -11715,9 +11953,9 @@
       "source_file": "server/utils/estoque-api.ts",
       "source_location": "L143",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_utils_estoque_api_ts",
-      "target": "utils_estoque_api_assertestoqueadminaccess",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_assertestoqueadminaccess"
     },
     {
       "relation": "contains",
@@ -11725,9 +11963,9 @@
       "source_file": "server/utils/estoque-api.ts",
       "source_location": "L167",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_utils_estoque_api_ts",
-      "target": "utils_estoque_api_assertprodutopaiexists",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_assertprodutopaiexists"
     },
     {
       "relation": "contains",
@@ -11735,9 +11973,9 @@
       "source_file": "server/utils/estoque-api.ts",
       "source_location": "L197",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_utils_estoque_api_ts",
-      "target": "utils_estoque_api_normalizeestoquepayload",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_normalizeestoquepayload"
     },
     {
       "relation": "calls",
@@ -11746,9 +11984,9 @@
       "source_file": "server/utils/estoque-api.ts",
       "source_location": "L73",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_estoque_api_tointeger",
-      "target": "utils_estoque_api_tonumber",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_tonumber"
     },
     {
       "relation": "calls",
@@ -11757,9 +11995,9 @@
       "source_file": "server/utils/estoque-api.ts",
       "source_location": "L227",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_estoque_api_normalizeestoquepayload",
-      "target": "utils_estoque_api_tonumber",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_tonumber"
     },
     {
       "relation": "calls",
@@ -11768,9 +12006,9 @@
       "source_file": "server/utils/estoque-api.ts",
       "source_location": "L265",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_estoque_api_normalizeestoquepayload",
-      "target": "utils_estoque_api_tointeger",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_tointeger"
     },
     {
       "relation": "calls",
@@ -11779,9 +12017,9 @@
       "source_file": "server/utils/estoque-api.ts",
       "source_location": "L86",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_estoque_api_normalizenullabletext",
-      "target": "utils_estoque_api_normalizetext",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_normalizetext"
     },
     {
       "relation": "calls",
@@ -11790,9 +12028,9 @@
       "source_file": "server/utils/estoque-api.ts",
       "source_location": "L205",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_estoque_api_normalizeestoquepayload",
-      "target": "utils_estoque_api_normalizetext",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_normalizetext"
     },
     {
       "relation": "calls",
@@ -11801,9 +12039,9 @@
       "source_file": "server/utils/estoque-api.ts",
       "source_location": "L255",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_estoque_api_normalizeestoquepayload",
-      "target": "utils_estoque_api_normalizenullabletext",
-      "confidence_score": 1.0
+      "target": "utils_estoque_api_normalizenullabletext"
     },
     {
       "relation": "contains",

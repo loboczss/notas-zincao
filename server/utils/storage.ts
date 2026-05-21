@@ -13,16 +13,23 @@ export const getStorageObjectPath = (
   }
 
   const extractFromPath = (input: string) => {
-    const publicMarker = `/storage/v1/object/public/${bucket}/`
-    const signedMarker = `/storage/v1/object/sign/${bucket}/`
-    const marker = input.includes(publicMarker) ? publicMarker : signedMarker
-    const index = input.indexOf(marker)
+    const markers = [
+      `/storage/v1/object/public/${bucket}/`,
+      `/storage/v1/object/sign/${bucket}/`,
+      `/storage/v1/object/authenticated/${bucket}/`,
+      `/storage/v1/render/image/public/${bucket}/`,
+      `/storage/v1/render/image/sign/${bucket}/`,
+      `/storage/v1/render/image/authenticated/${bucket}/`,
+    ]
 
-    if (index < 0) {
-      return null
+    for (const marker of markers) {
+      const index = input.indexOf(marker)
+      if (index >= 0) {
+        return input.slice(index + marker.length)
+      }
     }
 
-    return input.slice(index + marker.length)
+    return null
   }
 
   let path: string | null = null

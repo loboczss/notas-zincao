@@ -1,7 +1,7 @@
 {
   "D:\\dev\\notas-zincao\\capacitor.config.ts": {
-    "mtime": 1779375068.174435,
-    "hash": "5dce5818b1ba890d518e95f37a93f386"
+    "mtime": 1779403098.5082562,
+    "hash": "8268a24dbc871af0557439b4abb93da9"
   },
   "D:\\dev\\notas-zincao\\global.d.ts": {
     "mtime": 1775073410.4248738,
@@ -24,11 +24,11 @@
     "hash": "fbaf7cc870c663eb52dcf218531c439d"
   },
   "D:\\dev\\notas-zincao\\android\\app\\src\\main\\assets\\public\\cordova.js": {
-    "mtime": 1779396804.99017,
+    "mtime": 1779404368.9614973,
     "hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "D:\\dev\\notas-zincao\\android\\app\\src\\main\\assets\\public\\cordova_plugins.js": {
-    "mtime": 1779396804.99017,
+    "mtime": 1779404368.9614973,
     "hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "D:\\dev\\notas-zincao\\android\\app\\src\\main\\java\\br\\com\\zincao\\notas\\MainActivity.java": {
@@ -452,8 +452,8 @@
     "hash": "af787f2a913065265c3f1300bfac1141"
   },
   "D:\\dev\\notas-zincao\\app\\stores\\notas\\store.ts": {
-    "mtime": 1779402411.3460047,
-    "hash": "6c9fecb2e85013b8c160d06d64d7ccf8"
+    "mtime": 1779404274.5893095,
+    "hash": "864686a9f039fec893e77f2262efb582"
   },
   "D:\\dev\\notas-zincao\\app\\types\\database.types.ts": {
     "mtime": 1777307390.817489,
@@ -472,8 +472,8 @@
     "hash": "8ef9047a79c222af82096b0d1d961af1"
   },
   "D:\\dev\\notas-zincao\\app\\utils\\offline-notas-sync.ts": {
-    "mtime": 1779402578.7702355,
-    "hash": "dcb84cd66ed5108db537fd270a17ae34"
+    "mtime": 1779404317.2348964,
+    "hash": "3a5e5ff08b567f2453a35d2099e6d0c5"
   },
   "D:\\dev\\notas-zincao\\app\\utils\\retiradas-historico.ts": {
     "mtime": 1779393289.9581287,
@@ -696,8 +696,8 @@
     "hash": "a9ed2b1f188b6c77a6eab1aa53f1608c"
   },
   "D:\\dev\\notas-zincao\\server\\services\\sync\\notas-offline.ts": {
-    "mtime": 1779395760.3013628,
-    "hash": "bc5ca79fc629c75b492a597b1d2804cb"
+    "mtime": 1779404100.730384,
+    "hash": "384f27505c525a010f1d5555e86c1c10"
   },
   "D:\\dev\\notas-zincao\\server\\utils\\admin-users.ts": {
     "mtime": 1779396386.6018982,
@@ -712,8 +712,8 @@
     "hash": "3ca5ae8475ba5bcffe39885a99b713ba"
   },
   "D:\\dev\\notas-zincao\\server\\utils\\storage.ts": {
-    "mtime": 1779308395.2262948,
-    "hash": "a96837c6294d8f62720d3f4294347352"
+    "mtime": 1779404090.6253617,
+    "hash": "5127c5c6b94ca6fb68e5c4df73f33f1c"
   },
   "D:\\dev\\notas-zincao\\shared\\constants\\OpenAIModels.ts": {
     "mtime": 1779381479.7603312,

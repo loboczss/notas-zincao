@@ -119,6 +119,7 @@ export type OfflineNotasLocalSnapshot = {
 const DEFAULT_PAGE_SIZE = 100
 const LEGACY_LIST_CACHE_LIMIT = 100
 const YIELD_EVERY_NOTES = 10
+const NOTAS_RETIRADA_STORAGE_BUCKET = 'notas-retirada'
 
 const emptyMeta = (): OfflineNotasSyncMeta => ({
   lastStartedAt: null,
@@ -181,6 +182,90 @@ const blobToDataUrl = (blob: Blob) => new Promise<string>((resolve, reject) => {
   reader.onerror = () => reject(reader.error || new Error('Falha ao ler imagem baixada.'))
   reader.readAsDataURL(blob)
 })
+
+const isDataUrl = (value: unknown) => String(value || '').trim().startsWith('data:')
+
+const getOfflineStorageObjectPath = (
+  value: unknown,
+  bucket = NOTAS_RETIRADA_STORAGE_BUCKET,
+) => {
+  const raw = String(value || '').trim()
+
+  if (!raw || isDataUrl(raw)) {
+    return null
+  }
+
+  const extractFromPath = (input: string) => {
+    const markers = [
+      `/storage/v1/object/public/${bucket}/`,
+      `/storage/v1/object/sign/${bucket}/`,
+      `/storage/v1/object/authenticated/${bucket}/`,
+      `/storage/v1/render/image/public/${bucket}/`,
+      `/storage/v1/render/image/sign/${bucket}/`,
+      `/storage/v1/render/image/authenticated/${bucket}/`,
+    ]
+
+    for (const marker of markers) {
+      const index = input.indexOf(marker)
+      if (index >= 0) {
+        return input.slice(index + marker.length)
+      }
+    }
+
+    return null
+  }
+
+  let path: string | null = null
+
+  try {
+    const url = new URL(raw)
+    path = extractFromPath(decodeURIComponent(url.pathname))
+  }
+  catch {
+    path = extractFromPath(decodeURIComponent(raw.split('?')[0] || raw))
+  }
+
+  if (!path && !/^https?:\/\//i.test(raw)) {
+    path = raw
+  }
+
+  if (!path) {
+    return null
+  }
+
+  const normalized = path
+    .split('?')[0]!
+    .split('#')[0]!
+    .replace(/^\/+/, '')
+
+  return normalized.startsWith(`${bucket}/`)
+    ? normalized.slice(bucket.length + 1)
+    : normalized
+}
+
+const getNotaMediaCandidates = (nota: Record<string, any>) => {
+  const candidates: Array<{ field: string; value: unknown }> = [
+    { field: 'foto_url', value: nota.foto_url },
+    { field: 'foto_cliente_url', value: nota.foto_cliente_url },
+    { field: 'comprovante_retirada_url', value: nota.comprovante_retirada_url },
+  ]
+
+  const historico = Array.isArray(nota.historico_retiradas)
+    ? nota.historico_retiradas
+    : []
+
+  historico.forEach((item: any, historicoIndex: number) => {
+    const fotos = Array.isArray(item?.fotos) ? item.fotos : []
+    fotos.forEach((foto: unknown, fotoIndex: number) => {
+      candidates.push({
+        field: `historico_retiradas.${historicoIndex}.fotos.${fotoIndex}`,
+        value: foto,
+      })
+    })
+  })
+
+  return candidates
+}
 
 const assetCacheKey = (asset: Pick<OfflineNotaAsset, 'bucket' | 'path'>) => {
   return `${OFFLINE_NOTAS_SYNC_ASSET_PREFIX}${asset.bucket}:${asset.path}`
@@ -247,6 +332,57 @@ const setFieldValue = (target: Record<string, any>, field: string, value: string
   const last = parts[parts.length - 1] as string
   const key = /^\d+$/.test(last) ? Number(last) : last
   cursor[key] = value
+}
+
+export const preserveNotaOfflineMediaDataUrls = <T extends Record<string, any>>(
+  incoming: T,
+  cached?: Record<string, any> | null,
+): T => {
+  if (!cached) return incoming
+
+  const merged = cloneJson(incoming)
+  const cachedValuesByField = new Map(
+    getNotaMediaCandidates(cached)
+      .filter(candidate => isDataUrl(candidate.value))
+      .map(candidate => [candidate.field, String(candidate.value)] as const),
+  )
+
+  if (!cachedValuesByField.size) return merged
+
+  for (const candidate of getNotaMediaCandidates(merged)) {
+    if (isDataUrl(candidate.value)) continue
+
+    const cachedValue = cachedValuesByField.get(candidate.field)
+    if (cachedValue) {
+      setFieldValue(merged, candidate.field, cachedValue)
+    }
+  }
+
+  return merged
+}
+
+export const hydrateNotaOfflineMediaFromCache = async <T extends Record<string, any>>(
+  nota: T,
+): Promise<T> => {
+  const hydrated = cloneJson(nota)
+
+  for (const candidate of getNotaMediaCandidates(hydrated)) {
+    if (isDataUrl(candidate.value)) continue
+
+    const path = getOfflineStorageObjectPath(candidate.value)
+    if (!path) continue
+
+    const cached = await getOfflineCache<OfflineNotasSyncAssetCache>(assetCacheKey({
+      bucket: NOTAS_RETIRADA_STORAGE_BUCKET,
+      path,
+    }))
+
+    if (cached?.dataUrl) {
+      setFieldValue(hydrated, candidate.field, cached.dataUrl)
+    }
+  }
+
+  return hydrated
 }
 
 const toListItem = (nota: OfflineNotaSyncData | NotaRetiradaDetalheItem): NotaRetiradaListItem => ({

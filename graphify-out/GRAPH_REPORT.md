@@ -1,12 +1,12 @@
 # Graph Report - notas-zincao  (2026-05-21)
 
 ## Corpus Check
-- 189 files · ~81,493 words
+- 189 files · ~81,994 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 553 nodes · 752 edges · 26 communities detected
-- Extraction: 94% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 41 edges (avg confidence: 0.82)
+- 558 nodes · 770 edges · 26 communities detected
+- Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 41 edges (avg confidence: 0.82)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -69,40 +69,40 @@
 ## Communities (132 total, 5 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.08
-Nodes (24): toInteger(), toNumber(), getExtensionFromMime(), parseImageDataUrl(), uploadRetiradaPhoto(), attachCreatorNamesForSync(), attachSignedUrlsToAssets(), buildOfflineNotaSyncItem() (+16 more)
+Cohesion: 0.09
+Nodes (30): useRetiradasHistorico(), filterLocalNotas(), normalizeSearchText(), getApiFetch(), setOfflineCache(), assetCacheKey(), blobToDataUrl(), cloneJson() (+22 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.13
 Nodes (32): ensureListeners(), refreshOfflineState(), useOfflineStatus(), createOfflineProduto(), numberOrNull(), assertClient(), deleteQueueEntry(), enqueueOfflineRequest() (+24 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.13
-Nodes (29): applyProgress(), autoSyncIfNeeded(), noteLabel(), refreshLocalSnapshot(), resetRunState(), syncAllNotas(), upsertNote(), setOfflineCache() (+21 more)
+Cohesion: 0.11
+Nodes (22): getExtensionFromMime(), parseImageDataUrl(), uploadRetiradaPhoto(), attachCreatorNamesForSync(), attachSignedUrlsToAssets(), buildOfflineNotaSyncItem(), chunk(), collectNotaOfflineAssets() (+14 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.08
 Nodes (31): History Timeline UI, buildChanges Function, deleteNota Method, deleted_at and deleted_by Columns, fetchHistoricoNota Method, fetchNotas Method, Invisible Supabase Audit, log_nota_edicao Trigger Function (+23 more)
 
 ### Community 4 - "Community 4"
+Cohesion: 0.12
+Nodes (18): isOpenAIModelSupported(), buildSearchTerms(), buscarProdutosEstoquePorIds(), buscarSugestoesProdutoEstoque(), canonicalizarProdutosPorIdEstoque(), encontrarProdutoEstoque(), getScore(), mapEstoqueToNotaProduto() (+10 more)
+
+### Community 5 - "Community 5"
 Cohesion: 0.22
 Nodes (17): isResendConfigured(), sendEmailWithResend(), getAdminUserStatus(), isAdminUserRoleInput(), normalizeAdminRole(), assertAdminAccess(), getAdminUsersClient(), getCurrentAuthUid() (+9 more)
 
-### Community 5 - "Community 5"
+### Community 6 - "Community 6"
 Cohesion: 0.19
 Nodes (20): applyEstoqueSearchFilters(), assertAdminAccess(), assertProdutoPaiExists(), fetchProdutosPaiMap(), mapEstoqueRow(), normalizeEstoquePayload(), normalizeNullableText(), normalizeText() (+12 more)
-
-### Community 6 - "Community 6"
-Cohesion: 0.1
-Nodes (9): useNoteManagement(), useOfflineNotasSync(), useRetiradasHistorico(), useToast(), filterLocalNotas(), normalizeSearchText(), refreshAndSync(), syncNotasIfNeeded() (+1 more)
 
 ### Community 7 - "Community 7"
 Cohesion: 0.13
 Nodes (16): abrirDetalheNota(), aplicarFiltros(), carregarDetalhe(), carregarNotas(), carregarResumoNotas(), carregarZincoDisponivel(), confirmarExclusaoNota(), fecharDetalheNota() (+8 more)
 
 ### Community 8 - "Community 8"
-Cohesion: 0.16
-Nodes (16): isOpenAIModelSupported(), buildSearchTerms(), buscarProdutosEstoquePorIds(), buscarSugestoesProdutoEstoque(), canonicalizarProdutosPorIdEstoque(), encontrarProdutoEstoque(), getScore(), mapEstoqueToNotaProduto() (+8 more)
+Cohesion: 0.17
+Nodes (13): useNoteManagement(), applyProgress(), autoSyncIfNeeded(), noteLabel(), refreshLocalSnapshot(), resetRunState(), syncAllNotas(), upsertNote() (+5 more)
 
 ### Community 9 - "Community 9"
 Cohesion: 0.2
@@ -166,9 +166,11 @@ _Questions this graph is uniquely positioned to answer:_
 
 - **What is the exact relationship between `Yellow Rounded Icon` and `Black Fastener-Like Cutout`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **Why does `vincularProdutosAoEstoque()` connect `Community 8` to `Community 0`, `Community 9`?**
+- **Why does `vincularProdutosAoEstoque()` connect `Community 4` to `Community 9`?**
   _High betweenness centrality (0.012) - this node is a cross-community bridge._
-- **Why does `signNotasStorageUrls()` connect `Community 10` to `Community 0`?**
+- **Why does `signNotaStorageUrls()` connect `Community 2` to `Community 4`?**
+  _High betweenness centrality (0.008) - this node is a cross-community bridge._
+- **Why does `signNotasStorageUrls()` connect `Community 10` to `Community 2`?**
   _High betweenness centrality (0.008) - this node is a cross-community bridge._
 - **Are the 4 inferred relationships involving `syncOfflineNotasCompleto()` (e.g. with `syncAllNotas()` and `getOnlineStatus()`) actually correct?**
   _`syncOfflineNotasCompleto()` has 4 INFERRED edges - model-reasoned connections that need verification._
@@ -176,5 +178,3 @@ _Questions this graph is uniquely positioned to answer:_
   _`getApiFetch()` has 3 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 2 inferred relationships involving `syncOfflineQueue()` (e.g. with `getApiFetch()` and `syncOfflineNotasCompleto()`) actually correct?**
   _`syncOfflineQueue()` has 2 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 3 inferred relationships involving `getOnlineStatus()` (e.g. with `autoSyncIfNeeded()` and `refreshOfflineState()`) actually correct?**
-  _`getOnlineStatus()` has 3 INFERRED edges - model-reasoned connections that need verification._
