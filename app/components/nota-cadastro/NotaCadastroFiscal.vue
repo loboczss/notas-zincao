@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import Input from '../Input.vue'
+import NotaCadastroField from './NotaCadastroField.vue'
+import NotaCadastroSection from './NotaCadastroSection.vue'
 
 const props = defineProps<{
   numeroNota: string
@@ -24,60 +26,45 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <section class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Nota fiscal</p>
-    <h2 class="mt-1 text-lg font-bold text-slate-900 dark:text-slate-100">Dados fiscais e valores</h2>
+  <NotaCadastroSection eyebrow="Nota fiscal" title="Dados fiscais e valores">
+    <div class="grid grid-cols-2 gap-2.5 xl:grid-cols-6">
+      <NotaCadastroField label="Numero" :error="props.errors.numero_nota">
+        <Input :model-value="props.numeroNota" size="sm" @update:model-value="emit('update:numeroNota', $event)" />
+      </NotaCadastroField>
 
-    <div class="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-      <div>
-        <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Número da nota</label>
-        <Input :model-value="props.numeroNota" @update:model-value="emit('update:numeroNota', $event)" />
-        <p v-if="props.errors.numero_nota" class="mt-1 text-xs text-rose-600 dark:text-rose-400">{{ props.errors.numero_nota }}</p>
-      </div>
+      <NotaCadastroField label="Serie" :error="props.errors.serie_nota">
+        <Input :model-value="props.serieNota" size="sm" @update:model-value="emit('update:serieNota', $event)" />
+      </NotaCadastroField>
 
-      <div>
-        <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Série</label>
-        <Input :model-value="props.serieNota" @update:model-value="emit('update:serieNota', $event)" />
-        <p v-if="props.errors.serie_nota" class="mt-1 text-xs text-rose-600 dark:text-rose-400">{{ props.errors.serie_nota }}</p>
-      </div>
+      <NotaCadastroField class="col-span-2 xl:col-span-2" label="Data da compra" :error="props.errors.data_compra">
+        <Input type="date" :model-value="props.dataCompra" size="sm" @update:model-value="emit('update:dataCompra', $event)" />
+      </NotaCadastroField>
 
-      <div>
-        <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Data da compra</label>
-        <Input type="date" :model-value="props.dataCompra" @update:model-value="emit('update:dataCompra', $event)" />
-        <p v-if="props.errors.data_compra" class="mt-1 text-xs text-rose-600 dark:text-rose-400">{{ props.errors.data_compra }}</p>
-      </div>
+      <NotaCadastroField class="col-span-2 xl:col-span-2" label="Chave NFe" :error="props.errors.chave_nfe">
+        <Input :model-value="props.chaveNfe" placeholder="44 digitos" size="sm" @update:model-value="emit('update:chaveNfe', $event)" />
+      </NotaCadastroField>
 
-      <div class="md:col-span-2 xl:col-span-3">
-        <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Chave NFe</label>
-        <Input :model-value="props.chaveNfe" placeholder="44 dígitos" @update:model-value="emit('update:chaveNfe', $event)" />
-        <p v-if="props.errors.chave_nfe" class="mt-1 text-xs text-rose-600 dark:text-rose-400">{{ props.errors.chave_nfe }}</p>
-      </div>
+      <NotaCadastroField class="xl:col-span-2" label="Valor bruto">
+        <Input :model-value="props.valorTotal" size="sm" disabled />
+      </NotaCadastroField>
 
-      <div>
-        <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Valor bruto</label>
-        <Input :model-value="props.valorTotal" disabled />
-      </div>
+      <NotaCadastroField class="xl:col-span-2" label="Desconto">
+        <Input :model-value="props.descontoTotal" placeholder="0,00" size="sm" @update:model-value="emit('update:descontoTotal', $event)" />
+      </NotaCadastroField>
 
-      <div>
-        <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Desconto</label>
-        <Input :model-value="props.descontoTotal" placeholder="0,00" @update:model-value="emit('update:descontoTotal', $event)" />
-      </div>
+      <NotaCadastroField class="col-span-2 xl:col-span-2" label="Valor liquido">
+        <Input :model-value="props.valorLiquido" size="sm" disabled />
+      </NotaCadastroField>
 
-      <div>
-        <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Valor líquido</label>
-        <Input :model-value="props.valorLiquido" disabled />
-      </div>
-
-      <div class="md:col-span-2 xl:col-span-3">
-        <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Observações</label>
+      <NotaCadastroField class="col-span-2 xl:col-span-6" label="Observacoes">
         <textarea
           :value="props.observacoes"
-          rows="3"
-          class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition-colors focus:border-brand-400 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
-          placeholder="Avisos da IA, conferências e observações adicionais"
+          rows="2"
+          class="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-brand-400 focus:ring-2 focus:ring-brand-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500"
+          placeholder="Avisos da IA e observacoes"
           @input="emit('update:observacoes', ($event.target as HTMLTextAreaElement).value)"
         />
-      </div>
+      </NotaCadastroField>
     </div>
-  </section>
+  </NotaCadastroSection>
 </template>

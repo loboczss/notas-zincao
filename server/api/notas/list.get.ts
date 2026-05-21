@@ -80,6 +80,43 @@ const normalizeSearch = (value: unknown) => {
     .replace(/\s+/g, ' ')
 }
 
+const attachCreatorNames = async (client: any, notas: any[]) => {
+  const ownerIds = [...new Set(
+    notas
+      .map(nota => String(nota?.owner_user_id || '').trim())
+      .filter(Boolean),
+  )]
+
+  if (!ownerIds.length) {
+    return notas.map(({ owner_user_id: _ownerUserId, ...nota }) => ({
+      ...nota,
+      cadastrado_por_nome: null,
+    }))
+  }
+
+  const { data: profilesData, error } = await client
+    .from('profiles')
+    .select('auth_uid, nome, email')
+    .in('auth_uid', ownerIds)
+
+  if (error) {
+    console.error('[api/notas/list] profiles error:', error.message)
+  }
+
+  const creatorsByAuthUid = new Map<string, string>()
+  for (const profile of (profilesData || []) as Array<{ auth_uid: string; nome?: string | null; email?: string | null }>) {
+    const label = String(profile.nome || profile.email || '').trim()
+    if (profile.auth_uid && label) {
+      creatorsByAuthUid.set(String(profile.auth_uid), label)
+    }
+  }
+
+  return notas.map(({ owner_user_id: ownerUserId, ...nota }) => ({
+    ...nota,
+    cadastrado_por_nome: creatorsByAuthUid.get(String(ownerUserId || '')) || null,
+  }))
+}
+
 export const notasListGetHandler = defineEventHandler(async (event) => {
   const user = await serverSupabaseUser(event)
 
@@ -105,7 +142,7 @@ export const notasListGetHandler = defineEventHandler(async (event) => {
 
   let request = (client as any)
     .from('notas_retirada')
-    .select('id, contato_id, nome_cliente, numero_nota, serie_nota, data_compra, data_retirada, valor_total, desconto_total, status_retirada, criado_em, produtos, foto_url, foto_cliente_url, comprovante_retirada_url, historico_retiradas', { count: 'exact' })
+    .select('id, owner_user_id, contato_id, nome_cliente, numero_nota, serie_nota, data_compra, data_retirada, valor_total, desconto_total, status_retirada, criado_em, produtos, foto_url, foto_cliente_url, comprovante_retirada_url, historico_retiradas', { count: 'exact' })
     .is('deleted_at', null)
     .order('criado_em', { ascending: false })
 
@@ -154,7 +191,8 @@ export const notasListGetHandler = defineEventHandler(async (event) => {
   const pagedNotas = isSearching
     ? notasFiltradas.slice((safePage - 1) * pageSize, safePage * pageSize)
     : notasFiltradas
-  const signedNotas = await signNotasStorageUrls(client, pagedNotas)
+  const notasComCriadores = await attachCreatorNames(client as any, pagedNotas)
+  const signedNotas = await signNotasStorageUrls(client, notasComCriadores)
 
   return {
     success: true,

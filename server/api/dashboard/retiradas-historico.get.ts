@@ -118,6 +118,7 @@ export default defineEventHandler(async (event) => {
           nome_cliente: nota.nome_cliente,
           data: evento.data || new Date().toISOString(),
           responsavel_nome: evento.responsavel_nome || 'Sistema',
+          observacoes: evento.observacoes || null,
           itens,
           reducao_zinco_10: Number(reducaoZinco10.toFixed(2)),
         })

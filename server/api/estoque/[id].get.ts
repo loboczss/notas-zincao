@@ -4,7 +4,7 @@ import {
   estoqueSelectFields,
   fetchProdutosPaiMap,
   mapEstoqueRow,
-} from './_helpers'
+} from '../../utils/estoque-api'
 
 export default defineEventHandler(async (event) => {
   const user = await serverSupabaseUser(event)

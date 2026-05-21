@@ -8,7 +8,7 @@ Crie um arquivo local `capacitor.server.json` a partir do exemplo:
 
 ```json
 {
-  "url": "https://seu-dominio-da-vps.com"
+  "url": "https://notas.zincao.cloud"
 }
 ```
 

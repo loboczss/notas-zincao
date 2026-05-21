@@ -4,7 +4,7 @@ import {
   getAdminUsersClient,
   getCurrentAuthUid,
   getSupabaseAdminConfigOrThrow,
-} from '../_helpers'
+} from '../../../../utils/admin-users'
 import type { AdminResetUserPasswordResponse } from '../../../../../shared/types/AdminUsers'
 import { isResendConfigured, sendEmailWithResend } from '../../../../services/email/resend'
 

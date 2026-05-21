@@ -34,6 +34,30 @@ export default defineNuxtConfig({
       saveRedirectToCookie: false,
     },
   },
+  nitro: {
+    hooks: {
+      'rollup:before': (_nitro, rollupConfig) => {
+        const output = rollupConfig.output
+        if (!output || Array.isArray(output)) return
+        if (output.inlineDynamicImports) {
+          delete output.manualChunks
+          return
+        }
+
+        const manualChunks = output.manualChunks
+        output.manualChunks = (id, meta) => {
+          const normalizedId = id.replace(/\\/g, '/')
+          if (normalizedId.includes('/@nuxtjs/supabase/dist/runtime/server/services/')) {
+            return 'supabase-server-services'
+          }
+
+          if (typeof manualChunks === 'function') {
+            return manualChunks(id, meta)
+          }
+        }
+      },
+    },
+  },
   vite: {
     optimizeDeps: {
       include: [

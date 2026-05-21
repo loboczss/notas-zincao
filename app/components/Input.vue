@@ -13,12 +13,14 @@ const props = withDefaults(
     modelValue?: string
     type?: string
     placeholder?: string
+    size?: 'sm' | 'md'
     disabled?: boolean
   }>(),
   {
     modelValue: '',
     type: 'text',
     placeholder: '',
+    size: 'md',
     disabled: false,
   },
 )
@@ -39,6 +41,20 @@ const inputType = computed(() => {
   return exibirSenha.value ? 'text' : 'password'
 })
 
+const passThroughAttrs = computed(() => {
+  const { class: _class, ...rest } = attrs
+  return rest
+})
+
+const baseClass =
+  'w-full rounded-lg border border-slate-200 bg-white text-slate-950 outline-none transition-colors placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-brand-400 dark:focus:ring-brand-400/20'
+
+const sizeClass = computed(() => {
+  return props.size === 'sm'
+    ? 'px-2.5 py-1.5 text-sm'
+    : 'px-3 py-2 text-sm'
+})
+
 const onInput = (event: Event) => {
   const target = event.target as HTMLInputElement
   emit('update:modelValue', target.value)
@@ -48,13 +64,12 @@ const onInput = (event: Event) => {
 <template>
   <div class="relative group">
     <input
-      v-bind="attrs"
+      v-bind="passThroughAttrs"
       :value="props.modelValue"
       :type="inputType"
       :placeholder="props.placeholder"
       :disabled="props.disabled"
-      class="w-full rounded-2xl border border-slate-200 dark:border-white/10 bg-white/50 dark:bg-slate-900/40 px-4 py-3 text-sm text-slate-950 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 backdrop-blur-sm outline-none transition-all duration-300 focus:border-brand-500/50 dark:focus:border-brand-400/50 focus:ring-4 focus:ring-brand-500/10 dark:focus:ring-brand-400/10 disabled:cursor-not-allowed disabled:opacity-50"
-      :class="isPasswordField ? 'pr-12' : ''"
+      :class="[baseClass, sizeClass, attrs.class, isPasswordField ? 'pr-12' : '']"
       @input="onInput"
     >
 

@@ -2,13 +2,13 @@ import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import type { Database, EstoqueProdutoRow } from '../../../app/types/database.types'
 import type { EstoqueProdutoDraft } from '../../../shared/types/Estoque'
 import {
-  assertAdminAccess,
+  assertEstoqueAdminAccess,
   assertProdutoPaiExists,
   estoqueSelectFields,
   fetchProdutosPaiMap,
   mapEstoqueRow,
   normalizeEstoquePayload,
-} from './_helpers'
+} from '../../utils/estoque-api'
 
 export default defineEventHandler(async (event) => {
   const user = await serverSupabaseUser(event)
@@ -37,7 +37,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const client = await serverSupabaseClient<Database>(event)
-  await assertAdminAccess(client, authUid)
+  await assertEstoqueAdminAccess(client, authUid)
 
   const body = await readBody<Partial<EstoqueProdutoDraft>>(event)
   const payload = normalizeEstoquePayload(body, { partial: true })

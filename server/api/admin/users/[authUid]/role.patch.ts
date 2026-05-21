@@ -5,7 +5,7 @@ import {
   normalizeRoleInputOrThrow,
   PROFILE_ADMIN_SELECT,
   toAdminUserRecord,
-} from '../_helpers'
+} from '../../../../utils/admin-users'
 import type { AdminUpdateUserRolePayload } from '../../../../../shared/types/AdminUsers'
 
 export default defineEventHandler(async (event) => {

@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { $fetch } from 'ofetch'
+import { getApiFetch } from '../../utils/api-fetch'
 import {
   enqueueOfflineRequest,
   getOfflineCache,
@@ -19,6 +19,10 @@ import type {
 
 const ESTOQUE_CACHE_KEY = 'estoque:list:last'
 const ESTOQUE_DETAIL_CACHE_PREFIX = 'estoque:detail:'
+
+type FetchProdutosOptions = {
+  append?: boolean
+}
 
 const numberOrNull = (value: unknown) => {
   if (value === null || value === undefined || value === '') return null
@@ -93,7 +97,21 @@ export const useEstoqueStore = defineStore('estoque', () => {
     return true
   }
 
-  const fetchProdutos = async (filters: EstoqueListQuery = {}) => {
+  const mergeProdutos = (current: EstoqueProduto[], incoming: EstoqueProduto[]) => {
+    const byId = new Map<number, EstoqueProduto>()
+
+    for (const produto of current) {
+      byId.set(Number(produto.id_produto), produto)
+    }
+
+    for (const produto of incoming) {
+      byId.set(Number(produto.id_produto), produto)
+    }
+
+    return [...byId.values()]
+  }
+
+  const fetchProdutos = async (filters: EstoqueListQuery = {}, options: FetchProdutosOptions = {}) => {
     loadingProdutos.value = true
     clearError()
 
@@ -101,7 +119,7 @@ export const useEstoqueStore = defineStore('estoque', () => {
       const normalizedSearch = filters.search?.trim() || ''
       const endpoint = normalizedSearch ? '/api/estoque/search' : '/api/estoque/list'
 
-      const data = await $fetch<EstoqueListResponse | EstoqueSearchResponse>(endpoint, {
+      const data = await getApiFetch()<EstoqueListResponse | EstoqueSearchResponse>(endpoint, {
         query: {
           search: normalizedSearch || undefined,
           tipo_produto: filters.tipo_produto?.trim() || undefined,
@@ -110,7 +128,10 @@ export const useEstoqueStore = defineStore('estoque', () => {
         },
       })
 
-      produtos.value = data.produtos || []
+      const incomingProdutos = data.produtos || []
+      produtos.value = options.append
+        ? mergeProdutos(produtos.value, incomingProdutos)
+        : incomingProdutos
       page.value = data.meta?.page || 1
       pageSize.value = data.meta?.page_size || (filters.page_size ?? 30)
       totalItens.value = data.meta?.total_itens || produtos.value.length
@@ -149,7 +170,7 @@ export const useEstoqueStore = defineStore('estoque', () => {
     if (!getOnlineStatus()) return localSearch()
 
     try {
-      const data = await $fetch<EstoqueSearchResponse>('/api/estoque/search', {
+      const data = await getApiFetch()<EstoqueSearchResponse>('/api/estoque/search', {
         query: {
           search: term || undefined,
           tipo_produto: filters.tipo_produto?.trim() || undefined,
@@ -173,7 +194,7 @@ export const useEstoqueStore = defineStore('estoque', () => {
     clearError()
 
     try {
-      const data = await $fetch<EstoqueDetailResponse>(`/api/estoque/${idProduto}`)
+      const data = await getApiFetch()<EstoqueDetailResponse>(`/api/estoque/${idProduto}`)
       produtoAtual.value = data.produto
       await setOfflineCache(`${ESTOQUE_DETAIL_CACHE_PREFIX}${idProduto}`, produtoAtual.value)
       return produtoAtual.value
@@ -210,6 +231,9 @@ export const useEstoqueStore = defineStore('estoque', () => {
         method: 'POST',
         body: payload,
         entity: 'estoque',
+        operation: 'create',
+        entityId: String(offlineProduto.id_produto),
+        clientId: String(offlineProduto.id_produto),
         description: `Criar produto ${payload.descricao}`,
       })
       return offlineProduto
@@ -218,7 +242,7 @@ export const useEstoqueStore = defineStore('estoque', () => {
     try {
       if (!getOnlineStatus()) return await queueCreate()
 
-      const data = await $fetch<EstoqueSaveResponse>('/api/estoque/create', {
+      const data = await getApiFetch()<EstoqueSaveResponse>('/api/estoque/create', {
         method: 'POST',
         body: payload,
       })
@@ -246,6 +270,8 @@ export const useEstoqueStore = defineStore('estoque', () => {
         method: 'PATCH',
         body: payload,
         entity: 'estoque',
+        operation: 'update',
+        entityId: String(idProduto),
         description: `Atualizar produto ${idProduto}`,
       })
       produtos.value = produtos.value.map(produto => produto.id_produto === idProduto
@@ -259,7 +285,7 @@ export const useEstoqueStore = defineStore('estoque', () => {
     try {
       if (!getOnlineStatus()) return await queueUpdate()
 
-      const data = await $fetch<EstoqueSaveResponse>(`/api/estoque/${idProduto}`, {
+      const data = await getApiFetch()<EstoqueSaveResponse>(`/api/estoque/${idProduto}`, {
         method: 'PATCH',
         body: payload,
       })

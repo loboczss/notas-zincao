@@ -3,6 +3,8 @@ export const AppRoute = {
   login: '/login',
   confirm: '/confirm',
   notas: '/notas',
+  retiradas: '/retiradas',
+  sincronizacao: '/sincronizacao',
   estoque: '/estoque',
   cadastrarNota: '/cadastrar-nota',
   profile: '/profile',
@@ -24,6 +26,8 @@ export const getPageTitle = (path: string) => {
   if (path === AppRoute.login) return 'Login'
   if (path === AppRoute.confirm) return 'Confirmacao de Conta'
   if (path === AppRoute.notas) return 'Notas de Retirada'
+  if (path === AppRoute.retiradas) return 'Historico de Retiradas'
+  if (path === AppRoute.sincronizacao) return 'Sincronizacao Offline'
   if (path.startsWith(`${AppRoute.notas}/`) && path.endsWith('/retirada')) return 'Retirada da Nota'
   if (path.startsWith(`${AppRoute.notas}/`) && path.endsWith('/historico')) return 'Historico de Auditoria'
   if (path === AppRoute.estoque) return 'Estoque'

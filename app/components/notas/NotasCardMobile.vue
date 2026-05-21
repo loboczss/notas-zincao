@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { ReceiptText } from 'lucide-vue-next'
 import type { NotaRetiradaListItem } from '../../../shared/types/NotasRetirada'
 import NotasStatusBadge from './NotasStatusBadge.vue'
 
@@ -24,6 +23,10 @@ const valorFormatado = computed(() => {
     style: 'currency',
     currency: 'BRL',
   }).format(valor)
+})
+
+const cadastradoPor = computed(() => {
+  return String(props.nota.cadastrado_por_nome || '').trim() || 'Criador nao identificado'
 })
 </script>
 
@@ -56,12 +59,12 @@ const valorFormatado = computed(() => {
         </div>
       </div>
 
-      <div class="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 dark:border-slate-800">
-        <span class="text-xs text-slate-400 dark:text-slate-500">
-          Ref: {{ nota.id.slice(0, 8) }}
+      <div class="mt-4 flex items-center justify-between gap-3 border-t border-slate-100 pt-3 dark:border-slate-800">
+        <span class="min-w-0 flex-1 truncate text-xs text-slate-400 dark:text-slate-500" :title="cadastradoPor">
+          Criado por: {{ cadastradoPor }}
         </span>
 
-        <div class="flex gap-2">
+        <div class="flex shrink-0 gap-2">
 
           <button
             class="flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"

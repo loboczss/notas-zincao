@@ -25,3 +25,7 @@ logs
 
 # Local native app target
 capacitor.server.json
+
+# Graphify derived cache
+graphify-out/cache/
+graphify-out/.graphify_*

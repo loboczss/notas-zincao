@@ -3,7 +3,7 @@ import {
   getAdminUsersClient,
   getCurrentAuthUid,
   getSupabaseAdminConfigOrThrow,
-} from '../_helpers'
+} from '../../../../utils/admin-users'
 import { serverSupabaseServiceRole } from '#supabase/server'
 import type { AdminDeleteUserResponse } from '../../../../../shared/types/AdminUsers'
 

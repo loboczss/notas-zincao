@@ -1,7 +1,7 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import { $fetch } from 'ofetch'
 import { useToast } from '../../../composables/useToast'
+import { getApiFetch } from '../../../utils/api-fetch'
 
 import type {
   AdminDeleteUserResponse,
@@ -64,7 +64,7 @@ export const useAdminUsersStore = defineStore('admin-users', () => {
     clearError()
 
     try {
-      const data = await $fetch<AdminUsersListResponse>('/api/admin/users', {
+      const data = await getApiFetch()<AdminUsersListResponse>('/api/admin/users', {
         query: {
           search: filters.search?.trim() || undefined,
           status: filters.status && filters.status !== 'todos' ? filters.status : undefined,
@@ -98,7 +98,7 @@ export const useAdminUsersStore = defineStore('admin-users', () => {
     clearError()
 
     try {
-      const data = await $fetch<{ user: AdminUserRecord }>(`/api/admin/users/${authUid}/role`, {
+      const data = await getApiFetch()<{ user: AdminUserRecord }>(`/api/admin/users/${authUid}/role`, {
         method: 'PATCH',
         body: payload,
       })
@@ -127,7 +127,7 @@ export const useAdminUsersStore = defineStore('admin-users', () => {
     clearError()
 
     try {
-      const data = await $fetch<{ user: AdminUserRecord }>(`/api/admin/users/${authUid}/status`, {
+      const data = await getApiFetch()<{ user: AdminUserRecord }>(`/api/admin/users/${authUid}/status`, {
         method: 'PATCH',
         body: payload,
       })
@@ -157,7 +157,7 @@ export const useAdminUsersStore = defineStore('admin-users', () => {
     clearSuccess()
 
     try {
-      const data = await $fetch<AdminInviteUserResponse>('/api/admin/users/invite', {
+      const data = await getApiFetch()<AdminInviteUserResponse>('/api/admin/users/invite', {
         method: 'POST',
         body: payload,
       })
@@ -186,7 +186,7 @@ export const useAdminUsersStore = defineStore('admin-users', () => {
     clearSuccess()
 
     try {
-      const data = await $fetch<AdminDeleteUserResponse>(`/api/admin/users/${authUid}`, {
+      const data = await getApiFetch()<AdminDeleteUserResponse>(`/api/admin/users/${authUid}`, {
         method: 'DELETE',
       })
 
@@ -214,7 +214,7 @@ export const useAdminUsersStore = defineStore('admin-users', () => {
     clearSuccess()
 
     try {
-      const data = await $fetch<AdminResetUserPasswordResponse>(`/api/admin/users/${authUid}/reset-password`, {
+      const data = await getApiFetch()<AdminResetUserPasswordResponse>(`/api/admin/users/${authUid}/reset-password`, {
         method: 'POST',
       })
 

@@ -4,7 +4,7 @@ import {
   getCurrentAuthUid,
   getSupabaseAdminConfigOrThrow,
   normalizeRoleInputOrThrow,
-} from './_helpers'
+} from '../../../utils/admin-users'
 import type { AdminInviteUserPayload, AdminInviteUserResponse } from '../../../../shared/types/AdminUsers'
 import { isResendConfigured, sendEmailWithResend } from '../../../services/email/resend'
 

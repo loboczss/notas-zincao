@@ -6,7 +6,7 @@ export default {
 
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue'
-import { LayoutDashboard, FilePlus2, FileText, Boxes, Trash2, Users } from 'lucide-vue-next'
+import { LayoutDashboard, FilePlus2, FileText, Boxes, Trash2, Users, CloudUpload, ClipboardList } from 'lucide-vue-next'
 import { useRoute } from 'vue-router'
 import Logo from './Logo.vue'
 import NavLink from './NavLink.vue'
@@ -39,8 +39,7 @@ onUnmounted(() => {
 
 <template>
   <header 
-    class="sticky top-0 z-40 w-full transition-all duration-500 ease-in-out"
-    :class="[isScrolled ? 'h-16' : 'h-20']"
+    class="sticky top-0 z-40 h-16 w-full"
   >
     <!-- Dynamic backdrop -->
     <div 
@@ -66,11 +65,17 @@ onUnmounted(() => {
         <NavLink :to="AppRoute.notas" :active="isActive(AppRoute.notas)" :icon="FileText">
           Notas
         </NavLink>
+        <NavLink :to="AppRoute.retiradas" :active="isActive(AppRoute.retiradas)" :icon="ClipboardList">
+          Retiradas
+        </NavLink>
         <NavLink :to="AppRoute.estoque" :active="isActive(AppRoute.estoque)" :icon="Boxes">
           Estoque
         </NavLink>
         <NavLink :to="AppRoute.cadastrarNota" :active="isActive(AppRoute.cadastrarNota)" :icon="FilePlus2">
           Cadastrar
+        </NavLink>
+        <NavLink :to="AppRoute.sincronizacao" :active="isActive(AppRoute.sincronizacao)" :icon="CloudUpload">
+          Sync
         </NavLink>
         <NavLink v-if="isAdmin" :to="AppRoute.adminUsuarios" :active="isActive(AppRoute.adminUsuarios)" :icon="Users">
           Usuários

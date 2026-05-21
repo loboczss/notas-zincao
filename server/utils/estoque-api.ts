@@ -4,8 +4,8 @@ import type {
   EstoqueProdutoRow,
   EstoqueProdutoUpdate,
   Database,
-} from '../../../app/types/database.types'
-import type { EstoqueProduto, EstoqueProdutoDraft } from '../../../shared/types/Estoque'
+} from '../../app/types/database.types'
+import type { EstoqueProduto, EstoqueProdutoDraft } from '../../shared/types/Estoque'
 
 export const estoqueSelectFields = [
   'IDPRODUTO',
@@ -140,7 +140,7 @@ export const fetchProdutosPaiMap = async (client: EstoqueClient, parentIds: numb
   )
 }
 
-export const assertAdminAccess = async (client: EstoqueClient, authUid: string) => {
+export const assertEstoqueAdminAccess = async (client: EstoqueClient, authUid: string) => {
   const { data: profile, error } = await (client as any)
     .from('profiles')
     .select('role, deleted_at')

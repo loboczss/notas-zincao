@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { ShieldAlert } from 'lucide-vue-next'
 import AppPageShell from '../components/layout/AppPageShell.vue'
+import InfiniteScrollTrigger from '../components/InfiniteScrollTrigger.vue'
 import EstoqueProdutoModal from '../components/estoque/EstoqueProdutoModal.vue'
 import EstoqueTabela from '../components/estoque/EstoqueTabela.vue'
 import EstoqueToolbar from '../components/estoque/EstoqueToolbar.vue'
@@ -24,12 +25,23 @@ const produtoEmEdicao = ref<Partial<EstoqueProdutoDraft> | null>(null)
 
 const isAdmin = computed(() => String(authStore.profile?.role || '').trim().toLowerCase() === 'admin')
 
-const carregarEstoque = async () => {
+const carregarEstoque = async (options: { append?: boolean; page?: number } = {}) => {
+  const append = Boolean(options.append)
+  const pageToLoad = options.page || (append ? estoqueStore.page + 1 : 1)
+
+  if (append && (estoqueStore.loadingProdutos || pageToLoad > estoqueStore.totalPaginas)) return
+
+  if (!append) {
+    paginaAtual.value = pageToLoad
+  }
+
   await estoqueStore.fetchProdutos({
     search: searchTerm.value,
-    page: paginaAtual.value,
+    page: pageToLoad,
     page_size: itensPorPagina.value,
-  })
+  }, { append })
+
+  paginaAtual.value = estoqueStore.page
 }
 
 const aplicarFiltros = async () => {
@@ -64,6 +76,19 @@ const mudarItensPorPagina = async (value: string) => {
   itensPorPagina.value = parsed
   paginaAtual.value = 1
   await carregarEstoque()
+}
+
+const produtosTemMais = computed(() => estoqueStore.produtos.length < estoqueStore.totalItens && estoqueStore.page < estoqueStore.totalPaginas)
+const produtosLoadingInicial = computed(() => estoqueStore.loadingProdutos && !estoqueStore.produtos.length)
+const produtosLoadingMais = computed(() => estoqueStore.loadingProdutos && estoqueStore.produtos.length > 0)
+
+const carregarMaisProdutos = async () => {
+  if (estoqueStore.loadingProdutos || !produtosTemMais.value) return
+
+  await carregarEstoque({
+    append: true,
+    page: estoqueStore.page + 1,
+  })
 }
 
 const abrirNovoProduto = () => {
@@ -131,7 +156,7 @@ onMounted(async () => {
         @new="abrirNovoProduto"
       />
 
-      <Card class="flex flex-wrap items-center justify-between gap-4 text-sm" padding-class="px-4 py-3">
+      <Card v-if="false" class="flex flex-wrap items-center justify-between gap-4 text-sm" padding-class="px-4 py-3">
         <p class="text-slate-600 dark:text-slate-300">
           Página {{ estoqueStore.page }} de {{ estoqueStore.totalPaginas }} · {{ estoqueStore.totalItens }} produtos
         </p>
@@ -171,9 +196,20 @@ onMounted(async () => {
 
       <EstoqueTabela
         :produtos="estoqueStore.produtos"
-        :loading="estoqueStore.loadingProdutos"
+        :loading="produtosLoadingInicial"
         :can-edit="isAdmin"
         @edit="abrirEditarProduto"
+      />
+
+      <InfiniteScrollTrigger
+        v-if="estoqueStore.produtos.length"
+        :loading="produtosLoadingMais"
+        :done="!produtosTemMais"
+        :loaded-count="estoqueStore.produtos.length"
+        :total="estoqueStore.totalItens"
+        label="produtos"
+        done-label="Todos os produtos foram carregados."
+        @load-more="carregarMaisProdutos"
       />
 
       <div v-if="estoqueStore.errorMessage && !modalAberto" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-500/10 dark:text-rose-300">

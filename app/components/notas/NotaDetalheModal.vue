@@ -18,6 +18,7 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
   (e: 'save-edit', payload: NotaAdminEditRequest): void
+  (e: 'edit-mode-change', value: boolean): void
 }>()
 
 const router = useRouter()
@@ -53,6 +54,11 @@ const stats = computed(() => {
 const historico = computed(() => {
   const raw = Array.isArray(props.nota?.historico_retiradas) ? props.nota!.historico_retiradas : []
   return [...raw].sort((a, b) => new Date(b.data || '').getTime() - new Date(a.data || '').getTime())
+})
+
+const podeEfetuarRetirada = computed(() => {
+  const status = String(props.nota?.status_retirada || '').trim().toLowerCase()
+  return status === 'pendente' || status === 'parcial'
 })
 
 const formatDateTime = (value?: string) => {
@@ -102,6 +108,13 @@ watch(() => props.nota, () => {
   editMode.value = false
   syncDraft()
 }, { immediate: true })
+
+watch(editMode, value => emit('edit-mode-change', value))
+
+const iniciarEdicao = () => {
+  if (!props.isAdmin) return
+  editMode.value = true
+}
 
 const adicionarProduto = () => {
   const produtosDraft = Array.isArray(editDraft.value.produtos) ? editDraft.value.produtos : []
@@ -159,6 +172,13 @@ const editStats = computed(() => {
     saldo: Math.max(0, totalComprado - totalRetirado),
   }
 })
+
+defineExpose({
+  iniciarEdicao,
+  cancelarEdicao,
+  salvarEdicao,
+  editMode,
+})
 </script>
 
 <template>
@@ -214,7 +234,7 @@ const editStats = computed(() => {
               </div>
               
               <!-- Ações Administrativas Inline -->
-              <div v-if="isAdmin" class="flex items-center gap-2">
+              <div v-if="false && isAdmin" class="flex items-center gap-2">
                 <button
                   v-if="!editMode"
                   type="button"
@@ -289,14 +309,6 @@ const editStats = computed(() => {
                   <div class="text-xs font-medium text-slate-500">
                     Compra: <span class="font-semibold text-slate-900 dark:text-white">{{ formatDate(nota.data_compra) }}</span>
                   </div>
-                  <label class="block mt-2">
-                    <span class="text-[10px] font-medium text-slate-500 block">ID CONTATO (CRM)</span>
-                    <input 
-                      v-model="editDraft.contato_id" 
-                      type="text" 
-                      class="h-8 w-full rounded-lg border border-slate-200 bg-white px-2 text-xs text-slate-900 outline-none focus:border-brand-500 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
-                    />
-                  </label>
                 </div>
               </div>
             </div>
@@ -428,7 +440,7 @@ const editStats = computed(() => {
     </div>
 
     <!-- Área de Rodapé com Botão Fixo -->
-    <div class="mt-auto pt-4 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 z-30">
+    <div v-if="podeEfetuarRetirada" class="mt-auto pt-4 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 z-30">
       <Botao
         variant="primary"
         class="w-full !shadow-none hover:!shadow-none"

@@ -4,7 +4,7 @@ import {
   getCurrentAuthUid,
   PROFILE_ADMIN_SELECT,
   toAdminUserRecord,
-} from '../_helpers'
+} from '../../../../utils/admin-users'
 import type { AdminUpdateUserStatusPayload } from '../../../../../shared/types/AdminUsers'
 
 export default defineEventHandler(async (event) => {

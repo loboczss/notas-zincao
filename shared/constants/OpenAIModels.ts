@@ -1,5 +1,10 @@
 export const AVAILABLE_OPENAI_MODELS = [
   {
+    id: 'gpt-5.5',
+    label: 'GPT-5.5',
+    description: 'Modelo principal mais atual para alta precisao, visao e tarefas complexas.',
+  },
+  {
     id: 'gpt-5.4',
     label: 'GPT-5.4',
     description: 'Modelo principal para tarefas complexas, raciocínio e código.',

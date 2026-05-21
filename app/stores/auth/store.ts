@@ -1,8 +1,8 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { Session, User } from '@supabase/supabase-js'
-import { $fetch } from 'ofetch'
 import { useSupabaseClient } from '#imports'
+import { getApiFetch } from '../../utils/api-fetch'
 import type { SignInPayload, SignUpPayload } from '../../../shared/types/Auth'
 import type { UserProfile } from '../../../shared/types/Profile'
 import type { Database } from '../../types/database.types'
@@ -38,7 +38,7 @@ export const useAuthStore = defineStore('auth', () => {
     clearError()
 
     try {
-      const response = await $fetch<{
+      const response = await getApiFetch()<{
         user: {
           id: string
           email: string | null
@@ -124,7 +124,7 @@ export const useAuthStore = defineStore('auth', () => {
     loading.value = true
 
     try {
-      const updated = await $fetch<UserProfile>('/api/auth/profile', {
+      const updated = await getApiFetch()<UserProfile>('/api/auth/profile', {
         method: 'PATCH',
         body: data,
       })

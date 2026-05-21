@@ -5,11 +5,13 @@ const props = withDefaults(
     title: string
     description?: string
     widthClass?: string
+    hideHeader?: boolean
   }>(),
   {
     eyebrow: 'Painel',
     description: '',
     widthClass: 'max-w-7xl',
+    hideHeader: false,
   },
 )
 </script>
@@ -17,7 +19,7 @@ const props = withDefaults(
 <template>
   <main class="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 text-slate-800 dark:text-slate-200 md:p-8 transition-colors duration-300">
     <div class="mx-auto" :class="props.widthClass">
-      <header class="mb-6">
+      <header v-if="!props.hideHeader" class="mb-6">
         <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div class="max-w-3xl">
             <p v-if="props.eyebrow" class="text-xs font-medium text-brand-600 dark:text-brand-400">

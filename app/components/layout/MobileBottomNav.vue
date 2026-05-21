@@ -6,7 +6,7 @@ export default {
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { FilePlus2, FileText, Home } from 'lucide-vue-next'
+import { ClipboardList, CloudUpload, FilePlus2, FileText, Home } from 'lucide-vue-next'
 import { useRoute, useRouter } from 'vue-router'
 import { AppRoute } from '../../constants/routes'
 
@@ -27,9 +27,21 @@ const items = [
     exact: false,
   },
   {
+    label: 'Histórico',
+    to: AppRoute.retiradas,
+    icon: ClipboardList,
+    exact: true,
+  },
+  {
     label: 'Cadastrar',
     to: AppRoute.cadastrarNota,
     icon: FilePlus2,
+    exact: true,
+  },
+  {
+    label: 'Sync',
+    to: AppRoute.sincronizacao,
+    icon: CloudUpload,
     exact: true,
   },
 ] as const
@@ -47,12 +59,12 @@ const navClass = computed(() => 'fixed inset-x-0 bottom-0 z-50 border-t border-s
 
 <template>
   <nav :class="navClass" aria-label="Navegacao mobile principal">
-    <div class="mx-auto grid max-w-md grid-cols-3 gap-2">
+    <div class="mx-auto grid max-w-md grid-cols-5 gap-1">
       <button
         v-for="item in items"
         :key="item.to"
         type="button"
-        class="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl px-2 text-xs font-semibold transition focus:outline-none focus:ring-2 focus:ring-brand-500/40"
+        class="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl px-1.5 text-[11px] font-semibold transition focus:outline-none focus:ring-2 focus:ring-brand-500/40"
         :class="[
           isActive(item)
             ? 'bg-brand-50 text-brand-700 dark:bg-brand-500/15 dark:text-brand-300'

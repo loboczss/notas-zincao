@@ -1,25 +1,16 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { $fetch } from 'ofetch'
 import {
-  ReceiptText,
-  CircleDashed,
   PackageCheck,
   RefreshCw,
   LayoutDashboard,
   Box,
   Truck,
   AlertCircle,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
-  ChevronLeft,
-  ChevronRight
 } from 'lucide-vue-next'
 
-import Botao from '../Botao.vue'
-import ModalGlobal from '../ModalGlobal.vue'
-import NotaDetalheModal from '../notas/NotaDetalheModal.vue'
+import NotasKpiGrid from '../notas/NotasKpiGrid.vue'
+import { getApiFetch } from '../../utils/api-fetch'
 
 type DashboardProduto10Response = {
   success: boolean
@@ -54,6 +45,7 @@ const errorMessage = ref('')
 const resumoNotas = ref<DashboardNotasResumoResponse['resumo'] | null>(null)
 const produtoId10 = ref<DashboardProduto10Response['produto'] | null>(null)
 const loadingProdutoId10 = ref(false)
+const apiFetch = getApiFetch()
 
 const metricas = computed(() => {
   const resumo = resumoNotas.value
@@ -75,7 +67,7 @@ const carregarResumoNotas = async () => {
   errorMessage.value = ''
 
   try {
-    const response = await $fetch<DashboardNotasResumoResponse>('/api/dashboard/notas-resumo')
+    const response = await apiFetch<DashboardNotasResumoResponse>('/api/dashboard/notas-resumo')
     resumoNotas.value = response?.resumo || null
   }
   catch (error) {
@@ -95,17 +87,26 @@ const metricasProdutoId10 = computed(() => {
     id: produto?.id || 10,
     nome: String(produto?.nome || 'Produto ID 10'),
     saldoEstoque: Number(produto?.saldo_estoque || 0),
-    notasPendentes: Number(produto?.notas_pendentes_com_produto || 0),
     quantidadePendenteNotas: Number(produto?.quantidade_pendente_notas || 0),
     percentualComprometido: Number(produto?.percentual_comprometido || 0),
     quantidadeFilhos: Number(produto?.quantidade_filhos || 0),
   }
 })
 
+const formatMedidaM2 = (value: number) => {
+  const numericValue = Number(value || 0)
+  const hasFraction = Math.abs(numericValue - Math.trunc(numericValue)) > 0.000001
+
+  return new Intl.NumberFormat('pt-BR', {
+    minimumFractionDigits: hasFraction ? 1 : 0,
+    maximumFractionDigits: hasFraction ? 1 : 0,
+  }).format(numericValue)
+}
+
 const carregarProdutoId10 = async () => {
   loadingProdutoId10.value = true
   try {
-    const response = await $fetch<DashboardProduto10Response>('/api/dashboard/produto-10')
+    const response = await apiFetch<DashboardProduto10Response>('/api/dashboard/produto-10')
     produtoId10.value = response.produto || null
   }
   catch (error) {
@@ -117,131 +118,12 @@ const carregarProdutoId10 = async () => {
   }
 }
 
-const historicoRetiradas = ref<any[]>([])
-const loadingHistorico = ref(false)
-const modalAberto = ref(false)
-const notaDetalhe = ref<any | null>(null)
-const loadingDetalhe = ref(false)
-const totalHistorico = ref(0)
-const totalPages = ref(1)
-
-const carregarHistoricoRetiradas = async () => {
-  loadingHistorico.value = true
-  try {
-    const response = await $fetch<{
-      success: boolean
-      historico: any[]
-      pagination?: {
-        page: number
-        page_size: number
-        total: number
-        total_pages: number
-      }
-    }>('/api/dashboard/retiradas-historico', {
-      query: {
-        page: currentPage.value,
-        page_size: pageSize.value,
-        sort_key: sortKey.value,
-        sort_order: sortOrder.value,
-      },
-    })
-
-    historicoRetiradas.value = response.historico || []
-    totalHistorico.value = Number(response.pagination?.total || 0)
-    totalPages.value = Number(response.pagination?.total_pages || 1)
-    currentPage.value = Number(response.pagination?.page || 1)
-  }
-  catch (error) {
-    console.error('[dashboard/retiradas-historico]', error)
-    historicoRetiradas.value = []
-    totalHistorico.value = 0
-    totalPages.value = 1
-  }
-  finally {
-    loadingHistorico.value = false
-  }
-}
-
-const formatDateTime = (value?: string) => {
-  if (!value) return '-'
-  return new Date(value).toLocaleString('pt-BR')
-}
-
 const carregarMetricas = async () => {
   await Promise.all([
     carregarResumoNotas(),
     carregarProdutoId10(),
-    carregarHistoricoRetiradas(),
   ])
 }
-
-const abrirDetalheNotaPorHistorico = async (evento: any) => {
-  const notaId = String(evento?.id_nota || '').trim()
-  if (!notaId) return
-
-  modalAberto.value = true
-  loadingDetalhe.value = true
-
-  try {
-    const response = await $fetch<{ success: boolean; nota: any }>(`/api/notas/${notaId}/detail`)
-    notaDetalhe.value = response?.nota || null
-  }
-  catch (error) {
-    console.error('[dashboard/nota-detalhe]', error)
-    notaDetalhe.value = null
-  }
-  finally {
-    loadingDetalhe.value = false
-  }
-}
-
-const fecharDetalheNota = () => {
-  modalAberto.value = false
-}
-
-// Ordenação
-const sortKey = ref<string>('data')
-const sortOrder = ref<'asc' | 'desc'>('desc')
-
-const toggleSort = async (key: string) => {
-  if (sortKey.value === key) {
-    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
-  }
-  else {
-    sortKey.value = key
-    sortOrder.value = 'desc'
-  }
-  currentPage.value = 1
-  await carregarHistoricoRetiradas()
-}
-
-// Paginação
-const currentPage = ref(1)
-const pageSize = ref(5)
-
-const nextPage = async () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++
-    await carregarHistoricoRetiradas()
-  }
-}
-
-const prevPage = async () => {
-  if (currentPage.value > 1) {
-    currentPage.value--
-    await carregarHistoricoRetiradas()
-  }
-}
-
-const historicoInicio = computed(() => {
-  if (!totalHistorico.value) return 0
-  return (currentPage.value - 1) * pageSize.value + 1
-})
-
-const historicoFim = computed(() => {
-  if (!totalHistorico.value) return 0
-  return Math.min(currentPage.value * pageSize.value, totalHistorico.value)
-})
 
 
 
@@ -279,42 +161,13 @@ onMounted(() => {
       </button>
     </div>
 
-    <!-- Grid Principal: Status de Notas -->
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <div class="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <ReceiptText class="h-4 w-4 text-slate-400" />
-            <span class="text-sm font-medium text-slate-500">Total de Notas</span>
-          </div>
-        </div>
-        <div class="mt-2 text-2xl font-bold text-slate-900 dark:text-white">{{ metricas.totalNotas }}</div>
-      </div>
-
-      <div class="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-        <div class="flex items-center gap-2">
-          <CircleDashed class="h-4 w-4 text-rose-500" />
-          <span class="text-sm font-medium text-slate-500">Pendentes</span>
-        </div>
-        <div class="mt-2 text-2xl font-bold text-slate-900 dark:text-white">{{ metricas.notasPendentes }}</div>
-      </div>
-
-      <div class="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-        <div class="flex items-center gap-2">
-          <Truck class="h-4 w-4 text-brand-500" />
-          <span class="text-sm font-medium text-slate-500">Parciais</span>
-        </div>
-        <div class="mt-2 text-2xl font-bold text-slate-900 dark:text-white">{{ metricas.notasParciais }}</div>
-      </div>
-
-      <div class="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-        <div class="flex items-center gap-2">
-          <PackageCheck class="h-4 w-4 text-emerald-500" />
-          <span class="text-sm font-medium text-slate-500">Concluídas</span>
-        </div>
-        <div class="mt-2 text-2xl font-bold text-slate-900 dark:text-white">{{ metricas.notasRetiradas }}</div>
-      </div>
-    </div>
+    <NotasKpiGrid
+      :total="metricas.totalNotas"
+      :pendentes="metricas.notasPendentes"
+      :parciais="metricas.notasParciais"
+      :concluidas="metricas.notasRetiradas"
+      :zinco-disponivel="metricasProdutoId10.saldoEstoque"
+    />
 
     <!-- Painel de Controle de Zinco -->
     <div class="rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
@@ -353,9 +206,9 @@ onMounted(() => {
           </div>
         </div>
 
-        <div v-else class="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_300px]">
+        <div v-else class="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-[1fr_300px] lg:gap-8">
           <!-- Coluna 1: Barra de Progresso e Métricas de Volume -->
-          <div class="space-y-8">
+          <div class="space-y-6">
             <div class="relative">
               <div class="mb-2 flex items-end justify-between">
                 <div>
@@ -379,49 +232,50 @@ onMounted(() => {
             </div>
 
             <!-- Dashboard Interno de Volumes -->
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div class="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-                <span class="block text-xs font-medium text-slate-500">Saldo Total em Pátio</span>
-                <span class="mt-1 block text-xl font-bold text-slate-900 dark:text-white">{{ metricasProdutoId10.saldoEstoque }} <span class="text-xs font-normal text-slate-400">m²</span></span>
-              </div>
-              <div class="rounded-lg border border-brand-200 bg-brand-50 p-4 dark:border-brand-900/50 dark:bg-brand-900/10">
-                <span class="block text-xs font-medium text-brand-600 dark:text-brand-400">Pendente a Entregar</span>
-                <span class="mt-1 block text-xl font-bold text-brand-700 dark:text-brand-300">{{ metricasProdutoId10.quantidadePendenteNotas }} <span class="text-xs font-normal opacity-70">m²</span></span>
-              </div>
-              <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900/50 dark:bg-emerald-900/10">
-                <span class="block text-xs font-medium text-emerald-600 dark:text-emerald-400">Saldo Livre Real</span>
-                <span class="mt-1 block text-xl font-bold text-emerald-700 dark:text-emerald-300">
-                  {{ Math.max(0, metricasProdutoId10.saldoEstoque - metricasProdutoId10.quantidadePendenteNotas).toFixed(2) }}
-                  <span class="text-xs font-normal opacity-70">m²</span>
-                </span>
-                <p class="mt-1 text-xs text-emerald-600/70">Disponível para venda</p>
-              </div>
+            <div class="grid grid-cols-2 gap-3 md:grid-cols-3">
+              <article class="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+                <div class="flex items-center gap-2">
+                  <Box class="h-4 w-4 shrink-0 text-slate-400" />
+                  <span class="min-w-0 truncate text-xs font-medium text-slate-500">Saldo Total</span>
+                </div>
+                <div class="mt-2 flex items-baseline gap-1">
+                  <span class="truncate text-xl font-bold text-slate-900 dark:text-white sm:text-2xl">{{ formatMedidaM2(metricasProdutoId10.saldoEstoque) }}</span>
+                  <span class="text-xs font-medium text-slate-400">m²</span>
+                </div>
+                <p class="mt-1 truncate text-[11px] text-slate-400">Em pátio</p>
+              </article>
+
+              <article class="rounded-lg border border-brand-200 bg-brand-50 p-4 dark:border-brand-900/50 dark:bg-brand-900/10">
+                <div class="flex items-center gap-2">
+                  <Truck class="h-4 w-4 shrink-0 text-brand-600 dark:text-brand-400" />
+                  <span class="min-w-0 truncate text-xs font-medium text-brand-600 dark:text-brand-400">Pendente</span>
+                </div>
+                <div class="mt-2 flex items-baseline gap-1">
+                  <span class="truncate text-xl font-bold text-brand-700 dark:text-brand-300 sm:text-2xl">{{ formatMedidaM2(metricasProdutoId10.quantidadePendenteNotas) }}</span>
+                  <span class="text-xs font-medium text-brand-600/70 dark:text-brand-300/70">m²</span>
+                </div>
+                <p class="mt-1 truncate text-[11px] text-brand-700/70 dark:text-brand-300/70">A entregar</p>
+              </article>
+
+              <article class="col-span-2 rounded-lg border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900/50 dark:bg-emerald-900/10 md:col-span-1">
+                <div class="flex items-center gap-2">
+                  <PackageCheck class="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                  <span class="min-w-0 truncate text-xs font-medium text-emerald-600 dark:text-emerald-400">Saldo Livre</span>
+                </div>
+                <div class="mt-2 flex items-baseline gap-1">
+                  <span class="truncate text-xl font-bold text-emerald-700 dark:text-emerald-300 sm:text-2xl">
+                    {{ formatMedidaM2(Math.max(0, metricasProdutoId10.saldoEstoque - metricasProdutoId10.quantidadePendenteNotas)) }}
+                  </span>
+                  <span class="text-xs font-medium text-emerald-600/70 dark:text-emerald-300/70">m²</span>
+                </div>
+                <p class="mt-1 truncate text-[11px] text-emerald-700/70 dark:text-emerald-300/70">Disponível para venda</p>
+              </article>
             </div>
           </div>
 
           <!-- Coluna 2: Métricas Secundárias e Cards de Operação -->
-          <div class="flex flex-col gap-4 lg:border-l lg:border-slate-200 lg:pl-8 lg:dark:border-slate-800">
-            <div class="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-              <div class="flex items-center gap-3">
-                <ReceiptText class="h-5 w-5 text-slate-400" />
-                <div>
-                  <p class="text-xs font-medium text-slate-500">Notas em Aberto</p>
-                  <p class="text-lg font-bold text-slate-900 dark:text-white">{{ metricasProdutoId10.notasPendentes }}</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-              <div class="flex items-center gap-3">
-                <Box class="h-5 w-5 text-slate-400" />
-                <div>
-                  <p class="text-xs font-medium text-slate-500">Filhos Vinculados</p>
-                  <p class="text-lg font-bold text-slate-900 dark:text-white">{{ metricasProdutoId10.quantidadeFilhos }}</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="rounded-lg border border-brand-200 bg-brand-50 p-4 dark:border-brand-900/50 dark:bg-brand-900/10">
+          <div class="lg:border-l lg:border-slate-200 lg:pl-8 lg:dark:border-slate-800">
+            <article class="rounded-lg border border-brand-200 bg-brand-50 p-4 dark:border-brand-900/50 dark:bg-brand-900/10">
               <div class="flex items-start gap-3">
                 <AlertCircle class="h-4 w-4 shrink-0 text-brand-600 dark:text-brand-400" />
                 <div>
@@ -431,7 +285,7 @@ onMounted(() => {
                   </p>
                 </div>
               </div>
-            </div>
+            </article>
           </div>
         </div>
       </div>
@@ -515,146 +369,6 @@ onMounted(() => {
         </div>
       </article>
     </div>
-    <!-- Histórico de Retiradas -->
-    <div class="rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-      <div class="p-6 border-b border-slate-100 dark:border-slate-800">
-        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Histórico de Retiradas Recentes</h3>
-        <p class="text-sm text-slate-500">Últimas entregas efetuadas e impacto no Zinco (Cód. #10)</p>
-      </div>
-
-      <div class="overflow-x-auto">
-        <div v-if="loadingHistorico" class="flex items-center justify-center py-8 text-sm text-slate-500">
-          Carregando histórico...
-        </div>
-        <div v-else-if="!totalHistorico" class="flex items-center justify-center py-8 text-sm text-slate-400 italic">
-          Nenhuma retirada registrada até o momento.
-        </div>
-        <table v-else class="w-full min-w-[600px] text-left text-xs">
-          <thead class="bg-slate-50/75 dark:bg-slate-800/40 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-100 dark:border-slate-800">
-            <tr>
-              <th class="px-6 py-3.5 cursor-pointer select-none hover:bg-slate-100/80 dark:hover:bg-slate-800/60 transition-colors" @click="toggleSort('data')">
-                <div class="flex items-center gap-1.5">
-                  <span>Data / Operador</span>
-                  <ArrowUp v-if="sortKey === 'data' && sortOrder === 'asc'" class="h-3.5 w-3.5 text-brand-600" />
-                  <ArrowDown v-else-if="sortKey === 'data' && sortOrder === 'desc'" class="h-3.5 w-3.5 text-brand-600" />
-                  <ArrowUpDown v-else class="h-3.5 w-3.5 text-slate-300 dark:text-slate-600" />
-                </div>
-              </th>
-              <th class="px-6 py-3.5 cursor-pointer select-none hover:bg-slate-100/80 dark:hover:bg-slate-800/60 transition-colors" @click="toggleSort('nome_cliente')">
-                <div class="flex items-center gap-1.5">
-                  <span>Cliente / Nota</span>
-                  <ArrowUp v-if="sortKey === 'nome_cliente' && sortOrder === 'asc'" class="h-3.5 w-3.5 text-brand-600" />
-                  <ArrowDown v-else-if="sortKey === 'nome_cliente' && sortOrder === 'desc'" class="h-3.5 w-3.5 text-brand-600" />
-                  <ArrowUpDown v-else class="h-3.5 w-3.5 text-slate-300 dark:text-slate-600" />
-                </div>
-              </th>
-              <th class="px-6 py-3.5 cursor-pointer select-none hover:bg-slate-100/80 dark:hover:bg-slate-800/60 transition-colors" @click="toggleSort('itens')">
-                <div class="flex items-center gap-1.5">
-                  <span>Itens Retirados</span>
-                  <ArrowUp v-if="sortKey === 'itens' && sortOrder === 'asc'" class="h-3.5 w-3.5 text-brand-600" />
-                  <ArrowDown v-else-if="sortKey === 'itens' && sortOrder === 'desc'" class="h-3.5 w-3.5 text-brand-600" />
-                  <ArrowUpDown v-else class="h-3.5 w-3.5 text-slate-300 dark:text-slate-600" />
-                </div>
-              </th>
-              <th class="px-6 py-3.5 cursor-pointer select-none hover:bg-slate-100/80 dark:hover:bg-slate-800/60 transition-colors" @click="toggleSort('reducao_zinco_10')">
-                <div class="flex items-center justify-end gap-1.5">
-                  <span>Baixa Zinco (m²)</span>
-                  <ArrowUp v-if="sortKey === 'reducao_zinco_10' && sortOrder === 'asc'" class="h-3.5 w-3.5 text-brand-600" />
-                  <ArrowDown v-else-if="sortKey === 'reducao_zinco_10' && sortOrder === 'desc'" class="h-3.5 w-3.5 text-brand-600" />
-                  <ArrowUpDown v-else class="h-3.5 w-3.5 text-slate-300 dark:text-slate-600" />
-                </div>
-              </th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-            <tr 
-              v-for="(event, eIdx) in historicoRetiradas" 
-              :key="eIdx"
-              class="cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-950/30 transition-colors"
-              @click="abrirDetalheNotaPorHistorico(event)"
-            >
-              <td class="px-6 py-4">
-                <div class="font-medium text-slate-900 dark:text-slate-100">{{ formatDateTime(event.data) }}</div>
-                <div class="text-[10px] text-slate-400 mt-0.5">{{ event.responsavel_nome }}</div>
-              </td>
-              <td class="px-6 py-4">
-                <div class="font-medium text-slate-900 dark:text-slate-200">{{ event.nome_cliente }}</div>
-                <div class="text-[10px] text-slate-400 mt-0.5 uppercase tracking-wider">Nota: {{ event.serie_nota }}-{{ event.numero_nota }}</div>
-              </td>
-              <td class="px-6 py-4">
-                <div class="flex flex-wrap gap-1">
-                  <span 
-                    v-for="(it, iIdx) in event.itens" 
-                    :key="iIdx"
-                    class="inline-flex items-center rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300"
-                  >
-                    {{ it.nome }} ({{ it.quantidade }})
-                  </span>
-                </div>
-              </td>
-              <td class="px-6 py-4 text-right font-bold" :class="event.reducao_zinco_10 > 0 ? 'text-brand-600 dark:text-brand-400' : 'text-slate-400'">
-                {{ event.reducao_zinco_10 > 0 ? `-${event.reducao_zinco_10}` : '0' }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <!-- Paginação -->
-        <div v-if="totalHistorico > 0" class="flex items-center justify-between border-t border-slate-100 px-6 py-4 dark:border-slate-800">
-          <div class="text-xs text-slate-500">
-            Mostrando <span class="font-medium text-slate-700 dark:text-slate-300">{{ historicoInicio }}</span> até 
-            <span class="font-medium text-slate-700 dark:text-slate-300">{{ historicoFim }}</span> de 
-            <span class="font-medium text-slate-700 dark:text-slate-300">{{ totalHistorico }}</span> registros.
-          </div>
-          
-          <div class="flex items-center gap-2">
-            <button 
-              @click="prevPage" 
-              :disabled="currentPage === 1"
-              class="inline-flex h-8 w-8 items-center justify-center rounded border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 disabled:opacity-50 disabled:hover:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800"
-            >
-              <ChevronLeft class="h-4 w-4" />
-            </button>
-            
-            <span class="text-xs text-slate-600 dark:text-slate-400">
-              Página <span class="font-semibold text-slate-900 dark:text-white">{{ currentPage }}</span> de {{ totalPages }}
-            </span>
-            
-            <button 
-              @click="nextPage" 
-              :disabled="currentPage === totalPages"
-              class="inline-flex h-8 w-8 items-center justify-center rounded border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 disabled:opacity-50 disabled:hover:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800"
-            >
-              <ChevronRight class="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <ModalGlobal
-      v-model="modalAberto"
-      title=""
-      max-width-class="max-w-6xl"
-      content-class="p-0"
-      :show-footer="false"
-      @update:model-value="(value) => { if (!value) fecharDetalheNota() }"
-    >
-      <div v-if="loadingDetalhe" class="flex min-h-[400px] flex-col items-center justify-center gap-4 py-20 text-center">
-        <div class="h-8 w-8 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
-        <p class="text-xs text-slate-500">
-          Carregando detalhes...
-        </p>
-      </div>
-
-      <div v-else class="p-6 md:p-8">
-        <NotaDetalheModal
-          :nota="notaDetalhe"
-          :is-admin="false"
-        />
-      </div>
-    </ModalGlobal>
   </section>
 
 </template>

@@ -1,18 +1,17 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { $fetch } from 'ofetch'
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { AlertTriangle, Pencil, Save, Trash2, XCircle } from 'lucide-vue-next'
 import type { NotaAdminEditRequest, NotaRetiradaStatus } from '../../../shared/types/NotasRetirada'
-import { CheckCircle2, Package, LayoutDashboard, Wallet, Plus } from 'lucide-vue-next'
 import AppPageShell from '../../components/layout/AppPageShell.vue'
-import Botao from '../../components/Botao.vue'
+import InfiniteScrollTrigger from '../../components/InfiniteScrollTrigger.vue'
 import ModalGlobal from '../../components/ModalGlobal.vue'
 import NotaDetalheModal from '../../components/notas/NotaDetalheModal.vue'
+import NotasKpiGrid from '../../components/notas/NotasKpiGrid.vue'
 import NotasTabela from '../../components/notas/NotasTabela.vue'
 import NotasToolbar from '../../components/notas/NotasToolbar.vue'
 import { useAuthStore, useNotasStore } from '../../stores'
 import { useToast } from '../../composables/useToast'
-import { AppRoute } from '../../constants/routes'
+import { getApiFetch } from '../../utils/api-fetch'
 
 
 definePageMeta({
@@ -22,6 +21,7 @@ definePageMeta({
 const notasStore = useNotasStore()
 const authStore = useAuthStore()
 const { success: showSuccess, error: showError } = useToast()
+const apiFetch = getApiFetch()
 
 const searchTerm = ref('')
 const statusFilter = ref<'todos' | NotaRetiradaStatus>('todos')
@@ -31,21 +31,36 @@ const paginaAtual = ref(1)
 const itensPorPagina = ref(20)
 const modalAberto = ref(false)
 const notaDetalhe = ref<any | null>(null)
+const detalheModalRef = ref<InstanceType<typeof NotaDetalheModal> | null>(null)
+const detalheEditMode = ref(false)
 const loadingDetalhe = ref(false)
 const savingEdicao = ref(false)
+const confirmDeleteOpen = ref(false)
+const deletingNota = ref(false)
 const exportLoading = ref<'csv' | 'pdf' | false>(false)
+const pullTracking = ref(false)
+const isPulling = ref(false)
+const pullRefreshing = ref(false)
+const pullStartY = ref(0)
+const pullDistance = ref(0)
+const filterShell = ref<HTMLElement | null>(null)
+const filterSpacerHeight = ref(152)
+let filterResizeObserver: ResizeObserver | null = null
 const resumoNotas = ref<{
   total_notas: number
   pendentes: number
   parciais: number
   retiradas: number
 } | null>(null)
-const router = useRouter()
+const produtoZinco = ref<{
+  saldo_estoque: number
+  quantidade_pendente_notas: number
+} | null>(null)
 const isAdmin = computed(() => String(authStore.profile?.role || '').trim().toLowerCase() === 'admin')
 
 const carregarResumoNotas = async () => {
   try {
-    const response = await $fetch<{
+    const response = await apiFetch<{
       success: boolean
       resumo: {
         total_notas: number
@@ -62,18 +77,53 @@ const carregarResumoNotas = async () => {
   }
 }
 
-const carregarNotas = async () => {
-  await Promise.all([
-    notasStore.fetchNotas({
-      search: searchTerm.value,
-      status: statusFilter.value,
-      data_inicio: dataInicio.value,
-      data_fim: dataFim.value,
-      page: paginaAtual.value,
-      page_size: itensPorPagina.value,
-    }),
-    carregarResumoNotas(),
-  ])
+const carregarZincoDisponivel = async () => {
+  try {
+    const response = await apiFetch<{
+      success: boolean
+      produto: {
+        saldo_estoque: number
+        quantidade_pendente_notas: number
+      }
+    }>('/api/dashboard/produto-10')
+
+    produtoZinco.value = response?.produto || null
+  }
+  catch (err) {
+    console.error('[carregarZincoDisponivel]', err)
+    produtoZinco.value = null
+  }
+}
+
+const carregarNotas = async (options: { append?: boolean; page?: number } = {}) => {
+  const append = Boolean(options.append)
+  const pageToLoad = options.page || (append ? notasStore.page + 1 : 1)
+
+  if (append && (notasStore.loadingNotas || pageToLoad > notasStore.totalPaginas)) return
+
+  if (!append) {
+    paginaAtual.value = pageToLoad
+  }
+
+  const fetchPromise = notasStore.fetchNotas({
+    search: searchTerm.value,
+    status: statusFilter.value,
+    data_inicio: dataInicio.value,
+    data_fim: dataFim.value,
+    page: pageToLoad,
+    page_size: itensPorPagina.value,
+  }, { append })
+
+  if (append) {
+    await fetchPromise
+  }
+  else {
+    await Promise.all([
+      fetchPromise,
+      carregarResumoNotas(),
+      carregarZincoDisponivel(),
+    ])
+  }
 
   paginaAtual.value = notasStore.page
 }
@@ -81,8 +131,7 @@ const carregarNotas = async () => {
 const carregarDetalhe = async (id: string) => {
   loadingDetalhe.value = true
   try {
-    const response = await $fetch<{ success: boolean; nota: any }>(`/api/notas/${id}/detail`)
-    notaDetalhe.value = response.nota
+    notaDetalhe.value = await notasStore.fetchNotaDetalhe(id)
   }
   finally {
     loadingDetalhe.value = false
@@ -90,12 +139,26 @@ const carregarDetalhe = async (id: string) => {
 }
 
 const abrirDetalheNota = async (id: string) => {
+  detalheEditMode.value = false
   modalAberto.value = true
   await carregarDetalhe(id)
 }
 
 const fecharDetalheNota = () => {
   modalAberto.value = false
+  detalheEditMode.value = false
+}
+
+const iniciarEdicaoDetalhe = () => {
+  detalheModalRef.value?.iniciarEdicao()
+}
+
+const cancelarEdicaoDetalhe = () => {
+  detalheModalRef.value?.cancelarEdicao()
+}
+
+const salvarEdicaoDetalhe = () => {
+  detalheModalRef.value?.salvarEdicao()
 }
 
 const salvarEdicaoNota = async (payload: NotaAdminEditRequest) => {
@@ -103,7 +166,7 @@ const salvarEdicaoNota = async (payload: NotaAdminEditRequest) => {
 
   savingEdicao.value = true
   try {
-    await $fetch(`/api/notas/${notaDetalhe.value.id}/edit`, {
+    await apiFetch(`/api/notas/${notaDetalhe.value.id}/edit`, {
       method: 'PATCH',
       body: payload,
     })
@@ -118,6 +181,34 @@ const salvarEdicaoNota = async (payload: NotaAdminEditRequest) => {
   }
   finally {
     savingEdicao.value = false
+  }
+}
+
+const abrirConfirmacaoExclusao = () => {
+  if (!notaDetalhe.value?.id || !isAdmin.value || detalheEditMode.value || deletingNota.value) return
+  confirmDeleteOpen.value = true
+}
+
+const cancelarExclusaoNota = () => {
+  if (deletingNota.value) return
+  confirmDeleteOpen.value = false
+}
+
+const confirmarExclusaoNota = async () => {
+  if (!notaDetalhe.value?.id || deletingNota.value) return
+
+  deletingNota.value = true
+  try {
+    const deleted = await notasStore.deleteNota(notaDetalhe.value.id)
+
+    if (deleted) {
+      confirmDeleteOpen.value = false
+      fecharDetalheNota()
+      await carregarNotas()
+    }
+  }
+  finally {
+    deletingNota.value = false
   }
 }
 
@@ -153,8 +244,33 @@ const exportarRelatorio = async (format: 'csv' | 'pdf') => {
   }
 }
 
+const updateFilterSpacer = () => {
+  const reservedGap = 16
+  filterSpacerHeight.value = (filterShell.value?.offsetHeight || 136) + reservedGap
+}
+
 onMounted(async () => {
+  await nextTick()
+  updateFilterSpacer()
+
+  if (import.meta.client) {
+    window.addEventListener('resize', updateFilterSpacer)
+
+    if ('ResizeObserver' in window && filterShell.value) {
+      filterResizeObserver = new ResizeObserver(updateFilterSpacer)
+      filterResizeObserver.observe(filterShell.value)
+    }
+  }
+
   await carregarNotas()
+})
+
+onUnmounted(() => {
+  if (!import.meta.client) return
+
+  window.removeEventListener('resize', updateFilterSpacer)
+  filterResizeObserver?.disconnect()
+  filterResizeObserver = null
 })
 
 const aplicarFiltros = async () => {
@@ -164,14 +280,12 @@ const aplicarFiltros = async () => {
 
 const irPaginaAnterior = async () => {
   if (paginaAtual.value <= 1 || notasStore.loadingNotas) return
-  paginaAtual.value -= 1
-  await carregarNotas()
+  await carregarNotas({ page: paginaAtual.value - 1 })
 }
 
 const irProximaPagina = async () => {
   if (paginaAtual.value >= notasStore.totalPaginas || notasStore.loadingNotas) return
-  paginaAtual.value += 1
-  await carregarNotas()
+  await carregarNotas({ page: paginaAtual.value + 1 })
 }
 
 const mudarItensPorPagina = async (value: string) => {
@@ -182,6 +296,99 @@ const mudarItensPorPagina = async (value: string) => {
   await carregarNotas()
 }
 
+const carregarMaisNotas = async () => {
+  if (notasStore.loadingNotas || !notasTemMais.value) return
+
+  await carregarNotas({
+    append: true,
+    page: notasStore.page + 1,
+  })
+}
+
+const pullActivationDistance = 28
+const pullThreshold = 72
+const pullOffset = computed(() => {
+  if (pullRefreshing.value) return 54
+  return Math.min(76, Math.round(pullDistance.value * 0.55))
+})
+
+const pullReady = computed(() => pullDistance.value >= pullThreshold)
+const pullIndicatorVisible = computed(() => isPulling.value || pullRefreshing.value)
+const pullContentStyle = computed(() => ({
+  transform: `translate3d(0, ${pullOffset.value}px, 0)`,
+}))
+const pullIndicatorText = computed(() => {
+  if (pullRefreshing.value) return 'Atualizando...'
+  return pullReady.value ? 'Solte para atualizar' : 'Puxe para atualizar'
+})
+
+const isPageAtTop = () => {
+  if (!import.meta.client) return false
+  return (document.scrollingElement?.scrollTop || window.scrollY || 0) <= 4
+}
+
+const handlePullStart = (event: TouchEvent) => {
+  if (event.touches.length !== 1 || notasStore.loadingNotas || pullRefreshing.value || !isPageAtTop()) return
+
+  pullStartY.value = event.touches[0]?.clientY || 0
+  pullDistance.value = 0
+  pullTracking.value = true
+  isPulling.value = false
+}
+
+const handlePullMove = (event: TouchEvent) => {
+  if (!pullTracking.value || event.touches.length !== 1) return
+
+  const currentY = event.touches[0]?.clientY || 0
+  const distance = currentY - pullStartY.value
+
+  if (distance <= 0) {
+    pullTracking.value = false
+    isPulling.value = false
+    pullDistance.value = 0
+    return
+  }
+
+  if (!isPageAtTop()) {
+    pullTracking.value = false
+    isPulling.value = false
+    pullDistance.value = 0
+    return
+  }
+
+  if (distance < pullActivationDistance) return
+
+  isPulling.value = true
+  pullDistance.value = Math.min(distance - pullActivationDistance, 140)
+  if (event.cancelable) {
+    event.preventDefault()
+  }
+}
+
+const finishPullRefresh = async () => {
+  if (!pullTracking.value && !isPulling.value) return
+
+  const shouldRefresh = pullReady.value
+  pullTracking.value = false
+  isPulling.value = false
+
+  if (!shouldRefresh) {
+    pullDistance.value = 0
+    return
+  }
+
+  pullRefreshing.value = true
+  pullDistance.value = pullThreshold
+
+  try {
+    await carregarNotas()
+  }
+  finally {
+    pullRefreshing.value = false
+    pullDistance.value = 0
+  }
+}
+
 const notasFiltradas = computed(() => notasStore.notas)
 
 const intervaloNotas = computed(() => {
@@ -190,10 +397,15 @@ const intervaloNotas = computed(() => {
     return { inicio: 0, fim: 0 }
   }
 
-  const inicio = (notasStore.page - 1) * notasStore.pageSize + 1
-  const fim = Math.min(notasStore.page * notasStore.pageSize, total)
-  return { inicio, fim }
+  return {
+    inicio: 1,
+    fim: Math.min(notasStore.notas.length, total),
+  }
 })
+
+const notasTemMais = computed(() => notasStore.notas.length < notasStore.totalNotas && notasStore.page < notasStore.totalPaginas)
+const notasLoadingInicial = computed(() => notasStore.loadingNotas && !notasStore.notas.length)
+const notasLoadingMais = computed(() => notasStore.loadingNotas && notasStore.notas.length > 0)
 
 // Métricas Reativas
 const stats = computed(() => {
@@ -205,101 +417,78 @@ const stats = computed(() => {
     pendentes: Number(resumo?.pendentes ?? todas.filter(n => n.status_retirada === 'pendente').length),
     parciais: Number(resumo?.parciais ?? todas.filter(n => n.status_retirada === 'parcial').length),
     concluidas: Number(resumo?.retiradas ?? todas.filter(n => n.status_retirada === 'retirada').length),
+    zincoDisponivel: Number(produtoZinco.value?.saldo_estoque || 0),
     valorTotal: todas.reduce((acc, n) => acc + (n.valor_total || 0), 0)
   }
 })
 
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
-}
 </script>
 
 <template>
   <AppPageShell
-    eyebrow="Operações"
     title="Notas de Retirada"
-    description="Gestão de notas fiscais e acompanhamento de retiradas."
+    hide-header
   >
-    <template #headerAside>
-      <NuxtLink
-        :to="AppRoute.cadastrarNota"
-        class="flex items-center justify-center gap-2 rounded-md bg-brand-600 px-4 py-2 text-xs font-medium text-white transition hover:bg-brand-500 active:bg-brand-700"
+    <div class="animate-fade-in font-sans">
+      <div :style="{ height: `${filterSpacerHeight}px` }" aria-hidden="true" />
+
+      <div
+        ref="filterShell"
+        class="fixed inset-x-0 top-16 z-30 bg-slate-50 px-4 pb-3 pt-1 dark:bg-slate-950 md:px-8"
       >
-        <Plus class="h-4 w-4" />
-        <span>Nova Nota</span>
-      </NuxtLink>
-    </template>
-
-    <div class="animate-fade-in font-sans space-y-6">
-      <!-- Minimalist Metrics Grid -->
-      <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <!-- Total de Notas -->
-        <div class="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-          <div class="flex items-center gap-2">
-            <Package class="h-4 w-4 text-slate-400" />
-            <span class="text-xs font-medium text-slate-500">Total Geral</span>
-          </div>
-          <div class="mt-2 flex items-baseline">
-            <span class="text-2xl font-bold text-slate-900 dark:text-white">{{ stats.total }}</span>
-          </div>
-        </div>
-
-        <!-- Pendentes -->
-        <div class="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-          <div class="flex items-center gap-2">
-            <div class="h-2 w-2 rounded-full bg-brand-500" />
-            <span class="text-xs font-medium text-slate-500">Pendentes</span>
-          </div>
-          <div class="mt-2 flex items-baseline">
-            <span class="text-2xl font-bold text-slate-900 dark:text-white">{{ stats.pendentes }}</span>
-          </div>
-        </div>
-
-        <!-- Parciais -->
-        <div class="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-          <div class="flex items-center gap-2">
-            <div class="h-2 w-2 rounded-full bg-blue-500" />
-            <span class="text-xs font-medium text-slate-500">Parciais</span>
-          </div>
-          <div class="mt-2 flex items-baseline">
-            <span class="text-2xl font-bold text-slate-900 dark:text-white">{{ stats.parciais }}</span>
-          </div>
-        </div>
-
-        <!-- Concluídas -->
-        <div class="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-          <div class="flex items-center gap-2">
-            <CheckCircle2 class="h-4 w-4 text-emerald-500" />
-            <span class="text-xs font-medium text-slate-500">Concluídas</span>
-          </div>
-          <div class="mt-2 flex items-baseline">
-            <span class="text-2xl font-bold text-slate-900 dark:text-white">{{ stats.concluidas }}</span>
-          </div>
+        <div class="mx-auto max-w-7xl">
+          <NotasToolbar
+            :search-term="searchTerm"
+            :status-filter="statusFilter"
+            :data-inicio="dataInicio"
+            :data-fim="dataFim"
+            :total-count="notasStore.totalNotas"
+            :result-count="notasFiltradas.length"
+            :loading="notasStore.loadingNotas"
+            :export-loading="exportLoading"
+            @update:search-term="searchTerm = $event"
+            @update:status-filter="statusFilter = $event; aplicarFiltros()"
+            @update:data-inicio="dataInicio = $event"
+            @update:data-fim="dataFim = $event"
+            @apply="aplicarFiltros"
+            @refresh="carregarNotas"
+            @export="exportarRelatorio"
+          />
         </div>
       </div>
 
-      <!-- Toolbar de Controle -->
-      <NotasToolbar
-        :search-term="searchTerm"
-        :status-filter="statusFilter"
-        :data-inicio="dataInicio"
-        :data-fim="dataFim"
-        :total-count="notasStore.totalNotas"
-        :result-count="notasFiltradas.length"
-        :loading="notasStore.loadingNotas"
-        :export-loading="exportLoading"
-        @update:search-term="searchTerm = $event"
-        @update:status-filter="statusFilter = $event; aplicarFiltros()"
-        @update:data-inicio="dataInicio = $event"
-        @update:data-fim="dataFim = $event"
-        @apply="aplicarFiltros"
-        @refresh="carregarNotas"
-        @export="exportarRelatorio"
-      />
+      <div
+        class="relative"
+        @touchstart.passive="handlePullStart"
+        @touchmove="handlePullMove"
+        @touchend="finishPullRefresh"
+        @touchcancel="finishPullRefresh"
+      >
+        <div
+          v-if="pullIndicatorVisible"
+          class="pointer-events-none absolute inset-x-0 top-3 z-20 flex justify-center"
+        >
+          <div class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+            <div
+              class="h-4 w-4 rounded-full border-2 border-brand-500 border-t-transparent"
+              :class="pullRefreshing || pullReady ? 'animate-spin' : ''"
+            />
+            <span>{{ pullIndicatorText }}</span>
+          </div>
+        </div>
 
-      <div class="space-y-4">
-        <!-- Pagination Minimal -->
-        <div class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm dark:border-slate-800 dark:bg-slate-900">
+        <div
+          class="space-y-6 transition-transform duration-200 ease-out"
+          :class="{ 'duration-0': isPulling }"
+          :style="pullContentStyle"
+        >
+          <NotasKpiGrid
+            zinco-only
+            :zinco-disponivel="stats.zincoDisponivel"
+          />
+
+          <div class="space-y-4">
+        <div v-if="false" class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm dark:border-slate-800 dark:bg-slate-900">
           <div class="text-xs text-slate-500">
             <span>Página <span class="font-medium text-slate-900 dark:text-white">{{ notasStore.page }}</span> de {{ notasStore.totalPaginas }}</span>
             <span class="mx-2 hidden sm:inline">•</span>
@@ -345,8 +534,19 @@ const formatCurrency = (value: number) => {
 
         <NotasTabela
           :notas="notasFiltradas"
-          :loading="notasStore.loadingNotas"
+          :loading="notasLoadingInicial"
           @open="abrirDetalheNota"
+        />
+
+        <InfiniteScrollTrigger
+          v-if="notasFiltradas.length"
+          :loading="notasLoadingMais"
+          :done="!notasTemMais"
+          :loaded-count="notasFiltradas.length"
+          :total="notasStore.totalNotas"
+          label="notas"
+          done-label="Todas as notas foram carregadas."
+          @load-more="carregarMaisNotas"
         />
 
         <div
@@ -358,10 +558,12 @@ const formatCurrency = (value: number) => {
           </p>
           <button
             class="mt-2 text-xs font-medium text-rose-600 underline hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300"
-            @click="carregarNotas"
+            @click="() => carregarNotas()"
           >
             Tentar novamente
           </button>
+        </div>
+          </div>
         </div>
       </div>
 
@@ -374,6 +576,62 @@ const formatCurrency = (value: number) => {
         :show-footer="false"
         @update:model-value="(value) => { if (!value) fecharDetalheNota() }"
       >
+        <template #header>
+          <div class="space-y-1">
+            <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              Detalhes da nota
+            </p>
+            <h2 class="truncate text-base font-bold text-slate-950 dark:text-white md:text-lg">
+              {{ notaDetalhe ? `Nota ${notaDetalhe.serie_nota || '1'}-${notaDetalhe.numero_nota || ''}` : 'Carregando nota' }}
+            </h2>
+          </div>
+        </template>
+
+        <template #header-actions>
+          <div v-if="isAdmin && notaDetalhe && !loadingDetalhe" class="flex items-center gap-2">
+            <button
+              v-if="!detalheEditMode"
+              type="button"
+              class="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+              @click="iniciarEdicaoDetalhe"
+            >
+              <Pencil class="h-3.5 w-3.5" />
+              Editar notas
+            </button>
+            <button
+              v-if="!detalheEditMode"
+              type="button"
+              class="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-rose-200 bg-white px-3 text-xs font-semibold text-rose-700 transition hover:bg-rose-50 focus:outline-none focus:ring-2 focus:ring-rose-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-rose-900/70 dark:bg-slate-900 dark:text-rose-300 dark:hover:bg-rose-950/30"
+              :disabled="deletingNota"
+              @click="abrirConfirmacaoExclusao"
+            >
+              <Trash2 class="h-3.5 w-3.5" />
+              Excluir nota
+            </button>
+
+            <template v-else>
+              <button
+                type="button"
+                class="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-brand-600 px-3 text-xs font-semibold text-white transition hover:bg-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 disabled:opacity-60 dark:bg-brand-500 dark:hover:bg-brand-600"
+                :disabled="savingEdicao"
+                @click="salvarEdicaoDetalhe"
+              >
+                <Save class="h-3.5 w-3.5" />
+                {{ savingEdicao ? 'Salvando...' : 'Salvar' }}
+              </button>
+              <button
+                type="button"
+                class="inline-flex h-9 items-center justify-center gap-2 rounded-lg px-3 text-xs font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500/20 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                :disabled="savingEdicao"
+                @click="cancelarEdicaoDetalhe"
+              >
+                <XCircle class="h-3.5 w-3.5" />
+                Cancelar
+              </button>
+            </template>
+          </div>
+        </template>
+
         <div v-if="loadingDetalhe" class="flex min-h-[400px] flex-col items-center justify-center gap-4 py-20 text-center">
           <div class="h-8 w-8 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
           <p class="text-xs text-slate-500">
@@ -383,11 +641,76 @@ const formatCurrency = (value: number) => {
 
         <div v-else class="p-6 md:p-8">
           <NotaDetalheModal
+            ref="detalheModalRef"
             :nota="notaDetalhe"
             :is-admin="isAdmin"
             :saving-edit="savingEdicao"
+            @edit-mode-change="detalheEditMode = $event"
             @save-edit="salvarEdicaoNota"
           />
+        </div>
+      </ModalGlobal>
+
+      <ModalGlobal
+        v-model="confirmDeleteOpen"
+        title=""
+        max-width-class="max-w-lg"
+        content-class="p-0"
+        :show-footer="false"
+        @update:model-value="(value) => { if (!value) cancelarExclusaoNota() }"
+      >
+        <template #header>
+          <div class="space-y-1">
+            <p class="text-[11px] font-semibold uppercase tracking-wider text-rose-600 dark:text-rose-300">
+              Acao perigosa
+            </p>
+            <h2 class="text-base font-bold text-slate-950 dark:text-white md:text-lg">
+              Excluir nota?
+            </h2>
+          </div>
+        </template>
+
+        <div class="space-y-5 p-5 md:p-6">
+          <div class="flex gap-3 rounded-lg border border-rose-200 bg-rose-50 p-4 text-rose-900 dark:border-rose-900/70 dark:bg-rose-950/30 dark:text-rose-100">
+            <AlertTriangle class="mt-0.5 h-5 w-5 shrink-0" />
+            <div class="space-y-1 text-sm leading-relaxed">
+              <p class="font-semibold">
+                Esta exclusao vai remover a nota das listas principais.
+              </p>
+              <p class="text-rose-800/80 dark:text-rose-100/80">
+                Essa acao exige permissao de administrador, fica registrada no historico e pode impactar conferencias e retiradas vinculadas.
+              </p>
+            </div>
+          </div>
+
+          <div class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
+            <p class="font-semibold text-slate-950 dark:text-white">
+              {{ notaDetalhe ? `Nota ${notaDetalhe.serie_nota || '1'}-${notaDetalhe.numero_nota || ''}` : 'Nota selecionada' }}
+            </p>
+            <p v-if="notaDetalhe?.nome_cliente" class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              {{ notaDetalhe.nome_cliente }}
+            </p>
+          </div>
+
+          <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              class="inline-flex h-10 items-center justify-center rounded-lg px-4 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+              :disabled="deletingNota"
+              @click="cancelarExclusaoNota"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              class="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-rose-600 px-4 text-sm font-semibold text-white transition hover:bg-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+              :disabled="deletingNota"
+              @click="confirmarExclusaoNota"
+            >
+              <Trash2 class="h-4 w-4" />
+              {{ deletingNota ? 'Excluindo...' : 'Excluir nota' }}
+            </button>
+          </div>
         </div>
       </ModalGlobal>
     </div>

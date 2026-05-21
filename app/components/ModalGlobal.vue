@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { X } from 'lucide-vue-next'
+
 const props = withDefaults(
   defineProps<{
     modelValue: boolean
@@ -34,8 +36,7 @@ const fecharModal = () => {
       leave-from-class="opacity-100"
       leave-to-class="opacity-0"
     >
-      <div v-if="props.modelValue" class="fixed inset-0 z-[100] flex items-end justify-center p-3 md:items-center md:p-4 font-sans">
-        <!-- Simple Overlay -->
+      <div v-if="props.modelValue" class="fixed inset-0 z-[100] flex items-end justify-center p-3 font-sans md:items-center md:p-4">
         <button
           type="button"
           class="fixed inset-0 h-screen w-screen bg-slate-900/30 backdrop-blur-sm transition-opacity"
@@ -43,7 +44,6 @@ const fecharModal = () => {
           @click="fecharModal"
         />
 
-        <!-- Modal Panel -->
         <Transition
           enter-active-class="transition duration-300 ease-out"
           enter-from-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -52,30 +52,36 @@ const fecharModal = () => {
           leave-from-class="opacity-100 translate-y-0 sm:scale-100"
           leave-to-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
         >
-          <section 
-            class="relative z-10 flex flex-col max-h-[90vh] w-full overflow-hidden rounded-t-2xl bg-white/95 shadow-2xl ring-1 ring-slate-200/50 backdrop-blur-xl transition-colors duration-300 dark:bg-slate-900/95 dark:ring-white/10 md:rounded-2xl" 
+          <section
+            class="relative z-10 flex max-h-[90vh] w-full flex-col overflow-hidden rounded-t-2xl bg-white/95 shadow-2xl ring-1 ring-slate-200/50 backdrop-blur-xl transition-colors duration-300 dark:bg-slate-900/95 dark:ring-white/10 md:rounded-2xl"
             :class="[props.maxWidthClass]"
           >
-            <!-- Header -->
-            <header 
-              v-if="props.title || $slots.header" 
-              class="flex items-center justify-between gap-3 border-b border-slate-100 p-4 dark:border-slate-800 md:px-6 md:py-4"
+            <header
+              v-if="props.title || $slots.header || $slots['header-actions']"
+              class="flex items-center justify-between gap-3 border-b border-slate-100 bg-white/95 px-5 py-4 dark:border-slate-800 dark:bg-slate-900/95 md:px-7 md:py-5"
             >
-              <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100 md:text-lg">
-                {{ props.title }}
-              </h2>
+              <div class="min-w-0 flex-1">
+                <slot name="header">
+                  <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100 md:text-lg">
+                    {{ props.title }}
+                  </h2>
+                </slot>
+              </div>
 
-              <button
-                type="button"
-                class="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"
-                aria-label="Fechar"
-                @click="fecharModal"
-              >
-                <span class="text-lg leading-none">✕</span>
-              </button>
+              <div class="flex shrink-0 items-center gap-2">
+                <slot name="header-actions" :close="fecharModal" />
+
+                <button
+                  type="button"
+                  class="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500/20 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                  aria-label="Fechar"
+                  @click="fecharModal"
+                >
+                  <X class="h-4 w-4" />
+                </button>
+              </div>
             </header>
-            
-            <!-- Floating Close Button for when no title is present -->
+
             <button
               v-else
               type="button"
@@ -83,18 +89,16 @@ const fecharModal = () => {
               aria-label="Fechar"
               @click="fecharModal"
             >
-              <span class="text-sm leading-none">✕</span>
+              <X class="h-4 w-4" />
             </button>
 
-            <!-- Content Area -->
             <div class="flex-1 overflow-y-auto" :class="props.contentClass">
               <slot />
             </div>
 
-            <!-- Footer -->
-            <footer 
-              v-if="props.showFooter || $slots.footer" 
-              class="border-t border-slate-100 p-4 dark:border-slate-800 md:px-6 md:py-4 bg-slate-50/50 dark:bg-slate-950/50"
+            <footer
+              v-if="props.showFooter || $slots.footer"
+              class="border-t border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-950/50 md:px-6 md:py-4"
             >
               <slot name="footer" />
             </footer>

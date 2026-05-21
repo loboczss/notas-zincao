@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import AppPageShell from '../components/layout/AppPageShell.vue'
 import ModalGlobal from '../components/ModalGlobal.vue'
 import NotaCadastroCaptura from '../components/nota-cadastro/NotaCadastroCaptura.vue'
 import NotaCadastroCliente from '../components/nota-cadastro/NotaCadastroCliente.vue'
 import NotaCadastroFiscal from '../components/nota-cadastro/NotaCadastroFiscal.vue'
+import NotaCadastroLayout from '../components/nota-cadastro/NotaCadastroLayout.vue'
 import NotaCadastroProdutos from '../components/nota-cadastro/NotaCadastroProdutos.vue'
 import Botao from '../components/Botao.vue'
+import NotaCadastroBotaoFlutuante from '../components/nota-cadastro/NotaCadastroBotaoFlutuante.vue'
 import type { CrmContato } from '../../shared/types/CRM'
 import type { NotaProduto, NotaRetiradaDraft, NotaRetiradaListItem } from '../../shared/types/NotasRetirada'
 import { useCrmStore, useNotasStore } from '../stores'
@@ -37,6 +39,16 @@ const form = reactive<NotaRetiradaDraft>({
 })
 
 const errors = reactive<Record<string, string>>({})
+
+// Limpar erros automaticamente conforme o usuário preenche/altera os campos
+watch(() => form.nome_cliente, () => { delete errors.nome_cliente })
+watch(() => form.telefone_cliente, () => { delete errors.telefone_cliente })
+watch(() => form.documento_cliente, () => { delete errors.documento_cliente })
+watch(() => form.numero_nota, () => { delete errors.numero_nota })
+watch(() => form.serie_nota, () => { delete errors.serie_nota })
+watch(() => form.chave_nfe, () => { delete errors.chave_nfe })
+watch(() => form.data_compra, () => { delete errors.data_compra })
+watch(() => form.produtos, () => { delete errors.produtos }, { deep: true })
 const imageDataUrl = ref('')
 const successModalOpen = ref(false)
 const createdNota = ref<{ id: string; numero_nota: string; serie_nota: string } | null>(null)
@@ -104,6 +116,37 @@ const duplicateNota = computed<NotaRetiradaListItem | null>(() => {
 const crmQueryAtiva = computed(() => form.nome_cliente.trim().length >= 2)
 const showCrmSuggestions = computed(() => crmQueryAtiva.value && crmStore.contatos.length > 0)
 const showCrmNoResults = computed(() => crmQueryAtiva.value && !crmStore.loadingContatos && crmStore.contatos.length === 0)
+
+const hasCadastroStarted = computed(() => {
+  return Boolean(
+    imageDataUrl.value
+    || String(form.nome_cliente || '').trim()
+    || digitsOnly(String(form.telefone_cliente || ''))
+    || digitsOnly(String(form.documento_cliente || ''))
+    || String(form.numero_nota || '').trim()
+    || digitsOnly(String(form.chave_nfe || ''))
+    || String(form.data_compra || '').trim()
+    || String(form.observacoes || '').trim()
+    || toNumber(form.desconto_total) > 0
+    || form.produtos.length > 0,
+  )
+})
+
+const requiredFieldsReady = computed(() => {
+  return Boolean(
+    String(form.nome_cliente || '').trim()
+    && digitsOnly(String(form.telefone_cliente || '')).trim()
+    && String(form.numero_nota || '').trim()
+    && String(form.serie_nota || '').trim()
+    && String(form.data_compra || '').trim()
+    && digitsOnly(String(form.chave_nfe || '')).length === 44
+    && form.produtos.some(produto => String(produto.nome || '').trim()),
+  )
+})
+
+const saveDisabled = computed(() => {
+  return notasStore.creatingNota || !!duplicateNota.value || !hasCadastroStarted.value || !requiredFieldsReady.value
+})
 
 const divergenceWarning = computed(() => {
   const valorExtraido = toNumber(form.valor_total)
@@ -375,34 +418,28 @@ const cadastrarOutra = async () => {
   crmStore.clearContatos()
   await notasStore.fetchNotas()
 }
-
 await notasStore.fetchNotas()
 </script>
 
 <template>
   <AppPageShell
-    eyebrow="Cadastro"
     title="Cadastrar nota de retirada"
-    description="Capture o cupom, valide os dados extraídos pela IA e registre a nota com segurança."
+    eyebrow="Retiradas"
+    width-class="max-w-5xl"
   >
-    <template #headerAside>
-      <Botao :disabled="notasStore.creatingNota || !!duplicateNota" @click="saveNota">
-        {{ notasStore.creatingNota ? 'Salvando...' : 'Salvar nota' }}
-      </Botao>
-    </template>
+
 
     <!-- Mensagens de Validação -->
-    <div v-if="duplicateNota" class="mb-4 rounded-xl border border-brand-200 bg-brand-50 p-4 text-sm text-brand-800 dark:border-brand-900/50 dark:bg-brand-500/10 dark:text-brand-200">
+    <div v-if="duplicateNota" class="mb-3 rounded-lg border border-brand-200 bg-brand-50 p-3 text-sm text-brand-800 dark:border-brand-900/50 dark:bg-brand-500/10 dark:text-brand-200">
       Duplicidade encontrada: nota {{ duplicateNota.serie_nota }}-{{ duplicateNota.numero_nota }} já cadastrada para {{ duplicateNota.nome_cliente }}.
     </div>
 
-    <div v-if="notasStore.errorMessage" class="mb-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 dark:border-rose-900/50 dark:bg-rose-500/10 dark:text-rose-300">
+    <div v-if="notasStore.errorMessage" class="mb-3 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700 dark:border-rose-900/50 dark:bg-rose-500/10 dark:text-rose-300">
       {{ notasStore.errorMessage }}
     </div>
 
-    <div class="grid gap-4 xl:grid-cols-[1fr_2fr]">
-      <!-- Coluna da Esquerda (Menor) -->
-      <div class="space-y-4">
+    <NotaCadastroLayout>
+      <template #side>
         <NotaCadastroCaptura
           :preview-url="imageDataUrl"
           :loading="notasStore.extractingNota"
@@ -424,37 +461,34 @@ await notasStore.fetchNotas()
           @search-contato="buscarContato"
           @select-contato="selecionarContato"
         />
-      </div>
+      </template>
 
-      <!-- Coluna da Direita (Maior) -->
-      <div class="space-y-4">
-        <NotaCadastroFiscal
-          :numero-nota="form.numero_nota"
-          :serie-nota="form.serie_nota || '1'"
-          :chave-nfe="String(form.chave_nfe || '')"
-          :data-compra="form.data_compra"
-          :valor-total="totalProdutos.toFixed(2)"
-          :desconto-total="String(form.desconto_total ?? '')"
-          :valor-liquido="valorLiquido.toFixed(2)"
-          :observacoes="String(form.observacoes || '')"
-          :errors="errors"
-          @update:numero-nota="form.numero_nota = $event"
-          @update:serie-nota="form.serie_nota = $event"
-          @update:chave-nfe="form.chave_nfe = digitsOnly($event)"
-          @update:data-compra="form.data_compra = $event"
-          @update:desconto-total="form.desconto_total = toNumber($event)"
-          @update:observacoes="form.observacoes = $event"
-        />
+      <NotaCadastroFiscal
+        :numero-nota="form.numero_nota"
+        :serie-nota="form.serie_nota || '1'"
+        :chave-nfe="String(form.chave_nfe || '')"
+        :data-compra="form.data_compra"
+        :valor-total="totalProdutos.toFixed(2)"
+        :desconto-total="String(form.desconto_total ?? '')"
+        :valor-liquido="valorLiquido.toFixed(2)"
+        :observacoes="String(form.observacoes || '')"
+        :errors="errors"
+        @update:numero-nota="form.numero_nota = $event"
+        @update:serie-nota="form.serie_nota = $event"
+        @update:chave-nfe="form.chave_nfe = digitsOnly($event)"
+        @update:data-compra="form.data_compra = $event"
+        @update:desconto-total="form.desconto_total = toNumber($event)"
+        @update:observacoes="form.observacoes = $event"
+      />
 
-        <NotaCadastroProdutos
-          :produtos="form.produtos"
-          :errors="errors"
-          @add-produto="addProduto"
-          @remove-produto="removeProduto"
-          @update-produto="updateProduto"
-        />
-      </div>
-    </div>
+      <NotaCadastroProdutos
+        :produtos="form.produtos"
+        :errors="errors"
+        @add-produto="addProduto"
+        @remove-produto="removeProduto"
+        @update-produto="updateProduto"
+      />
+    </NotaCadastroLayout>
 
     <ModalGlobal v-model="successModalOpen" title="Nota salva com sucesso" max-width-class="max-w-md">
       <div class="space-y-4 text-sm text-slate-700 dark:text-slate-300">
@@ -464,22 +498,28 @@ await notasStore.fetchNotas()
       </div>
       <template #footer>
         <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
-          <button
+          <Botao
             type="button"
-            class="inline-flex items-center justify-center rounded-2xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+            variant="secondary"
             @click="cadastrarOutra"
           >
             Cadastrar outra
-          </button>
-          <button
+          </Botao>
+          <Botao
             type="button"
-            class="inline-flex items-center justify-center rounded-2xl bg-brand-600 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-brand-500"
             @click="router.push(AppRoute.notas)"
           >
             Ir para listagem
-          </button>
+          </Botao>
         </div>
       </template>
     </ModalGlobal>
+
+    <!-- Botão Flutuante de Salvar -->
+    <NotaCadastroBotaoFlutuante
+      :disabled="saveDisabled"
+      :loading="notasStore.creatingNota"
+      @click="saveNota"
+    />
   </AppPageShell>
 </template>

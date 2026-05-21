@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
-import { Camera, X } from 'lucide-vue-next'
+import { ArrowLeft, Camera, ListChecks, X } from 'lucide-vue-next'
 
-import { $fetch } from 'ofetch'
 import { useRoute, useRouter } from 'vue-router'
-import type { NotaRegistrarRetiradaRequest } from '../../../../shared/types/NotasRetirada'
+import type { NotaRegistrarRetiradaRequest, NotaRetiradaDetalheItem } from '../../../../shared/types/NotasRetirada'
 import AppPageShell from '../../../components/layout/AppPageShell.vue'
+import Botao from '../../../components/Botao.vue'
 import Input from '../../../components/Input.vue'
+import NotaCadastroBotaoFlutuante from '../../../components/nota-cadastro/NotaCadastroBotaoFlutuante.vue'
+import NotaCadastroField from '../../../components/nota-cadastro/NotaCadastroField.vue'
+import NotaCadastroLayout from '../../../components/nota-cadastro/NotaCadastroLayout.vue'
+import NotaCadastroSection from '../../../components/nota-cadastro/NotaCadastroSection.vue'
 import NotasStatusBadge from '../../../components/notas/NotasStatusBadge.vue'
 import { useNotasStore } from '../../../stores'
 import { AppRoute } from '../../../constants/routes'
@@ -23,15 +27,7 @@ type NotaProdutoPage = {
   valor_unitario?: number | string
 }
 
-type NotaRetiradaPageData = {
-  id: string
-  nome_cliente: string
-  numero_nota: string
-  serie_nota: string
-  data_compra: string
-  status_retirada: 'pendente' | 'parcial' | 'retirada' | 'cancelada'
-  observacoes?: string | null
-  foto_url?: string | null
+type NotaRetiradaPageData = Omit<NotaRetiradaDetalheItem, 'produtos'> & {
   produtos?: NotaProdutoPage[]
 }
 
@@ -55,7 +51,6 @@ const triggerFileInput = () => {
   fileInput.value?.click()
 }
 
-
 const toNumber = (value: unknown) => {
   if (typeof value === 'number' && Number.isFinite(value)) return value
   if (typeof value === 'string') {
@@ -74,6 +69,30 @@ const saldoItem = (produto: NotaProdutoPage) => {
   return Math.max(0, comprado - retirado)
 }
 
+const totalSaldo = computed(() => produtos.value.reduce((total, produto) => total + saldoItem(produto), 0))
+const itensComSaldo = computed(() => produtos.value.filter(produto => saldoItem(produto) > 0).length)
+const totalSelecionado = computed(() => {
+  return produtos.value.reduce((total, produto, index) => {
+    return total + Math.min(Math.max(0, toNumber(retirarForm[index])), saldoItem(produto))
+  }, 0)
+})
+
+const saveDisabled = computed(() => {
+  return saving.value || !nota.value || totalSelecionado.value <= 0 || !fotoDataUrl.value
+})
+
+const saveHint = computed(() => {
+  if (!nota.value) return ''
+  if (totalSelecionado.value <= 0) return 'Selecione ao menos uma quantidade para retirada.'
+  if (!fotoDataUrl.value) return 'Anexe a foto da retirada para confirmar.'
+  return 'Pronto para confirmar.'
+})
+
+const notaTitulo = computed(() => {
+  if (!nota.value) return 'Nota'
+  return `Nota ${nota.value.serie_nota || '1'}-${nota.value.numero_nota || ''}`
+})
+
 const onUpdateRetirar = (index: number, value: string, maxSaldo: number) => {
   if (!value) {
     retirarForm[index] = ''
@@ -90,25 +109,23 @@ const onUpdateRetirar = (index: number, value: string, maxSaldo: number) => {
   }
 }
 
+const preencherSaldos = () => {
+  produtos.value.forEach((produto, index) => {
+    const saldo = saldoItem(produto)
+    retirarForm[index] = saldo > 0 ? String(saldo) : ''
+  })
+}
 
 const formatDate = (value?: string) => {
   if (!value) return '-'
   return new Date(value).toLocaleDateString('pt-BR')
 }
 
-const formatCurrency = (value?: number | string) => {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(toNumber(value))
-}
-
 const carregarDetalhe = async () => {
   loading.value = true
 
   try {
-    const response = await $fetch<{ success: boolean; nota: NotaRetiradaPageData }>(`/api/notas/${notaId.value}/detail`)
-    nota.value = response.nota
+    nota.value = await notasStore.fetchNotaDetalhe(notaId.value) as NotaRetiradaPageData | null
   }
   finally {
     loading.value = false
@@ -139,8 +156,10 @@ const onSelecionarFoto = async (event: Event) => {
 const limparFoto = () => {
   fotoDataUrl.value = ''
   fotoPreviewUrl.value = ''
+  if (fileInput.value) {
+    fileInput.value.value = ''
+  }
 }
-
 
 const submitRetirada = async () => {
   erroLocal.value = ''
@@ -196,168 +215,232 @@ await carregarDetalhe()
 
 <template>
   <AppPageShell
-    eyebrow="Retirada"
-    title="Registrar Retirada da Nota"
-    description="Informe os itens entregues e anexe a evidência da retirada."
+    eyebrow="Retiradas"
+    title="Registrar retirada"
+    width-class="max-w-5xl"
   >
-    <div v-if="loading" class="rounded-xl border border-slate-200 bg-white p-6 text-center text-sm font-medium text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
+    <div
+      v-if="loading"
+      class="rounded-lg border border-slate-200 bg-white p-4 text-center text-sm font-medium text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400"
+    >
       Carregando nota...
     </div>
 
-    <div v-else-if="nota" class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-      <!-- Coluna Esquerda: Informações da Nota e Itens -->
-      <div class="lg:col-span-2 space-y-6">
-        <!-- Dados do Cliente / Nota -->
-        <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 transition-all">
-          <div class="mb-3 flex flex-wrap items-center justify-between gap-4">
-            <div class="flex items-center gap-3">
-              <div class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-100 text-brand-600 dark:bg-brand-950/60 dark:text-brand-400 font-bold text-base">
-                {{ nota.nome_cliente.charAt(0).toUpperCase() }}
-              </div>
-              <div>
-                <h2 class="text-lg font-bold text-slate-900 dark:text-white">{{ nota.nome_cliente }}</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Data da compra: {{ formatDate(nota.data_compra) }}</p>
-              </div>
-            </div>
-            <div class="flex flex-col items-end gap-1.5">
-              <NotasStatusBadge :status="nota.status_retirada" />
-              <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 tracking-wider">NOTA {{ nota.serie_nota }}-{{ nota.numero_nota }}</span>
-            </div>
-          </div>
-        </section>
+    <div v-else-if="nota" class="pb-24">
+      <div
+        v-if="erroLocal"
+        class="mb-3 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700 dark:border-rose-900/50 dark:bg-rose-500/10 dark:text-rose-300"
+      >
+        {{ erroLocal }}
+      </div>
 
-        <!-- Itens para Retirada -->
-        <section class="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div class="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
-            <h3 class="text-sm font-bold text-slate-900 dark:text-white">Itens para Retirada</h3>
-            <span class="text-xs font-medium text-slate-400 dark:text-slate-500">{{ produtos.length }} {{ produtos.length === 1 ? 'item cadastrado' : 'itens cadastrados' }}</span>
-          </div>
-          <div class="space-y-3">
+      <NotaCadastroLayout>
+        <template #side>
+          <NotaCadastroSection eyebrow="Nota" title="Resumo">
+            <div class="space-y-3">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="truncate text-sm font-bold text-slate-950 dark:text-slate-100">
+                    {{ nota.nome_cliente || 'Cliente sem nome' }}
+                  </p>
+                  <p class="mt-0.5 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                    {{ notaTitulo }}
+                  </p>
+                </div>
+                <NotasStatusBadge :status="nota.status_retirada" />
+              </div>
+
+              <dl class="grid grid-cols-2 gap-2 text-xs">
+                <div class="rounded-lg border border-slate-100 p-2 dark:border-slate-800">
+                  <dt class="text-slate-500 dark:text-slate-400">Compra</dt>
+                  <dd class="mt-0.5 font-semibold text-slate-900 dark:text-slate-100">
+                    {{ formatDate(nota.data_compra) }}
+                  </dd>
+                </div>
+                <div class="rounded-lg border border-slate-100 p-2 dark:border-slate-800">
+                  <dt class="text-slate-500 dark:text-slate-400">Saldo</dt>
+                  <dd class="mt-0.5 font-semibold text-slate-900 dark:text-slate-100">
+                    {{ totalSaldo }}
+                  </dd>
+                </div>
+                <div class="rounded-lg border border-slate-100 p-2 dark:border-slate-800">
+                  <dt class="text-slate-500 dark:text-slate-400">Itens</dt>
+                  <dd class="mt-0.5 font-semibold text-slate-900 dark:text-slate-100">
+                    {{ itensComSaldo }}/{{ produtos.length }}
+                  </dd>
+                </div>
+                <div class="rounded-lg border border-slate-100 p-2 dark:border-slate-800">
+                  <dt class="text-slate-500 dark:text-slate-400">Selecionado</dt>
+                  <dd class="mt-0.5 font-semibold text-brand-700 dark:text-brand-300">
+                    {{ totalSelecionado }}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          </NotaCadastroSection>
+
+          <NotaCadastroSection eyebrow="Evidencia" title="Foto da retirada">
+            <input
+              ref="fileInput"
+              type="file"
+              accept="image/*"
+              class="hidden"
+              @change="onSelecionarFoto"
+            >
+
+            <button
+              type="button"
+              class="flex w-full min-h-40 flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50/70 p-3 text-center transition hover:border-brand-500 hover:bg-white dark:border-slate-700 dark:bg-slate-950/40 dark:hover:border-brand-400 dark:hover:bg-slate-950"
+              @click="triggerFileInput"
+            >
+              <img
+                v-if="fotoPreviewUrl"
+                :src="fotoPreviewUrl"
+                alt="Foto da retirada"
+                class="h-40 w-full rounded-lg object-cover"
+              >
+
+              <div v-else class="space-y-2">
+                <span class="mx-auto flex h-11 w-11 items-center justify-center rounded-lg bg-white text-slate-500 shadow-sm dark:bg-slate-900 dark:text-slate-300">
+                  <Camera class="h-5 w-5" />
+                </span>
+                <div>
+                  <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                    Camera ou galeria
+                  </p>
+                  <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                    JPG, PNG, WEBP ou HEIC
+                  </p>
+                </div>
+              </div>
+            </button>
+
+            <Botao
+              v-if="fotoPreviewUrl"
+              type="button"
+              variant="danger"
+              size="sm"
+              class="mt-2 w-full"
+              @click="limparFoto"
+            >
+              <X class="h-3.5 w-3.5" />
+              Remover foto
+            </Botao>
+          </NotaCadastroSection>
+        </template>
+
+        <NotaCadastroSection eyebrow="Itens" title="Quantidades da retirada">
+          <template #action>
+            <Botao
+              type="button"
+              variant="secondary"
+              size="sm"
+              :disabled="!itensComSaldo"
+              @click="preencherSaldos"
+            >
+              <ListChecks class="h-3.5 w-3.5" />
+              Preencher saldos
+            </Botao>
+          </template>
+
+          <div v-if="produtos.length" class="divide-y divide-slate-100 dark:divide-slate-800">
             <div
               v-for="(produto, index) in produtos"
               :key="`${nota.id}-${index}`"
-              class="rounded-xl border border-slate-200 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-950/50 transition-all"
+              class="grid gap-3 py-3 sm:grid-cols-[minmax(0,1fr)_7.5rem] sm:items-center"
             >
-              <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div class="space-y-1">
-                  <p class="font-bold text-slate-900 text-sm dark:text-white">{{ produto.nome || 'Produto sem nome' }}</p>
-                  <p v-if="produto.id_produto_estoque" class="text-xs font-semibold text-slate-400 dark:text-slate-600">
-                    CÓD: #{{ produto.id_produto_estoque }}
-                  </p>
-                  <div class="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-slate-100 dark:border-slate-800/50 shadow-xs">
-                    <span>Comprado: <strong class="text-slate-900 dark:text-slate-200">{{ toNumber(produto.quantidade) }}</strong></span>
-                    <span class="text-slate-300 dark:text-slate-800">|</span>
-                    <span>Entregue: <strong class="text-emerald-600 dark:text-emerald-400">{{ toNumber(produto.quantidade_retirada) }}</strong></span>
-                    <span class="text-slate-300 dark:text-slate-800">|</span>
-                    <span>Saldo: <strong class="text-brand-600 dark:text-brand-400">{{ saldoItem(produto) }}</strong></span>
-                    <span class="text-slate-300 dark:text-slate-800">|</span>
-                    <span>V. Unit: <strong class="text-slate-700 dark:text-slate-300">{{ formatCurrency(produto.valor_unitario) }}</strong></span>
-                  </div>
-                </div>
-
-                <div class="w-full md:w-32 shrink-0">
-                  <label class="mb-1 block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Retirar</label>
-                  <Input
-                    :modelValue="retirarForm[index]"
-                    @update:modelValue="val => onUpdateRetirar(index, val, saldoItem(produto))"
-                    type="number"
-                    min="0"
-                    step="0.5"
-                    :max="String(saldoItem(produto))"
-                    placeholder="0"
-                    class="h-10 text-sm rounded-xl border-slate-200 font-semibold text-slate-900 dark:text-white dark:border-slate-800 dark:bg-slate-950 focus:ring-2 focus:ring-brand-500"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      <!-- Coluna Direita: Evidência e Ações -->
-      <div class="space-y-6">
-        <section class="space-y-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <h3 class="text-sm font-bold text-slate-900 dark:text-white border-b border-slate-100 pb-3 dark:border-slate-800">Evidência e Observações</h3>
-          
-          <!-- UPLOAD ZONE -->
-          <div class="space-y-2">
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Foto de Evidência</span>
-            
-            <div 
-              class="relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-950/20 p-6 transition-all duration-200 hover:border-brand-500 hover:bg-slate-50 dark:hover:bg-slate-950/40 group cursor-pointer shadow-xs"
-              @click="triggerFileInput"
-            >
-              <input 
-                ref="fileInput"
-                type="file" 
-                accept="image/*" 
-                class="hidden" 
-                @change="onSelecionarFoto"
-              >
-              
-              <div v-if="!fotoPreviewUrl" class="flex flex-col items-center text-center space-y-2">
-                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 group-hover:bg-brand-50 group-hover:text-brand-600 dark:group-hover:bg-brand-950/50 dark:group-hover:text-brand-400 transition-colors duration-200">
-                  <Camera class="h-6 w-6" />
-                </div>
-                <div>
-                  <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">Clique para capturar ou selecionar</p>
-                  <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Formatos suportados: JPG, PNG, WEBP</p>
+              <div class="min-w-0">
+                <p class="truncate text-sm font-semibold text-slate-950 dark:text-slate-100">
+                  {{ produto.nome || 'Produto sem nome' }}
+                </p>
+                <div class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+                  <span>Comprado <strong class="text-slate-800 dark:text-slate-200">{{ toNumber(produto.quantidade) }}</strong></span>
+                  <span>Entregue <strong class="text-slate-800 dark:text-slate-200">{{ toNumber(produto.quantidade_retirada) }}</strong></span>
+                  <span>Saldo <strong class="text-brand-700 dark:text-brand-300">{{ saldoItem(produto) }}</strong></span>
                 </div>
               </div>
 
-              <!-- Preview Interno -->
-              <div v-else class="relative w-full flex flex-col items-center">
-                <img 
-                  :src="fotoPreviewUrl" 
-                  alt="Preview" 
-                  class="max-h-[180px] rounded-lg object-cover shadow-sm border border-slate-200 dark:border-slate-800"
+              <NotaCadastroField label="Retirar">
+                <Input
+                  :model-value="retirarForm[index]"
+                  type="number"
+                  min="0"
+                  step="0.5"
+                  :max="String(saldoItem(produto))"
+                  :disabled="saldoItem(produto) <= 0"
+                  placeholder="0"
+                  size="sm"
+                  @update:model-value="value => onUpdateRetirar(index, value, saldoItem(produto))"
                 />
-                <button 
-                  type="button"
-                  class="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-                  @click.stop="limparFoto"
-                >
-                  <X class="h-3.5 w-3.5" /> Remover Imagem
-                </button>
-              </div>
+              </NotaCadastroField>
             </div>
           </div>
 
-          <!-- OBSERVAÇÕES -->
-          <div class="space-y-2">
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Observações (Opcional)</span>
+          <p v-else class="rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-400">
+            Nenhum item encontrado nesta nota.
+          </p>
+        </NotaCadastroSection>
+
+        <NotaCadastroSection eyebrow="Conferencia" title="Observacoes">
+          <NotaCadastroField label="Observacoes da retirada">
             <textarea
               v-model="observacoesRetirada"
               rows="4"
-              class="w-full rounded-xl border border-slate-200 bg-slate-50/30 dark:bg-slate-950/20 px-4 py-3 text-sm text-slate-900 dark:text-slate-100 outline-none transition-colors focus:border-brand-500 focus:bg-white dark:focus:bg-slate-950 dark:border-slate-800 shadow-xs"
-              placeholder="Ex: Entregue ao motorista João"
+              class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 outline-none transition-colors placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-brand-400 dark:focus:ring-brand-400/20"
+              placeholder="Ex: entregue ao responsavel no balcao"
             />
-          </div>
+          </NotaCadastroField>
 
-          <p v-if="erroLocal" class="text-xs font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 p-3 rounded-xl border border-rose-200/50 dark:border-rose-900/50">{{ erroLocal }}</p>
-
-          <div class="mt-6 flex flex-col gap-3 border-t border-slate-100 pt-5 dark:border-slate-800">
-            <button
-              type="button"
-              class="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 py-3 text-sm font-bold text-white transition-all hover:bg-brand-500 shadow-md hover:shadow-brand-500/20 active:scale-98 disabled:opacity-60 disabled:pointer-events-none"
-              :disabled="saving"
-              @click="submitRetirada"
+          <div class="mt-3 flex flex-col gap-3 border-t border-slate-100 pt-3 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
+            <p
+              class="text-xs font-semibold"
+              :class="saveDisabled ? 'text-slate-500 dark:text-slate-400' : 'text-brand-700 dark:text-brand-300'"
             >
-              <span v-if="saving" class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
-              {{ saving ? 'Salvando...' : 'Confirmar Retirada' }}
-            </button>
+              {{ saveHint }}
+            </p>
 
-            <button
+            <Botao
               type="button"
-              class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-100 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-950/50 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-200"
+              variant="secondary"
+              size="sm"
               @click="router.push(AppRoute.notas)"
             >
-              Voltar para Notas
-            </button>
+              <ArrowLeft class="h-3.5 w-3.5" />
+              Voltar
+            </Botao>
           </div>
-        </section>
-      </div>
+        </NotaCadastroSection>
+      </NotaCadastroLayout>
+
+      <NotaCadastroBotaoFlutuante
+        :disabled="saveDisabled"
+        :loading="saving"
+        label="Confirmar retirada"
+        loading-label="Salvando..."
+        @click="submitRetirada"
+      />
     </div>
 
+    <div
+      v-else
+      class="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
+    >
+      <p class="font-semibold text-slate-950 dark:text-slate-100">
+        Nota nao encontrada.
+      </p>
+      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+        Volte para a listagem e tente abrir a retirada novamente.
+      </p>
+      <Botao
+        type="button"
+        variant="secondary"
+        size="sm"
+        class="mt-3"
+        @click="router.push(AppRoute.notas)"
+      >
+        <ArrowLeft class="h-3.5 w-3.5" />
+        Voltar para notas
+      </Botao>
+    </div>
   </AppPageShell>
 </template>

@@ -1,27 +1,55 @@
 {
+  "D:\\dev\\notas-zincao\\capacitor.config.ts": {
+    "mtime": 1779375068.174435,
+    "hash": "5dce5818b1ba890d518e95f37a93f386"
+  },
   "D:\\dev\\notas-zincao\\global.d.ts": {
     "mtime": 1775073410.4248738,
     "hash": "16fd2647e6c001dc18f37a585dd34213"
   },
   "D:\\dev\\notas-zincao\\nuxt.config.ts": {
-    "mtime": 1775142431.9442635,
-    "hash": "c0a479634b8b8c375c8d79c416ccc15f"
+    "mtime": 1779398288.0638034,
+    "hash": "bc322d715e2a7624cdfc4d5fa7e731bb"
   },
   "D:\\dev\\notas-zincao\\tailwind.config.js": {
     "mtime": 1775744035.274821,
     "hash": "58c6f74cb31c1a6317511f983822fe36"
   },
+  "D:\\dev\\notas-zincao\\android\\gradlew": {
+    "mtime": 1778618299.0,
+    "hash": "794669d78aef1dd5c7d889ef618b311a"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\androidTest\\java\\com\\getcapacitor\\myapp\\ExampleInstrumentedTest.java": {
+    "mtime": 1778618299.0,
+    "hash": "fbaf7cc870c663eb52dcf218531c439d"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\assets\\public\\cordova.js": {
+    "mtime": 1779396804.99017,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\assets\\public\\cordova_plugins.js": {
+    "mtime": 1779396804.99017,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\java\\br\\com\\zincao\\notas\\MainActivity.java": {
+    "mtime": 1779373451.4458227,
+    "hash": "1780c62aabd407004b9b8c548c8adccc"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\test\\java\\com\\getcapacitor\\myapp\\ExampleUnitTest.java": {
+    "mtime": 1778618299.0,
+    "hash": "e91b4501c14da821682fa5c26a16d616"
+  },
   "D:\\dev\\notas-zincao\\app\\app.vue": {
-    "mtime": 1777406600.9437456,
-    "hash": "f317192f6c18b12626a7b6aafb88b812"
+    "mtime": 1779378408.6868174,
+    "hash": "87c7f0257764682bd75731086a71e7a9"
   },
   "D:\\dev\\notas-zincao\\app\\components\\Botao.vue": {
-    "mtime": 1775747273.411761,
-    "hash": "5086b9976edd1c7a9b20b9b40ca0b7bf"
+    "mtime": 1779380410.0857334,
+    "hash": "119a103e8217cb45d50cd1c77847f27f"
   },
   "D:\\dev\\notas-zincao\\app\\components\\Card.vue": {
-    "mtime": 1777397437.9485724,
-    "hash": "0b3d02bb23db277a6c4e732162bfadec"
+    "mtime": 1779380410.0847332,
+    "hash": "b8a57673dcec67c6d72b857df20f187f"
   },
   "D:\\dev\\notas-zincao\\app\\components\\DarkModeToggle.vue": {
     "mtime": 1775747273.4136891,
@@ -31,13 +59,21 @@
     "mtime": 1775747273.4154117,
     "hash": "0b68030c3736f08cb39368fb422442ae"
   },
+  "D:\\dev\\notas-zincao\\app\\components\\InfiniteScrollTrigger.vue": {
+    "mtime": 1779393825.6021602,
+    "hash": "cf7e2c5eefdb67a1121adcd9a2c32d0b"
+  },
   "D:\\dev\\notas-zincao\\app\\components\\Input.vue": {
-    "mtime": 1775747273.4169447,
-    "hash": "377bd297d6b8669fa853a7ebc2ff5877"
+    "mtime": 1779386181.5627842,
+    "hash": "7446d1356b9a03814f7da17cae44c52b"
   },
   "D:\\dev\\notas-zincao\\app\\components\\ModalGlobal.vue": {
-    "mtime": 1777394487.706566,
-    "hash": "53bfa4ca80be50f2540a121122ed5c1e"
+    "mtime": 1779390803.4369266,
+    "hash": "2285f6804ef80289ea435aa11d4f3df1"
+  },
+  "D:\\dev\\notas-zincao\\app\\components\\OfflineSyncStatus.vue": {
+    "mtime": 1779382537.6495285,
+    "hash": "1438c5f39b81d47dfc9945cbca30aec1"
   },
   "D:\\dev\\notas-zincao\\app\\components\\Toast.vue": {
     "mtime": 1777406590.5178065,
@@ -80,40 +116,44 @@
     "hash": "163acf99af8d47a7c047e6af1c24a7d1"
   },
   "D:\\dev\\notas-zincao\\app\\components\\header\\HeaderMenu.vue": {
-    "mtime": 1775747273.3459716,
-    "hash": "6c95ac0882bd3d4c22422375f4e5a6c0"
+    "mtime": 1779373309.2217827,
+    "hash": "f29353261c27908854d477ab6053700d"
   },
   "D:\\dev\\notas-zincao\\app\\components\\header\\HeaderNavButton.vue": {
     "mtime": 1775747273.3477087,
     "hash": "6825c867665b4fb34c84f8ea8b54e2a5"
   },
   "D:\\dev\\notas-zincao\\app\\components\\header\\HeaderPrincipal.vue": {
-    "mtime": 1777399092.7626262,
-    "hash": "d4d665950cee0c09fea30d1c38e21795"
+    "mtime": 1779392554.2699852,
+    "hash": "84d8346d45a313810d61db9d4f15a4ab"
   },
   "D:\\dev\\notas-zincao\\app\\components\\header\\Logo.vue": {
-    "mtime": 1777306268.8579168,
-    "hash": "a74c170e2e96f70e417e72c37578299e"
+    "mtime": 1779373309.2217827,
+    "hash": "b0098ddad28341ff78716857c1b6348e"
   },
   "D:\\dev\\notas-zincao\\app\\components\\header\\NavLink.vue": {
     "mtime": 1777396219.6277523,
     "hash": "f372a2d9285115878b183e04e6751af7"
   },
   "D:\\dev\\notas-zincao\\app\\components\\header\\UserActions.vue": {
-    "mtime": 1777396233.787456,
-    "hash": "e967c013ca9d1129c2252f99037c4eab"
+    "mtime": 1779378421.5830715,
+    "hash": "dd150660c05922d7b9423c6a8d5bc9b7"
   },
   "D:\\dev\\notas-zincao\\app\\components\\index\\IndexMetricasGerais.vue": {
-    "mtime": 1777408938.6227667,
-    "hash": "e0bbf73b5cb4514eb78451f95d33772e"
+    "mtime": 1779395328.36173,
+    "hash": "43300f3b4f089c536fa7f9a99f441458"
   },
   "D:\\dev\\notas-zincao\\app\\components\\layout\\AppPageShell.vue": {
-    "mtime": 1777395813.4804885,
-    "hash": "f46329facde087bbaa62ac3ca19dd1d4"
+    "mtime": 1779383269.6838021,
+    "hash": "83aaeb1c59aa6d5775e9f3af66754e30"
   },
   "D:\\dev\\notas-zincao\\app\\components\\layout\\AuthPageShell.vue": {
     "mtime": 1775747273.363541,
     "hash": "b2336bc3b8cbdab4d22c891203d6fcf0"
+  },
+  "D:\\dev\\notas-zincao\\app\\components\\layout\\MobileBottomNav.vue": {
+    "mtime": 1779392548.4731932,
+    "hash": "e25d3c80b282348b6eb28e7b31d04b70"
   },
   "D:\\dev\\notas-zincao\\app\\components\\login\\LoginForm.vue": {
     "mtime": 1777404847.3716977,
@@ -127,29 +167,45 @@
     "mtime": 1775747273.3698826,
     "hash": "132c15bd6c7789f55ef2f3db33d9c930"
   },
+  "D:\\dev\\notas-zincao\\app\\components\\nota-cadastro\\NotaCadastroBotaoFlutuante.vue": {
+    "mtime": 1779391900.3034294,
+    "hash": "0243778fc0be32d6b66b384a9fb18ac4"
+  },
   "D:\\dev\\notas-zincao\\app\\components\\nota-cadastro\\NotaCadastroCaptura.vue": {
-    "mtime": 1777397051.8199399,
-    "hash": "7fa5cda8c1d8fadbbf88d199944a4689"
+    "mtime": 1779388024.3939223,
+    "hash": "638c5a58f98267f57111233ef65a9858"
   },
   "D:\\dev\\notas-zincao\\app\\components\\nota-cadastro\\NotaCadastroCliente.vue": {
-    "mtime": 1777397075.0939312,
-    "hash": "3da9a30092f84d7c2d13593212f79616"
+    "mtime": 1779386304.014287,
+    "hash": "66b001cbd421038154c821c28602934a"
+  },
+  "D:\\dev\\notas-zincao\\app\\components\\nota-cadastro\\NotaCadastroField.vue": {
+    "mtime": 1779386304.0082805,
+    "hash": "8fc8d3adb539d7188ed5e9e92bdd6ef9"
   },
   "D:\\dev\\notas-zincao\\app\\components\\nota-cadastro\\NotaCadastroFiscal.vue": {
-    "mtime": 1777397101.1328888,
-    "hash": "faac2f83f46a81337e65231f20b9f815"
+    "mtime": 1779386350.9259863,
+    "hash": "d44a3de6da154d6b5ac871cc468258f8"
+  },
+  "D:\\dev\\notas-zincao\\app\\components\\nota-cadastro\\NotaCadastroLayout.vue": {
+    "mtime": 1779386181.5517294,
+    "hash": "4a8773ac78b40562a97268a30f3dab9f"
   },
   "D:\\dev\\notas-zincao\\app\\components\\nota-cadastro\\NotaCadastroProdutos.vue": {
-    "mtime": 1777397164.374749,
-    "hash": "0df2ef2a31fb84fd1da3d72f4e110d03"
+    "mtime": 1779386350.9360085,
+    "hash": "fe642b23a487597cbe28445050e16c49"
   },
   "D:\\dev\\notas-zincao\\app\\components\\nota-cadastro\\NotaCadastroResumo.vue": {
-    "mtime": 1777397176.0795293,
-    "hash": "1fc2e063a5e63e45dbce77b7cb932155"
+    "mtime": 1779380475.3405702,
+    "hash": "7e735d589999fd0760db568a7de17ba2"
+  },
+  "D:\\dev\\notas-zincao\\app\\components\\nota-cadastro\\NotaCadastroSection.vue": {
+    "mtime": 1779386181.5476837,
+    "hash": "6bc9c165f4f44cf5b751fa80dd75055d"
   },
   "D:\\dev\\notas-zincao\\app\\components\\notas\\NotaDetalheModal.vue": {
-    "mtime": 1777398613.7983613,
-    "hash": "164219d77d5faf486816f6b7c4f45202"
+    "mtime": 1779390617.7142441,
+    "hash": "40db1c13989fa296c8211c065e0e524b"
   },
   "D:\\dev\\notas-zincao\\app\\components\\notas\\NotaItemCard.vue": {
     "mtime": 1777393556.6720588,
@@ -160,12 +216,16 @@
     "hash": "417a535210f2f4fd4d93d2468d95666c"
   },
   "D:\\dev\\notas-zincao\\app\\components\\notas\\NotasCardMobile.vue": {
-    "mtime": 1777397749.855741,
-    "hash": "63fdd7da452c8fab5c74a6898a6ebcb7"
+    "mtime": 1779392206.534253,
+    "hash": "4bb4e04a65ab5a6298a24e49e3dae4eb"
   },
   "D:\\dev\\notas-zincao\\app\\components\\notas\\NotasEmptyState.vue": {
     "mtime": 1777394269.6534472,
     "hash": "511189de167a31a134681752087c3432"
+  },
+  "D:\\dev\\notas-zincao\\app\\components\\notas\\NotasKpiGrid.vue": {
+    "mtime": 1779395333.026642,
+    "hash": "c64b3a4569accd7924225ed2d0568c8c"
   },
   "D:\\dev\\notas-zincao\\app\\components\\notas\\NotasStatusBadge.vue": {
     "mtime": 1777394307.5042126,
@@ -180,8 +240,32 @@
     "hash": "7e3487093e23872e8b29175697239dd0"
   },
   "D:\\dev\\notas-zincao\\app\\components\\notas\\NotasToolbar.vue": {
-    "mtime": 1777394192.9837677,
-    "hash": "685b620bfe55a15171b818c0848c3c74"
+    "mtime": 1779383150.7191057,
+    "hash": "687986f98c3608487f1a8c3dad008f6f"
+  },
+  "D:\\dev\\notas-zincao\\app\\components\\offline\\OfflineNotasSyncNoteList.vue": {
+    "mtime": 1779400885.2268121,
+    "hash": "f4d6205675d00a565da7f3be41961bd9"
+  },
+  "D:\\dev\\notas-zincao\\app\\components\\offline\\OfflineNotasSyncPanel.vue": {
+    "mtime": 1779402523.8536172,
+    "hash": "66fafe371b9c07caf9bc04d0ffe82845"
+  },
+  "D:\\dev\\notas-zincao\\app\\components\\offline\\OfflineNotasSyncProgress.vue": {
+    "mtime": 1779400863.3058448,
+    "hash": "d097b20cbd181f6e0166d66a0193bb23"
+  },
+  "D:\\dev\\notas-zincao\\app\\components\\offline\\OfflineQueueList.vue": {
+    "mtime": 1779394372.9953952,
+    "hash": "e0fbf0ed10018eaa5976ecbd7aee4bad"
+  },
+  "D:\\dev\\notas-zincao\\app\\components\\offline\\OfflineSummaryCards.vue": {
+    "mtime": 1779394352.931784,
+    "hash": "4e9a5ae10fadc00550e8a87a33229e51"
+  },
+  "D:\\dev\\notas-zincao\\app\\components\\offline\\OfflineSyncProgressBar.vue": {
+    "mtime": 1779400809.623344,
+    "hash": "a4de887a8708ddb2658b02dc01f85b00"
   },
   "D:\\dev\\notas-zincao\\app\\components\\profile\\ProfileHeader.vue": {
     "mtime": 1775747273.4061956,
@@ -195,73 +279,129 @@
     "mtime": 1775747273.4097753,
     "hash": "f12aaf4a00e295845f802c99ca3c28c5"
   },
+  "D:\\dev\\notas-zincao\\app\\components\\retiradas\\RetiradasHistoricoMobileList.vue": {
+    "mtime": 1779393628.921947,
+    "hash": "6f999f46ce7f71d49617f75435b9dc67"
+  },
+  "D:\\dev\\notas-zincao\\app\\components\\retiradas\\RetiradasHistoricoPagination.vue": {
+    "mtime": 1779393289.9684033,
+    "hash": "69f3be4bff631281c3ec4120b32b30e8"
+  },
+  "D:\\dev\\notas-zincao\\app\\components\\retiradas\\RetiradasHistoricoState.vue": {
+    "mtime": 1779393289.9724028,
+    "hash": "2bc11f92b85196a06299daef78bf3a86"
+  },
+  "D:\\dev\\notas-zincao\\app\\components\\retiradas\\RetiradasHistoricoTable.vue": {
+    "mtime": 1779393628.921947,
+    "hash": "d8c88caa3c3a593dca99915d15175e11"
+  },
+  "D:\\dev\\notas-zincao\\app\\components\\retiradas\\RetiradasHistoricoToolbar.vue": {
+    "mtime": 1779393628.9209473,
+    "hash": "a75c294eb379d9f65dda5bc5243a1d1f"
+  },
+  "D:\\dev\\notas-zincao\\app\\components\\retiradas\\RetiradasPullRefresh.vue": {
+    "mtime": 1779393628.921947,
+    "hash": "e93683e5c19ea82101c78dc73be8eda6"
+  },
+  "D:\\dev\\notas-zincao\\app\\composables\\useAppRoutes.ts": {
+    "mtime": 1779373210.16988,
+    "hash": "fefdcf25936112a523036fc61f34b470"
+  },
   "D:\\dev\\notas-zincao\\app\\composables\\useNoteManagement.ts": {
     "mtime": 1777406613.8412404,
     "hash": "d463a219239104d8259d947858d6f064"
+  },
+  "D:\\dev\\notas-zincao\\app\\composables\\useOfflineNotasSync.ts": {
+    "mtime": 1779402513.7398436,
+    "hash": "b735ff924c29ed5f39f3be74bde8837c"
+  },
+  "D:\\dev\\notas-zincao\\app\\composables\\useOfflineStatus.ts": {
+    "mtime": 1779382198.7548401,
+    "hash": "50e8b64ba937989d5929f864615ad5dd"
+  },
+  "D:\\dev\\notas-zincao\\app\\composables\\useRetiradasHistorico.ts": {
+    "mtime": 1779393825.6091611,
+    "hash": "84641d2235ff7abee9107a6bfeb60ed9"
   },
   "D:\\dev\\notas-zincao\\app\\composables\\useToast.ts": {
     "mtime": 1777406584.0590665,
     "hash": "548ec293269e60ad8f58ae4c0ddfee46"
   },
+  "D:\\dev\\notas-zincao\\app\\constants\\routes.ts": {
+    "mtime": 1779392541.0459998,
+    "hash": "64ba59490feaa845a9df9d28ab905bf6"
+  },
   "D:\\dev\\notas-zincao\\app\\middleware\\admin.ts": {
-    "mtime": 1777403379.4496531,
-    "hash": "149edb43def06a5998e4bd35b2513ad3"
+    "mtime": 1779373219.7072146,
+    "hash": "f12c92fa46cdbe279f580da202a80257"
   },
   "D:\\dev\\notas-zincao\\app\\middleware\\auth.global.ts": {
-    "mtime": 1775747253.4562378,
-    "hash": "82f9e80f0e9ee6f475699d26778da93e"
+    "mtime": 1779373219.7052145,
+    "hash": "0ee267b97a9e2104c1b37a7e6b3797ae"
   },
   "D:\\dev\\notas-zincao\\app\\middleware\\auth.ts": {
-    "mtime": 1775747273.480892,
-    "hash": "3bc19eab27a2f5bf5d9527822b106ef6"
+    "mtime": 1779373219.7062156,
+    "hash": "ca87baf3aa2ad673a22a0caf451ee2cb"
   },
   "D:\\dev\\notas-zincao\\app\\pages\\cadastrar-nota.vue": {
-    "mtime": 1777397253.872672,
-    "hash": "a6808f117c17264f8b138b983afe1e89"
+    "mtime": 1779389203.8124733,
+    "hash": "c832edab6033c02fa7b41014eceba337"
   },
   "D:\\dev\\notas-zincao\\app\\pages\\confirm.vue": {
     "mtime": 1775747273.4976315,
     "hash": "ef3310891fac48514ae94cbf786a7040"
   },
   "D:\\dev\\notas-zincao\\app\\pages\\estoque.vue": {
-    "mtime": 1777397487.3017764,
-    "hash": "0da6ad6ca830a0cb60bc8c77b3c0da8e"
+    "mtime": 1779393991.7265582,
+    "hash": "9fb38d1c91da333dd35f39660c1e73ba"
   },
   "D:\\dev\\notas-zincao\\app\\pages\\index.vue": {
     "mtime": 1775747273.5021439,
     "hash": "92fe6b67ed8447858347b847a3032442"
   },
   "D:\\dev\\notas-zincao\\app\\pages\\login.vue": {
-    "mtime": 1775747273.503657,
-    "hash": "bbf90578cf1f47651efb3b253fd5647f"
-  },
-  "D:\\dev\\notas-zincao\\app\\pages\\notas.vue": {
-    "mtime": 1775747273.504891,
-    "hash": "563000e15728746d9e147d8a268e0435"
+    "mtime": 1779373357.8777792,
+    "hash": "4d52e96619e9b77e16e4a4983ec75329"
   },
   "D:\\dev\\notas-zincao\\app\\pages\\profile.vue": {
     "mtime": 1777398840.7329025,
     "hash": "79a28635dfaf817984843ac1d1509de3"
   },
+  "D:\\dev\\notas-zincao\\app\\pages\\retiradas.vue": {
+    "mtime": 1779393866.653431,
+    "hash": "6add3d767feabab5404e30ba0cd21d97"
+  },
+  "D:\\dev\\notas-zincao\\app\\pages\\sincronizacao.vue": {
+    "mtime": 1779402542.1640227,
+    "hash": "9211088dd1527c11cb7b83450a0763f5"
+  },
   "D:\\dev\\notas-zincao\\app\\pages\\admin\\lixeira.vue": {
-    "mtime": 1777403457.5378325,
-    "hash": "2f1426a23944d98fd80ed52eec452f42"
+    "mtime": 1779373357.9710116,
+    "hash": "1c6f32104c58ea003fd7216d37f37861"
   },
   "D:\\dev\\notas-zincao\\app\\pages\\admin\\usuarios.vue": {
     "mtime": 1777405277.4941654,
     "hash": "78c30593075578a3e01f4912be9afcf9"
   },
   "D:\\dev\\notas-zincao\\app\\pages\\notas\\index.vue": {
-    "mtime": 1777406924.3110425,
-    "hash": "7544d36f16a2044821973db8947332e2"
+    "mtime": 1779394028.6802197,
+    "hash": "aab5326136c655a65cb130732b07d92a"
   },
   "D:\\dev\\notas-zincao\\app\\pages\\notas\\[id]\\historico.vue": {
-    "mtime": 1777308141.267556,
-    "hash": "40f29f4972b895e9669076d9760f9ef7"
+    "mtime": 1779373357.8813374,
+    "hash": "b9683dfaed6c76377d7d08890879d218"
   },
   "D:\\dev\\notas-zincao\\app\\pages\\notas\\[id]\\retirada.vue": {
-    "mtime": 1777407832.1076617,
-    "hash": "7734caf1b3e8732c942ccc09b6bf066d"
+    "mtime": 1779391988.544641,
+    "hash": "3b14a9cf88b0b10a5a80d72d0012cae7"
+  },
+  "D:\\dev\\notas-zincao\\app\\plugins\\offline-sync.client.ts": {
+    "mtime": 1779402451.1723967,
+    "hash": "c6389a6a370c890e9a58bf9f436fb0c4"
+  },
+  "D:\\dev\\notas-zincao\\app\\plugins\\offline-worker.client.ts": {
+    "mtime": 1779382732.274745,
+    "hash": "7214ad4c015ac1d7af9c437bc998f250"
   },
   "D:\\dev\\notas-zincao\\app\\stores\\index.ts": {
     "mtime": 1777403379.4333596,
@@ -276,16 +416,16 @@
     "hash": "3904464f2246b8536db3df1a1696bbdf"
   },
   "D:\\dev\\notas-zincao\\app\\stores\\admin\\users\\store.ts": {
-    "mtime": 1777407001.4425797,
-    "hash": "aaeb0741b1c0232bc6b42bd8310f8854"
+    "mtime": 1779387367.5592651,
+    "hash": "aaf301ced9faa1a523505efb41d0c248"
   },
   "D:\\dev\\notas-zincao\\app\\stores\\auth\\index.ts": {
     "mtime": 1775747273.5107834,
     "hash": "dc1d9f48efacc1b0f2617f28f1ccbe48"
   },
   "D:\\dev\\notas-zincao\\app\\stores\\auth\\store.ts": {
-    "mtime": 1777404838.0343924,
-    "hash": "a5ea539aad20ac4b4b391353baf3c30c"
+    "mtime": 1779387367.5602648,
+    "hash": "a530b43051989c9a2805a25a67781547"
   },
   "D:\\dev\\notas-zincao\\app\\stores\\auth\\login\\index.ts": {
     "mtime": 1775747273.5097837,
@@ -296,56 +436,76 @@
     "hash": "2367c5098d2d547541c55a38b989ec4c"
   },
   "D:\\dev\\notas-zincao\\app\\stores\\crm\\store.ts": {
-    "mtime": 1775747273.517385,
-    "hash": "07bfc77ab604f9f76e1aefeccd6249be"
+    "mtime": 1779387367.5612657,
+    "hash": "bd52b0429e0dcf77f2f48df706da4cf5"
   },
   "D:\\dev\\notas-zincao\\app\\stores\\estoque\\index.ts": {
     "mtime": 1775747273.5183868,
     "hash": "270643b269ae28a0b597f7e13d1b9f72"
   },
   "D:\\dev\\notas-zincao\\app\\stores\\estoque\\store.ts": {
-    "mtime": 1775747273.5215125,
-    "hash": "7b8ff419eda0ba60bab8f0f363116ca5"
+    "mtime": 1779393825.6081622,
+    "hash": "5cf3286f6bfae3e7606402a6bcf97dd0"
   },
   "D:\\dev\\notas-zincao\\app\\stores\\notas\\index.ts": {
     "mtime": 1775747273.5225213,
     "hash": "af787f2a913065265c3f1300bfac1141"
   },
   "D:\\dev\\notas-zincao\\app\\stores\\notas\\store.ts": {
-    "mtime": 1777406943.6052175,
-    "hash": "5b2e605cc1e6ce7aad3edee5bc2a110e"
+    "mtime": 1779402411.3460047,
+    "hash": "6c9fecb2e85013b8c160d06d64d7ccf8"
   },
   "D:\\dev\\notas-zincao\\app\\types\\database.types.ts": {
     "mtime": 1777307390.817489,
     "hash": "4e6e683ec320e531cf981c99c599a468"
   },
+  "D:\\dev\\notas-zincao\\app\\utils\\api-fetch.ts": {
+    "mtime": 1779389441.4412706,
+    "hash": "82db52efdbf7438de1af7c63bb0ed5da"
+  },
+  "D:\\dev\\notas-zincao\\app\\utils\\offline-cache-keys.ts": {
+    "mtime": 1779400563.6830347,
+    "hash": "93f02e4b8f79847e42fa2eb6b08eaf0b"
+  },
+  "D:\\dev\\notas-zincao\\app\\utils\\offline-db.ts": {
+    "mtime": 1779402272.9706035,
+    "hash": "8ef9047a79c222af82096b0d1d961af1"
+  },
+  "D:\\dev\\notas-zincao\\app\\utils\\offline-notas-sync.ts": {
+    "mtime": 1779402578.7702355,
+    "hash": "dcb84cd66ed5108db537fd270a17ae34"
+  },
+  "D:\\dev\\notas-zincao\\app\\utils\\retiradas-historico.ts": {
+    "mtime": 1779393289.9581287,
+    "hash": "f74b618a9e9aca9401846b7ff198b734"
+  },
+  "D:\\dev\\notas-zincao\\public\\offline-sw.js": {
+    "mtime": 1779382743.711073,
+    "hash": "1d182534406d1481ef71165e39f09d4e"
+  },
   "D:\\dev\\notas-zincao\\server\\api\\admin\\users\\health.get.ts": {
-    "mtime": 1777404237.2076855,
-    "hash": "dd9a9b41e046378ce3aed205e96fbe9d"
+    "mtime": 1779396415.740329,
+    "hash": "c572ed0881d8b371e0f511583c148983"
   },
   "D:\\dev\\notas-zincao\\server\\api\\admin\\users\\index.get.ts": {
-    "mtime": 1777403493.8994322,
-    "hash": "0a22cc6e0785b5ab5f854ff29f4755d3"
+    "mtime": 1779396415.7515728,
+    "hash": "76ff27cedf2788d99209a536a07b923f"
   },
   "D:\\dev\\notas-zincao\\server\\api\\admin\\users\\invite.post.ts": {
-    "mtime": 1777404705.0504918,
-    "hash": "13bb97d96dc99bf94f75b4ba045e5ea1"
-  },
-  "D:\\dev\\notas-zincao\\server\\api\\admin\\users\\_helpers.ts": {
-    "mtime": 1777404237.2076855,
-    "hash": "1c302365eed46086d4fcd3afa2c0b722"
+    "mtime": 1779396415.7423098,
+    "hash": "feacb9e376246ce2379d4d59d58ed918"
   },
   "D:\\dev\\notas-zincao\\server\\api\\admin\\users\\[authUid]\\index.delete.ts": {
-    "mtime": 1777406413.526188,
-    "hash": "004d2a9facc6f47588d52c83195bece8"
+    "mtime": 1779396415.7535732,
+    "hash": "9d8d4cb30e49164dfb22f5c0a8abe448"
   },
   "D:\\dev\\notas-zincao\\server\\api\\admin\\users\\[authUid]\\role.patch.ts": {
-    "mtime": 1777403379.2330647,
-    "hash": "2a0c0c45041f431b74bb5f0c407ad75e"
+    "mtime": 1779396415.7674148,
+    "hash": "83aa971025d6d3dda7ad75534804f45e"
   },
   "D:\\dev\\notas-zincao\\server\\api\\admin\\users\\[authUid]\\status.patch.ts": {
-    "mtime": 1777403379.2330647,
-    "hash": "969935b8dcc340711da379c7b3f675fd"
+    "mtime": 1779396415.7704568,
+    "hash": "6df5dceee96d05f4a9ad1f2860a1239e"
   },
   "D:\\dev\\notas-zincao\\server\\api\\auth\\me.get.ts": {
     "mtime": 1774021524.5629122,
@@ -376,76 +536,72 @@
     "hash": "0e4c1cdc4a1d5338ef66b66879b0a2e6"
   },
   "D:\\dev\\notas-zincao\\server\\api\\dashboard\\retiradas-historico.get.ts": {
-    "mtime": 1777408938.624917,
-    "hash": "141d593972b6d4c03ee5c794e8db4f28"
+    "mtime": 1779392720.623359,
+    "hash": "eb463a84f7c6f4cc4c9170cd05d058b5"
   },
   "D:\\dev\\notas-zincao\\server\\api\\estoque\\create.post.ts": {
-    "mtime": 1775079178.1596003,
-    "hash": "12b0ee73907d2e3e19c1bab8b4012a0e"
+    "mtime": 1779396455.283498,
+    "hash": "c7290c8d19657401634111ae181eff6e"
   },
   "D:\\dev\\notas-zincao\\server\\api\\estoque\\list.get.ts": {
-    "mtime": 1775084695.6037333,
-    "hash": "72ba040d7af8a6c345bda09e8e30f686"
+    "mtime": 1779396415.8050928,
+    "hash": "ba3e14c4029d39b167d5f841031dc03d"
   },
   "D:\\dev\\notas-zincao\\server\\api\\estoque\\search.get.ts": {
-    "mtime": 1775084823.591561,
-    "hash": "b23e2a0e30e85648e202348af803772e"
+    "mtime": 1779396415.7816248,
+    "hash": "05713ffe3f3830e3d3bf8d97559ff548"
   },
   "D:\\dev\\notas-zincao\\server\\api\\estoque\\[id].get.ts": {
-    "mtime": 1775079178.0330303,
-    "hash": "d76bf29789e37f867959fefe797bd7bf"
+    "mtime": 1779396415.804102,
+    "hash": "74355f36e3982a1a00cf0ccf39e7ff0f"
   },
   "D:\\dev\\notas-zincao\\server\\api\\estoque\\[id].patch.ts": {
-    "mtime": 1775079178.0330303,
-    "hash": "7753d98408b1561189b337b03fc2c76e"
-  },
-  "D:\\dev\\notas-zincao\\server\\api\\estoque\\_helpers.ts": {
-    "mtime": 1775084695.6037333,
-    "hash": "654b8e98be5d63b27eae4dbde097719d"
+    "mtime": 1779396455.2844973,
+    "hash": "3ee86654049b1dffadcced324af08f58"
   },
   "D:\\dev\\notas-zincao\\server\\api\\notas\\create.post.ts": {
-    "mtime": 1775084013.1070738,
-    "hash": "a3fc313c85d76b62ec36b3e7792d8f8e"
+    "mtime": 1779376898.6574974,
+    "hash": "22ada412c1e6f293df0e539745ddb49c"
   },
   "D:\\dev\\notas-zincao\\server\\api\\notas\\export.get.ts": {
     "mtime": 1777306175.994741,
     "hash": "4c132092edfefe922c679da254c06840"
   },
   "D:\\dev\\notas-zincao\\server\\api\\notas\\list.get.ts": {
-    "mtime": 1777306171.5068169,
-    "hash": "1d05c7e0c7152498129952a7d64d754d"
+    "mtime": 1779392175.097483,
+    "hash": "6998979036126e851682d2351d79dff8"
   },
   "D:\\dev\\notas-zincao\\server\\api\\notas\\lixeira.get.ts": {
-    "mtime": 1777308595.6816869,
-    "hash": "0694e7bcbc0044bbde5cc525a6b98f39"
+    "mtime": 1779307648.309389,
+    "hash": "c041cd8af6bf1784c4f9d156b83ceb28"
   },
   "D:\\dev\\notas-zincao\\server\\api\\notas\\retirada-list.get.ts": {
-    "mtime": 1777306173.9082592,
-    "hash": "50a9f9444e14b54bac8b75ab43c24d51"
+    "mtime": 1779308333.8628316,
+    "hash": "bfbff35fd8aeb3d9dbef536110bad3e9"
   },
   "D:\\dev\\notas-zincao\\server\\api\\notas\\[id]\\delete.delete.ts": {
-    "mtime": 1777308250.4961264,
-    "hash": "48ebfb7fe3876cf574869cb6bf2ddc7d"
+    "mtime": 1779391309.1214764,
+    "hash": "9d3e4143e230e50766118c53c7ccc7c5"
   },
   "D:\\dev\\notas-zincao\\server\\api\\notas\\[id]\\detail.get.ts": {
-    "mtime": 1775087495.215665,
-    "hash": "77d394c1a97c699460dc0d7d9b2e24ec"
+    "mtime": 1779308340.636439,
+    "hash": "3ff4ed7b838eff229c57e368581139de"
   },
   "D:\\dev\\notas-zincao\\server\\api\\notas\\[id]\\edit.patch.ts": {
-    "mtime": 1777407610.6826189,
-    "hash": "ae49a16e06d601aee04529a15bbf0882"
+    "mtime": 1779308357.9097052,
+    "hash": "6bed3619c195c2e2295cfb0dd18c9767"
   },
   "D:\\dev\\notas-zincao\\server\\api\\notas\\[id]\\historico.get.ts": {
-    "mtime": 1777308586.6907876,
-    "hash": "fc44c6f75899235787f2d1fd017992ee"
+    "mtime": 1779307687.1407602,
+    "hash": "7b8642ace94eb741cf9a21f4ad574125"
   },
   "D:\\dev\\notas-zincao\\server\\api\\notas\\[id]\\retirada.patch.ts": {
-    "mtime": 1775087341.1780727,
-    "hash": "3961e52c63aa419395a283805ae072bc"
+    "mtime": 1779308346.0637214,
+    "hash": "81a4c7d7549d73524804445bf5c19383"
   },
   "D:\\dev\\notas-zincao\\server\\api\\notas\\[id]\\status.patch.ts": {
-    "mtime": 1777308189.9419198,
-    "hash": "dbbcad7ca1dfa4463c0e1b5aee0d1fd4"
+    "mtime": 1779308353.3854072,
+    "hash": "3945c60a59556fbdcab857432824da6d"
   },
   "D:\\dev\\notas-zincao\\server\\api\\openai\\chat.post.ts": {
     "mtime": 1774026876.5559971,
@@ -463,6 +619,10 @@
     "mtime": 1774026670.3248792,
     "hash": "46945db8e4068b75bef2316dc067dade"
   },
+  "D:\\dev\\notas-zincao\\server\\api\\sync\\notas.get.ts": {
+    "mtime": 1779396093.116141,
+    "hash": "14e503ec1cad0106ca90b5836cdbcfbb"
+  },
   "D:\\dev\\notas-zincao\\server\\api\\system\\health.get.ts": {
     "mtime": 1774021340.2530572,
     "hash": "86eab52b0d49c3df3d5c1f65e1640620"
@@ -470,6 +630,30 @@
   "D:\\dev\\notas-zincao\\server\\database\\migrations\\20260401_estoque_stats.sql": {
     "mtime": 1775084291.2179768,
     "hash": "8daf09a091cb98c1acbaa565d8e127cb"
+  },
+  "D:\\dev\\notas-zincao\\server\\database\\migrations\\20260520_advisor_regression_cleanup.sql": {
+    "mtime": 1779308916.9441717,
+    "hash": "81832542a3e8bd27814b13828e44a1a8"
+  },
+  "D:\\dev\\notas-zincao\\server\\database\\migrations\\20260520_performance_advisor_cleanup.sql": {
+    "mtime": 1779308795.304829,
+    "hash": "14461d1dae65ac188acffd25a3ae4c7a"
+  },
+  "D:\\dev\\notas-zincao\\server\\database\\migrations\\20260520_security_advisor_cleanup.sql": {
+    "mtime": 1779308690.7429502,
+    "hash": "615649f1a543d64de230581c48799026"
+  },
+  "D:\\dev\\notas-zincao\\server\\database\\migrations\\20260520_security_hardening.sql": {
+    "mtime": 1779308464.483562,
+    "hash": "61e2cdaf8d89317d7783fe5ce3883438"
+  },
+  "D:\\dev\\notas-zincao\\server\\database\\migrations\\20260521_allow_vendedor_create_notas.sql": {
+    "mtime": 1779376929.094668,
+    "hash": "d2a1191fc073dddcac29f3c5e16449a3"
+  },
+  "D:\\dev\\notas-zincao\\server\\database\\migrations\\20260521_secure_nota_soft_delete.sql": {
+    "mtime": 1779391153.0319436,
+    "hash": "389ed73bffb6e08fb7d02e8a9a57979e"
   },
   "D:\\dev\\notas-zincao\\server\\database\\migrations\\atualizacao_bd_estoque_geral.sql": {
     "mtime": 1775054533.1079848,
@@ -504,16 +688,36 @@
     "hash": "49a82774816c6be61f2ed6287eeba761"
   },
   "D:\\dev\\notas-zincao\\server\\services\\openai\\extract-nota.ts": {
-    "mtime": 1775085637.7849512,
-    "hash": "48a03ba5f127aa5b9fc05866d396ab9a"
+    "mtime": 1779381438.0300033,
+    "hash": "5c4f9954060bff2ec61419bb11610007"
   },
   "D:\\dev\\notas-zincao\\server\\services\\openai\\index.ts": {
     "mtime": 1774028158.6401484,
     "hash": "a9ed2b1f188b6c77a6eab1aa53f1608c"
   },
+  "D:\\dev\\notas-zincao\\server\\services\\sync\\notas-offline.ts": {
+    "mtime": 1779395760.3013628,
+    "hash": "bc5ca79fc629c75b492a597b1d2804cb"
+  },
+  "D:\\dev\\notas-zincao\\server\\utils\\admin-users.ts": {
+    "mtime": 1779396386.6018982,
+    "hash": "7bf74d989130d5117934bcbb8144cd00"
+  },
+  "D:\\dev\\notas-zincao\\server\\utils\\estoque-api.ts": {
+    "mtime": 1779396455.282498,
+    "hash": "c6adf38924716f3aaaa748bee50e3d8d"
+  },
+  "D:\\dev\\notas-zincao\\server\\utils\\permissions.ts": {
+    "mtime": 1779376702.7039795,
+    "hash": "3ca5ae8475ba5bcffe39885a99b713ba"
+  },
+  "D:\\dev\\notas-zincao\\server\\utils\\storage.ts": {
+    "mtime": 1779308395.2262948,
+    "hash": "a96837c6294d8f62720d3f4294347352"
+  },
   "D:\\dev\\notas-zincao\\shared\\constants\\OpenAIModels.ts": {
-    "mtime": 1774026670.4856648,
-    "hash": "1185147c995290d415c573f7293d6f23"
+    "mtime": 1779381479.7603312,
+    "hash": "997ba2144d564ce398c0fee37850f90a"
   },
   "D:\\dev\\notas-zincao\\shared\\types\\AdminUsers.ts": {
     "mtime": 1777405756.3054464,
@@ -532,8 +736,12 @@
     "hash": "5acadb5aa734a9775cea35c76fd9d344"
   },
   "D:\\dev\\notas-zincao\\shared\\types\\NotasRetirada.ts": {
-    "mtime": 1777306918.769163,
-    "hash": "433f562104f83a30d70361609833577c"
+    "mtime": 1779392161.0183578,
+    "hash": "ef91c8316839090ba516acdf81f01e17"
+  },
+  "D:\\dev\\notas-zincao\\shared\\types\\OfflineNotasSync.ts": {
+    "mtime": 1779396086.562415,
+    "hash": "36b9479c04122f35ec5808caa31157c8"
   },
   "D:\\dev\\notas-zincao\\shared\\types\\OpenAI.ts": {
     "mtime": 1774027585.048064,
@@ -542,6 +750,10 @@
   "D:\\dev\\notas-zincao\\shared\\types\\Profile.ts": {
     "mtime": 1777403379.4333596,
     "hash": "7b5a876fd8944ea397c0b9155dde996d"
+  },
+  "D:\\dev\\notas-zincao\\shared\\types\\RetiradasHistorico.ts": {
+    "mtime": 1779393289.9571288,
+    "hash": "3bb27aced9a335e2b90139362eb61d66"
   },
   "D:\\dev\\notas-zincao\\novafuc.md": {
     "mtime": 1777305335.1592867,
@@ -555,9 +767,137 @@
     "mtime": 1777399399.1072907,
     "hash": "c9016c7c657fbd036d6b55b148cb3cf0"
   },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\assets\\public\\index.html": {
+    "mtime": 1779373475.419,
+    "hash": "e3e650148edfee6414e291ea4b213d0c"
+  },
+  "D:\\dev\\notas-zincao\\docs\\android.md": {
+    "mtime": 1779382799.5391734,
+    "hash": "17d3e0c7c33af1f3da1128d008000640"
+  },
+  "D:\\dev\\notas-zincao\\docs\\offline-sync.md": {
+    "mtime": 1779402629.4098177,
+    "hash": "3aa812469460565911a1a9a15e25fc0f"
+  },
+  "D:\\dev\\notas-zincao\\native-shell\\index.html": {
+    "mtime": 1779373475.419,
+    "hash": "e3e650148edfee6414e291ea4b213d0c"
+  },
   "D:\\dev\\notas-zincao\\public\\robots.txt": {
     "mtime": 1773328047.0,
     "hash": "243b03ecba82dde9612cd5163145a86d"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\assets\\public\\logomarca.png": {
+    "mtime": 1768267031.0607529,
+    "hash": "d0c91a2090f769954b751ca57b39614e"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\res\\drawable\\splash.png": {
+    "mtime": 1778618299.0,
+    "hash": "acc976d4a36479233371a53021525c0c"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\res\\drawable-land-hdpi\\splash.png": {
+    "mtime": 1778618299.0,
+    "hash": "f7a80786dd355bd39014e58027aa6e19"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\res\\drawable-land-mdpi\\splash.png": {
+    "mtime": 1778618299.0,
+    "hash": "acc976d4a36479233371a53021525c0c"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\res\\drawable-land-xhdpi\\splash.png": {
+    "mtime": 1778618299.0,
+    "hash": "b8c72969bc1f78aab71a76035360d4af"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\res\\drawable-land-xxhdpi\\splash.png": {
+    "mtime": 1778618299.0,
+    "hash": "f87e988387b07d843905f38b084929fb"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\res\\drawable-land-xxxhdpi\\splash.png": {
+    "mtime": 1778618299.0,
+    "hash": "055a69553b16b0bf5f72094a2e459fc7"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\res\\drawable-port-hdpi\\splash.png": {
+    "mtime": 1778618299.0,
+    "hash": "5eb10d16c81338abe8bbc033d49638a8"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\res\\drawable-port-mdpi\\splash.png": {
+    "mtime": 1778618299.0,
+    "hash": "d855a76a5070c8e6fcfd83a27549bdce"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\res\\drawable-port-xhdpi\\splash.png": {
+    "mtime": 1778618299.0,
+    "hash": "df100b2a36bdb98b711cca58941728de"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\res\\drawable-port-xxhdpi\\splash.png": {
+    "mtime": 1778618299.0,
+    "hash": "2c1b668364e815256f67b71dcdfa4d6e"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\res\\drawable-port-xxxhdpi\\splash.png": {
+    "mtime": 1778618299.0,
+    "hash": "b5b1b22b59abe686c1df0d74a423d034"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\res\\mipmap-hdpi\\ic_launcher.png": {
+    "mtime": 1778618299.0,
+    "hash": "1956941339dd5fe36d5c66601c89a08d"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\res\\mipmap-hdpi\\ic_launcher_foreground.png": {
+    "mtime": 1778618299.0,
+    "hash": "73b1e06d769fa08a9c3b8328cc15fd75"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\res\\mipmap-hdpi\\ic_launcher_round.png": {
+    "mtime": 1778618299.0,
+    "hash": "f43e5674865a00186dd76183cf1f2f8e"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\res\\mipmap-mdpi\\ic_launcher.png": {
+    "mtime": 1778618299.0,
+    "hash": "7ed1b3739b83215d0c4a0b4a7f2dcab4"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\res\\mipmap-mdpi\\ic_launcher_foreground.png": {
+    "mtime": 1778618299.0,
+    "hash": "5b77e8aec8b17eed320a97567c7cb8bf"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\res\\mipmap-mdpi\\ic_launcher_round.png": {
+    "mtime": 1778618299.0,
+    "hash": "a49547a32c7d9b529af607b033811d81"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\res\\mipmap-xhdpi\\ic_launcher.png": {
+    "mtime": 1778618299.0,
+    "hash": "5689511ee4e41a367d0342f37ac48bdf"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\res\\mipmap-xhdpi\\ic_launcher_foreground.png": {
+    "mtime": 1778618299.0,
+    "hash": "15cdded29b9877ac98c5931024c5da5d"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\res\\mipmap-xhdpi\\ic_launcher_round.png": {
+    "mtime": 1778618299.0,
+    "hash": "c890fa4af62a63486d5dea62441ce7ab"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\res\\mipmap-xxhdpi\\ic_launcher.png": {
+    "mtime": 1778618299.0,
+    "hash": "a3285eeaedda8201f04e7737b9df8421"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\res\\mipmap-xxhdpi\\ic_launcher_foreground.png": {
+    "mtime": 1778618299.0,
+    "hash": "4e9584ecc16d1fc75afb798688ce576f"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\res\\mipmap-xxhdpi\\ic_launcher_round.png": {
+    "mtime": 1778618299.0,
+    "hash": "14cde87848553e24d7106f56eb8ceb6f"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\res\\mipmap-xxxhdpi\\ic_launcher.png": {
+    "mtime": 1778618299.0,
+    "hash": "9e029293ab1ae8e3a6a7b7d0b7177e46"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\res\\mipmap-xxxhdpi\\ic_launcher_foreground.png": {
+    "mtime": 1778618299.0,
+    "hash": "ed3696b7c52d9747411a475dbe3fa34a"
+  },
+  "D:\\dev\\notas-zincao\\android\\app\\src\\main\\res\\mipmap-xxxhdpi\\ic_launcher_round.png": {
+    "mtime": 1778618299.0,
+    "hash": "85addb4159ecd3f76f02fbacd5ec86de"
+  },
+  "D:\\dev\\notas-zincao\\native-shell\\logomarca.png": {
+    "mtime": 1768267031.0607529,
+    "hash": "d0c91a2090f769954b751ca57b39614e"
   },
   "D:\\dev\\notas-zincao\\public\\logomarca.png": {
     "mtime": 1768267031.0607529,

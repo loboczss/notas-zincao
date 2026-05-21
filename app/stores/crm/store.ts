@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { $fetch } from 'ofetch'
+import { getApiFetch } from '../../utils/api-fetch'
 import type {
   CrmContato,
   CrmContatoListResponse,
@@ -27,7 +27,7 @@ export const useCrmStore = defineStore('crm', () => {
     clearError()
 
     try {
-      const data = await $fetch<CrmContatoListResponse>('/api/crm/list', {
+      const data = await getApiFetch()<CrmContatoListResponse>('/api/crm/list', {
         query: {
           search: search.trim() || undefined,
         },
@@ -50,7 +50,7 @@ export const useCrmStore = defineStore('crm', () => {
     clearError()
 
     try {
-      const data = await $fetch<CrmContatoUpsertResponse>('/api/crm/upsert', {
+      const data = await getApiFetch()<CrmContatoUpsertResponse>('/api/crm/upsert', {
         method: 'POST',
         body: payload,
       })

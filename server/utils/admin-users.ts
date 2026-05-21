@@ -1,13 +1,13 @@
 import type { H3Event } from 'h3'
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
-import type { Database } from '../../../../app/types/database.types'
+import type { Database } from '../../app/types/database.types'
 import {
   getAdminUserStatus,
   isAdminUserRoleInput,
   normalizeAdminRole,
   type AdminUserRecord,
   type AdminUserRoleInput,
-} from '../../../../shared/types/AdminUsers'
+} from '../../shared/types/AdminUsers'
 
 type AdminUsersClient = Awaited<ReturnType<typeof serverSupabaseClient<Database>>>
 
