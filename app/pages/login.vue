@@ -7,6 +7,7 @@ import LoginTabs from '../components/login/LoginTabs.vue'
 import LoginForm from '../components/login/LoginForm.vue'
 import RegisterForm from '../components/login/RegisterForm.vue'
 import { useAuthStore } from '../stores'
+import { AppRoute } from '../constants/routes'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -21,7 +22,7 @@ const mensagemErro = computed(() => authStore.errorMessage)
 onMounted(async () => {
   await authStore.fetchSession()
   if (authStore.isAuthenticated) {
-    await router.push('/')
+    await router.push(AppRoute.home)
   }
 })
 
@@ -36,7 +37,7 @@ const handleLogin = async (payload: { email: string; password: string }) => {
   const ok = await authStore.signIn(payload)
 
   if (ok) {
-    await router.push('/')
+    await router.push(AppRoute.home)
   }
 }
 

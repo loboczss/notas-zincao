@@ -9,6 +9,7 @@ import AppPageShell from '../../../components/layout/AppPageShell.vue'
 import Input from '../../../components/Input.vue'
 import NotasStatusBadge from '../../../components/notas/NotasStatusBadge.vue'
 import { useNotasStore } from '../../../stores'
+import { AppRoute } from '../../../constants/routes'
 
 definePageMeta({
   middleware: 'auth',
@@ -179,7 +180,7 @@ const submitRetirada = async () => {
   try {
     const result = await notasStore.registrarRetirada(nota.value.id, payload)
     if (result) {
-      await router.push('/notas')
+      await router.push(AppRoute.notas)
       return
     }
 
@@ -349,7 +350,7 @@ await carregarDetalhe()
             <button
               type="button"
               class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-100 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-950/50 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-200"
-              @click="router.push('/notas')"
+              @click="router.push(AppRoute.notas)"
             >
               Voltar para Notas
             </button>

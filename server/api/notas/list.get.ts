@@ -1,4 +1,5 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
+import { signNotasStorageUrls } from '../../utils/storage'
 
 const allowedStatus = ['pendente', 'parcial', 'retirada', 'cancelada'] as const
 
@@ -153,10 +154,11 @@ export const notasListGetHandler = defineEventHandler(async (event) => {
   const pagedNotas = isSearching
     ? notasFiltradas.slice((safePage - 1) * pageSize, safePage * pageSize)
     : notasFiltradas
+  const signedNotas = await signNotasStorageUrls(client, pagedNotas)
 
   return {
     success: true,
-    notas: pagedNotas,
+    notas: signedNotas,
     pagination: {
       page: safePage,
       page_size: pageSize,

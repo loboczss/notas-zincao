@@ -1,6 +1,7 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import type { Database } from '../../../../app/types/database.types'
 import { canonicalizarProdutosPorIdEstoque } from '../../../services/estoque/match-produtos'
+import { signNotaStorageUrls } from '../../../utils/storage'
 
 export default defineEventHandler(async (event) => {
   const user = await serverSupabaseUser(event)
@@ -88,13 +89,15 @@ export default defineEventHandler(async (event) => {
     }
   })
 
+  const nota = await signNotaStorageUrls(client, {
+    ...data,
+    produtos: produtosNormalizados,
+    historico_retiradas: historicoNormalizado,
+    cadastrado_por_nome: cadastradoPorNome,
+  })
+
   return {
     success: true,
-    nota: {
-      ...data,
-      produtos: produtosNormalizados,
-      historico_retiradas: historicoNormalizado,
-      cadastrado_por_nome: cadastradoPorNome,
-    },
+    nota,
   }
 })

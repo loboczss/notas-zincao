@@ -7,6 +7,7 @@ export default defineNuxtConfig({
     head: {
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/logomarca.ico' },
+        { rel: 'manifest', href: '/manifest.webmanifest' },
       ],
     },
   },
@@ -29,7 +30,7 @@ export default defineNuxtConfig({
     redirectOptions: {
       login: '/login',
       callback: '/login',
-      exclude: [],
+      exclude: ['/login', '/confirm'],
       saveRedirectToCookie: false,
     },
   },

@@ -5,15 +5,19 @@ export default {
 </script>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { LayoutDashboard, FilePlus2, FileText, Boxes, Trash2, Users } from 'lucide-vue-next'
 import { useRoute } from 'vue-router'
 import Logo from './Logo.vue'
 import NavLink from './NavLink.vue'
 import UserActions from './UserActions.vue'
+import { AppRoute } from '../../constants/routes'
+import { useAuthStore } from '../../stores'
 
 const route = useRoute()
+const authStore = useAuthStore()
 const isActive = (path: string) => route.path === path || route.path.startsWith(`${path}/`)
+const isAdmin = computed(() => String(authStore.profile?.role || '').trim().toLowerCase() === 'admin')
 
 const isScrolled = ref(false)
 const handleScroll = () => {
@@ -23,6 +27,9 @@ const handleScroll = () => {
 onMounted(() => {
   window.addEventListener('scroll', handleScroll)
   handleScroll()
+  if (!authStore.profile) {
+    authStore.getMe()
+  }
 })
 
 onUnmounted(() => {
@@ -53,22 +60,22 @@ onUnmounted(() => {
 
       <!-- Center: Navigation -->
       <nav class="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-1">
-        <NavLink to="/" :active="isActive('/')" :icon="LayoutDashboard">
+        <NavLink :to="AppRoute.home" :active="isActive(AppRoute.home)" :icon="LayoutDashboard">
           Dashboard
         </NavLink>
-        <NavLink to="/notas" :active="isActive('/notas')" :icon="FileText">
+        <NavLink :to="AppRoute.notas" :active="isActive(AppRoute.notas)" :icon="FileText">
           Notas
         </NavLink>
-        <NavLink to="/estoque" :active="isActive('/estoque')" :icon="Boxes">
+        <NavLink :to="AppRoute.estoque" :active="isActive(AppRoute.estoque)" :icon="Boxes">
           Estoque
         </NavLink>
-        <NavLink to="/cadastrar-nota" :active="isActive('/cadastrar-nota')" :icon="FilePlus2">
+        <NavLink :to="AppRoute.cadastrarNota" :active="isActive(AppRoute.cadastrarNota)" :icon="FilePlus2">
           Cadastrar
         </NavLink>
-        <NavLink to="/admin/usuarios" :active="isActive('/admin/usuarios')" :icon="Users">
+        <NavLink v-if="isAdmin" :to="AppRoute.adminUsuarios" :active="isActive(AppRoute.adminUsuarios)" :icon="Users">
           Usuários
         </NavLink>
-        <NavLink to="/admin/lixeira" :active="isActive('/admin/lixeira')" :icon="Trash2">
+        <NavLink :to="AppRoute.adminLixeira" :active="isActive(AppRoute.adminLixeira)" :icon="Trash2">
           Auditoria
         </NavLink>
       </nav>

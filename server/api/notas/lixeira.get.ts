@@ -1,5 +1,6 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import type { Database } from '~~/app/types/database.types'
+import { assertActiveProfileRole, getAuthUidOrThrow } from '../../utils/permissions'
 
 export default defineEventHandler(async (event) => {
   const user = await serverSupabaseUser(event)
@@ -11,7 +12,14 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  const authUid = getAuthUidOrThrow(user)
   const client = await serverSupabaseClient<Database>(event)
+  await assertActiveProfileRole(
+    client as any,
+    authUid,
+    ['admin'],
+    'Acesso permitido apenas para administradores.',
+  )
 
   // Busca notas onde deleted_at NÃO é nulo com o nome de quem excluiu
   const { data: notas, error: nError } = await client

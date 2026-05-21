@@ -13,6 +13,7 @@ import {
 import { useNotasStore } from '~~/app/stores'
 import AppPageShell from '~~/app/components/layout/AppPageShell.vue'
 import Card from '~~/app/components/Card.vue'
+import { AppRoute, notaHistoricoRoute } from '~~/app/constants/routes'
 
 definePageMeta({
   middleware: ['auth', 'admin']
@@ -44,7 +45,7 @@ const formatCurrency = (value?: number | null) => {
 }
 
 const verHistorico = (id: string) => {
-  navigateTo(`/notas/${id}/historico`)
+  navigateTo(notaHistoricoRoute(id))
 }
 
 const restaurarNota = async (id: string) => {
@@ -71,7 +72,7 @@ const restaurarNota = async (id: string) => {
           />
         </div>
         <button 
-          @click="navigateTo('/notas')"
+          @click="navigateTo(AppRoute.notas)"
           class="flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-semibold transition-all"
         >
           <ArrowLeft class="h-4 w-4" />

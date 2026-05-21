@@ -2,6 +2,7 @@ import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import type { Database } from '../../../../app/types/database.types'
 import type { NotaAdminEditRequest, NotaRetiradaHistoricoItem, NotaProduto } from '../../../../shared/types/NotasRetirada'
 import { vincularProdutosAoEstoque } from '../../../services/estoque/match-produtos'
+import { signNotaStorageUrls } from '../../../utils/storage'
 
 const toNumber = (value: unknown) => {
   if (typeof value === 'number' && Number.isFinite(value)) return value
@@ -268,6 +269,6 @@ export default defineEventHandler(async (event) => {
   return {
 
     success: true,
-    nota: data,
+    nota: await signNotaStorageUrls(client as any, data),
   }
 })

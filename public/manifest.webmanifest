@@ -1,0 +1,17 @@
+{
+  "name": "Notas Zincao",
+  "short_name": "Notas",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#d97706",
+  "icons": [
+    {
+      "src": "/logomarca.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

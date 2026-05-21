@@ -1,4 +1,5 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
+import { signNotasStorageUrls } from '../../utils/storage'
 
 const allowedStatusRetirada = ['pendente', 'parcial'] as const
 
@@ -136,7 +137,7 @@ export const notasRetiradaListGetHandler = defineEventHandler(async (event) => {
 
   return {
     success: true,
-    notas: notasFiltradas,
+    notas: await signNotasStorageUrls(client, notasFiltradas),
   }
 })
 

@@ -11,6 +11,7 @@ import { useRouter } from 'vue-router'
 import { useSupabaseClient, useSupabaseUser } from '#imports'
 import HeaderDropmenu from './HeaderDropmenu.vue'
 import HeaderNavButton from './HeaderNavButton.vue'
+import { AppRoute } from '../../constants/routes'
 
 const carregandoLogout = ref(false)
 
@@ -55,14 +56,14 @@ const inicialUsuario = computed(() => {
 })
 
 const irParaInicio = async () => {
-  await router.push('/')
+  await router.push(AppRoute.home)
 }
 
 const fazerLogout = async () => {
   carregandoLogout.value = true
   await supabase.auth.signOut()
   carregandoLogout.value = false
-  await router.push('/login')
+  await router.push(AppRoute.login)
 }
 
 const handleCloseAndFocus = (fechar: () => void) => {

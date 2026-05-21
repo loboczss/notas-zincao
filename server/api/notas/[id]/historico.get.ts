@@ -1,6 +1,7 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import type { Database } from '../../../../app/types/database.types'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { assertActiveProfileRole, getAuthUidOrThrow } from '../../../utils/permissions'
 
 export default defineEventHandler(async (event) => {
   const user = await serverSupabaseUser(event)
@@ -12,6 +13,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  const authUid = getAuthUidOrThrow(user)
   const notaId = getRouterParam(event, 'id')
   if (!notaId) {
     throw createError({
@@ -21,6 +23,28 @@ export default defineEventHandler(async (event) => {
   }
 
   const client = await serverSupabaseClient<Database>(event) as SupabaseClient<Database>
+
+  const { data: notaAtual, error: notaError } = await (client as any)
+    .from('notas_retirada')
+    .select('id, owner_user_id')
+    .eq('id', notaId)
+    .single()
+
+  if (notaError || !notaAtual) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'Nota nao encontrada.',
+    })
+  }
+
+  if (notaAtual.owner_user_id !== authUid) {
+    await assertActiveProfileRole(
+      client as any,
+      authUid,
+      ['admin', 'colaborador'],
+      'Sem permissao para ver historico desta nota.',
+    )
+  }
 
   // 1. Buscar o histórico
   const { data: historico, error: hError } = await (client as any)

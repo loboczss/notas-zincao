@@ -12,6 +12,7 @@ import NotasTabela from '../../components/notas/NotasTabela.vue'
 import NotasToolbar from '../../components/notas/NotasToolbar.vue'
 import { useAuthStore, useNotasStore } from '../../stores'
 import { useToast } from '../../composables/useToast'
+import { AppRoute } from '../../constants/routes'
 
 
 definePageMeta({
@@ -221,7 +222,7 @@ const formatCurrency = (value: number) => {
   >
     <template #headerAside>
       <NuxtLink
-        to="/cadastrar-nota"
+        :to="AppRoute.cadastrarNota"
         class="flex items-center justify-center gap-2 rounded-md bg-brand-600 px-4 py-2 text-xs font-medium text-white transition hover:bg-brand-500 active:bg-brand-700"
       >
         <Plus class="h-4 w-4" />

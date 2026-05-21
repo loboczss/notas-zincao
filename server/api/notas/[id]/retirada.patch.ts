@@ -7,8 +7,10 @@ import type {
   NotaRetiradaStatus,
 } from '../../../../shared/types/NotasRetirada'
 import { encontrarProdutoEstoque } from '../../../services/estoque/match-produtos'
+import { assertActiveProfileRole } from '../../../utils/permissions'
+import { NOTAS_RETIRADA_STORAGE_BUCKET, signNotaStorageUrls } from '../../../utils/storage'
 
-const storageBucket = 'notas-retirada'
+const storageBucket = NOTAS_RETIRADA_STORAGE_BUCKET
 
 type ProdutoNormalizadoRetirada = {
   index: number
@@ -99,8 +101,7 @@ const uploadRetiradaPhoto = async (client: any, ownerUserId: string, dataUrl: st
     })
   }
 
-  const { data } = client.storage.from(storageBucket).getPublicUrl(path)
-  return data?.publicUrl || null
+  return path
 }
 
 export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
@@ -148,6 +149,12 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
   }
 
   const client = await serverSupabaseClient(event)
+  await assertActiveProfileRole(
+    client as any,
+    authUid,
+    ['admin', 'colaborador'],
+    'Somente administradores ou colaboradores podem registrar retirada.',
+  )
 
   const { data: notaAtual, error: notaError } = await (client as any)
     .from('notas_retirada')
@@ -343,7 +350,7 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
 
   return {
     success: true,
-    nota: data,
+    nota: await signNotaStorageUrls(client as any, data),
   }
 })
 

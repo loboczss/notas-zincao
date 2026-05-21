@@ -6,11 +6,12 @@ export default {
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { AppRoute } from '../../constants/routes'
 
 const router = useRouter()
 
 const irParaIndex = async () => {
-  await router.push('/')
+  await router.push(AppRoute.home)
 }
 </script>
 

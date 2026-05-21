@@ -3,6 +3,7 @@ import { useRoute } from 'vue-router'
 import { ArrowLeft, History, FileText, ClipboardList } from 'lucide-vue-next'
 import { useNotasStore } from '~~/app/stores'
 import NotaHistoricoTimeline from '~~/app/components/auditoria/NotaHistoricoTimeline.vue'
+import { AppRoute } from '~~/app/constants/routes'
 
 definePageMeta({
   middleware: 'auth'
@@ -30,7 +31,7 @@ onMounted(async () => {
 })
 
 const goBack = () => {
-  navigateTo('/notas')
+  navigateTo(AppRoute.notas)
 }
 </script>
 

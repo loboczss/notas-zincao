@@ -6,11 +6,16 @@
     "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
+    "android:sync": "npm run build && cap sync android",
+    "android:open": "cap open android",
+    "android:run": "npm run android:sync && cap run android",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "typecheck": "nuxi typecheck"
   },
   "dependencies": {
+    "@capacitor/android": "^8.3.4",
+    "@capacitor/core": "^8.3.4",
     "@nuxtjs/supabase": "^2.0.4",
     "@nuxtjs/tailwindcss": "^6.14.0",
     "@pinia/nuxt": "^0.11.3",
@@ -23,9 +28,11 @@
     "vue-router": "^5.0.3"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.3.4",
     "@cspell/dict-pt-br": "^2.4.2",
     "@nuxtjs/color-mode": "^4.0.0",
     "@types/pdfkit": "^0.17.5",
-    "@vue/language-core": "^3.2.6"
+    "@vue/language-core": "^3.2.6",
+    "typescript": "^6.0.3"
   }
 }

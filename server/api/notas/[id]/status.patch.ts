@@ -4,6 +4,8 @@ import type {
   NotaRetiradaStatus,
   NotaRetiradaStatusUpdateRequest,
 } from '../../../../shared/types/NotasRetirada'
+import { assertActiveProfileRole } from '../../../utils/permissions'
+import { getNotasRetiradaStoragePath, signNotaStorageUrls } from '../../../utils/storage'
 
 const allowedStatus = ['pendente', 'parcial', 'retirada', 'cancelada'] as const
 
@@ -45,6 +47,12 @@ export const notasStatusPatchHandler = defineEventHandler(async (event) => {
   }
 
   const client = await serverSupabaseClient(event)
+  await assertActiveProfileRole(
+    client as any,
+    authUid,
+    ['admin', 'colaborador'],
+    'Somente administradores ou colaboradores podem atualizar status de retirada.',
+  )
 
   const { data: notaAtual, error: notaAtualError } = await (client as any)
     .from('notas_retirada')
@@ -88,7 +96,7 @@ export const notasStatusPatchHandler = defineEventHandler(async (event) => {
   }
 
   if (body.comprovante_retirada_url !== undefined) {
-    payload.comprovante_retirada_url = body.comprovante_retirada_url
+    payload.comprovante_retirada_url = getNotasRetiradaStoragePath(body.comprovante_retirada_url)
   }
   else if (body.status_retirada === 'pendente' || body.status_retirada === 'cancelada') {
     payload.comprovante_retirada_url = null
@@ -106,8 +114,7 @@ export const notasStatusPatchHandler = defineEventHandler(async (event) => {
 
   const responsavelNome = String(profile?.nome || profile?.email || '').trim() || authUid
   const fotoHistorico = String(
-    body.comprovante_retirada_url
-    ?? payload.comprovante_retirada_url
+    payload.comprovante_retirada_url
     ?? '',
   ).trim()
 
@@ -157,7 +164,7 @@ export const notasStatusPatchHandler = defineEventHandler(async (event) => {
 
   return {
     success: true,
-    nota: data,
+    nota: await signNotaStorageUrls(client as any, data),
   }
 })
 

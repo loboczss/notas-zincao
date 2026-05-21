@@ -11,6 +11,7 @@ import Botao from '../components/Botao.vue'
 import type { CrmContato } from '../../shared/types/CRM'
 import type { NotaProduto, NotaRetiradaDraft, NotaRetiradaListItem } from '../../shared/types/NotasRetirada'
 import { useCrmStore, useNotasStore } from '../stores'
+import { AppRoute } from '../constants/routes'
 
 definePageMeta({
   middleware: 'auth',
@@ -473,7 +474,7 @@ await notasStore.fetchNotas()
           <button
             type="button"
             class="inline-flex items-center justify-center rounded-2xl bg-brand-600 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-brand-500"
-            @click="router.push('/notas')"
+            @click="router.push(AppRoute.notas)"
           >
             Ir para listagem
           </button>

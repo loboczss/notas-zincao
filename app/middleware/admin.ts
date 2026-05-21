@@ -1,4 +1,5 @@
 export default defineNuxtRouteMiddleware(async () => {
+  const { AppRoute } = useAppRoutes()
   const authStore = useAuthStore()
 
   if (!authStore.profile) {
@@ -8,6 +9,6 @@ export default defineNuxtRouteMiddleware(async () => {
   const role = String(authStore.profile?.role || '').trim().toLowerCase()
 
   if (role !== 'admin') {
-    return navigateTo('/')
+    return navigateTo(AppRoute.home)
   }
 })

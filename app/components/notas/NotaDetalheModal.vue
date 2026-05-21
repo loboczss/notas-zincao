@@ -8,6 +8,7 @@ import NotaStatsCard from './NotaStatsCard.vue'
 import NotaItemCard from './NotaItemCard.vue'
 import NotaLogCard from './NotaLogCard.vue'
 import Botao from '../Botao.vue'
+import { notaRetiradaRoute } from '../../constants/routes'
 
 const props = withDefaults(defineProps<{
   nota: NotaRetiradaDetalheItem | null
@@ -70,7 +71,7 @@ const getProdutoNome = (index: number) => {
 
 const irParaRetirada = () => {
   if (props.nota?.id) {
-    router.push(`/notas/${props.nota.id}/retirada`)
+    router.push(notaRetiradaRoute(props.nota.id))
   }
 }
 
