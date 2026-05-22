@@ -85,6 +85,11 @@ export type AdminUpdateUserRolePayload = {
   role: AdminUserRoleInput
 }
 
+export type AdminUpdateUserProfilePayload = {
+  nome: string
+  role: AdminUserRoleInput
+}
+
 export type AdminUpdateUserStatusPayload = {
   status: Exclude<AdminUserStatus, 'pendente'>
 }

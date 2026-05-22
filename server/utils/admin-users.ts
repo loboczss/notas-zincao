@@ -80,12 +80,12 @@ export const normalizeRoleInputOrThrow = (value: unknown): AdminUserRoleInput =>
   if (!isAdminUserRoleInput(value)) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Role invalida. Use: admin, colaborador, operador ou visualizador.',
+      statusMessage: 'Role invalida. Use: admin, colaborador, operador, visualizador ou vendedor.',
     })
   }
 
   const normalized = String(value).trim().toLowerCase()
-  if (normalized === 'admin' || normalized === 'colaborador' || normalized === 'operador' || normalized === 'visualizador') {
+  if (normalized === 'admin' || normalized === 'colaborador' || normalized === 'operador' || normalized === 'visualizador' || normalized === 'vendedor') {
     return normalized
   }
 

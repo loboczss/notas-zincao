@@ -5,12 +5,14 @@ const props = withDefaults(
   defineProps<{
     modelValue: boolean
     title?: string
+    description?: string
     maxWidthClass?: string
     contentClass?: string
     showFooter?: boolean
   }>(),
   {
     title: '',
+    description: '',
     maxWidthClass: 'max-w-lg',
     contentClass: 'p-5 md:p-8',
     showFooter: false,
@@ -65,6 +67,9 @@ const fecharModal = () => {
                   <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100 md:text-lg">
                     {{ props.title }}
                   </h2>
+                  <p v-if="props.description" class="mt-1 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+                    {{ props.description }}
+                  </p>
                 </slot>
               </div>
 

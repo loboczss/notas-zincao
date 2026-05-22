@@ -21,13 +21,13 @@ const setTab = (tab: 'login' | 'cadastro') => {
 </script>
 
 <template>
-  <div class="w-full rounded-2xl border border-slate-200/50 bg-slate-100/50 p-1.5 backdrop-blur-md dark:border-white/10 dark:bg-slate-900/50">
-    <div class="grid min-w-0 grid-cols-2 gap-1.5">
+  <div class="w-full rounded-lg border border-slate-200 bg-white/80 p-1 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-950/70">
+    <div class="grid min-w-0 grid-cols-2 gap-1">
       <button
         type="button"
-        class="relative min-w-0 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-300 sm:px-6"
+        class="relative min-w-0 rounded-md px-3 py-2.5 text-sm font-semibold transition-colors duration-200 sm:px-6"
         :class="activeTab === 'login'
-          ? 'bg-white dark:bg-slate-800 text-slate-950 dark:text-white shadow-lg shadow-black/5 dark:shadow-white/5 ring-1 ring-black/5 dark:ring-white/10'
+          ? 'bg-slate-100 text-slate-950 dark:bg-slate-800 dark:text-white'
           : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
         @click="setTab('login')"
       >
@@ -36,9 +36,9 @@ const setTab = (tab: 'login' | 'cadastro') => {
 
       <button
         type="button"
-        class="relative min-w-0 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-300 sm:px-6"
+        class="relative min-w-0 rounded-md px-3 py-2.5 text-sm font-semibold transition-colors duration-200 sm:px-6"
         :class="activeTab === 'cadastro'
-          ? 'bg-white dark:bg-slate-800 text-slate-950 dark:text-white shadow-lg shadow-black/5 dark:shadow-white/5 ring-1 ring-black/5 dark:ring-white/10'
+          ? 'bg-slate-100 text-slate-950 dark:bg-slate-800 dark:text-white'
           : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
         @click="setTab('cadastro')"
       >

@@ -12,7 +12,7 @@ import type {
   AdminUsersListQuery,
   AdminUsersSortBy,
   AdminUsersSortDir,
-  AdminUpdateUserRolePayload,
+  AdminUpdateUserProfilePayload,
   AdminUserRecord,
   AdminUserStatus,
 } from '../../../shared/types/AdminUsers'
@@ -58,8 +58,11 @@ const handleInvited = async (payload: AdminInviteUserPayload) => {
   }
 }
 
-const handleEditSaved = async (payload: { auth_uid: string; role: AdminUpdateUserRolePayload['role'] }) => {
-  const user = await adminUsersStore.updateUserRole(payload.auth_uid, { role: payload.role })
+const handleEditSaved = async (payload: { auth_uid: string } & AdminUpdateUserProfilePayload) => {
+  const user = await adminUsersStore.updateUserProfile(payload.auth_uid, {
+    nome: payload.nome,
+    role: payload.role,
+  })
   if (user) {
     modalEditAberto.value = false
   }

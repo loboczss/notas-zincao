@@ -12,6 +12,7 @@ import type {
   AdminUsersListQuery,
   AdminUsersSortBy,
   AdminUsersSortDir,
+  AdminUpdateUserProfilePayload,
   AdminUpdateUserRolePayload,
   AdminUpdateUserStatusPayload,
   AdminUserRecord,
@@ -152,6 +153,35 @@ export const useAdminUsersStore = defineStore('admin-users', () => {
     }
   }
 
+  const updateUserProfile = async (authUid: string, payload: AdminUpdateUserProfilePayload) => {
+    savingUsuario.value = true
+    clearError()
+
+    try {
+      const data = await getApiFetch()<{ user: AdminUserRecord }>(`/api/admin/users/${authUid}/profile`, {
+        method: 'PATCH',
+        body: payload,
+      })
+
+      if (data.user) {
+        upsertLocalUser(data.user)
+      }
+
+      showSuccess('Usuario atualizado com sucesso!')
+      return data.user || null
+    }
+    catch (error) {
+      const msg = getApiErrorMessage(error, 'Falha ao atualizar usuario.')
+      errorMessage.value = msg
+      showError(msg)
+      return null
+    }
+
+    finally {
+      savingUsuario.value = false
+    }
+  }
+
   const inviteUser = async (payload: AdminInviteUserPayload) => {
     savingUsuario.value = true
     clearError()
@@ -252,6 +282,7 @@ export const useAdminUsersStore = defineStore('admin-users', () => {
     clearError,
     clearSuccess,
     fetchUsuarios,
+    updateUserProfile,
     updateUserRole,
     updateUserStatus,
     inviteUser,

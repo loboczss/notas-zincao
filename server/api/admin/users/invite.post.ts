@@ -15,6 +15,7 @@ const roleLabelMap: Record<string, string> = {
   colaborador: 'Colaborador',
   operador: 'Operador',
   visualizador: 'Visualizador',
+  vendedor: 'Vendedor',
 }
 
 const buildInviteEmailHtml = (params: { nome: string; role: string }) => {

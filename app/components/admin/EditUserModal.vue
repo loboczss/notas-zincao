@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { Shield, User, X, Check, Trash2, AlertTriangle, Mail, Tag } from 'lucide-vue-next'
 import ModalGlobal from '../ModalGlobal.vue'
 import Botao from '../Botao.vue'
+import Input from '../Input.vue'
 import type { AdminUserRecord, AdminUserRoleInput } from '../../../shared/types/AdminUsers'
 
 const props = defineProps<{
@@ -15,18 +16,28 @@ const props = defineProps<{
 const emit = defineEmits(['update:modelValue', 'saved', 'deleted', 'reset-password'])
 
 const selectedRole = ref<AdminUserRoleInput>('colaborador')
+const selectedName = ref('')
+const nameError = ref('')
 const confirmandoEdicao = ref(false)
 const confirmandoExclusao = ref(false)
 const confirmandoRecuperacao = ref(false)
+
+const hasChanges = computed(() => {
+  const nomeAtual = String(props.usuario?.nome || '').trim()
+  return selectedName.value.trim() !== nomeAtual || selectedRole.value !== props.usuario?.role
+})
+const isColaboradorSelected = computed(() => selectedRole.value === 'colaborador' || selectedRole.value === 'operador')
 
 watch(() => props.usuario, (newVal) => {
   if (newVal) {
     confirmandoEdicao.value = false
     confirmandoExclusao.value = false
     confirmandoRecuperacao.value = false
+    selectedName.value = String(newVal.nome || '').trim()
+    nameError.value = ''
     const normalized = String(newVal.role || '').trim().toLowerCase()
     if (normalized === 'admin' || normalized === 'colaborador' || normalized === 'visualizador' || normalized === 'vendedor' || normalized === 'operador') {
-      selectedRole.value = normalized === 'operador' ? 'colaborador' : normalized
+      selectedRole.value = normalized
       return
     }
     selectedRole.value = 'colaborador'
@@ -37,16 +48,37 @@ const fechar = () => {
   confirmandoEdicao.value = false
   confirmandoExclusao.value = false
   confirmandoRecuperacao.value = false
+  nameError.value = ''
   emit('update:modelValue', false)
 }
 
 const salvar = async () => {
   if (!props.usuario) return
+  const nome = selectedName.value.trim()
+
+  if (!nome) {
+    nameError.value = 'Informe o nome do usuario.'
+    return
+  }
+
   confirmandoEdicao.value = false
   emit('saved', {
     auth_uid: props.usuario.auth_uid,
+    nome,
     role: selectedRole.value
   })
+}
+
+const solicitarConfirmacao = () => {
+  if (!props.usuario) return
+
+  if (!selectedName.value.trim()) {
+    nameError.value = 'Informe o nome do usuario.'
+    return
+  }
+
+  nameError.value = ''
+  confirmandoEdicao.value = true
 }
 
 const excluir = async () => {
@@ -78,7 +110,7 @@ const resetPassword = async () => {
           Confirmar Alteração
         </div>
         <p class="text-xs text-slate-400 leading-relaxed">
-          Tem certeza que deseja alterar as permissões de <strong class="text-slate-200">{{ usuario.nome || usuario.email }}</strong>? Isso afetará imediatamente os acessos dele no sistema.
+          Tem certeza que deseja salvar as alterações de <strong class="text-slate-200">{{ selectedName || usuario.email }}</strong>? O nome e a permissão passam a valer imediatamente no sistema.
         </p>
         <div class="flex justify-end gap-2 pt-1">
           <Botao variant="secondary" type="button" class="px-4 py-2 text-xs" @click="confirmandoEdicao = false">Voltar</Botao>
@@ -129,6 +161,24 @@ const resetPassword = async () => {
           </div>
         </div>
 
+        <!-- Dados do Perfil -->
+        <div class="space-y-2">
+          <label class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block pl-1">
+            Nome do usuário
+          </label>
+          <Input
+            v-model="selectedName"
+            placeholder="Nome do usuário"
+            maxlength="120"
+            autocomplete="name"
+            :disabled="props.loading"
+            @update:model-value="nameError = ''"
+          />
+          <p v-if="nameError" class="text-[11px] font-semibold text-rose-600 dark:text-rose-300">
+            {{ nameError }}
+          </p>
+        </div>
+
         <!-- Nível de Permissão -->
         <div class="space-y-2">
           <label class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block pl-1">
@@ -164,13 +214,13 @@ const resetPassword = async () => {
             <!-- Operador / Colaborador -->
             <label 
               class="group flex items-center gap-3.5 p-3.5 rounded-2xl border cursor-pointer transition-all duration-300"
-              :class="selectedRole === 'colaborador' 
+              :class="isColaboradorSelected 
                 ? 'border-brand-500/30 bg-brand-500/10 dark:border-brand-500/50 dark:bg-brand-500/5 shadow-lg shadow-brand-500/5' 
                 : 'border-slate-200/50 dark:border-white/5 bg-white dark:bg-slate-900/20 hover:border-slate-300 dark:hover:border-white/10 hover:bg-slate-50/50 dark:hover:bg-slate-900/40'"
             >
               <input type="radio" v-model="selectedRole" value="colaborador" class="sr-only" />
               <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-300"
-                :class="selectedRole === 'colaborador' ? 'bg-brand-500 text-white shadow-md shadow-brand-500/20' : 'bg-slate-100 dark:bg-slate-800/80 text-slate-500 group-hover:text-slate-300'"
+                :class="isColaboradorSelected ? 'bg-brand-500 text-white shadow-md shadow-brand-500/20' : 'bg-slate-100 dark:bg-slate-800/80 text-slate-500 group-hover:text-slate-300'"
               >
                 <User class="w-4 h-4" />
               </div>
@@ -179,9 +229,9 @@ const resetPassword = async () => {
                 <span class="block text-[10px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5">Gestão completa de notas, pedidos e movimentações.</span>
               </div>
               <div class="w-4 h-4 rounded-full border flex items-center justify-center transition-all shrink-0 duration-300"
-                :class="selectedRole === 'colaborador' ? 'border-brand-500 bg-brand-500 text-white' : 'border-slate-300 dark:border-slate-700 bg-transparent'"
+                :class="isColaboradorSelected ? 'border-brand-500 bg-brand-500 text-white' : 'border-slate-300 dark:border-slate-700 bg-transparent'"
               >
-                <Check v-if="selectedRole === 'colaborador'" class="w-2.5 h-2.5" />
+                <Check v-if="isColaboradorSelected" class="w-2.5 h-2.5" />
               </div>
             </label>
 
@@ -261,7 +311,7 @@ const resetPassword = async () => {
         <!-- Ações de Fluxo -->
         <div class="flex justify-end gap-3 pt-4">
           <Botao variant="secondary" type="button" class="px-5 py-2.5 text-xs font-semibold" @click="fechar">Cancelar</Botao>
-          <Botao variant="primary" type="button" class="px-6 py-2.5 text-xs font-black shadow-lg shadow-brand-500/20" :disabled="props.loading" @click="confirmandoEdicao = true">
+          <Botao variant="primary" type="button" class="px-6 py-2.5 text-xs font-black shadow-lg shadow-brand-500/20" :disabled="props.loading || !hasChanges" @click="solicitarConfirmacao">
             {{ props.loading ? 'Salvando...' : 'Salvar Alteração' }}
           </Botao>
         </div>
