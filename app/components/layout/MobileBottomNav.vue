@@ -19,30 +19,35 @@ const items = [
     to: AppRoute.home,
     icon: Home,
     exact: true,
+    primary: false,
   },
   {
     label: 'Notas',
     to: AppRoute.notas,
     icon: FileText,
     exact: false,
-  },
-  {
-    label: 'Histórico',
-    to: AppRoute.retiradas,
-    icon: ClipboardList,
-    exact: true,
+    primary: false,
   },
   {
     label: 'Cadastrar',
     to: AppRoute.cadastrarNota,
     icon: FilePlus2,
     exact: true,
+    primary: true,
+  },
+  {
+    label: 'Histórico',
+    to: AppRoute.retiradas,
+    icon: ClipboardList,
+    exact: true,
+    primary: false,
   },
   {
     label: 'Sync',
     to: AppRoute.sincronizacao,
     icon: CloudUpload,
     exact: true,
+    primary: false,
   },
 ] as const
 
@@ -64,11 +69,20 @@ const navClass = computed(() => 'fixed inset-x-0 bottom-0 z-50 border-t border-s
         v-for="item in items"
         :key="item.to"
         type="button"
-        class="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl px-1.5 text-[11px] font-semibold transition focus:outline-none focus:ring-2 focus:ring-brand-500/40"
+        class="flex flex-col items-center justify-center gap-1 px-1.5 text-[11px] font-semibold transition duration-200 focus:outline-none focus:ring-2 focus:ring-brand-500/40"
         :class="[
-          isActive(item)
+          item.primary
+            ? 'h-16 rounded-xl text-amber-500 hover:text-amber-600 active:scale-[0.98] dark:text-brand-300 dark:hover:text-brand-200'
+            : 'h-16 rounded-xl',
+          item.primary && isActive(item)
+            ? 'text-amber-600 dark:text-brand-300'
+            : '',
+          !item.primary && isActive(item)
             ? 'bg-brand-50 text-brand-700 dark:bg-brand-500/15 dark:text-brand-300'
-            : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100',
+            : '',
+          !item.primary && !isActive(item)
+            ? 'text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100'
+            : '',
         ]"
         :aria-current="isActive(item) ? 'page' : undefined"
         @click="router.push(item.to)"
@@ -76,7 +90,7 @@ const navClass = computed(() => 'fixed inset-x-0 bottom-0 z-50 border-t border-s
         <component
           :is="item.icon"
           class="h-5 w-5"
-          :class="isActive(item) ? 'stroke-[2.5px]' : 'stroke-2'"
+          :class="item.primary || isActive(item) ? 'stroke-[2.5px]' : 'stroke-2'"
         />
         <span class="leading-none">{{ item.label }}</span>
       </button>

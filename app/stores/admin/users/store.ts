@@ -1,6 +1,7 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { useToast } from '../../../composables/useToast'
+import { getApiErrorMessage } from '../../../utils/api-errors'
 import { getApiFetch } from '../../../utils/api-fetch'
 
 import type {
@@ -85,7 +86,7 @@ export const useAdminUsersStore = defineStore('admin-users', () => {
       return usuarios.value
     }
     catch (error) {
-      errorMessage.value = error instanceof Error ? error.message : 'Falha ao carregar usuarios do painel admin.'
+      errorMessage.value = getApiErrorMessage(error, 'Falha ao carregar usuarios do painel admin.')
       return []
     }
     finally {
@@ -111,7 +112,7 @@ export const useAdminUsersStore = defineStore('admin-users', () => {
       return data.user || null
     }
     catch (error) {
-      const msg = error instanceof Error ? error.message : 'Falha ao atualizar permissao do usuario.'
+      const msg = getApiErrorMessage(error, 'Falha ao atualizar permissao do usuario.')
       errorMessage.value = msg
       showError(msg)
       return null
@@ -140,7 +141,7 @@ export const useAdminUsersStore = defineStore('admin-users', () => {
       return data.user || null
     }
     catch (error) {
-      const msg = error instanceof Error ? error.message : 'Falha ao atualizar status do usuario.'
+      const msg = getApiErrorMessage(error, 'Falha ao atualizar status do usuario.')
       errorMessage.value = msg
       showError(msg)
       return null

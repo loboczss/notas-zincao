@@ -6,15 +6,14 @@ export default {
 
 <script setup lang="ts">
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
-import { ChevronDown, LogOut, User, LayoutDashboard, FilePlus2, FileText, Boxes, Users } from 'lucide-vue-next'
+import { Boxes, ChevronDown, FilePlus2, FileText, LayoutDashboard, LogOut, Trash2, User, Users } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
-import { useSupabaseClient, useSupabaseUser } from '#imports'
+import { useSupabaseUser } from '#imports'
 import { useAuthStore } from '../../stores'
 import DarkModeToggle from '../DarkModeToggle.vue'
 import { AppRoute } from '../../constants/routes'
 
 const router = useRouter()
-const supabase = useSupabaseClient()
 const user = useSupabaseUser()
 const authStore = useAuthStore()
 
@@ -70,7 +69,7 @@ const inicial = computed(() => nomeUsuario.value?.[0]?.toUpperCase() || 'U')
 const isAdmin = computed(() => String(authStore.profile?.role || '').trim().toLowerCase() === 'admin')
 
 const fazerLogout = async () => {
-  await supabase.auth.signOut()
+  await authStore.signOut()
   router.push(AppRoute.login)
 }
 </script>
@@ -144,6 +143,11 @@ const fazerLogout = async () => {
           <button v-if="isAdmin" @click="router.push(AppRoute.adminUsuarios); fecharMenu()" class="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm text-slate-600 dark:text-slate-300 transition-all hover:bg-brand-50 dark:hover:bg-brand-500/10 hover:text-brand-600 dark:hover:text-brand-400">
             <Users class="h-4 w-4" />
             <span>Gerenciar usuarios</span>
+          </button>
+
+          <button v-if="isAdmin" @click="router.push(AppRoute.adminLixeira); fecharMenu()" class="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm text-slate-600 dark:text-slate-300 transition-all hover:bg-brand-50 dark:hover:bg-brand-500/10 hover:text-brand-600 dark:hover:text-brand-400">
+            <Trash2 class="h-4 w-4" />
+            <span>Auditoria</span>
           </button>
           
           <button @click="router.push(AppRoute.profile); fecharMenu()" class="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm text-slate-600 dark:text-slate-300 transition-all hover:bg-brand-50 dark:hover:bg-brand-500/10 hover:text-brand-600 dark:hover:text-brand-400">

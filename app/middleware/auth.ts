@@ -1,5 +1,5 @@
-export default defineNuxtRouteMiddleware(() => {
+export default defineNuxtRouteMiddleware(async () => {
   const { AppRoute } = useAppRoutes()
-  const session = useSupabaseSession()
-  if (!session.value) return navigateTo(AppRoute.login)
+  const session = await resolveAuthSessionForRoute()
+  if (!session) return navigateTo(AppRoute.login)
 })

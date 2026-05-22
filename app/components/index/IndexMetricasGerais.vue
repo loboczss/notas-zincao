@@ -10,6 +10,8 @@ import {
 } from 'lucide-vue-next'
 
 import NotasKpiGrid from '../notas/NotasKpiGrid.vue'
+import { useToast } from '../../composables/useToast'
+import { getApiErrorMessage } from '../../utils/api-errors'
 import { getApiFetch } from '../../utils/api-fetch'
 
 type DashboardProduto10Response = {
@@ -46,6 +48,7 @@ const resumoNotas = ref<DashboardNotasResumoResponse['resumo'] | null>(null)
 const produtoId10 = ref<DashboardProduto10Response['produto'] | null>(null)
 const loadingProdutoId10 = ref(false)
 const apiFetch = getApiFetch()
+const { error: showError } = useToast()
 
 const metricas = computed(() => {
   const resumo = resumoNotas.value
@@ -73,7 +76,8 @@ const carregarResumoNotas = async () => {
   catch (error) {
     console.error('[dashboard/notas-resumo]', error)
     resumoNotas.value = null
-    errorMessage.value = error instanceof Error ? error.message : 'Falha ao carregar resumo de notas.'
+    errorMessage.value = getApiErrorMessage(error, 'Falha ao carregar resumo de notas.')
+    showError(errorMessage.value)
   }
   finally {
     loadingResumo.value = false
@@ -111,6 +115,7 @@ const carregarProdutoId10 = async () => {
   }
   catch (error) {
     console.error('[dashboard/produto-id-10]', error)
+    showError(getApiErrorMessage(error, 'Falha ao carregar dados de estoque.'))
     produtoId10.value = null
   }
   finally {
@@ -134,11 +139,6 @@ onMounted(() => {
 
 <template>
   <section class="animate-fade-in font-sans space-y-6">
-    <!-- Erro -->
-    <div v-if="errorMessage" class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-400">
-      {{ errorMessage }}
-    </div>
-
     <!-- Toolbar de Ação -->
     <div class="flex flex-wrap items-center justify-between gap-4">
       <div class="flex items-center gap-3">

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AlertTriangle, CheckCircle2, Clock3, FileText, Package, RefreshCw } from 'lucide-vue-next'
+import { CheckCircle2, Clock3, FileText, Package, RefreshCw } from 'lucide-vue-next'
 import { computed, type Component } from 'vue'
 import type { OfflineQueueEntry, OfflineQueueEntity, OfflineQueueOperation } from '../../utils/offline-db'
 
@@ -103,14 +103,6 @@ const methodClass = (method: string) => {
             <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">
               Criado em {{ formatDateTime(entry.createdAt) }}
             </p>
-
-            <div
-              v-if="entry.lastError"
-              class="mt-3 flex items-start gap-2 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700 dark:border-rose-900/50 dark:bg-rose-500/10 dark:text-rose-300"
-            >
-              <AlertTriangle class="mt-0.5 h-3.5 w-3.5 shrink-0" />
-              <span class="break-words">{{ entry.lastError }}</span>
-            </div>
           </div>
         </div>
 

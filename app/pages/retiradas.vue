@@ -10,7 +10,9 @@ import RetiradasHistoricoTable from '../components/retiradas/RetiradasHistoricoT
 import RetiradasHistoricoToolbar from '../components/retiradas/RetiradasHistoricoToolbar.vue'
 import RetiradasPullRefresh from '../components/retiradas/RetiradasPullRefresh.vue'
 import { useRetiradasHistorico } from '../composables/useRetiradasHistorico'
+import { useToast } from '../composables/useToast'
 import { getApiFetch } from '../utils/api-fetch'
+import { getApiErrorMessage } from '../utils/api-errors'
 import type { RetiradaHistoricoEvento } from '../../shared/types/RetiradasHistorico'
 
 definePageMeta({
@@ -18,10 +20,10 @@ definePageMeta({
 })
 
 const apiFetch = getApiFetch()
+const { error: showError } = useToast()
 const {
   historico,
   loading,
-  errorMessage,
   totalHistorico,
   sortKey,
   sortOrder,
@@ -52,6 +54,7 @@ const abrirDetalheNota = async (evento: RetiradaHistoricoEvento) => {
   }
   catch (error) {
     console.error('[retiradas/nota-detalhe]', error)
+    showError(getApiErrorMessage(error, 'Falha ao carregar detalhe da nota.'))
     notaDetalhe.value = null
   }
   finally {
@@ -80,10 +83,6 @@ onMounted(() => {
       @refresh="carregarHistorico"
     >
       <div class="space-y-3 pb-24 md:pb-0">
-        <div v-if="errorMessage" class="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700 dark:border-rose-900/50 dark:bg-rose-500/10 dark:text-rose-300">
-          {{ errorMessage }}
-        </div>
-
         <RetiradasHistoricoToolbar
           :inicio="historicoInicio"
           :fim="historicoFim"

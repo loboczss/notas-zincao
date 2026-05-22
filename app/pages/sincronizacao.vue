@@ -10,6 +10,7 @@ import OfflineSummaryCards from '../components/offline/OfflineSummaryCards.vue'
 import { useOfflineNotasSync } from '../composables/useOfflineNotasSync'
 import { useOfflineStatus } from '../composables/useOfflineStatus'
 import { useToast } from '../composables/useToast'
+import { getApiErrorMessage } from '../utils/api-errors'
 
 definePageMeta({
   middleware: 'auth',
@@ -39,7 +40,7 @@ const syncNow = async (options: { silent?: boolean } = {}) => {
     }
   }
   catch (error) {
-    showError(error instanceof Error ? error.message : 'Falha ao sincronizar notas.')
+    showError(getApiErrorMessage(error, 'Falha ao sincronizar notas.'))
   }
 }
 
@@ -88,7 +89,6 @@ onMounted(async () => {
         :deleted-notes="notasSync.localSnapshot.value.deletedNotes"
         :pending-queue-items="offline.pendingCount.value"
         :last-meta="notasSync.lastMeta.value"
-        :error-message="notasSync.errorMessage.value"
         @sync-all="() => syncNow()"
       />
 

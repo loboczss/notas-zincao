@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
+import { getApiErrorMessage } from '../../utils/api-errors'
 import { getApiFetch } from '../../utils/api-fetch'
 import {
   enqueueOfflineRequest,
@@ -148,7 +149,7 @@ export const useEstoqueStore = defineStore('estoque', () => {
         return produtos.value
       }
 
-      errorMessage.value = error instanceof Error ? error.message : 'Falha ao carregar o estoque.'
+      errorMessage.value = getApiErrorMessage(error, 'Falha ao carregar o estoque.')
       return []
     }
     finally {
@@ -184,7 +185,7 @@ export const useEstoqueStore = defineStore('estoque', () => {
       const local = await localSearch()
       if (local.length) return local
 
-      errorMessage.value = error instanceof Error ? error.message : 'Falha ao buscar sugestoes de estoque.'
+      errorMessage.value = getApiErrorMessage(error, 'Falha ao buscar sugestoes de estoque.')
       return []
     }
   }
@@ -207,7 +208,7 @@ export const useEstoqueStore = defineStore('estoque', () => {
         return produtoAtual.value
       }
 
-      errorMessage.value = error instanceof Error ? error.message : 'Falha ao carregar o produto do estoque.'
+      errorMessage.value = getApiErrorMessage(error, 'Falha ao carregar o produto do estoque.')
       return null
     }
     finally {

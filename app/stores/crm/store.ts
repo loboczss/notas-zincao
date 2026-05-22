@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
+import { getApiErrorMessage } from '../../utils/api-errors'
 import { getApiFetch } from '../../utils/api-fetch'
 import type {
   CrmContato,
@@ -37,7 +38,7 @@ export const useCrmStore = defineStore('crm', () => {
       return contatos.value
     }
     catch (error) {
-      errorMessage.value = error instanceof Error ? error.message : 'Falha ao carregar contatos do CRM.'
+      errorMessage.value = getApiErrorMessage(error, 'Falha ao carregar contatos do CRM.')
       return []
     }
     finally {
@@ -68,7 +69,7 @@ export const useCrmStore = defineStore('crm', () => {
       return contato
     }
     catch (error) {
-      errorMessage.value = error instanceof Error ? error.message : 'Falha ao salvar contato no CRM.'
+      errorMessage.value = getApiErrorMessage(error, 'Falha ao salvar contato no CRM.')
       return null
     }
     finally {

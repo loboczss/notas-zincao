@@ -5,7 +5,9 @@ import type {
   RetiradaHistoricoSortOption,
   RetiradaHistoricoSortOrder,
 } from '../../shared/types/RetiradasHistorico'
+import { getApiErrorMessage } from '../utils/api-errors'
 import { getApiFetch } from '../utils/api-fetch'
+import { useToast } from './useToast'
 
 const sortOptions: RetiradaHistoricoSortOption[] = [
   { key: 'data', label: 'Data', description: 'momento da retirada' },
@@ -21,6 +23,7 @@ type CarregarHistoricoOptions = {
 
 export const useRetiradasHistorico = () => {
   const apiFetch = getApiFetch()
+  const { error: showError } = useToast()
   const historico = ref<RetiradaHistoricoEvento[]>([])
   const loading = ref(false)
   const errorMessage = ref('')
@@ -106,7 +109,8 @@ export const useRetiradasHistorico = () => {
         totalHistorico.value = 0
         totalPages.value = 1
       }
-      errorMessage.value = error instanceof Error ? error.message : 'Falha ao carregar o historico de retiradas.'
+      errorMessage.value = getApiErrorMessage(error, 'Falha ao carregar o historico de retiradas.')
+      showError(errorMessage.value)
     }
     finally {
       loading.value = false

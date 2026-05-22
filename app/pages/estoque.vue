@@ -212,16 +212,12 @@ onMounted(async () => {
         @load-more="carregarMaisProdutos"
       />
 
-      <div v-if="estoqueStore.errorMessage && !modalAberto" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-500/10 dark:text-rose-300">
-        {{ estoqueStore.errorMessage }}
-      </div>
     </div>
 
     <EstoqueProdutoModal
       v-model="modalAberto"
       :initial-value="produtoEmEdicao"
       :loading="estoqueStore.savingProduto"
-      :error-message="estoqueStore.errorMessage"
       @save="salvarProduto"
     />
   </AppPageShell>

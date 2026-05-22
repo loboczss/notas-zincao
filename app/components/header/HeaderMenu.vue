@@ -8,16 +8,17 @@ export default {
 import { computed, ref } from 'vue'
 import { ChevronDown, House, LogOut, UserCircle2 } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
-import { useSupabaseClient, useSupabaseUser } from '#imports'
+import { useSupabaseUser } from '#imports'
 import HeaderDropmenu from './HeaderDropmenu.vue'
 import HeaderNavButton from './HeaderNavButton.vue'
+import { useAuthStore } from '../../stores'
 import { AppRoute } from '../../constants/routes'
 
 const carregandoLogout = ref(false)
 
 const router = useRouter()
-const supabase = useSupabaseClient()
 const user = useSupabaseUser()
+const authStore = useAuthStore()
 const triggerRef = ref<HTMLButtonElement | null>(null)
 
 const nomeUsuario = computed(() => {
@@ -61,7 +62,7 @@ const irParaInicio = async () => {
 
 const fazerLogout = async () => {
   carregandoLogout.value = true
-  await supabase.auth.signOut()
+  await authStore.signOut()
   carregandoLogout.value = false
   await router.push(AppRoute.login)
 }

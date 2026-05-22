@@ -13,7 +13,6 @@ const props = defineProps<{
   deletedNotes: number
   pendingQueueItems: number
   lastMeta: OfflineNotasSyncMeta | null
-  errorMessage?: string
 }>()
 
 const emit = defineEmits<{
@@ -64,12 +63,6 @@ const lastSyncLabel = computed(() => {
           {{ lastSyncLabel }}
         </p>
 
-        <p
-          v-if="props.errorMessage"
-          class="mt-3 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700 dark:border-rose-900/50 dark:bg-rose-500/10 dark:text-rose-300"
-        >
-          {{ props.errorMessage }}
-        </p>
       </div>
 
       <button

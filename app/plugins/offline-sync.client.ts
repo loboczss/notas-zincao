@@ -32,6 +32,9 @@ export default defineNuxtPlugin(() => {
       if (result.synced > 0) {
         toast.success(`${result.synced} alteracao(oes) offline sincronizada(s).`)
       }
+      if (result.failed > 0) {
+        toast.error(`${result.failed} alteracao(oes) offline nao puderam ser sincronizadas.`)
+      }
       return
     }
 

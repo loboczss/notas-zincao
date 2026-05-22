@@ -131,7 +131,13 @@ onBeforeUnmount(() => {
       </Botao>
     </template>
 
-    <p v-if="props.errors.produtos" class="mb-2 text-xs text-rose-600 dark:text-rose-400">{{ props.errors.produtos }}</p>
+    <p
+      v-if="props.errors.produtos"
+      data-has-error="true"
+      class="mb-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-300"
+    >
+      {{ props.errors.produtos }}
+    </p>
 
     <div class="space-y-2.5">
       <div

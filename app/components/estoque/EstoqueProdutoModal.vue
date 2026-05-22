@@ -151,10 +151,6 @@ const submit = () => {
       </div>
     </div>
 
-    <p v-if="props.errorMessage" class="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-500/10 dark:text-rose-300">
-      {{ props.errorMessage }}
-    </p>
-
     <template #footer>
       <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
         <Botao variant="secondary" :disabled="props.loading" @click="close">

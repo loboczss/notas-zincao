@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { Camera, Images, LoaderCircle, Sparkles, X } from 'lucide-vue-next'
+import { Capacitor } from '@capacitor/core'
+import { Camera as CameraIcon, Images, LoaderCircle, Sparkles, X } from 'lucide-vue-next'
 import { ref } from 'vue'
 import Botao from '../Botao.vue'
 import NotaCadastroSection from './NotaCadastroSection.vue'
+import { CADASTRO_NOTA_CAMERA_PENDING_KEY } from '../../constants/camera-capture'
 
 const props = withDefaults(defineProps<{
   previewUrl?: string
@@ -14,12 +16,14 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
   (e: 'selectImage', event: Event): void
+  (e: 'selectImageDataUrl', dataUrl: string): void
   (e: 'analyze'): void
 }>()
 
 const cameraInput = ref<HTMLInputElement | null>(null)
 const galleryInput = ref<HTMLInputElement | null>(null)
 const pickerOpen = ref(false)
+const nativeCaptureLoading = ref(false)
 
 const openPicker = () => {
   pickerOpen.value = true
@@ -29,13 +33,64 @@ const closePicker = () => {
   pickerOpen.value = false
 }
 
-const triggerCamera = () => {
+const isNativeCameraCanceled = (error: unknown) => {
+  const message = error instanceof Error ? error.message : String(error || '')
+  return /cancel|cancelled|canceled|user cancelled/i.test(message)
+}
+
+const dataUrlFromPhoto = (photo: { dataUrl?: string; base64String?: string; format?: string }) => {
+  if (photo.dataUrl) return photo.dataUrl
+  if (photo.base64String) {
+    const format = photo.format || 'jpeg'
+    return `data:image/${format};base64,${photo.base64String}`
+  }
+
+  return ''
+}
+
+const requestNativeImage = async (source: 'camera' | 'photos') => {
+  if (!import.meta.client || !Capacitor.isNativePlatform()) return false
+
+  nativeCaptureLoading.value = true
+  localStorage.setItem(CADASTRO_NOTA_CAMERA_PENDING_KEY, source)
+
+  try {
+    const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera')
+    const photo = await Camera.getPhoto({
+      allowEditing: false,
+      correctOrientation: true,
+      quality: 85,
+      resultType: CameraResultType.DataUrl,
+      source: source === 'camera' ? CameraSource.Camera : CameraSource.Photos,
+    })
+    const dataUrl = dataUrlFromPhoto(photo)
+
+    if (dataUrl) {
+      emit('selectImageDataUrl', dataUrl)
+    }
+
+    return true
+  }
+  catch (error) {
+    if (isNativeCameraCanceled(error)) return true
+    console.warn('[nota-cadastro] native camera unavailable, falling back to file input', error)
+    return false
+  }
+  finally {
+    localStorage.removeItem(CADASTRO_NOTA_CAMERA_PENDING_KEY)
+    nativeCaptureLoading.value = false
+  }
+}
+
+const triggerCamera = async () => {
   closePicker()
+  if (await requestNativeImage('camera')) return
   cameraInput.value?.click()
 }
 
-const triggerGallery = () => {
+const triggerGallery = async () => {
   closePicker()
+  if (await requestNativeImage('photos')) return
   galleryInput.value?.click()
 }
 
@@ -70,7 +125,7 @@ const onImageSelected = (event: Event) => {
         class="group flex h-12 w-full cursor-pointer items-center justify-center gap-2.5 rounded-lg border border-dashed border-slate-200 bg-slate-50/50 px-4 text-xs font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:border-brand-500 hover:bg-slate-50 active:scale-[0.98] dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-300 dark:hover:border-brand-500/80 dark:hover:bg-slate-900/60"
         @click="openPicker"
       >
-        <Camera class="h-4 w-4 text-slate-400 dark:text-slate-500 transition-colors group-hover:text-brand-500 dark:group-hover:text-brand-400" />
+        <CameraIcon class="h-4 w-4 text-slate-400 dark:text-slate-500 transition-colors group-hover:text-brand-500 dark:group-hover:text-brand-400" />
         <span>Adicionar imagem</span>
       </button>
       <p class="mt-2 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
@@ -101,7 +156,7 @@ const onImageSelected = (event: Event) => {
           class="group flex h-8 w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:border-brand-500 hover:bg-slate-50 active:scale-[0.98] dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300 dark:hover:border-brand-500/80 dark:hover:bg-slate-900/60"
           @click="openPicker"
         >
-          <Camera class="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 transition-colors group-hover:text-brand-500 dark:group-hover:text-brand-400" />
+          <CameraIcon class="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 transition-colors group-hover:text-brand-500 dark:group-hover:text-brand-400" />
           <span>Trocar imagem</span>
         </button>
       </div>
@@ -120,14 +175,17 @@ const onImageSelected = (event: Event) => {
         <button
           type="button"
           class="flex h-10 items-center justify-center gap-2 rounded-md bg-brand-600 px-3 text-xs font-bold text-white transition hover:bg-brand-500 active:bg-brand-700"
+          :disabled="nativeCaptureLoading"
           @click="triggerCamera"
         >
-          <Camera class="h-4 w-4" />
+          <LoaderCircle v-if="nativeCaptureLoading" class="h-4 w-4 animate-spin" />
+          <CameraIcon v-else class="h-4 w-4" />
           <span>Tirar foto</span>
         </button>
         <button
           type="button"
           class="flex h-10 items-center justify-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 text-xs font-bold text-slate-700 transition hover:border-brand-500 hover:bg-white dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-brand-500"
+          :disabled="nativeCaptureLoading"
           @click="triggerGallery"
         >
           <Images class="h-4 w-4" />

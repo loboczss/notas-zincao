@@ -7,17 +7,15 @@ import LoginTabs from '../components/login/LoginTabs.vue'
 import LoginForm from '../components/login/LoginForm.vue'
 import RegisterForm from '../components/login/RegisterForm.vue'
 import { useAuthStore } from '../stores'
+import { useToast } from '../composables/useToast'
 import { AppRoute } from '../constants/routes'
 
 const authStore = useAuthStore()
 const router = useRouter()
+const { success: showSuccess } = useToast()
 
 const abaAtiva = ref<'login' | 'cadastro'>('login')
-const feedback = ref('')
-const feedbackTipo = ref<'success' | 'error'>('success')
-
 const loading = computed(() => authStore.loading)
-const mensagemErro = computed(() => authStore.errorMessage)
 
 onMounted(async () => {
   await authStore.fetchSession()
@@ -27,7 +25,6 @@ onMounted(async () => {
 })
 
 const limparMensagens = () => {
-  feedback.value = ''
   authStore.clearError()
 }
 
@@ -50,12 +47,8 @@ const handleCadastro = async (payload: { nome: string; email: string; password: 
   })
 
   if (ok) {
-    feedbackTipo.value = 'success'
-    feedback.value = 'Conta criada com sucesso. Você já pode entrar.'
+    showSuccess('Conta criada com sucesso. Voce ja pode entrar.')
     abaAtiva.value = 'login'
-  }
-  else {
-    feedbackTipo.value = 'error'
   }
 }
 </script>
@@ -76,38 +69,6 @@ const handleCadastro = async (payload: { nome: string; email: string; password: 
       </div>
 
       <div class="space-y-6">
-        <transition
-          enter-active-class="transition duration-300 ease-out"
-          enter-from-class="transform -translate-y-2 opacity-0"
-          enter-to-class="transform translate-y-0 opacity-100"
-          leave-active-class="transition duration-200 ease-in"
-          leave-from-class="transform translate-y-0 opacity-100"
-          leave-to-class="transform -translate-y-2 opacity-0"
-        >
-          <p
-            v-if="feedback"
-            class="rounded-2xl border px-4 py-3 text-sm font-medium backdrop-blur-sm"
-            :class="feedbackTipo === 'success'
-              ? 'border-emerald-200/50 bg-emerald-50/50 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300'
-              : 'border-red-200/50 bg-red-50/50 text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300'"
-          >
-            {{ feedback }}
-          </p>
-        </transition>
-
-        <transition
-          enter-active-class="transition duration-300 ease-out"
-          enter-from-class="transform -translate-y-2 opacity-0"
-          enter-to-class="transform translate-y-0 opacity-100"
-        >
-          <p
-            v-if="mensagemErro"
-            class="rounded-2xl border border-red-200/50 bg-red-50/50 px-4 py-3 text-sm font-medium text-red-700 backdrop-blur-sm dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300"
-          >
-            {{ mensagemErro }}
-          </p>
-        </transition>
-
         <div class="animate-fade-in-up" style="animation-delay: 200ms;">
           <LoginForm
             v-if="abaAtiva === 'login'"

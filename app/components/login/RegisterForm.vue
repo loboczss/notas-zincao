@@ -5,9 +5,10 @@ export default {
 </script>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { reactive } from 'vue'
 import Botao from '../Botao.vue'
 import Input from '../Input.vue'
+import { useToast } from '../../composables/useToast'
 
 const props = withDefaults(defineProps<{
   loading?: boolean
@@ -19,6 +20,8 @@ const emit = defineEmits<{
   (e: 'submit', value: { nome: string; email: string; password: string }): void
 }>()
 
+const { error: showError } = useToast()
+
 const form = reactive({
   nome: '',
   email: '',
@@ -26,13 +29,9 @@ const form = reactive({
   confirmacaoSenha: '',
 })
 
-const erroLocal = ref('')
-
 const onSubmit = () => {
-  erroLocal.value = ''
-
   if (form.password !== form.confirmacaoSenha) {
-    erroLocal.value = 'As senhas não conferem.'
+    showError('As senhas nao conferem.')
     return
   }
 
@@ -79,10 +78,6 @@ const onSubmit = () => {
         required
       />
     </div>
-
-    <p v-if="erroLocal" class="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
-      {{ erroLocal }}
-    </p>
 
     <Botao type="submit" :disabled="props.loading" class="w-full">
       {{ props.loading ? 'Criando conta...' : 'Criar conta' }}

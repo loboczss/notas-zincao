@@ -74,13 +74,8 @@ const visibleNotes = computed(() => props.notes.slice(0, 12))
           <p v-if="note.lastAssetLabel" class="mt-1 text-xs text-slate-500 dark:text-slate-400">
             {{ note.lastAssetLabel }}
           </p>
-
-          <p v-if="note.error" class="mt-2 rounded-md bg-rose-50 px-2 py-1 text-xs text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">
-            {{ note.error }}
-          </p>
         </div>
       </article>
     </div>
   </section>
 </template>
-

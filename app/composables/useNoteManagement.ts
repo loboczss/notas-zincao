@@ -3,6 +3,8 @@ import { ref, computed } from 'vue'
 import { useNotasStore } from '../stores'
 import type { NotaRetiradaDraft, NotaMissingField } from '../../shared/types/NotasRetirada'
 import { useToast } from './useToast'
+import { getApiErrorMessage } from '../utils/api-errors'
+import { getApiFetch } from '../utils/api-fetch'
 
 export const useNoteManagement = () => {
   const notasStore = useNotasStore()
@@ -23,7 +25,7 @@ export const useNoteManagement = () => {
     clearMessages()
     
     try {
-      const data = await $fetch<{
+      const data = await getApiFetch()<{
         draft: NotaRetiradaDraft
         missingFields: NotaMissingField[]
       }>('/api/openai/extract-nota', {
@@ -33,7 +35,7 @@ export const useNoteManagement = () => {
       showSuccess('Imagem processada com sucesso!', 'IA')
       return data
     } catch (error) {
-      const msg = error instanceof Error ? error.message : 'Falha ao processar imagem.'
+      const msg = getApiErrorMessage(error, 'Falha ao processar imagem.')
       lastError.value = msg
       showError(msg, 'Erro na IA')
       return null
@@ -45,7 +47,7 @@ export const useNoteManagement = () => {
   const saveNota = async (nota: NotaRetiradaDraft) => {
     clearMessages()
     try {
-      await $fetch('/api/notas/create', {
+      await getApiFetch()('/api/notas/create', {
         method: 'POST',
         body: nota,
       })
@@ -54,7 +56,7 @@ export const useNoteManagement = () => {
       showSuccess(msg)
       return true
     } catch (error) {
-      const msg = error instanceof Error ? error.message : 'Falha ao salvar nota.'
+      const msg = getApiErrorMessage(error, 'Falha ao salvar nota.')
       lastError.value = msg
       showError(msg)
       return false

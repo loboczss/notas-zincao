@@ -13,14 +13,24 @@ import {
 import { useNotasStore } from '~~/app/stores'
 import AppPageShell from '~~/app/components/layout/AppPageShell.vue'
 import Card from '~~/app/components/Card.vue'
-import { AppRoute, notaHistoricoRoute } from '~~/app/constants/routes'
+import ModalGlobal from '~~/app/components/ModalGlobal.vue'
+import NotaDetalheModal from '~~/app/components/notas/NotaDetalheModal.vue'
+import NotaHistoricoTimeline from '~~/app/components/auditoria/NotaHistoricoTimeline.vue'
+import { AppRoute } from '~~/app/constants/routes'
+import { useToast } from '~~/app/composables/useToast'
 
 definePageMeta({
   middleware: ['auth', 'admin']
 })
 
 const notasStore = useNotasStore()
+const { info: showInfo, error: showError } = useToast()
 const search = ref('')
+const modalHistoricoAberto = ref(false)
+const loadingVisualizacao = ref(false)
+const notaSelecionada = ref<any | null>(null)
+const notaAuditoriaSelecionada = ref<any | null>(null)
+const historicoAuditoria = ref<any[]>([])
 
 const filteredLixeira = computed(() => {
   if (!search.value) return notasStore.lixeira
@@ -44,13 +54,56 @@ const formatCurrency = (value?: number | null) => {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0)
 }
 
-const verHistorico = (id: string) => {
-  navigateTo(notaHistoricoRoute(id))
+const getDeletedByName = (nota?: any) => {
+  return String(nota?.deleted_by_profile?.nome || '').trim() || 'Desconhecido'
+}
+
+const toDetalheFallback = (nota: any) => ({
+  ...nota,
+  contato_id: nota?.contato_id ?? null,
+  produtos: Array.isArray(nota?.produtos) ? nota.produtos : [],
+  historico_retiradas: Array.isArray(nota?.historico_retiradas) ? nota.historico_retiradas : [],
+  criado_em: nota?.criado_em || '',
+})
+
+const verHistorico = async (nota: any) => {
+  modalHistoricoAberto.value = true
+  loadingVisualizacao.value = true
+  notaAuditoriaSelecionada.value = nota
+  notaSelecionada.value = null
+  historicoAuditoria.value = []
+
+  try {
+    const [detalhe, historico] = await Promise.all([
+      notasStore.fetchNotaDetalhe(nota.id),
+      notasStore.fetchHistorico(nota.id),
+    ])
+
+    notaSelecionada.value = detalhe || toDetalheFallback(nota)
+    historicoAuditoria.value = Array.isArray(historico) ? historico : []
+  }
+  catch (error) {
+    console.error('[admin/lixeira] erro ao carregar auditoria:', error)
+    notaSelecionada.value = toDetalheFallback(nota)
+    showError('Nao foi possivel carregar todos os dados da auditoria.')
+  }
+  finally {
+    loadingVisualizacao.value = false
+  }
+}
+
+const fecharHistorico = () => {
+  modalHistoricoAberto.value = false
+  loadingVisualizacao.value = false
+  notaSelecionada.value = null
+  notaAuditoriaSelecionada.value = null
+  historicoAuditoria.value = []
 }
 
 const restaurarNota = async (id: string) => {
   // Implementação futura ou via API de restore se disponível
-  alert('Função de restaurar nota será implementada em breve.')
+  void id
+  showInfo('Funcao de restaurar nota sera implementada em breve.')
 }
 </script>
 
@@ -149,7 +202,7 @@ const restaurarNota = async (id: string) => {
 
         <div class="flex gap-2">
           <button 
-            @click="verHistorico(nota.id)"
+            @click="verHistorico(nota)"
             class="flex-1 flex items-center justify-center gap-2 py-2 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 rounded-lg text-xs font-semibold transition-all"
           >
             <History class="h-3.5 w-3.5" />
@@ -165,5 +218,98 @@ const restaurarNota = async (id: string) => {
         </div>
       </Card>
     </div>
+
+    <ModalGlobal
+      v-model="modalHistoricoAberto"
+      title=""
+      max-width-class="max-w-6xl"
+      content-class="p-0"
+      :show-footer="false"
+      @update:model-value="(value) => { if (!value) fecharHistorico() }"
+    >
+      <template #header>
+        <div class="space-y-1">
+          <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            Auditoria da nota
+          </p>
+          <h2 class="truncate text-base font-bold text-slate-950 dark:text-white md:text-lg">
+            {{ notaSelecionada ? `Nota ${notaSelecionada.serie_nota || '1'}-${notaSelecionada.numero_nota || ''}` : 'Carregando nota' }}
+          </h2>
+        </div>
+      </template>
+
+      <div v-if="loadingVisualizacao" class="flex min-h-[400px] flex-col items-center justify-center gap-4 py-20 text-center">
+        <div class="h-8 w-8 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
+        <p class="text-xs text-slate-500">
+          Carregando auditoria completa...
+        </p>
+      </div>
+
+      <div v-else class="space-y-5 p-5 md:p-6">
+        <Card
+          v-if="notaAuditoriaSelecionada"
+          padding-class="p-4"
+          class="border-rose-200 bg-rose-50/40 dark:border-rose-900/50 dark:bg-rose-950/20"
+        >
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-start gap-3">
+              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-rose-100 text-rose-600 dark:bg-rose-500/10 dark:text-rose-300">
+                <Trash2 class="h-5 w-5" />
+              </div>
+              <div>
+                <p class="text-sm font-bold text-slate-950 dark:text-white">
+                  Nota movida para a lixeira
+                </p>
+                <p class="mt-1 text-xs text-slate-600 dark:text-slate-300">
+                  Este registro permanece disponivel para consulta e conferencia.
+                </p>
+              </div>
+            </div>
+
+            <dl class="grid grid-cols-1 gap-3 text-xs sm:grid-cols-2 sm:text-right">
+              <div>
+                <dt class="font-semibold uppercase tracking-wide text-slate-400">Excluido em</dt>
+                <dd class="mt-1 font-bold text-slate-900 dark:text-white">
+                  {{ formatDateTime(notaAuditoriaSelecionada.deleted_at) }}
+                </dd>
+              </div>
+              <div>
+                <dt class="font-semibold uppercase tracking-wide text-slate-400">Por</dt>
+                <dd class="mt-1 font-bold text-slate-900 dark:text-white">
+                  {{ getDeletedByName(notaAuditoriaSelecionada) }}
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </Card>
+
+        <NotaDetalheModal
+          :nota="notaSelecionada"
+          :is-admin="false"
+          :show-retirada-action="false"
+        />
+
+        <Card padding-class="p-4 md:p-5">
+          <div class="mb-5 flex items-center justify-between gap-3 border-b border-slate-100 pb-4 dark:border-slate-800">
+            <div class="flex items-center gap-2">
+              <History class="h-4 w-4 text-slate-400" />
+              <div>
+                <h3 class="text-sm font-bold text-slate-950 dark:text-white">
+                  Historico de alteracoes
+                </h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">
+                  Eventos de criacao, edicao e exclusao registrados para esta nota.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <NotaHistoricoTimeline
+            :historico="historicoAuditoria"
+            :loading="notasStore.loadingHistorico"
+          />
+        </Card>
+      </div>
+    </ModalGlobal>
   </AppPageShell>
 </template>

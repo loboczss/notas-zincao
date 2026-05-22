@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
+import { LoaderCircle } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import AppPageShell from '../components/layout/AppPageShell.vue'
 import ModalGlobal from '../components/ModalGlobal.vue'
@@ -9,11 +10,12 @@ import NotaCadastroFiscal from '../components/nota-cadastro/NotaCadastroFiscal.v
 import NotaCadastroLayout from '../components/nota-cadastro/NotaCadastroLayout.vue'
 import NotaCadastroProdutos from '../components/nota-cadastro/NotaCadastroProdutos.vue'
 import Botao from '../components/Botao.vue'
-import NotaCadastroBotaoFlutuante from '../components/nota-cadastro/NotaCadastroBotaoFlutuante.vue'
 import type { CrmContato } from '../../shared/types/CRM'
 import type { NotaProduto, NotaRetiradaDraft, NotaRetiradaListItem } from '../../shared/types/NotasRetirada'
 import { useCrmStore, useNotasStore } from '../stores'
+import { useToast } from '../composables/useToast'
 import { AppRoute } from '../constants/routes'
+import { CADASTRO_NOTA_RESTORED_IMAGE_STATE_KEY } from '../constants/camera-capture'
 
 definePageMeta({
   middleware: 'auth',
@@ -22,6 +24,7 @@ definePageMeta({
 const router = useRouter()
 const notasStore = useNotasStore()
 const crmStore = useCrmStore()
+const { error: showError, warning: showWarning } = useToast()
 
 const form = reactive<NotaRetiradaDraft>({
   nome_cliente: '',
@@ -50,6 +53,7 @@ watch(() => form.chave_nfe, () => { delete errors.chave_nfe })
 watch(() => form.data_compra, () => { delete errors.data_compra })
 watch(() => form.produtos, () => { delete errors.produtos }, { deep: true })
 const imageDataUrl = ref('')
+const restoredImageDataUrl = useState<string>(CADASTRO_NOTA_RESTORED_IMAGE_STATE_KEY, () => '')
 const successModalOpen = ref(false)
 const createdNota = ref<{ id: string; numero_nota: string; serie_nota: string } | null>(null)
 let crmSearchTimer: ReturnType<typeof setTimeout> | null = null
@@ -117,21 +121,6 @@ const crmQueryAtiva = computed(() => form.nome_cliente.trim().length >= 2)
 const showCrmSuggestions = computed(() => crmQueryAtiva.value && crmStore.contatos.length > 0)
 const showCrmNoResults = computed(() => crmQueryAtiva.value && !crmStore.loadingContatos && crmStore.contatos.length === 0)
 
-const hasCadastroStarted = computed(() => {
-  return Boolean(
-    imageDataUrl.value
-    || String(form.nome_cliente || '').trim()
-    || digitsOnly(String(form.telefone_cliente || ''))
-    || digitsOnly(String(form.documento_cliente || ''))
-    || String(form.numero_nota || '').trim()
-    || digitsOnly(String(form.chave_nfe || ''))
-    || String(form.data_compra || '').trim()
-    || String(form.observacoes || '').trim()
-    || toNumber(form.desconto_total) > 0
-    || form.produtos.length > 0,
-  )
-})
-
 const requiredFieldsReady = computed(() => {
   return Boolean(
     String(form.nome_cliente || '').trim()
@@ -144,8 +133,17 @@ const requiredFieldsReady = computed(() => {
   )
 })
 
-const saveDisabled = computed(() => {
-  return notasStore.creatingNota || !!duplicateNota.value || !hasCadastroStarted.value || !requiredFieldsReady.value
+const saveReady = computed(() => {
+  return !notasStore.creatingNota && !duplicateNota.value && requiredFieldsReady.value
+})
+
+const validationErrorEntries = computed(() => {
+  return Object.entries(errors).filter(([, message]) => Boolean(message))
+})
+
+const saveButtonLabel = computed(() => {
+  if (notasStore.creatingNota) return 'Salvando...'
+  return 'Salvar nota'
 })
 
 const divergenceWarning = computed(() => {
@@ -224,6 +222,16 @@ const validateForm = () => {
   return Object.keys(errors).length === 0
 }
 
+const scrollToFirstError = async () => {
+  if (!import.meta.client) return
+
+  await nextTick()
+  document.querySelector<HTMLElement>('[data-has-error="true"]')?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'center',
+  })
+}
+
 const buscarContato = (value: string) => {
   if (crmSearchTimer) {
     clearTimeout(crmSearchTimer)
@@ -269,6 +277,12 @@ const selecionarContato = (contato: CrmContato) => {
   crmStore.clearContatos()
 }
 
+const selecionarImagemDataUrl = (dataUrl: string) => {
+  if (!dataUrl.startsWith('data:image/')) return
+
+  imageDataUrl.value = dataUrl
+}
+
 const selecionarImagem = async (event: Event) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
@@ -280,15 +294,23 @@ const selecionarImagem = async (event: Event) => {
 
   const reader = new FileReader()
   try {
-    imageDataUrl.value = await new Promise<string>((resolve, reject) => {
+    const dataUrl = await new Promise<string>((resolve, reject) => {
       reader.onload = () => resolve(String(reader.result || ''))
       reader.onerror = () => reject(new Error('Falha ao ler imagem'))
       reader.readAsDataURL(file)
     })
+    selecionarImagemDataUrl(dataUrl)
   } finally {
     target.value = ''
   }
 }
+
+watch(restoredImageDataUrl, (dataUrl) => {
+  if (!dataUrl) return
+
+  selecionarImagemDataUrl(dataUrl)
+  restoredImageDataUrl.value = ''
+}, { immediate: true })
 
 const normalizeProduto = (produto: NotaProduto): NotaProduto => {
   const quantidade = toNumber(produto.quantidade)
@@ -373,7 +395,15 @@ const saveNota = async () => {
   ensureWarningInObservacoes()
   form.valor_total = totalProdutos.value
 
-  if (!validateForm() || duplicateNota.value) {
+  if (!validateForm()) {
+    const firstError = Object.values(errors)[0]
+    if (firstError) showError(firstError)
+    await scrollToFirstError()
+    return
+  }
+
+  if (duplicateNota.value) {
+    showWarning(`Duplicidade encontrada: nota ${duplicateNota.value.serie_nota}-${duplicateNota.value.numero_nota} ja cadastrada.`)
     return
   }
 
@@ -405,6 +435,7 @@ const saveNota = async () => {
 const cadastrarOutra = async () => {
   successModalOpen.value = false
   createdNota.value = null
+  notasStore.clearError()
   imageDataUrl.value = ''
   form.contato_id = undefined
   form.telefone_cliente = ''
@@ -420,11 +451,10 @@ const cadastrarOutra = async () => {
   form.desconto_total = 0
   resetErrors()
   crmStore.clearContatos()
-  void notasStore.fetchNotas()
 }
 
 onMounted(() => {
-  void notasStore.fetchNotas()
+  notasStore.clearError()
 })
 </script>
 
@@ -441,16 +471,13 @@ onMounted(() => {
       Duplicidade encontrada: nota {{ duplicateNota.serie_nota }}-{{ duplicateNota.numero_nota }} já cadastrada para {{ duplicateNota.nome_cliente }}.
     </div>
 
-    <div v-if="notasStore.errorMessage" class="mb-3 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700 dark:border-rose-900/50 dark:bg-rose-500/10 dark:text-rose-300">
-      {{ notasStore.errorMessage }}
-    </div>
-
     <NotaCadastroLayout>
       <template #side>
         <NotaCadastroCaptura
           :preview-url="imageDataUrl"
           :loading="notasStore.extractingNota"
           @select-image="selecionarImagem"
+          @select-image-data-url="selecionarImagemDataUrl"
           @analyze="analisarImagem"
         />
         <NotaCadastroCliente
@@ -522,11 +549,28 @@ onMounted(() => {
       </template>
     </ModalGlobal>
 
-    <!-- Botão Flutuante de Salvar -->
-    <NotaCadastroBotaoFlutuante
-      :disabled="saveDisabled"
-      :loading="notasStore.creatingNota"
-      @click="saveNota"
-    />
+    <div class="mb-24 mt-5 md:mb-0">
+      <div class="flex justify-end">
+        <Botao
+          type="button"
+          :variant="saveReady ? 'primary' : 'secondary'"
+          class="w-full sm:w-auto sm:min-w-36"
+          :aria-disabled="!saveReady"
+          :disabled="notasStore.creatingNota"
+          @click="saveNota"
+        >
+          <LoaderCircle v-if="notasStore.creatingNota" class="h-4 w-4 animate-spin" />
+          {{ saveButtonLabel }}
+        </Botao>
+      </div>
+      <ul
+        v-if="validationErrorEntries.length"
+        class="mt-3 space-y-1 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-300"
+      >
+        <li v-for="([field, message]) in validationErrorEntries" :key="field">
+          {{ message }}
+        </li>
+      </ul>
+    </div>
   </AppPageShell>
 </template>

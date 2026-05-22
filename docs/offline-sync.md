@@ -56,4 +56,13 @@ O app usa IndexedDB no aparelho para cache e fila de operacoes.
 
 ## Limites conhecidos
 
-Com `server.url` apontando para a VPS, o primeiro carregamento do aplicativo ainda depende da rede. Depois que o app ja abriu uma vez, o service worker ajuda a reabrir o shell offline e o IndexedDB mantem os dados/operacoes locais. Para offline 100% mesmo no primeiro boot, o frontend precisa ser empacotado no APK e a VPS deve ser usada somente como API de sincronizacao.
+O Android nao usa `server.url` em producao. O frontend Nuxt e gerado em modo estatico e empacotado no APK, entao o shell do aplicativo abre mesmo sem internet.
+
+O que ainda exige internet:
+
+- primeiro login em um aparelho sem sessao salva;
+- analise de imagem por IA;
+- envio de notas, retiradas e alteracoes para o banco;
+- leitura de dados que ainda nao tenham sido sincronizados/cacheados no aparelho.
+
+Quando o aparelho esta offline, leituras usam IndexedDB e escritas entram na fila local. Quando a internet volta, a fila envia as operacoes para `apiBaseUrl`.

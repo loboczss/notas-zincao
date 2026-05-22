@@ -30,6 +30,10 @@ const formatCurrency = (value: number | null | undefined) => {
     currency: 'BRL',
   }).format(Number(value || 0))
 }
+
+const cadastradoPor = (nota: NotaRetiradaListItem) => {
+  return String(nota.cadastrado_por_nome || '').trim() || 'Criador nao identificado'
+}
 </script>
 
 <template>
@@ -72,7 +76,9 @@ const formatCurrency = (value: number | null | undefined) => {
 
               <div class="flex flex-col truncate">
                 <span class="truncate text-sm font-medium text-slate-900 dark:text-slate-200">{{ nota.nome_cliente }}</span>
-                <span class="text-xs text-slate-500">Série: {{ nota.serie_nota }}</span>
+                <span class="truncate text-xs text-slate-500" :title="cadastradoPor(nota)">
+                  Criado por: {{ cadastradoPor(nota) }}
+                </span>
               </div>
 
               <div class="text-sm text-slate-600 dark:text-slate-400">

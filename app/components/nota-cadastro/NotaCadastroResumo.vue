@@ -26,10 +26,6 @@ const emit = defineEmits<{
       Duplicidade encontrada: nota {{ props.duplicateNota.serie_nota }}-{{ props.duplicateNota.numero_nota }} já cadastrada para {{ props.duplicateNota.nome_cliente }}.
     </div>
 
-    <div v-if="props.errorMessage" class="mt-3 rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 dark:border-rose-900/50 dark:bg-rose-500/10 dark:text-rose-300">
-      {{ props.errorMessage }}
-    </div>
-
     <div class="mt-4 flex justify-end">
       <Botao :disabled="props.loading || !!props.duplicateNota" @click="emit('save')">
         {{ props.loading ? 'Salvando...' : 'Salvar nota' }}

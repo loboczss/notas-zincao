@@ -1,12 +1,22 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { Calendar, Phone, UserRound, ArrowRight, Package, Wallet, CheckCircle2, Info, Camera, ClipboardList, CircleDashed } from 'lucide-vue-next'
-import type { NotaAdminEditRequest, NotaRetiradaDetalheItem, NotaProduto } from '../../../shared/types/NotasRetirada'
+import {
+  ArrowRight,
+  Calendar,
+  Camera,
+  ClipboardList,
+  Info,
+  Phone,
+  Plus,
+  Trash2,
+  UserRound,
+} from 'lucide-vue-next'
+import type { NotaAdminEditRequest, NotaRetiradaDetalheItem } from '../../../shared/types/NotasRetirada'
 import NotasStatusBadge from './NotasStatusBadge.vue'
-import NotaStatsCard from './NotaStatsCard.vue'
 import NotaItemCard from './NotaItemCard.vue'
 import NotaLogCard from './NotaLogCard.vue'
+import Card from '../Card.vue'
 import Botao from '../Botao.vue'
 import { notaRetiradaRoute } from '../../constants/routes'
 
@@ -14,7 +24,10 @@ const props = withDefaults(defineProps<{
   nota: NotaRetiradaDetalheItem | null
   isAdmin?: boolean
   savingEdit?: boolean
-}>(), {})
+  showRetiradaAction?: boolean
+}>(), {
+  showRetiradaAction: true,
+})
 
 const emit = defineEmits<{
   (e: 'save-edit', payload: NotaAdminEditRequest): void
@@ -33,22 +46,52 @@ const toNumber = (value: unknown) => {
   return 0
 }
 
+const formatQuantity = (value: unknown) => {
+  return new Intl.NumberFormat('pt-BR', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(toNumber(value))
+}
+
+const formatCurrency = (value: unknown) => {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(toNumber(value))
+}
+
+const formatDateTime = (value?: string) => {
+  if (!value) return '-'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '-'
+  return date.toLocaleString('pt-BR')
+}
+
+const formatDate = (value?: string) => {
+  if (!value) return '-'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '-'
+  return date.toLocaleDateString('pt-BR')
+}
+
 const produtos = computed(() => Array.isArray(props.nota?.produtos) ? props.nota!.produtos : [])
 
-// Métricas Organizacionais (Stats)
 const stats = computed(() => {
-  const totalItens = produtos.value.length
   const totalComprado = produtos.value.reduce((acc, p) => acc + toNumber(p.quantidade), 0)
   const totalRetirado = produtos.value.reduce((acc, p) => acc + toNumber(p.quantidade_retirada), 0)
-  const totalValor = props.nota?.valor_total || 0
-  
+
   return {
-    totalItens,
+    totalItens: produtos.value.length,
     totalComprado,
     totalRetirado,
     saldoPendente: Math.max(0, totalComprado - totalRetirado),
-    valorTotal: totalValor
+    valorTotal: props.nota?.valor_total || 0,
   }
+})
+
+const retiradaPercent = computed(() => {
+  if (stats.value.totalComprado <= 0) return 0
+  return Math.min(100, Math.round((stats.value.totalRetirado / stats.value.totalComprado) * 100))
 })
 
 const historico = computed(() => {
@@ -60,16 +103,6 @@ const podeEfetuarRetirada = computed(() => {
   const status = String(props.nota?.status_retirada || '').trim().toLowerCase()
   return status === 'pendente' || status === 'parcial'
 })
-
-const formatDateTime = (value?: string) => {
-  if (!value) return '-'
-  return new Date(value).toLocaleString('pt-BR')
-}
-
-const formatDate = (value?: string) => {
-  if (!value) return '-'
-  return new Date(value).toLocaleDateString('pt-BR')
-}
 
 const getProdutoNome = (index: number) => {
   return props.nota?.produtos?.[index]?.nome || 'Produto'
@@ -161,18 +194,6 @@ const salvarEdicao = () => {
   editMode.value = false
 }
 
-const editStats = computed(() => {
-  const items = Array.isArray(editDraft.value.produtos) ? editDraft.value.produtos : []
-  const totalComprado = items.reduce((acc, p) => acc + Math.max(0, toNumber(p.quantidade)), 0)
-  const totalRetirado = items.reduce((acc, p) => acc + Math.max(0, toNumber(p.quantidade_retirada)), 0)
-  return {
-    totalItens: items.length,
-    totalComprado,
-    totalRetirado,
-    saldo: Math.max(0, totalComprado - totalRetirado),
-  }
-})
-
 defineExpose({
   iniciarEdicao,
   cancelarEdicao,
@@ -182,283 +203,297 @@ defineExpose({
 </script>
 
 <template>
-  <div v-if="nota" class="animate-fade-in flex flex-col max-h-[calc(90vh-6rem)] text-slate-700 dark:text-slate-300 font-sans">
-    
-    <!-- Área de Conteúdo Rolável -->
-    <div class="flex-1 overflow-y-auto custom-scrollbar space-y-6 pr-2 pb-4">
-      
-      <!-- StatusBar: Componentes Reutilizáveis -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <NotaStatsCard 
-          label="Total Itens" 
-          :value="stats.totalComprado" 
-          :icon="Package" 
-          icon-bg-class="bg-slate-100 text-slate-500 dark:bg-slate-800"
-        />
-        <NotaStatsCard 
-          label="Pendentes" 
-          :value="stats.saldoPendente" 
-          :icon="CircleDashed" 
-          icon-bg-class="bg-amber-50 text-amber-500 dark:bg-amber-950/50 dark:text-amber-400"
-          icon-color-class="animate-spin-slow"
-        />
-        <NotaStatsCard 
-          label="Concluídas" 
-          :value="stats.totalRetirado" 
-          :icon="CheckCircle2" 
-          icon-bg-class="bg-emerald-50 text-emerald-500 dark:bg-emerald-950/50 dark:text-emerald-400"
-        />
-      </div>
-
-
-
-      <!-- Layout Principal -->
-      <div class="grid gap-6 grid-cols-1 lg:grid-cols-[1fr_320px]">
-        
-        <div class="space-y-6">
-          <!-- Bloco: Contexto da Nota -->
-          <section class="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
-            <div class="mb-4 flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4 dark:border-slate-800">
-              <div class="flex items-center gap-4">
-                <div>
-                  <span class="text-xs font-medium text-slate-500">ID DA NOTA</span>
-                  <div class="mt-1 flex items-center gap-2">
-                    <span class="text-xl font-bold text-slate-900 dark:text-white">{{ nota.numero_nota }}</span>
-                    <NotasStatusBadge :status="nota.status_retirada" />
-                  </div>
-                </div>
-                <div>
-                  <span class="block text-xs font-medium text-slate-500">Série</span>
-                  <span class="text-base font-bold text-brand-600 dark:text-brand-400">{{ nota.serie_nota }}</span>
-                </div>
-              </div>
-              
-              <!-- Ações Administrativas Inline -->
-              <div v-if="false && isAdmin" class="flex items-center gap-2">
-                <button
-                  v-if="!editMode"
-                  type="button"
-                  class="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-                  @click="editMode = true"
-                >
-                  Editar Nota
-                </button>
-                <template v-else>
-                  <button
-                    type="button"
-                    class="rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-brand-500 disabled:opacity-60"
-                    :disabled="!!savingEdit"
-                    @click="salvarEdicao"
-                  >
-                    {{ savingEdit ? 'Salvando...' : 'Salvar Alterações' }}
-                  </button>
-                  <button
-                    type="button"
-                    class="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
-                    @click="cancelarEdicao"
-                  >
-                    Cancelar
-                  </button>
-                </template>
-              </div>
+  <div v-if="nota" class="text-slate-700 dark:text-slate-300">
+    <div class="space-y-5">
+      <Card padding-class="p-4 md:p-5">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div class="min-w-0">
+            <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+              Resumo da nota
+            </p>
+            <div class="mt-1 flex flex-wrap items-center gap-2">
+              <h3 class="text-xl font-bold text-slate-950 dark:text-white">
+                {{ nota.serie_nota || '1' }}-{{ nota.numero_nota }}
+              </h3>
+              <NotasStatusBadge :status="nota.status_retirada" />
             </div>
+          </div>
 
-            <div class="grid gap-4 grid-cols-1 sm:grid-cols-2">
-              <!-- Titular -->
-              <div class="flex items-start gap-3 rounded-lg bg-slate-50 p-3 dark:bg-slate-950">
-                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
-                  <UserRound class="h-4 w-4" />
-                </div>
-                <div class="w-full min-w-0" v-if="!editMode">
-                  <span class="text-xs font-medium text-slate-500">Titular</span>
-                  <p class="truncate text-sm font-semibold text-slate-900 dark:text-white">{{ nota.nome_cliente }}</p>
-                  <p v-if="nota.telefone_cliente" class="mt-0.5 text-xs text-slate-500">{{ nota.telefone_cliente }}</p>
-                </div>
-                <div class="w-full space-y-2" v-else>
-                  <label class="block">
-                    <span class="text-[10px] font-medium text-slate-500 block">NOME DO CLIENTE</span>
-                    <input 
-                      v-model="editDraft.nome_cliente" 
-                      type="text" 
-                      class="h-8 w-full rounded-lg border border-slate-200 bg-white px-2 text-xs font-semibold text-slate-900 outline-none focus:border-brand-500 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
-                    />
-                  </label>
-                  <label class="block">
-                    <span class="text-[10px] font-medium text-slate-500 block">TELEFONE</span>
-                    <input 
-                      v-model="editDraft.telefone_cliente" 
-                      type="text" 
-                      class="h-8 w-full rounded-lg border border-slate-200 bg-white px-2 text-xs text-slate-900 outline-none focus:border-brand-500 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
-                    />
-                  </label>
-                </div>
-              </div>
-
-              <!-- Registro -->
-              <div class="flex items-start gap-3 rounded-lg bg-slate-50 p-3 dark:bg-slate-950">
-                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
-                  <Calendar class="h-4 w-4" />
-                </div>
-                <div v-if="!editMode">
-                  <span class="text-xs font-medium text-slate-500">Registro</span>
-                  <p class="text-sm font-semibold text-slate-900 dark:text-white">Compra: {{ formatDate(nota.data_compra) }}</p>
-                  <p class="mt-0.5 text-[10px] text-slate-400">Cadastrado em {{ formatDateTime(nota.criado_em) }}</p>
-                  <p v-if="nota.cadastrado_por_nome" class="mt-0.5 text-[10px] font-medium text-brand-600 dark:text-brand-400">Por: {{ nota.cadastrado_por_nome }}</p>
-                </div>
-                <div class="w-full space-y-2" v-else>
-                  <div class="text-xs font-medium text-slate-500">
-                    Compra: <span class="font-semibold text-slate-900 dark:text-white">{{ formatDate(nota.data_compra) }}</span>
-                  </div>
-                </div>
-              </div>
+          <div class="grid min-w-0 grid-cols-2 gap-5 text-sm sm:text-right">
+            <div class="min-w-0">
+              <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Itens</p>
+              <p class="mt-1 text-base font-bold text-slate-950 dark:text-white">{{ stats.totalItens }}</p>
             </div>
-          </section>
-
-          <!-- Bloco: Itens do Pedido -->
-          <section class="space-y-3">
-            <div class="flex items-center justify-between px-1">
-              <h4 class="text-sm font-semibold text-slate-900 dark:text-white">Itens do Pedido</h4>
-              <div class="flex items-center gap-2">
-                <button
-                  v-if="editMode"
-                  type="button"
-                  class="rounded-lg bg-brand-50 px-2.5 py-1 text-xs font-medium text-brand-700 transition hover:bg-brand-100 dark:bg-brand-950/30 dark:text-brand-400 dark:hover:bg-brand-950/50"
-                  @click="adicionarProduto"
-                >
-                  + Novo Item
-                </button>
-                <span class="text-xs text-slate-500">{{ editMode ? (editDraft.produtos?.length || 0) : (nota.produtos?.length || 0) }} itens</span>
-              </div>
+            <div class="min-w-0">
+              <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Valor</p>
+              <p class="mt-1 break-words text-base font-bold text-slate-950 dark:text-white">{{ formatCurrency(stats.valorTotal) }}</p>
             </div>
-            
-            <div class="space-y-2">
-              <template v-if="!editMode">
-                <NotaItemCard 
-                  v-for="(produto, index) in nota.produtos" 
-                  :key="index"
-                  :produto="produto"
-                />
-              </template>
-              <template v-else>
-                <!-- Cabeçalho dos Itens (Edição) -->
-                <div class="hidden sm:grid sm:grid-cols-[2fr_1fr_1fr_1fr_auto] gap-3 px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  <div>Produto</div>
-                  <div>Qtd Comprada</div>
-                  <div>Qtd Retirada</div>
-                  <div>ID Estoque</div>
-                  <div class="w-[60px]"></div>
-                </div>
-                <!-- Lista Editável -->
-                <div 
-                  v-for="(produto, index) in (editDraft.produtos || [])" 
-                  :key="`inline-edit-${index}`"
-                  class="grid gap-2 grid-cols-1 sm:grid-cols-[2fr_1fr_1fr_1fr_auto] items-center bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 p-2 rounded-xl"
-                >
-                  <label class="space-y-1">
-                    <span class="text-[10px] font-medium text-slate-400 sm:hidden block">Produto</span>
-                    <input
-                      v-model="produto.nome"
-                      type="text"
-                      class="h-8 w-full rounded-lg border border-slate-200 bg-slate-50 px-2 text-xs font-medium text-slate-800 outline-none focus:border-brand-500 focus:bg-white dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
-                    >
-                  </label>
-                  <label class="space-y-1">
-                    <span class="text-[10px] font-medium text-slate-400 sm:hidden block">Qtd Comprada</span>
-                    <input
-                      v-model.number="produto.quantidade"
-                      type="number"
-                      step="0.01"
-                      class="h-8 w-full rounded-lg border border-slate-200 bg-slate-50 px-2 text-xs font-medium text-slate-800 outline-none focus:border-brand-500 focus:bg-white dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
-                    >
-                  </label>
-                  <label class="space-y-1">
-                    <span class="text-[10px] font-medium text-slate-400 sm:hidden block">Qtd Retirada</span>
-                    <input
-                      v-model.number="produto.quantidade_retirada"
-                      type="number"
-                      step="0.01"
-                      class="h-8 w-full rounded-lg border border-slate-200 bg-slate-50 px-2 text-xs font-medium text-slate-800 outline-none focus:border-brand-500 focus:bg-white dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
-                    >
-                  </label>
-                  <label class="space-y-1">
-                    <span class="text-[10px] font-medium text-slate-400 sm:hidden block">ID Estoque</span>
-                    <input
-                      v-model.number="produto.id_produto_estoque"
-                      type="number"
-                      class="h-8 w-full rounded-lg border border-slate-200 bg-slate-50 px-2 text-xs font-medium text-slate-800 outline-none focus:border-brand-500 focus:bg-white dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
-                    >
-                  </label>
-                  <button
-                    type="button"
-                    class="h-8 px-2 rounded-lg text-xs font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors w-full sm:w-[60px] text-center"
-                    @click="removerProduto(index)"
-                  >
-                    Remover
-                  </button>
-                </div>
-              </template>
-            </div>
-          </section>
+          </div>
         </div>
 
-        <!-- Barra Lateral -->
-        <aside class="space-y-6">
-          <!-- Evidência Fiscal -->
-          <section v-if="nota.foto_url" class="space-y-2">
-            <h4 class="text-sm font-semibold text-slate-900 dark:text-white">Evidência Fiscal</h4>
+        <div class="mt-4 border-t border-slate-100 pt-4 dark:border-slate-800">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <h4 class="text-sm font-bold text-slate-950 dark:text-white">Andamento da retirada</h4>
+              <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                {{ formatQuantity(stats.totalRetirado) }} de {{ formatQuantity(stats.totalComprado) }} ja retirado.
+                Ainda falta retirar {{ formatQuantity(stats.saldoPendente) }}.
+              </p>
+            </div>
+            <span class="shrink-0 text-sm font-bold text-slate-950 dark:text-white">{{ retiradaPercent }}%</span>
+          </div>
+
+          <div class="mt-3 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
             <div
-              class="group relative block aspect-[4/3] cursor-pointer overflow-hidden rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950"
-              @click="previewImage = nota.foto_url"
-            >
-              <img :src="nota.foto_url" alt="Cupom" class="h-full w-full object-cover transition-all duration-300 group-hover:opacity-80">
-              <div class="absolute inset-0 flex items-center justify-center bg-slate-900/50 opacity-0 transition-opacity group-hover:opacity-100">
-                <span class="rounded-lg bg-white px-3 py-1.5 text-xs font-medium text-slate-900 shadow-md">Visualizar</span>
+              class="h-full rounded-full bg-emerald-500 transition-all duration-300 dark:bg-emerald-400"
+              :style="{ width: `${retiradaPercent}%` }"
+            />
+          </div>
+
+          <dl class="mt-3 grid grid-cols-3 gap-3 text-xs">
+            <div class="min-w-0">
+              <dt class="font-semibold uppercase tracking-wide text-slate-400">Comprado</dt>
+              <dd class="mt-1 text-base font-bold text-slate-950 dark:text-white">{{ formatQuantity(stats.totalComprado) }}</dd>
+              <p class="mt-0.5 text-[11px] leading-snug text-slate-500 dark:text-slate-400">Total da nota.</p>
+            </div>
+            <div class="min-w-0">
+              <dt class="font-semibold uppercase tracking-wide text-sky-500 dark:text-sky-300">A retirar</dt>
+              <dd class="mt-1 text-base font-bold text-slate-950 dark:text-white">{{ formatQuantity(stats.saldoPendente) }}</dd>
+              <p class="mt-0.5 text-[11px] leading-snug text-slate-500 dark:text-slate-400">Ainda nao retirado.</p>
+            </div>
+            <div class="min-w-0">
+              <dt class="font-semibold uppercase tracking-wide text-emerald-500 dark:text-emerald-300">Retirado</dt>
+              <dd class="mt-1 text-base font-bold text-slate-950 dark:text-white">{{ formatQuantity(stats.totalRetirado) }}</dd>
+              <p class="mt-0.5 text-[11px] leading-snug text-slate-500 dark:text-slate-400">Ja saiu do estoque.</p>
+            </div>
+          </dl>
+        </div>
+
+        <div class="mt-4 grid gap-4 border-t border-slate-100 pt-4 dark:border-slate-800 md:grid-cols-2">
+          <div>
+            <div class="flex items-center gap-2 text-slate-400">
+              <UserRound class="h-4 w-4" />
+              <span class="text-[11px] font-semibold uppercase tracking-wide">Cliente</span>
+            </div>
+
+            <div v-if="!editMode" class="mt-3 space-y-1">
+              <p class="truncate text-base font-bold text-slate-950 dark:text-white">
+                {{ nota.nome_cliente || 'Cliente nao informado' }}
+              </p>
+              <p v-if="nota.telefone_cliente" class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                <Phone class="h-3.5 w-3.5" />
+                {{ nota.telefone_cliente }}
+              </p>
+              <p v-if="nota.documento_cliente" class="text-xs text-slate-500 dark:text-slate-400">
+                Documento: {{ nota.documento_cliente }}
+              </p>
+            </div>
+
+            <div v-else class="mt-3 grid gap-3">
+              <label class="space-y-1">
+                <span class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Nome</span>
+                <input
+                  v-model="editDraft.nome_cliente"
+                  type="text"
+                  class="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-sky-400 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+                >
+              </label>
+              <div class="grid gap-3 sm:grid-cols-2">
+                <label class="space-y-1">
+                  <span class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Telefone</span>
+                  <input
+                    v-model="editDraft.telefone_cliente"
+                    type="text"
+                    class="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-sky-400 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+                  >
+                </label>
+                <label class="space-y-1">
+                  <span class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Documento</span>
+                  <input
+                    v-model="editDraft.documento_cliente"
+                    type="text"
+                    class="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-sky-400 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+                  >
+                </label>
               </div>
             </div>
-          </section>
+          </div>
 
-          <!-- Log de Operações -->
-          <section v-if="historico.length" class="space-y-2">
-            <div class="flex items-center justify-between">
-              <h4 class="text-sm font-semibold text-slate-900 dark:text-white">Log de Operações</h4>
-              <span class="text-xs text-slate-500">{{ historico.length }} eventos</span>
+          <div>
+            <div class="flex items-center gap-2 text-slate-400">
+              <Calendar class="h-4 w-4" />
+              <span class="text-[11px] font-semibold uppercase tracking-wide">Registro</span>
             </div>
+            <dl class="mt-3 grid gap-3 text-sm">
+              <div class="flex items-center justify-between gap-3">
+                <dt class="text-slate-500 dark:text-slate-400">Compra</dt>
+                <dd class="font-semibold text-slate-950 dark:text-white">{{ formatDate(nota.data_compra) }}</dd>
+              </div>
+              <div class="flex items-center justify-between gap-3">
+                <dt class="text-slate-500 dark:text-slate-400">Criado em</dt>
+                <dd class="text-right font-semibold text-slate-950 dark:text-white">{{ formatDateTime(nota.criado_em) }}</dd>
+              </div>
+              <div v-if="nota.cadastrado_por_nome" class="flex items-center justify-between gap-3">
+                <dt class="text-slate-500 dark:text-slate-400">Por</dt>
+                <dd class="text-right font-semibold text-slate-950 dark:text-white">{{ nota.cadastrado_por_nome }}</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </Card>
 
-            <div class="space-y-3 border-l border-slate-200 dark:border-slate-800 pl-3 ml-2">
-              <NotaLogCard 
-                v-for="(item, index) in historico" 
-                :key="index"
-                :item="item"
-                :format-date-time="formatDateTime"
-                :get-produto-nome="getProdutoNome"
-                @preview="(url) => previewImage = url"
-              />
+      <section class="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+        <div class="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 dark:border-slate-800 md:px-5">
+          <div>
+            <h4 class="text-sm font-bold text-slate-950 dark:text-white">
+              Itens do pedido
+            </h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400">
+              {{ editMode ? (editDraft.produtos?.length || 0) : produtos.length }} itens
+            </p>
+          </div>
+
+          <button
+            v-if="editMode"
+            type="button"
+            class="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-slate-200 px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-800"
+            @click="adicionarProduto"
+          >
+            <Plus class="h-4 w-4" />
+            Novo
+          </button>
+        </div>
+
+        <div v-if="!editMode" class="space-y-2 p-4 md:p-5">
+          <NotaItemCard
+            v-for="(produto, index) in produtos"
+            :key="index"
+            :produto="produto"
+          />
+
+          <div v-if="!produtos.length" class="rounded-lg border border-dashed border-slate-200 px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
+            Nenhum item cadastrado.
+          </div>
+        </div>
+
+        <div v-else class="divide-y divide-slate-100 dark:divide-slate-800">
+          <div
+            v-for="(produto, index) in (editDraft.produtos || [])"
+            :key="`edit-${index}`"
+            class="grid gap-3 px-4 py-4 md:grid-cols-[minmax(0,1.6fr)_120px_120px_120px_40px] md:items-end md:px-5"
+          >
+            <label class="space-y-1">
+              <span class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Produto</span>
+              <input
+                v-model="produto.nome"
+                type="text"
+                class="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-sky-400 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+              >
+            </label>
+            <label class="space-y-1">
+              <span class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Qtd</span>
+              <input
+                v-model.number="produto.quantidade"
+                type="number"
+                step="0.01"
+                class="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-sky-400 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+              >
+            </label>
+            <label class="space-y-1">
+                  <span class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Retirado</span>
+              <input
+                v-model.number="produto.quantidade_retirada"
+                type="number"
+                step="0.01"
+                class="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-sky-400 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+              >
+            </label>
+            <label class="space-y-1">
+              <span class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">ID estoque</span>
+              <input
+                v-model.number="produto.id_produto_estoque"
+                type="number"
+                class="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-sky-400 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+              >
+            </label>
+            <button
+              type="button"
+              class="flex h-10 w-full items-center justify-center rounded-lg text-slate-400 transition hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/30 dark:hover:text-rose-300 md:w-10"
+              aria-label="Remover item"
+              title="Remover item"
+              @click="removerProduto(index)"
+            >
+              <Trash2 class="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid gap-5 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+        <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 md:p-5">
+          <div class="flex items-center gap-2 text-slate-400">
+            <Camera class="h-4 w-4" />
+            <h4 class="text-[11px] font-semibold uppercase tracking-wide">Evidencia fiscal</h4>
+          </div>
+
+          <button
+            v-if="nota.foto_url"
+            type="button"
+            class="group mt-3 block aspect-[4/3] w-full overflow-hidden rounded-lg border border-slate-100 bg-slate-50 text-left dark:border-slate-800 dark:bg-slate-950"
+            @click="previewImage = nota.foto_url"
+          >
+            <img :src="nota.foto_url" alt="Foto da nota" class="h-full w-full object-cover transition duration-200 group-hover:opacity-85">
+          </button>
+
+          <div v-else class="mt-3 rounded-lg border border-dashed border-slate-200 px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
+            Nenhuma foto anexada.
+          </div>
+        </div>
+
+        <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 md:p-5">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2 text-slate-400">
+              <ClipboardList class="h-4 w-4" />
+              <h4 class="text-[11px] font-semibold uppercase tracking-wide">Historico</h4>
             </div>
-          </section>
-        </aside>
-      </div>
+            <span class="text-xs text-slate-500 dark:text-slate-400">{{ historico.length }} eventos</span>
+          </div>
+
+          <div v-if="historico.length" class="mt-3 border-l border-slate-200 dark:border-slate-800">
+            <NotaLogCard
+              v-for="(item, index) in historico"
+              :key="index"
+              :item="item"
+              :format-date-time="formatDateTime"
+              :get-produto-nome="getProdutoNome"
+              @preview="(url) => previewImage = url"
+            />
+          </div>
+
+          <div v-else class="mt-3 rounded-lg border border-dashed border-slate-200 px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
+            Nenhum evento registrado.
+          </div>
+        </div>
+      </section>
     </div>
 
-    <!-- Área de Rodapé com Botão Fixo -->
-    <div v-if="podeEfetuarRetirada" class="mt-auto pt-4 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 z-30">
+    <div v-if="props.showRetiradaAction && podeEfetuarRetirada" class="sticky bottom-0 mt-6 border-t border-slate-100 bg-white/95 pb-5 pt-5 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95">
       <Botao
         variant="primary"
         class="w-full !shadow-none hover:!shadow-none"
         @click="irParaRetirada"
       >
-        Efetuar Retirada
-        <ArrowRight class="h-4 w-4 ml-2" />
+        Efetuar retirada
+        <ArrowRight class="ml-2 h-4 w-4" />
       </Botao>
     </div>
   </div>
 
-  <!-- Empty State -->
-  <div v-else class="flex flex-col items-center justify-center py-12 text-center opacity-60">
-    <ArrowRight class="h-6 w-6 -rotate-45 text-slate-400" />
-    <p class="mt-2 text-xs font-medium text-slate-500 uppercase">Selecione uma nota</p>
+  <div v-else class="flex flex-col items-center justify-center py-12 text-center opacity-70">
+    <Info class="h-6 w-6 text-slate-400" />
+    <p class="mt-2 text-xs font-medium uppercase text-slate-500">Selecione uma nota</p>
   </div>
 
-  <!-- Zoom Modal -->
   <Teleport to="body">
     <Transition
       enter-active-class="transition duration-200 ease-out"
@@ -470,18 +505,19 @@ defineExpose({
     >
       <div v-if="previewImage" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" @click="previewImage = null" />
-        
+
         <div class="relative max-h-full max-w-full overflow-hidden rounded-xl bg-black shadow-2xl">
-          <button 
+          <button
             type="button"
-            class="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"
+            class="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-lg bg-black/50 text-white transition hover:bg-black/75"
+            aria-label="Fechar preview"
             @click="previewImage = null"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
           </button>
-          
-          <img 
-            :src="previewImage" 
+
+          <img
+            :src="previewImage"
             class="h-full max-h-[85vh] w-auto object-contain"
             alt="Preview"
           >
@@ -490,30 +526,3 @@ defineExpose({
     </Transition>
   </Teleport>
 </template>
-
-<style scoped>
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #cbd5e1;
-  border-radius: 20px;
-}
-
-.dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #334155;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: #94a3b8;
-}
-
-.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: #475569;
-}
-</style>

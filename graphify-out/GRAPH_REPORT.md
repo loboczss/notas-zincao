@@ -1,53 +1,117 @@
-# Graph Report - notas-zincao  (2026-05-21)
+# Graph Report - .  (2026-05-22)
 
 ## Corpus Check
-- 189 files · ~82,141 words
-- Verdict: corpus is large enough that graph structure adds value.
+- Large corpus: 322 files · ~117,692 words. Semantic extraction will be expensive (many Claude tokens). Consider running on a subfolder, or use --no-semantic to run AST-only.
 
 ## Summary
-- 558 nodes · 770 edges · 26 communities detected
-- Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 41 edges (avg confidence: 0.82)
+- 1706 nodes · 4361 edges · 91 communities detected
+- Extraction: 95% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 196 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
-- [[_COMMUNITY_Community 0|Community 0]]
-- [[_COMMUNITY_Community 1|Community 1]]
-- [[_COMMUNITY_Community 2|Community 2]]
-- [[_COMMUNITY_Community 3|Community 3]]
-- [[_COMMUNITY_Community 4|Community 4]]
-- [[_COMMUNITY_Community 5|Community 5]]
-- [[_COMMUNITY_Community 6|Community 6]]
-- [[_COMMUNITY_Community 7|Community 7]]
-- [[_COMMUNITY_Community 8|Community 8]]
-- [[_COMMUNITY_Community 9|Community 9]]
-- [[_COMMUNITY_Community 10|Community 10]]
-- [[_COMMUNITY_Community 11|Community 11]]
-- [[_COMMUNITY_Community 12|Community 12]]
-- [[_COMMUNITY_Community 13|Community 13]]
-- [[_COMMUNITY_Community 14|Community 14]]
-- [[_COMMUNITY_Community 15|Community 15]]
-- [[_COMMUNITY_Community 16|Community 16]]
-- [[_COMMUNITY_Community 17|Community 17]]
-- [[_COMMUNITY_Community 20|Community 20]]
-- [[_COMMUNITY_Community 21|Community 21]]
-- [[_COMMUNITY_Community 23|Community 23]]
-- [[_COMMUNITY_Community 24|Community 24]]
-- [[_COMMUNITY_Community 25|Community 25]]
-- [[_COMMUNITY_Community 26|Community 26]]
-- [[_COMMUNITY_Community 27|Community 27]]
-- [[_COMMUNITY_Community 31|Community 31]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Core Nota Historico|Core Nota Historico]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Utils Offline Get|Utils Offline Get]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Utils Offline Notas|Utils Offline Notas]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Utils Use Store|Utils Use Store]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Server Utils Admin Users|Server Utils Admin Users]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Auth Session Cache|Auth Session Cache]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Notas Nota Routes|Notas Nota Routes]]
+- [[_COMMUNITY_Server API Create Contato|Server API Create Contato]]
+- [[_COMMUNITY_Server API Normalize Search|Server API Normalize Search]]
+- [[_COMMUNITY_Server Utils Estoque Get|Server Utils Estoque Get]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Server API Export Get|Server API Export Get]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Server Services Sync Offline|Server Services Sync Offline]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Server Services Estoque Produtos|Server Services Estoque Produtos]]
+- [[_COMMUNITY_Server Services Nota Open|Server Services Nota Open]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Components Header User Actions|Components Header User Actions]]
+- [[_COMMUNITY_Utils Is Api|Utils Is Api]]
+- [[_COMMUNITY_Stores Nota Store|Stores Nota Store]]
+- [[_COMMUNITY_Server Utils Get Assert|Server Utils Get Assert]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Components Header Dropmenu Handle|Components Header Dropmenu Handle]]
+- [[_COMMUNITY_Composables Notas Sync|Composables Notas Sync]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Assets Black Rounded|Assets Black Rounded]]
+- [[_COMMUNITY_Assets Offline Sw|Assets Offline Sw]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Components Retiradas Pull On|Components Retiradas Pull On]]
+- [[_COMMUNITY_Plugins Sync Offline|Plugins Sync Offline]]
+- [[_COMMUNITY_Utils Retirada Format|Utils Retirada Format]]
+- [[_COMMUNITY_Server Utils Storage Get|Server Utils Storage Get]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Plugins Camera Native|Plugins Camera Native]]
+- [[_COMMUNITY_Server API Retirada Patch|Server API Retirada Patch]]
+- [[_COMMUNITY_Server API Edit Patch|Server API Edit Patch]]
+- [[_COMMUNITY_Assets Robots Crawling|Assets Robots Crawling]]
+- [[_COMMUNITY_Core Nuxt Config|Core Nuxt Config]]
+- [[_COMMUNITY_Android Build|Android Build]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime Activity|Android Runtime Activity]]
+- [[_COMMUNITY_Android Build|Android Build]]
+- [[_COMMUNITY_Core Total Novafuc|Core Total Novafuc]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
+- [[_COMMUNITY_Android Runtime|Android Runtime]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `syncOfflineNotasCompleto()` - 14 edges
-2. `getApiFetch()` - 12 edges
-3. `syncOfflineQueue()` - 12 edges
-4. `getOnlineStatus()` - 10 edges
-5. `carregarNotas()` - 10 edges
-6. `public.profiles Table` - 10 edges
-7. `isOfflineStorageAvailable()` - 9 edges
-8. `setOfflineCache()` - 9 edges
-9. `getOfflineQueue()` - 9 edges
-10. `assertActiveProfileRole()` - 9 edges
+1. `zs()` - 76 edges
+2. `K()` - 63 edges
+3. `_e()` - 57 edges
+4. `Ee()` - 47 edges
+5. `bk` - 44 edges
+6. `X` - 42 edges
+7. `oe()` - 40 edges
+8. `z_()` - 37 edges
+9. `Pn` - 35 edges
+10. `_y()` - 34 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `deleted_at and deleted_by Columns` --semantically_similar_to--> `Profile deleted_at and deleted_by Fields`  [INFERRED] [semantically similar]
@@ -56,99 +120,291 @@
   novafuc.md → tabelaprofile.md
 - `Invisible Supabase Audit` --semantically_similar_to--> `Profile Audit Consistency`  [INFERRED] [semantically similar]
   novafuc.md → tabelaprofile.md
-- `Supabase` --conceptually_related_to--> `Supabase Authentication`  [INFERRED]
-  novafuc.md → tabelaprofile.md
 - `createOpenAIChat()` --calls--> `isOpenAIModelSupported()`  [INFERRED]
   server/services/openai/chat.ts → shared/constants/OpenAIModels.ts
+- `assertAdminAccess()` --calls--> `normalizeAdminRole()`  [INFERRED]
+  server/utils/admin-users.ts → shared/types/AdminUsers.ts
 
 ## Hyperedges (group relationships)
 - **Nuxt Supabase Notes Audit Flow** — novafuc_nuxt_4_vue_3, novafuc_supabase, novafuc_notas_retirada, novafuc_notas_historico_edicao, novafuc_log_nota_edicao, novafuc_soft_delete [EXTRACTED 1.00]
 - **Profiles Lifecycle Automation** — tabelaprofile_public_profiles, tabelaprofile_auth_users, tabelaprofile_on_auth_user_created, tabelaprofile_handle_new_user, tabelaprofile_profiles_updated_at, tabelaprofile_handle_updated_at [EXTRACTED 1.00]
 - **Zincao Brand Identity Assets** — logomarca_zincao_png_logo, logomarca_zincao_wordmark, logomarca_yellow_rounded_icon, logomarca_notas_zincao_svg_logo, logomarca_notas_zincao_wordmark, logomarca_orange_rounded_square [INFERRED 0.85]
 
-## Communities (132 total, 5 thin omitted)
+## Communities (199 total, 22 thin omitted)
 
-### Community 0 - "Community 0"
-Cohesion: 0.09
-Nodes (30): useRetiradasHistorico(), filterLocalNotas(), normalizeSearchText(), getApiFetch(), setOfflineCache(), assetCacheKey(), blobToDataUrl(), cloneJson() (+22 more)
+### Community 0 - "Android Runtime"
+Cohesion: 0.05
+Nodes (73): $a(), aA(), Ab(), Ac(), ad, addHooks(), aE(), Ag() (+65 more)
 
-### Community 1 - "Community 1"
-Cohesion: 0.13
-Nodes (32): ensureListeners(), refreshOfflineState(), useOfflineStatus(), createOfflineProduto(), numberOrNull(), assertClient(), deleteQueueEntry(), enqueueOfflineRequest() (+24 more)
+### Community 1 - "Android Runtime"
+Cohesion: 0.02
+Nodes (49): Ba(), cn(), createNamespace(), createNamespaceIfNotExists(), createTable(), createTableIfNotExists(), cv(), deprecateHook() (+41 more)
 
-### Community 2 - "Community 2"
-Cohesion: 0.11
-Nodes (22): getExtensionFromMime(), parseImageDataUrl(), uploadRetiradaPhoto(), attachCreatorNamesForSync(), attachSignedUrlsToAssets(), buildOfflineNotaSyncItem(), chunk(), collectNotaOfflineAssets() (+14 more)
+### Community 2 - "Core Nota Historico"
+Cohesion: 0.05
+Nodes (45): @nuxtjs/supabase, History Timeline UI, buildChanges Function, deleteNota Method, deleted_at and deleted_by Columns, fetchHistoricoNota Method, fetchNotas Method, Flutter App (+37 more)
 
-### Community 3 - "Community 3"
-Cohesion: 0.08
-Nodes (31): History Timeline UI, buildChanges Function, deleteNota Method, deleted_at and deleted_by Columns, fetchHistoricoNota Method, fetchNotas Method, Invisible Supabase Audit, log_nota_edicao Trigger Function (+23 more)
+### Community 3 - "Android Runtime"
+Cohesion: 0.06
+Nodes (36): bd(), Cl(), cloneRequestState(), csv(), ep(), explain(), filter(), Fw() (+28 more)
 
-### Community 4 - "Community 4"
+### Community 4 - "Android Runtime"
+Cohesion: 0.06
+Nodes (37): copy(), createBucket(), createIndex(), createSignedUploadUrl(), createSignedUrl(), createSignedUrls(), deleteBucket(), deleteIndex() (+29 more)
+
+### Community 5 - "Android Runtime"
 Cohesion: 0.12
-Nodes (18): isOpenAIModelSupported(), buildSearchTerms(), buscarProdutosEstoquePorIds(), buscarSugestoesProdutoEstoque(), canonicalizarProdutosPorIdEstoque(), encontrarProdutoEstoque(), getScore(), mapEstoqueToNotaProduto() (+10 more)
+Nodes (3): bk, getChannels(), _handleTokenChanged()
 
-### Community 5 - "Community 5"
-Cohesion: 0.22
-Nodes (17): isResendConfigured(), sendEmailWithResend(), getAdminUserStatus(), isAdminUserRoleInput(), normalizeAdminRole(), assertAdminAccess(), getAdminUsersClient(), getCurrentAuthUid() (+9 more)
+### Community 6 - "Android Runtime"
+Cohesion: 0.14
+Nodes (7): afterEach(), beforeEach(), _e(), j0(), kn(), K(), X
 
-### Community 6 - "Community 6"
-Cohesion: 0.19
-Nodes (20): applyEstoqueSearchFilters(), assertAdminAccess(), assertProdutoPaiExists(), fetchProdutosPaiMap(), mapEstoqueRow(), normalizeEstoquePayload(), normalizeNullableText(), normalizeText() (+12 more)
+### Community 7 - "Android Runtime"
+Cohesion: 0.09
+Nodes (25): Bv(), du(), Ed(), ev(), Fv(), hv(), in(), Kh() (+17 more)
 
-### Community 7 - "Community 7"
+### Community 8 - "Android Runtime"
+Cohesion: 0.1
+Nodes (4): Hr(), Pn, Sf(), td()
+
+### Community 10 - "Utils Offline Get"
+Cohesion: 0.16
+Nodes (28): refreshOfflineState(), assertClient(), deleteQueueEntry(), enqueueOfflineRequest(), extractSyncedServerId(), getOfflineCache(), getOfflineIdMapping(), getOfflineNotasQueue() (+20 more)
+
+### Community 12 - "Utils Offline Notas"
+Cohesion: 0.16
+Nodes (26): setOfflineCache(), assetCacheKey(), blobToDataUrl(), cloneJson(), createNotaCacheEntries(), emptyMeta(), fetchNotasSyncPage(), getCachedAsset() (+18 more)
+
+### Community 13 - "Android Runtime"
+Cohesion: 0.14
+Nodes (24): Bi(), ch(), cy(), Dl(), dn(), Fc(), Fl(), gf() (+16 more)
+
+### Community 14 - "Android Runtime"
+Cohesion: 0.15
+Nodes (22): de(), dm, er(), Gt(), hd(), _i(), Il(), Jr() (+14 more)
+
+### Community 15 - "Android Runtime"
+Cohesion: 0.09
+Nodes (23): bt(), Ct(), dy(), Em(), ew(), Gi(), go(), ho() (+15 more)
+
+### Community 16 - "Android Runtime"
 Cohesion: 0.13
-Nodes (16): abrirDetalheNota(), aplicarFiltros(), carregarDetalhe(), carregarNotas(), carregarResumoNotas(), carregarZincoDisponivel(), confirmarExclusaoNota(), fecharDetalheNota() (+8 more)
+Nodes (6): bp(), hE(), tw(), Vd(), Vg(), Ze()
 
-### Community 8 - "Community 8"
+### Community 17 - "Utils Use Store"
+Cohesion: 0.14
+Nodes (13): useNoteManagement(), useRetiradasHistorico(), useToast(), createOfflineProduto(), numberOrNull(), isOfflineNotice(), showMessageToast(), getApiErrorMessage() (+5 more)
+
+### Community 18 - "Android Runtime"
+Cohesion: 0.13
+Nodes (13): Bf(), cf, Fe(), fu(), Gg(), gm, hi(), lf (+5 more)
+
+### Community 19 - "Android Runtime"
+Cohesion: 0.1
+Nodes (21): $0(), Bn(), Cp(), dS(), eb(), Fs(), G0(), Gu() (+13 more)
+
+### Community 20 - "Android Runtime"
+Cohesion: 0.1
+Nodes (22): __(), Bs(), by(), cm(), eh(), Gl(), hookOnce(), jl() (+14 more)
+
+### Community 21 - "Android Runtime"
+Cohesion: 0.13
+Nodes (17): Bc(), Bg(), bm(), fy(), ge(), hm, jg(), Lg() (+9 more)
+
+### Community 22 - "Android Runtime"
+Cohesion: 0.19
+Nodes (20): at(), br(), cs(), Db(), dr(), fh(), fi(), ja() (+12 more)
+
+### Community 23 - "Server Utils Admin Users"
+Cohesion: 0.21
+Nodes (11): isResendConfigured(), sendEmailWithResend(), getAdminUserStatus(), isAdminUserRoleInput(), normalizeAdminRole(), assertAdminAccess(), getAdminUsersClient(), getCurrentAuthUid() (+3 more)
+
+### Community 24 - "Android Runtime"
+Cohesion: 0.14
+Nodes (21): Bl(), Cc(), eg(), es(), Id(), Ii(), JS(), Lc() (+13 more)
+
+### Community 25 - "Android Runtime"
 Cohesion: 0.17
-Nodes (13): useNoteManagement(), applyProgress(), autoSyncIfNeeded(), noteLabel(), refreshLocalSnapshot(), resetRunState(), syncAllNotas(), upsertNote() (+5 more)
+Nodes (7): fd(), Ke(), qp(), rn(), ud(), ue(), We()
 
-### Community 9 - "Community 9"
+### Community 26 - "Auth Session Cache"
+Cohesion: 0.24
+Nodes (15): hydrateFromCache(), getErrorText(), isNetworkFetchError(), getApiAuthHeaders(), isClientOffline(), resolveAuthSessionForRoute(), cacheAuthProfile(), cacheAuthSession() (+7 more)
+
+### Community 27 - "Android Runtime"
+Cohesion: 0.19
+Nodes (18): Cd(), Dc(), Ee(), ey(), Ff(), hf(), hook(), Ia() (+10 more)
+
+### Community 28 - "Android Runtime"
+Cohesion: 0.15
+Nodes (17): Cg(), cr(), di(), J1(), Jd(), jn(), lu(), nm() (+9 more)
+
+### Community 29 - "Android Runtime"
+Cohesion: 0.14
+Nodes (16): dh(), Fg(), Hl(), hy(), iC(), Kd(), ml(), ny() (+8 more)
+
+### Community 30 - "Android Runtime"
+Cohesion: 0.23
+Nodes (14): w(), qo(), B(), A(), C(), d(), ie(), J() (+6 more)
+
+### Community 31 - "Notas Nota Routes"
+Cohesion: 0.15
+Nodes (6): getPageTitle(), notaHistoricoRoute(), notaRetiradaRoute(), cancelarEdicao(), irParaRetirada(), syncDraft()
+
+### Community 32 - "Server API Create Contato"
 Cohesion: 0.2
 Nodes (10): badRequest(), createContatoId(), ensureCrmContato(), getExtensionFromMime(), getTelefoneFromContatoId(), mapSupabaseCreateError(), parseImageDataUrl(), toInteger() (+2 more)
 
-### Community 10 - "Community 10"
+### Community 33 - "Server API Normalize Search"
 Cohesion: 0.17
 Nodes (9): levenshtein(), normalizeForSearch(), scoreNota(), scoreTexto(), levenshtein(), normalizeForSearch(), scoreNota(), scoreTexto() (+1 more)
 
-### Community 11 - "Community 11"
-Cohesion: 0.16
-Nodes (6): getPageTitle(), notaHistoricoRoute(), notaRetiradaRoute(), cancelarEdicao(), irParaRetirada(), syncDraft()
+### Community 34 - "Server Utils Estoque Get"
+Cohesion: 0.28
+Nodes (10): applyEstoqueSearchFilters(), assertEstoqueAdminAccess(), assertProdutoPaiExists(), fetchProdutosPaiMap(), mapEstoqueRow(), normalizeEstoquePayload(), normalizeNullableText(), normalizeText() (+2 more)
 
-### Community 12 - "Community 12"
+### Community 35 - "Android Runtime"
+Cohesion: 0.15
+Nodes (15): Ck(), constructor(), ek(), Gs(), _initRealtimeClient(), _initSupabaseAuthClient(), is(), _listenForAuthEvents() (+7 more)
+
+### Community 36 - "Server API Export Get"
 Cohesion: 0.22
 Nodes (11): buildCsv(), enrichNota(), escapeCsv(), fmtCurrency(), fmtDate(), levenshtein(), normalizeForSearch(), round2() (+3 more)
 
-### Community 13 - "Community 13"
-Cohesion: 0.14
-Nodes (14): @nuxtjs/supabase, Flutter App, Historico e Soft Deletes Integration Guide, Nuxt 4 / Vue 3, Supabase, Dependency Installation, Deployment Documentation, Development Server (+6 more)
+### Community 37 - "Android Runtime"
+Cohesion: 0.2
+Nodes (7): Fn(), Kg(), nf(), rf(), tf(), wc(), Xd
 
-### Community 14 - "Community 14"
-Cohesion: 0.15
-Nodes (14): SVG role img aria-label Notas Zincao, Arial Bold Typography, Black Background, Black Fastener-Like Cutout, Notas Zincao SVG Logo, NOTAS ZINCAO Wordmark, Orange Rounded Square #D97706, SVG Orange White Slate Palette (+6 more)
+### Community 38 - "Android Runtime"
+Cohesion: 0.18
+Nodes (14): b_(), d0(), et(), hh(), Ib(), If(), io(), M0() (+6 more)
 
-### Community 16 - "Community 16"
+### Community 39 - "Android Runtime"
+Cohesion: 0.23
+Nodes (13): Ei(), iy(), jf(), mg(), Ni(), Oi(), pE(), Pr() (+5 more)
+
+### Community 42 - "Android Runtime"
+Cohesion: 0.23
+Nodes (10): catch(), execute(), finally(), getPromise(), Ir(), nE(), then(), v0() (+2 more)
+
+### Community 43 - "Android Runtime"
+Cohesion: 0.24
+Nodes (5): G(), I(), q(), V(), z()
+
+### Community 44 - "Server Services Sync Offline"
+Cohesion: 0.29
+Nodes (11): attachCreatorNamesForSync(), attachSignedUrlsToAssets(), buildOfflineNotaSyncItem(), chunk(), collectNotaOfflineAssets(), createSignedUrlMap(), getNotaAssetCandidates(), normalizeSyncBoolean() (+3 more)
+
+### Community 45 - "Android Runtime"
+Cohesion: 0.18
+Nodes (5): ef(), of(), Rl(), vi, xl()
+
+### Community 46 - "Android Runtime"
+Cohesion: 0.26
+Nodes (5): Da(), Fa(), ha(), TE(), Wr()
+
+### Community 47 - "Android Runtime"
+Cohesion: 0.18
+Nodes (8): Bw(), _getAccessToken(), Ju(), kp(), Rc(), Ta(), To(), Xn()
+
+### Community 49 - "Server Services Estoque Produtos"
+Cohesion: 0.35
+Nodes (10): buildSearchTerms(), buscarProdutosEstoquePorIds(), buscarSugestoesProdutoEstoque(), canonicalizarProdutosPorIdEstoque(), encontrarProdutoEstoque(), getScore(), mapEstoqueToNotaProduto(), normalizeText() (+2 more)
+
+### Community 50 - "Server Services Nota Open"
+Cohesion: 0.24
+Nodes (6): isOpenAIModelSupported(), createOpenAIChat(), getOpenAIClient(), extractNotaFromImage(), normalizeProdutos(), toNumber()
+
+### Community 51 - "Android Runtime"
+Cohesion: 0.2
+Nodes (11): dk(), fk(), gk(), hk(), Ik(), ip(), mk(), nb() (+3 more)
+
+### Community 52 - "Android Runtime"
+Cohesion: 0.2
+Nodes (3): Qd, qs(), X1()
+
+### Community 54 - "Android Runtime"
+Cohesion: 0.22
+Nodes (9): callHookParallel(), callHookWith(), ea(), Fr(), O0(), qu(), Xo(), E() (+1 more)
+
+### Community 56 - "Utils Is Api"
+Cohesion: 0.29
+Nodes (5): getApiErrorStatus(), isCacheFallbackNotice(), isConnectionUnavailableMessage(), isUnauthorizedError(), normalizeMessageText()
+
+### Community 58 - "Server Utils Get Assert"
+Cohesion: 0.31
+Nodes (4): assertActiveProfileRole(), assertCanCreateNota(), getActiveProfileRole(), getAuthUidOrThrow()
+
+### Community 59 - "Android Runtime"
+Cohesion: 0.25
+Nodes (9): dd(), ft(), Hw(), Ka(), mp(), nw(), rw(), Yb() (+1 more)
+
+### Community 60 - "Android Runtime"
+Cohesion: 0.25
+Nodes (7): cb(), dt, hp(), lw(), Pu(), Tb(), Ub()
+
+### Community 61 - "Android Runtime"
+Cohesion: 0.22
+Nodes (9): Cw(), f0(), from(), h0(), Ku(), notIn(), Qh(), toBase64() (+1 more)
+
+### Community 64 - "Components Header Dropmenu Handle"
 Cohesion: 0.28
 Nodes (3): fechar(), handleDocumentClick(), handleEsc()
 
-### Community 17 - "Community 17"
-Cohesion: 0.33
-Nodes (5): aplicarFiltros(), carregarEstoque(), irPaginaAnterior(), irProximaPagina(), mudarItensPorPagina()
+### Community 65 - "Composables Notas Sync"
+Cohesion: 0.42
+Nodes (8): applyProgress(), autoSyncIfNeeded(), noteLabel(), refreshLocalSnapshot(), resetRunState(), syncAllNotas(), upsertNote(), getOfflineNotasLocalSnapshot()
 
-### Community 20 - "Community 20"
+### Community 67 - "Android Runtime"
+Cohesion: 0.33
+Nodes (7): B0(), be(), gr(), np(), op(), Ri(), Vp()
+
+### Community 69 - "Assets Black Rounded"
+Cohesion: 0.29
+Nodes (7): Black Background, Black Fastener-Like Cutout, White Bold Rounded Lowercase Typography, Yellow i and Tilde Accents, Yellow Rounded Icon, Zincao PNG Logo, zincao Lowercase Wordmark
+
+### Community 70 - "Assets Offline Sw"
+Cohesion: 0.6
+Nodes (4): cacheResponse(), isApiRequest(), networkFirst(), staleWhileRevalidate()
+
+### Community 71 - "Android Runtime"
+Cohesion: 0.47
+Nodes (6): Hb(), jb(), qb(), Sb(), xb(), yE()
+
+### Community 74 - "Components Retiradas Pull On"
 Cohesion: 0.53
 Nodes (5): canStartPull(), onTouchEnd(), onTouchMove(), onTouchStart(), resetPull()
 
-### Community 21 - "Community 21"
+### Community 75 - "Plugins Sync Offline"
+Cohesion: 0.4
+Nodes (5): useOfflineNotasSync(), ensureListeners(), useOfflineStatus(), refreshAndSync(), syncNotasIfNeeded()
+
+### Community 76 - "Utils Retirada Format"
 Cohesion: 0.53
 Nodes (4): formatRetiradaNumber(), formatRetiradaZinco(), getRetiradaItensResumo(), getRetiradaQuantidadeTotal()
 
-### Community 24 - "Community 24"
+### Community 77 - "Server Utils Storage Get"
+Cohesion: 0.6
+Nodes (4): createSignedStorageUrl(), getNotasRetiradaStoragePath(), getStorageObjectPath(), signNotaStorageUrls()
+
+### Community 78 - "Android Runtime"
+Cohesion: 0.4
+Nodes (3): delete(), kr(), Ol()
+
+### Community 79 - "Android Runtime"
+Cohesion: 0.4
+Nodes (5): kb(), wb(), be(), H(), Y()
+
+### Community 81 - "Server API Retirada Patch"
+Cohesion: 0.6
+Nodes (3): getExtensionFromMime(), parseImageDataUrl(), uploadRetiradaPhoto()
+
+### Community 83 - "Assets Robots Crawling"
 Cohesion: 0.5
 Nodes (4): Crawling Allowed, Empty Disallow Directive, robots.txt Policy, User-Agent Wildcard
 
-### Community 31 - "Community 31"
+### Community 93 - "Core Total Novafuc"
 Cohesion: 0.67
 Nodes (3): produtos_edit_list, valorTotal and descontoTotal Recalculation, Vue computed/watch Reactivity
 
@@ -157,24 +413,24 @@ Nodes (3): produtos_edit_list, valorTotal and descontoTotal Recalculation, Vue c
   public/logomarca.png · relation: conceptually_related_to
 
 ## Knowledge Gaps
-- **26 isolated node(s):** `@nuxtjs/supabase`, `Flutter App`, `useNotas Composable`, `NotaHistoricoTimeline.vue Component`, `produtos_edit_list` (+21 more)
+- **22 isolated node(s):** `@nuxtjs/supabase`, `Flutter App`, `useNotas Composable`, `NotaHistoricoTimeline.vue Component`, `produtos_edit_list` (+17 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **5 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **22 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **What is the exact relationship between `Yellow Rounded Icon` and `Black Fastener-Like Cutout`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **Why does `vincularProdutosAoEstoque()` connect `Community 4` to `Community 9`?**
-  _High betweenness centrality (0.012) - this node is a cross-community bridge._
-- **Why does `signNotaStorageUrls()` connect `Community 2` to `Community 4`?**
-  _High betweenness centrality (0.008) - this node is a cross-community bridge._
-- **Why does `signNotasStorageUrls()` connect `Community 10` to `Community 2`?**
-  _High betweenness centrality (0.008) - this node is a cross-community bridge._
-- **Are the 4 inferred relationships involving `syncOfflineNotasCompleto()` (e.g. with `syncAllNotas()` and `getOnlineStatus()`) actually correct?**
-  _`syncOfflineNotasCompleto()` has 4 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 3 inferred relationships involving `getApiFetch()` (e.g. with `useRetiradasHistorico()` and `syncOfflineQueue()`) actually correct?**
-  _`getApiFetch()` has 3 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 2 inferred relationships involving `syncOfflineQueue()` (e.g. with `getApiFetch()` and `syncOfflineNotasCompleto()`) actually correct?**
-  _`syncOfflineQueue()` has 2 INFERRED edges - model-reasoned connections that need verification._
+- **Why does `bk` connect `Android Runtime` to `Android Runtime`, `Android Runtime`, `Android Runtime`, `Android Runtime`, `Android Runtime`, `Android Runtime`, `Android Runtime`?**
+  _High betweenness centrality (0.036) - this node is a cross-community bridge._
+- **Why does `zs()` connect `Android Runtime` to `Android Runtime`, `Android Runtime`, `Android Runtime`, `Android Runtime`, `Android Runtime`, `Android Runtime`, `Android Runtime`, `Android Runtime`, `Android Runtime`?**
+  _High betweenness centrality (0.031) - this node is a cross-community bridge._
+- **Why does `Pn` connect `Android Runtime` to `Android Runtime`, `Android Runtime`, `Android Runtime`, `Android Runtime`, `Android Runtime`, `Android Runtime`?**
+  _High betweenness centrality (0.023) - this node is a cross-community bridge._
+- **Are the 61 inferred relationships involving `K()` (e.g. with `nE()` and `Da()`) actually correct?**
+  _`K()` has 61 INFERRED edges - model-reasoned connections that need verification._
+- **What connects `@nuxtjs/supabase`, `Flutter App`, `useNotas Composable` to the rest of the system?**
+  _22 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `Android Runtime` be split into smaller, more focused modules?**
+  _Cohesion score 0.05 - nodes in this community are weakly interconnected._

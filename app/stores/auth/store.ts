@@ -2,7 +2,15 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { Session, User } from '@supabase/supabase-js'
 import { useSupabaseClient } from '#imports'
+import { getApiErrorMessage, isNetworkFetchError, isUnauthorizedError } from '../../utils/api-errors'
 import { getApiFetch } from '../../utils/api-fetch'
+import {
+  cacheAuthProfile,
+  cacheAuthSession,
+  clearCachedAuthState,
+  getCachedAuthProfile,
+  getCachedAuthSession,
+} from '../../utils/auth-session-cache'
 import type { SignInPayload, SignUpPayload } from '../../../shared/types/Auth'
 import type { UserProfile } from '../../../shared/types/Profile'
 import type { Database } from '../../types/database.types'
@@ -24,14 +32,32 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const fetchSession = async () => {
-    const { data, error } = await supabase.auth.getSession()
+    const cachedSession = getCachedAuthSession()
 
-    if (error) {
-      errorMessage.value = error.message
-      return
+    try {
+      const { data, error } = await supabase.auth.getSession()
+
+      if (error) {
+        throw error
+      }
+
+      session.value = data.session
+      cacheAuthSession(data.session)
     }
+    catch (error) {
+      if (cachedSession && (isNetworkFetchError(error) || (import.meta.client && !navigator.onLine))) {
+        session.value = cachedSession
+        return
+      }
 
-    session.value = data.session
+      if (isUnauthorizedError(error)) {
+        clearCachedAuthState()
+        session.value = null
+        return
+      }
+
+      errorMessage.value = getApiErrorMessage(error, 'Nao foi possivel recuperar a sessao.')
+    }
   }
 
   const getMe = async () => {
@@ -59,10 +85,18 @@ export const useAuthStore = defineStore('auth', () => {
       }
 
       profile.value = response.profile
+      cacheAuthProfile(response.profile)
       return response
     }
     catch (error) {
-      const message = error instanceof Error ? error.message : 'Não foi possível obter os dados do usuário.'
+      const cachedProfile = getCachedAuthProfile()
+
+      if (cachedProfile && (isNetworkFetchError(error) || (import.meta.client && !navigator.onLine))) {
+        profile.value = cachedProfile
+        return null
+      }
+
+      const message = getApiErrorMessage(error, 'Nao foi possivel obter os dados do usuario.')
       errorMessage.value = message
       return null
     }
@@ -72,13 +106,20 @@ export const useAuthStore = defineStore('auth', () => {
     clearError()
     loading.value = true
 
-    const { error } = await signInWithEmailAndPassword(supabase, payload)
+    try {
+      const { error } = await signInWithEmailAndPassword(supabase, payload)
 
-    loading.value = false
-
-    if (error) {
-      errorMessage.value = error.message
+      if (error) {
+        errorMessage.value = getApiErrorMessage(error, 'Nao foi possivel entrar na conta.')
+        return false
+      }
+    }
+    catch (error) {
+      errorMessage.value = getApiErrorMessage(error, 'Nao foi possivel entrar na conta.')
       return false
+    }
+    finally {
+      loading.value = false
     }
 
     await fetchSession()
@@ -90,33 +131,45 @@ export const useAuthStore = defineStore('auth', () => {
     clearError()
     loading.value = true
 
-    const { error } = await supabase.auth.signUp({
-      email: payload.email,
-      password: payload.password,
-      options: {
-        data: {
-          name: payload.nome,
-          full_name: payload.nome,
-          nome: payload.nome,
+    try {
+      const { error } = await supabase.auth.signUp({
+        email: payload.email,
+        password: payload.password,
+        options: {
+          data: {
+            name: payload.nome,
+            full_name: payload.nome,
+            nome: payload.nome,
+          },
+          emailRedirectTo: payload.redirectTo,
         },
-        emailRedirectTo: payload.redirectTo,
-      },
-    })
+      })
 
-    loading.value = false
-
-    if (error) {
-      errorMessage.value = error.message
+      if (error) {
+        errorMessage.value = getApiErrorMessage(error, 'Nao foi possivel criar a conta.')
+        return false
+      }
+    }
+    catch (error) {
+      errorMessage.value = getApiErrorMessage(error, 'Nao foi possivel criar a conta.')
       return false
+    }
+    finally {
+      loading.value = false
     }
 
     return true
   }
 
   const signOut = async () => {
-    await supabase.auth.signOut()
-    session.value = null
-    profile.value = null
+    try {
+      await supabase.auth.signOut()
+    }
+    finally {
+      clearCachedAuthState()
+      session.value = null
+      profile.value = null
+    }
   }
 
   const updateProfile = async (data: { nome?: string; foto_perfil?: string }) => {
@@ -129,10 +182,11 @@ export const useAuthStore = defineStore('auth', () => {
         body: data,
       })
       profile.value = updated
+      cacheAuthProfile(updated)
       return true
     }
     catch (error) {
-      const message = error instanceof Error ? error.message : 'Erro ao atualizar perfil.'
+      const message = getApiErrorMessage(error, 'Erro ao atualizar perfil.')
       errorMessage.value = message
       return false
     }
@@ -151,14 +205,14 @@ export const useAuthStore = defineStore('auth', () => {
       })
 
       if (error) {
-        errorMessage.value = error.message
+        errorMessage.value = getApiErrorMessage(error, 'Erro ao solicitar recuperacao de senha.')
         return false
       }
 
       return true
     }
     catch (error) {
-      errorMessage.value = error instanceof Error ? error.message : 'Erro ao solicitar recuperacao de senha.'
+      errorMessage.value = getApiErrorMessage(error, 'Erro ao solicitar recuperacao de senha.')
       return false
     }
     finally {

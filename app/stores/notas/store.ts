@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { useToast } from '../../composables/useToast'
+import { getApiErrorMessage } from '../../utils/api-errors'
 import { getApiFetch } from '../../utils/api-fetch'
 import {
   enqueueOfflineRequest,
@@ -350,7 +351,7 @@ export const useNotasStore = defineStore('notas', () => {
         return notas.value
       }
 
-      errorMessage.value = error instanceof Error ? error.message : 'Falha ao carregar notas.'
+      errorMessage.value = getApiErrorMessage(error, 'Falha ao carregar notas.')
       return []
     }
     finally {
@@ -371,7 +372,7 @@ export const useNotasStore = defineStore('notas', () => {
       return data
     }
     catch (error) {
-      errorMessage.value = error instanceof Error ? error.message : 'Falha ao analisar a imagem da nota.'
+      errorMessage.value = getApiErrorMessage(error, 'Falha ao analisar a imagem da nota.')
       return null
     }
     finally {
@@ -447,7 +448,7 @@ export const useNotasStore = defineStore('notas', () => {
     }
     catch (error) {
       const offlineNota = await queueCreateNota(payload)
-      errorMessage.value = 'Sem conexao: a nota foi salva offline para sincronizar depois.'
+      clearError()
       showSuccess('Nota salva offline. Ela sera sincronizada quando a internet voltar.')
       return { success: true, nota: offlineNota }
     }
@@ -488,7 +489,7 @@ export const useNotasStore = defineStore('notas', () => {
         return notasRetirada.value
       }
 
-      errorMessage.value = error instanceof Error ? error.message : 'Falha ao carregar notas para retirada.'
+      errorMessage.value = getApiErrorMessage(error, 'Falha ao carregar notas para retirada.')
       return []
     }
     finally {
@@ -528,7 +529,7 @@ export const useNotasStore = defineStore('notas', () => {
         return notaDetalheAtual.value
       }
 
-      errorMessage.value = error instanceof Error ? error.message : 'Falha ao carregar detalhe da nota.'
+      errorMessage.value = getApiErrorMessage(error, 'Falha ao carregar detalhe da nota.')
       return null
     }
   }
@@ -780,7 +781,7 @@ export const useNotasStore = defineStore('notas', () => {
         return lixeira.value
       }
 
-      errorMessage.value = error instanceof Error ? error.message : 'Falha ao carregar a lixeira.'
+      errorMessage.value = getApiErrorMessage(error, 'Falha ao carregar a lixeira.')
       return []
     }
     finally {
@@ -810,7 +811,7 @@ export const useNotasStore = defineStore('notas', () => {
         return historicoAtual.value
       }
 
-      errorMessage.value = error instanceof Error ? error.message : 'Falha ao carregar o histórico da nota.'
+      errorMessage.value = getApiErrorMessage(error, 'Falha ao carregar o historico da nota.')
       return []
     }
     finally {
@@ -861,7 +862,7 @@ export const useNotasStore = defineStore('notas', () => {
       return data.success
     }
     catch (error) {
-      const msg = error instanceof Error ? error.message : 'Falha ao excluir nota.'
+      const msg = getApiErrorMessage(error, 'Falha ao excluir nota.')
       errorMessage.value = msg
       showError(msg)
       return false

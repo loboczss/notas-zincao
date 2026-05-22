@@ -235,10 +235,6 @@ const resetPassword = async () => {
           </div>
         </div>
 
-        <p v-if="props.errorMessage" class="rounded-2xl border border-rose-500/20 bg-rose-500/5 px-3.5 py-2.5 text-xs text-rose-400 backdrop-blur-sm">
-          {{ props.errorMessage }}
-        </p>
-
         <!-- Ações Administrativas -->
         <div class="flex items-center justify-start gap-6 pt-4 border-t border-slate-100/5 dark:border-white/5 mt-6">
           <!-- Botão Recuperar -->

@@ -176,10 +176,6 @@ watch(() => props.successMessage, (value) => {
         </div>
       </div>
 
-      <p v-if="props.errorMessage" class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700 dark:border-rose-900/60 dark:bg-rose-500/10 dark:text-rose-300">
-        {{ props.errorMessage }}
-      </p>
-
       <div class="flex justify-end gap-2 pt-2">
         <Botao variant="secondary" type="button" @click="fechar">Cancelar</Botao>
         <Botao variant="primary" type="submit" :disabled="props.loading || !form.email">

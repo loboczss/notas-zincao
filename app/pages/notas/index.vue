@@ -11,7 +11,8 @@ import NotasTabela from '../../components/notas/NotasTabela.vue'
 import NotasToolbar from '../../components/notas/NotasToolbar.vue'
 import { useAuthStore, useNotasStore } from '../../stores'
 import { useToast } from '../../composables/useToast'
-import { getApiFetch } from '../../utils/api-fetch'
+import { getApiErrorMessage } from '../../utils/api-errors'
+import { getApiAuthHeaders, getApiFetch, getApiUrl } from '../../utils/api-fetch'
 
 
 definePageMeta({
@@ -22,6 +23,7 @@ const notasStore = useNotasStore()
 const authStore = useAuthStore()
 const { success: showSuccess, error: showError } = useToast()
 const apiFetch = getApiFetch()
+const supabaseClient = useSupabaseClient()
 
 const searchTerm = ref('')
 const statusFilter = ref<'todos' | NotaRetiradaStatus>('todos')
@@ -74,6 +76,7 @@ const carregarResumoNotas = async () => {
   }
   catch (err) {
     console.error('[carregarResumoNotas]', err)
+    showError(getApiErrorMessage(err, 'Falha ao carregar resumo de notas.'))
   }
 }
 
@@ -91,6 +94,7 @@ const carregarZincoDisponivel = async () => {
   }
   catch (err) {
     console.error('[carregarZincoDisponivel]', err)
+    showError(getApiErrorMessage(err, 'Falha ao carregar saldo de estoque.'))
     produtoZinco.value = null
   }
 }
@@ -223,7 +227,9 @@ const exportarRelatorio = async (format: 'csv' | 'pdf') => {
     if (dataInicio.value) params.set('data_inicio', dataInicio.value)
     if (dataFim.value) params.set('data_fim', dataFim.value)
 
-    const res = await fetch(`/api/notas/export?${params.toString()}`)
+    const res = await fetch(getApiUrl(`/api/notas/export?${params.toString()}`), {
+      headers: await getApiAuthHeaders(supabaseClient),
+    })
     if (!res.ok) throw new Error('Erro ao exportar relatório')
 
     const blob = await res.blob()
@@ -238,6 +244,7 @@ const exportarRelatorio = async (format: 'csv' | 'pdf') => {
   }
   catch (err) {
     console.error('[exportarRelatorio]', err)
+    showError(getApiErrorMessage(err, 'Falha ao exportar relatorio.'))
   }
   finally {
     exportLoading.value = false
@@ -549,20 +556,6 @@ const stats = computed(() => {
           @load-more="carregarMaisNotas"
         />
 
-        <div
-          v-if="notasStore.errorMessage"
-          class="rounded-lg border border-rose-200 bg-rose-50 p-4 text-center dark:border-rose-900/50 dark:bg-rose-950/20"
-        >
-          <p class="text-sm text-rose-600 dark:text-rose-400">
-            {{ notasStore.errorMessage }}
-          </p>
-          <button
-            class="mt-2 text-xs font-medium text-rose-600 underline hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300"
-            @click="() => carregarNotas()"
-          >
-            Tentar novamente
-          </button>
-        </div>
           </div>
         </div>
       </div>
@@ -592,41 +585,45 @@ const stats = computed(() => {
             <button
               v-if="!detalheEditMode"
               type="button"
-              class="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+              class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+              aria-label="Editar nota"
+              title="Editar nota"
               @click="iniciarEdicaoDetalhe"
             >
-              <Pencil class="h-3.5 w-3.5" />
-              Editar notas
+              <Pencil class="h-4 w-4" />
             </button>
             <button
               v-if="!detalheEditMode"
               type="button"
-              class="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-rose-200 bg-white px-3 text-xs font-semibold text-rose-700 transition hover:bg-rose-50 focus:outline-none focus:ring-2 focus:ring-rose-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-rose-900/70 dark:bg-slate-900 dark:text-rose-300 dark:hover:bg-rose-950/30"
+              class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-rose-200 bg-white text-rose-600 transition hover:bg-rose-50 hover:text-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-rose-900/70 dark:bg-slate-900 dark:text-rose-300 dark:hover:bg-rose-950/30"
               :disabled="deletingNota"
+              aria-label="Excluir nota"
+              title="Excluir nota"
               @click="abrirConfirmacaoExclusao"
             >
-              <Trash2 class="h-3.5 w-3.5" />
-              Excluir nota
+              <Trash2 class="h-4 w-4" />
             </button>
 
             <template v-else>
               <button
                 type="button"
-                class="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-brand-600 px-3 text-xs font-semibold text-white transition hover:bg-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 disabled:opacity-60 dark:bg-brand-500 dark:hover:bg-brand-600"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-sky-600 text-white transition hover:bg-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30 disabled:opacity-60 dark:bg-sky-500 dark:hover:bg-sky-600"
                 :disabled="savingEdicao"
+                :aria-label="savingEdicao ? 'Salvando nota' : 'Salvar alteracoes'"
+                :title="savingEdicao ? 'Salvando...' : 'Salvar alteracoes'"
                 @click="salvarEdicaoDetalhe"
               >
-                <Save class="h-3.5 w-3.5" />
-                {{ savingEdicao ? 'Salvando...' : 'Salvar' }}
+                <Save class="h-4 w-4" />
               </button>
               <button
                 type="button"
-                class="inline-flex h-9 items-center justify-center gap-2 rounded-lg px-3 text-xs font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500/20 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500/20 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
                 :disabled="savingEdicao"
+                aria-label="Cancelar edicao"
+                title="Cancelar edicao"
                 @click="cancelarEdicaoDetalhe"
               >
-                <XCircle class="h-3.5 w-3.5" />
-                Cancelar
+                <XCircle class="h-4 w-4" />
               </button>
             </template>
           </div>

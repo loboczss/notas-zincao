@@ -8,7 +8,9 @@ import {
   type OfflineNotasSyncProgressEvent,
   type OfflineNotasSyncSummary,
 } from '../utils/offline-notas-sync'
+import { getApiErrorMessage } from '../utils/api-errors'
 import { getOnlineStatus } from '../utils/offline-db'
+import { useToast } from './useToast'
 
 export type OfflineNotasSyncPhase =
   | 'idle'
@@ -250,7 +252,8 @@ const syncAllNotas = async (_options: SyncAllNotasOptions = {}) => {
   }
   catch (error) {
     phase.value = 'error'
-    errorMessage.value = error instanceof Error ? error.message : 'Falha ao sincronizar notas.'
+    errorMessage.value = getApiErrorMessage(error, 'Falha ao sincronizar notas.')
+    useToast().error(errorMessage.value)
     throw error
   }
   finally {

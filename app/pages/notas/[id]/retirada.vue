@@ -1,19 +1,24 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
-import { ArrowLeft, Camera, ListChecks, X } from 'lucide-vue-next'
+import { computed, nextTick, reactive, ref, watch } from 'vue'
+import { Capacitor } from '@capacitor/core'
+import { ArrowLeft, Camera, Images, ListChecks, LoaderCircle, X } from 'lucide-vue-next'
 
 import { useRoute, useRouter } from 'vue-router'
 import type { NotaRegistrarRetiradaRequest, NotaRetiradaDetalheItem } from '../../../../shared/types/NotasRetirada'
 import AppPageShell from '../../../components/layout/AppPageShell.vue'
 import Botao from '../../../components/Botao.vue'
 import Input from '../../../components/Input.vue'
-import NotaCadastroBotaoFlutuante from '../../../components/nota-cadastro/NotaCadastroBotaoFlutuante.vue'
 import NotaCadastroField from '../../../components/nota-cadastro/NotaCadastroField.vue'
 import NotaCadastroLayout from '../../../components/nota-cadastro/NotaCadastroLayout.vue'
 import NotaCadastroSection from '../../../components/nota-cadastro/NotaCadastroSection.vue'
 import NotasStatusBadge from '../../../components/notas/NotasStatusBadge.vue'
 import { useNotasStore } from '../../../stores'
+import { useToast } from '../../../composables/useToast'
 import { AppRoute } from '../../../constants/routes'
+import {
+  RETIRADA_FOTO_CAMERA_PENDING_KEY,
+  retiradaFotoRestoredImageStateKey,
+} from '../../../constants/camera-capture'
 
 definePageMeta({
   middleware: 'auth',
@@ -34,21 +39,30 @@ type NotaRetiradaPageData = Omit<NotaRetiradaDetalheItem, 'produtos'> & {
 const route = useRoute()
 const router = useRouter()
 const notasStore = useNotasStore()
+const { error: showError } = useToast()
 
 const notaId = computed(() => String(route.params.id || ''))
 const nota = ref<NotaRetiradaPageData | null>(null)
 const loading = ref(true)
 const saving = ref(false)
-const erroLocal = ref('')
 
 const retirarForm = reactive<Record<number, string>>({})
+const errors = reactive<Record<string, string>>({})
 const observacoesRetirada = ref('')
 const fotoDataUrl = ref('')
 const fotoPreviewUrl = ref('')
-const fileInput = ref<HTMLInputElement | null>(null)
+const cameraInput = ref<HTMLInputElement | null>(null)
+const galleryInput = ref<HTMLInputElement | null>(null)
+const pickerOpen = ref(false)
+const nativeCaptureLoading = ref(false)
+const restoredRetiradaImageDataUrl = useState<string>(retiradaFotoRestoredImageStateKey(notaId.value), () => '')
 
-const triggerFileInput = () => {
-  fileInput.value?.click()
+const openPicker = () => {
+  pickerOpen.value = true
+}
+
+const closePicker = () => {
+  pickerOpen.value = false
 }
 
 const toNumber = (value: unknown) => {
@@ -77,15 +91,17 @@ const totalSelecionado = computed(() => {
   }, 0)
 })
 
-const saveDisabled = computed(() => {
-  return saving.value || !nota.value || totalSelecionado.value <= 0 || !fotoDataUrl.value
+const retiradaReady = computed(() => {
+  return Boolean(nota.value && totalSelecionado.value > 0 && fotoDataUrl.value)
 })
 
-const saveHint = computed(() => {
-  if (!nota.value) return ''
-  if (totalSelecionado.value <= 0) return 'Selecione ao menos uma quantidade para retirada.'
-  if (!fotoDataUrl.value) return 'Anexe a foto da retirada para confirmar.'
-  return 'Pronto para confirmar.'
+const validationErrorEntries = computed(() => {
+  return Object.entries(errors).filter(([, message]) => Boolean(message))
+})
+
+const saveButtonLabel = computed(() => {
+  if (saving.value) return 'Salvando...'
+  return 'Confirmar retirada'
 })
 
 const notaTitulo = computed(() => {
@@ -121,6 +137,36 @@ const formatDate = (value?: string) => {
   return new Date(value).toLocaleDateString('pt-BR')
 }
 
+const resetErrors = () => {
+  Object.keys(errors).forEach((key) => {
+    delete errors[key]
+  })
+}
+
+const validateRetirada = () => {
+  resetErrors()
+
+  if (totalSelecionado.value <= 0) {
+    errors.quantidades = 'Informe ao menos uma quantidade para retirada.'
+  }
+
+  if (!fotoDataUrl.value) {
+    errors.foto = 'Adicione a foto da retirada.'
+  }
+
+  return Object.keys(errors).length === 0
+}
+
+const scrollToFirstError = async () => {
+  if (!import.meta.client) return
+
+  await nextTick()
+  document.querySelector<HTMLElement>('[data-has-error="true"]')?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'center',
+  })
+}
+
 const carregarDetalhe = async () => {
   loading.value = true
 
@@ -132,39 +178,138 @@ const carregarDetalhe = async () => {
   }
 }
 
-const onSelecionarFoto = async (event: Event) => {
-  const target = event.target as HTMLInputElement
-  const file = target.files?.[0]
+watch(totalSelecionado, () => {
+  delete errors.quantidades
+})
 
-  if (!file) {
-    fotoDataUrl.value = ''
-    fotoPreviewUrl.value = ''
-    return
+watch(fotoDataUrl, () => {
+  delete errors.foto
+})
+
+const isNativeCameraCanceled = (error: unknown) => {
+  const message = error instanceof Error ? error.message : String(error || '')
+  return /cancel|cancelled|canceled|user cancelled/i.test(message)
+}
+
+const dataUrlFromPhoto = (photo: { dataUrl?: string; base64String?: string; format?: string }) => {
+  if (photo.dataUrl) return photo.dataUrl
+  if (photo.base64String) {
+    const format = photo.format || 'jpeg'
+    return `data:image/${format};base64,${photo.base64String}`
   }
 
-  const reader = new FileReader()
-  const dataUrl = await new Promise<string>((resolve, reject) => {
-    reader.onload = () => resolve(String(reader.result || ''))
-    reader.onerror = () => reject(new Error('Falha ao ler imagem'))
-    reader.readAsDataURL(file)
-  })
+  return ''
+}
+
+const selecionarFotoDataUrl = (dataUrl: string) => {
+  if (!dataUrl.startsWith('data:image/')) return
 
   fotoDataUrl.value = dataUrl
   fotoPreviewUrl.value = dataUrl
 }
 
-const limparFoto = () => {
-  fotoDataUrl.value = ''
-  fotoPreviewUrl.value = ''
-  if (fileInput.value) {
-    fileInput.value.value = ''
+const requestNativeImage = async (source: 'camera' | 'photos') => {
+  if (!import.meta.client || !Capacitor.isNativePlatform()) return false
+
+  nativeCaptureLoading.value = true
+  localStorage.setItem(RETIRADA_FOTO_CAMERA_PENDING_KEY, JSON.stringify({
+    notaId: notaId.value,
+    route: route.fullPath,
+    source,
+  }))
+
+  try {
+    const { Camera: CameraPlugin, CameraResultType, CameraSource } = await import('@capacitor/camera')
+    const photo = await CameraPlugin.getPhoto({
+      allowEditing: false,
+      correctOrientation: true,
+      quality: 85,
+      resultType: CameraResultType.DataUrl,
+      source: source === 'camera' ? CameraSource.Camera : CameraSource.Photos,
+    })
+    const dataUrl = dataUrlFromPhoto(photo)
+
+    if (dataUrl) {
+      selecionarFotoDataUrl(dataUrl)
+    }
+
+    return true
+  }
+  catch (error) {
+    if (isNativeCameraCanceled(error)) return true
+    console.warn('[retirada] native camera unavailable, falling back to file input', error)
+    return false
+  }
+  finally {
+    localStorage.removeItem(RETIRADA_FOTO_CAMERA_PENDING_KEY)
+    nativeCaptureLoading.value = false
   }
 }
 
-const submitRetirada = async () => {
-  erroLocal.value = ''
+const triggerCamera = async () => {
+  closePicker()
+  if (await requestNativeImage('camera')) return
+  cameraInput.value?.click()
+}
 
+const triggerGallery = async () => {
+  closePicker()
+  if (await requestNativeImage('photos')) return
+  galleryInput.value?.click()
+}
+
+const onSelecionarFoto = async (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+
+  if (!file) {
+    target.value = ''
+    return
+  }
+
+  const reader = new FileReader()
+  try {
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      reader.onload = () => resolve(String(reader.result || ''))
+      reader.onerror = () => reject(new Error('Falha ao ler imagem'))
+      reader.readAsDataURL(file)
+    })
+
+    selecionarFotoDataUrl(dataUrl)
+  }
+  finally {
+    target.value = ''
+  }
+}
+
+const limparFoto = () => {
+  fotoDataUrl.value = ''
+  fotoPreviewUrl.value = ''
+  cameraInput.value && (cameraInput.value.value = '')
+  galleryInput.value && (galleryInput.value.value = '')
+}
+
+watch(restoredRetiradaImageDataUrl, (dataUrl) => {
+  if (!dataUrl) return
+
+  selecionarFotoDataUrl(dataUrl)
+  restoredRetiradaImageDataUrl.value = ''
+}, { immediate: true })
+
+const onPickerFileSelected = (event: Event) => {
+  closePicker()
+  onSelecionarFoto(event)
+}
+
+const submitRetirada = async () => {
   if (!nota.value) {
+    return
+  }
+
+  if (!validateRetirada()) {
+    const firstError = Object.values(errors)[0]
+    if (firstError) showError(firstError)
+    await scrollToFirstError()
     return
   }
 
@@ -179,12 +324,9 @@ const submitRetirada = async () => {
     .filter(item => item.nome && item.quantidade_retirada > 0)
 
   if (!produtos_retirada.length) {
-    erroLocal.value = 'Informe ao menos um item para retirada.'
-    return
-  }
-
-  if (!fotoDataUrl.value) {
-    erroLocal.value = 'Selecione uma foto da retirada.'
+    errors.quantidades = 'Informe ao menos uma quantidade para retirada.'
+    showError(errors.quantidades)
+    await scrollToFirstError()
     return
   }
 
@@ -203,7 +345,7 @@ const submitRetirada = async () => {
       return
     }
 
-    erroLocal.value = notasStore.errorMessage || 'Nao foi possivel registrar a retirada.'
+    showError(notasStore.errorMessage || 'Nao foi possivel registrar a retirada.')
   }
   finally {
     saving.value = false
@@ -227,13 +369,6 @@ await carregarDetalhe()
     </div>
 
     <div v-else-if="nota" class="pb-24">
-      <div
-        v-if="erroLocal"
-        class="mb-3 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700 dark:border-rose-900/50 dark:bg-rose-500/10 dark:text-rose-300"
-      >
-        {{ erroLocal }}
-      </div>
-
       <NotaCadastroLayout>
         <template #side>
           <NotaCadastroSection eyebrow="Nota" title="Resumo">
@@ -281,39 +416,92 @@ await carregarDetalhe()
 
           <NotaCadastroSection eyebrow="Evidencia" title="Foto da retirada">
             <input
-              ref="fileInput"
+              ref="cameraInput"
+              type="file"
+              accept="image/*"
+              capture="environment"
+              class="hidden"
+              @change="onPickerFileSelected"
+            >
+            <input
+              ref="galleryInput"
               type="file"
               accept="image/*"
               class="hidden"
-              @change="onSelecionarFoto"
+              @change="onPickerFileSelected"
             >
 
-            <button
-              type="button"
-              class="flex w-full min-h-40 flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50/70 p-3 text-center transition hover:border-brand-500 hover:bg-white dark:border-slate-700 dark:bg-slate-950/40 dark:hover:border-brand-400 dark:hover:bg-slate-950"
-              @click="triggerFileInput"
+            <div
+              :data-has-error="errors.foto ? 'true' : undefined"
+              class="space-y-2"
             >
-              <img
-                v-if="fotoPreviewUrl"
-                :src="fotoPreviewUrl"
-                alt="Foto da retirada"
-                class="h-40 w-full rounded-lg object-cover"
+              <button
+                type="button"
+                class="flex w-full min-h-40 flex-col items-center justify-center rounded-lg border border-dashed bg-slate-50/70 p-3 text-center transition hover:border-brand-500 hover:bg-white dark:bg-slate-950/40 dark:hover:border-brand-400 dark:hover:bg-slate-950"
+                :class="errors.foto ? 'border-rose-300 dark:border-rose-800' : 'border-slate-300 dark:border-slate-700'"
+                @click="openPicker"
               >
+                <img
+                  v-if="fotoPreviewUrl"
+                  :src="fotoPreviewUrl"
+                  alt="Foto da retirada"
+                  class="h-40 w-full rounded-lg object-cover"
+                >
 
-              <div v-else class="space-y-2">
-                <span class="mx-auto flex h-11 w-11 items-center justify-center rounded-lg bg-white text-slate-500 shadow-sm dark:bg-slate-900 dark:text-slate-300">
-                  <Camera class="h-5 w-5" />
-                </span>
-                <div>
-                  <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">
-                    Camera ou galeria
-                  </p>
-                  <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                    JPG, PNG, WEBP ou HEIC
-                  </p>
+                <div v-else class="space-y-2">
+                  <span class="mx-auto flex h-11 w-11 items-center justify-center rounded-lg bg-white text-slate-500 shadow-sm dark:bg-slate-900 dark:text-slate-300">
+                    <Camera class="h-5 w-5" />
+                  </span>
+                  <div>
+                    <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                      Camera ou galeria
+                    </p>
+                    <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                      Tire uma foto ou selecione do celular
+                    </p>
+                  </div>
                 </div>
+              </button>
+
+              <p v-if="errors.foto" class="text-[11px] font-semibold text-rose-600 dark:text-rose-300">
+                {{ errors.foto }}
+              </p>
+
+              <div
+                v-if="pickerOpen"
+                class="rounded-lg border border-slate-200 bg-white p-2 shadow-sm dark:border-slate-800 dark:bg-slate-950"
+              >
+                <div class="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    class="flex h-10 items-center justify-center gap-2 rounded-md bg-brand-600 px-3 text-xs font-bold text-white transition hover:bg-brand-500 active:bg-brand-700 disabled:cursor-wait disabled:opacity-70"
+                    :disabled="nativeCaptureLoading"
+                    @click="triggerCamera"
+                  >
+                    <LoaderCircle v-if="nativeCaptureLoading" class="h-4 w-4 animate-spin" />
+                    <Camera v-else class="h-4 w-4" />
+                    <span>Tirar foto</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="flex h-10 items-center justify-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 text-xs font-bold text-slate-700 transition hover:border-brand-500 hover:bg-white disabled:cursor-wait disabled:opacity-70 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-brand-500"
+                    :disabled="nativeCaptureLoading"
+                    @click="triggerGallery"
+                  >
+                    <Images class="h-4 w-4" />
+                    <span>Galeria</span>
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  class="mt-2 flex h-8 w-full items-center justify-center gap-1.5 rounded-md text-[11px] font-semibold text-slate-500 transition hover:bg-slate-50 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-200"
+                  @click="closePicker"
+                >
+                  <X class="h-3.5 w-3.5" />
+                  <span>Cancelar</span>
+                </button>
               </div>
-            </button>
+            </div>
 
             <Botao
               v-if="fotoPreviewUrl"
@@ -342,6 +530,14 @@ await carregarDetalhe()
               Preencher saldos
             </Botao>
           </template>
+
+          <p
+            v-if="errors.quantidades"
+            data-has-error="true"
+            class="mb-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-300"
+          >
+            {{ errors.quantidades }}
+          </p>
 
           <div v-if="produtos.length" class="divide-y divide-slate-100 dark:divide-slate-800">
             <div
@@ -391,14 +587,7 @@ await carregarDetalhe()
             />
           </NotaCadastroField>
 
-          <div class="mt-3 flex flex-col gap-3 border-t border-slate-100 pt-3 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
-            <p
-              class="text-xs font-semibold"
-              :class="saveDisabled ? 'text-slate-500 dark:text-slate-400' : 'text-brand-700 dark:text-brand-300'"
-            >
-              {{ saveHint }}
-            </p>
-
+          <div class="mt-3 flex justify-end border-t border-slate-100 pt-3 dark:border-slate-800">
             <Botao
               type="button"
               variant="secondary"
@@ -412,13 +601,29 @@ await carregarDetalhe()
         </NotaCadastroSection>
       </NotaCadastroLayout>
 
-      <NotaCadastroBotaoFlutuante
-        :disabled="saveDisabled"
-        :loading="saving"
-        label="Confirmar retirada"
-        loading-label="Salvando..."
-        @click="submitRetirada"
-      />
+      <div class="mb-8 mt-6">
+        <div class="flex justify-end">
+          <Botao
+            type="button"
+            :variant="retiradaReady ? 'primary' : 'secondary'"
+            class="w-full sm:w-auto sm:min-w-44"
+            :aria-disabled="!retiradaReady"
+            :disabled="saving"
+            @click="submitRetirada"
+          >
+            <LoaderCircle v-if="saving" class="h-4 w-4 animate-spin" />
+            {{ saveButtonLabel }}
+          </Botao>
+        </div>
+        <ul
+          v-if="validationErrorEntries.length"
+          class="mt-3 space-y-1 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-300"
+        >
+          <li v-for="([field, message]) in validationErrorEntries" :key="field">
+            {{ message }}
+          </li>
+        </ul>
+      </div>
     </div>
 
     <div

@@ -283,25 +283,11 @@ onMounted(async () => {
         </div>
       </Card>
 
-      <div
-        v-if="adminUsersStore.successMessage"
-        class="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-900/60 dark:bg-green-500/10 dark:text-green-300"
-      >
-        {{ adminUsersStore.successMessage }}
-      </div>
-
-      <div
-        v-if="adminUsersStore.errorMessage"
-        class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-500/10 dark:text-rose-300"
-      >
-        {{ adminUsersStore.errorMessage }}
-      </div>
     </div>
 
     <InviteUserModal 
       v-model="modalInviteAberto" 
       :loading="adminUsersStore.savingUsuario"
-      :error-message="adminUsersStore.errorMessage"
       :success-message="adminUsersStore.successMessage"
       @invited="handleInvited"
     />
@@ -310,7 +296,6 @@ onMounted(async () => {
       v-model="modalEditAberto" 
       :usuario="usuarioSelecionado"
       :loading="adminUsersStore.savingUsuario"
-      :error-message="adminUsersStore.errorMessage"
       @saved="handleEditSaved"
       @deleted="handleDeleteUser"
       @reset-password="handleResetPassword"
