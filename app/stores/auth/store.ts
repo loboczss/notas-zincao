@@ -107,11 +107,16 @@ export const useAuthStore = defineStore('auth', () => {
     loading.value = true
 
     try {
-      const { error } = await signInWithEmailAndPassword(supabase, payload)
+      const { data, error } = await signInWithEmailAndPassword(supabase, payload)
 
       if (error) {
         errorMessage.value = getApiErrorMessage(error, 'Nao foi possivel entrar na conta.')
         return false
+      }
+
+      if (data.session) {
+        session.value = data.session
+        cacheAuthSession(data.session)
       }
     }
     catch (error) {

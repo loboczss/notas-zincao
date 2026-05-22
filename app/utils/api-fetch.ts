@@ -36,7 +36,15 @@ export const getApiAuthHeaders = async (supabaseClient = resolveSupabaseClient()
   try {
     const { data } = await supabaseClient.auth.getSession()
     const token = data.session?.access_token
-    if (token) headers.set('Authorization', `Bearer ${token}`)
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`)
+      return headers
+    }
+
+    const cachedToken = getCachedAuthSession()?.access_token
+    if (cachedToken) {
+      headers.set('Authorization', `Bearer ${cachedToken}`)
+    }
   }
   catch (error) {
     const cachedToken = isNetworkFetchError(error) ? getCachedAuthSession()?.access_token : null
