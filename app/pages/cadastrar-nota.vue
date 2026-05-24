@@ -102,8 +102,9 @@ const totalProdutos = computed(() => {
   }, 0)
 })
 
+const valorBrutoNumber = computed(() => Math.max(0, toNumber(form.valor_total)))
 const descontoTotalNumber = computed(() => Math.max(0, toNumber(form.desconto_total)))
-const valorLiquido = computed(() => Math.max(0, totalProdutos.value - descontoTotalNumber.value))
+const valorLiquido = computed(() => Math.max(0, valorBrutoNumber.value - descontoTotalNumber.value))
 
 const duplicateNota = computed<NotaRetiradaListItem | null>(() => {
   const numeroNota = form.numero_nota.trim()
@@ -148,7 +149,7 @@ const saveButtonLabel = computed(() => {
 })
 
 const divergenceWarning = computed(() => {
-  const valorExtraido = toNumber(form.valor_total)
+  const valorExtraido = valorBrutoNumber.value
   const somaProdutos = totalProdutos.value
 
   if (!valorExtraido || !somaProdutos) {
@@ -221,6 +222,26 @@ const validateForm = () => {
   }
 
   return Object.keys(errors).length === 0
+}
+
+const atualizarValorTotal = (value: string) => {
+  form.valor_total = toNumber(value)
+  ensureWarningInObservacoes()
+}
+
+const atualizarValorLiquido = (value: string) => {
+  const liquido = Math.max(0, toNumber(value))
+  const bruto = valorBrutoNumber.value
+
+  if (liquido > bruto) {
+    form.valor_total = liquido
+    form.desconto_total = 0
+  }
+  else {
+    form.desconto_total = Number((bruto - liquido).toFixed(2))
+  }
+
+  ensureWarningInObservacoes()
 }
 
 const scrollToFirstError = async () => {
@@ -345,7 +366,7 @@ const analisarImagem = async () => {
   form.observacoes = String(response.draft.observacoes || '').trim()
   form.desconto_total = toNumber(response.draft.desconto_total)
   form.produtos = Array.isArray(response.draft.produtos) ? response.draft.produtos.map(normalizeProduto) : []
-  form.valor_total = totalProdutos.value
+  form.valor_total = toNumber(response.draft.valor_total) || totalProdutos.value
   ensureWarningInObservacoes()
 
   resetErrors()
@@ -394,7 +415,6 @@ const updateProduto = (payload: { index: number; field: keyof NotaProduto; value
 
 const saveNota = async () => {
   ensureWarningInObservacoes()
-  form.valor_total = totalProdutos.value
 
   if (!validateForm()) {
     const firstError = Object.values(errors)[0]
@@ -415,7 +435,7 @@ const saveNota = async () => {
     chave_nfe: digitsOnly(String(form.chave_nfe || '')),
     foto_cupom_data_url: imageDataUrl.value,
     produtos: form.produtos.map(normalizeProduto),
-    valor_total: totalProdutos.value,
+    valor_total: valorBrutoNumber.value,
     desconto_total: descontoTotalNumber.value,
     observacoes: String(form.observacoes || '').trim(),
   }
@@ -503,7 +523,7 @@ onMounted(() => {
         :serie-nota="form.serie_nota || '1'"
         :chave-nfe="String(form.chave_nfe || '')"
         :data-compra="form.data_compra"
-        :valor-total="totalProdutos.toFixed(2)"
+        :valor-total="valorBrutoNumber.toFixed(2)"
         :desconto-total="String(form.desconto_total ?? '')"
         :valor-liquido="valorLiquido.toFixed(2)"
         :observacoes="String(form.observacoes || '')"
@@ -512,7 +532,9 @@ onMounted(() => {
         @update:serie-nota="form.serie_nota = $event"
         @update:chave-nfe="form.chave_nfe = digitsOnly($event)"
         @update:data-compra="form.data_compra = $event"
+        @update:valor-total="atualizarValorTotal"
         @update:desconto-total="form.desconto_total = toNumber($event)"
+        @update:valor-liquido="atualizarValorLiquido"
         @update:observacoes="form.observacoes = $event"
       />
 
@@ -554,7 +576,7 @@ onMounted(() => {
       <div class="flex justify-end">
         <Botao
           type="button"
-          :variant="saveReady ? 'primary' : 'secondary'"
+          variant="accent"
           class="w-full sm:w-auto sm:min-w-36"
           :aria-disabled="!saveReady"
           :disabled="notasStore.creatingNota"

@@ -5,7 +5,7 @@ import { serverSupabaseClient } from '#supabase/server'
 import { vincularProdutosAoEstoque } from '../estoque/match-produtos'
 import { getOpenAIClient } from './client'
 
-const NOTA_EXTRACTION_MODEL = 'gpt-5.5'
+const NOTA_EXTRACTION_MODEL = 'gpt-5.4-mini'
 const NOTA_EXTRACTION_REASONING_EFFORT = 'high'
 
 const notaMissingFields = [

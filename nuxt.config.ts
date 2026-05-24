@@ -28,6 +28,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   ssr: !isCapacitorBuild,
   devtools: { enabled: false },
+  sourcemap: false,
   app: {
     head: {
       link: [
@@ -70,6 +71,23 @@ export default defineNuxtConfig({
   nitro: {
     hooks: {
       'rollup:before': (_nitro, rollupConfig) => {
+        const existingPlugins = rollupConfig.plugins
+
+        rollupConfig.plugins = [
+          {
+            name: 'resolve-nitro-cache-driver-file-url',
+            resolveId(id) {
+              if (
+                id.startsWith('file:///')
+                && id.includes('/@nuxt/nitro-server/dist/runtime/utils/cache-driver.js')
+              ) {
+                return { id, external: true }
+              }
+            },
+          },
+          ...(Array.isArray(existingPlugins) ? existingPlugins : existingPlugins ? [existingPlugins] : []),
+        ]
+
         const output = rollupConfig.output
         if (!output || Array.isArray(output)) return
         if (output.inlineDynamicImports) {
@@ -92,6 +110,21 @@ export default defineNuxtConfig({
     },
   },
   vite: {
+    build: {
+      sourcemap: false,
+      rollupOptions: {
+        onwarn(warning, warn) {
+          if (
+            warning.plugin === 'nuxt:module-preload-polyfill'
+            && warning.message.includes('Sourcemap is likely to be incorrect')
+          ) {
+            return
+          }
+
+          warn(warning)
+        },
+      },
+    },
     optimizeDeps: {
       include: [
         'lucide-vue-next',

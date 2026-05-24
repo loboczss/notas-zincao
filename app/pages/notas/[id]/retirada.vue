@@ -605,7 +605,7 @@ await carregarDetalhe()
         <div class="flex justify-end">
           <Botao
             type="button"
-            :variant="retiradaReady ? 'primary' : 'secondary'"
+            variant="accent"
             class="w-full sm:w-auto sm:min-w-44"
             :aria-disabled="!retiradaReady"
             :disabled="saving"

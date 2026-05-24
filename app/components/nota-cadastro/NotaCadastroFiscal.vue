@@ -20,7 +20,9 @@ const emit = defineEmits<{
   (e: 'update:serieNota', value: string): void
   (e: 'update:chaveNfe', value: string): void
   (e: 'update:dataCompra', value: string): void
+  (e: 'update:valorTotal', value: string): void
   (e: 'update:descontoTotal', value: string): void
+  (e: 'update:valorLiquido', value: string): void
   (e: 'update:observacoes', value: string): void
 }>()
 </script>
@@ -45,7 +47,13 @@ const emit = defineEmits<{
       </NotaCadastroField>
 
       <NotaCadastroField class="xl:col-span-2" label="Valor bruto">
-        <Input :model-value="props.valorTotal" size="sm" disabled />
+        <Input
+          :model-value="props.valorTotal"
+          size="sm"
+          inputmode="decimal"
+          placeholder="0,00"
+          @update:model-value="emit('update:valorTotal', $event)"
+        />
       </NotaCadastroField>
 
       <NotaCadastroField class="xl:col-span-2" label="Desconto">
@@ -53,7 +61,13 @@ const emit = defineEmits<{
       </NotaCadastroField>
 
       <NotaCadastroField class="col-span-2 xl:col-span-2" label="Valor liquido">
-        <Input :model-value="props.valorLiquido" size="sm" disabled />
+        <Input
+          :model-value="props.valorLiquido"
+          size="sm"
+          inputmode="decimal"
+          placeholder="0,00"
+          @update:model-value="emit('update:valorLiquido', $event)"
+        />
       </NotaCadastroField>
 
       <NotaCadastroField class="col-span-2 xl:col-span-6" label="Observacoes">
