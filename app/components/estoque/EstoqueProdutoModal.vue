@@ -12,6 +12,7 @@ type EstoqueProdutoFormState = {
   valor_preco_varejo: string
   tipo_produto: string
   quantidade_estoque: string
+  adicao_estoque: string
   id_produto_pai: string
   fator_conversao: string
 }
@@ -39,11 +40,34 @@ const form = reactive<EstoqueProdutoFormState>({
   valor_preco_varejo: '',
   tipo_produto: '',
   quantidade_estoque: '0',
+  adicao_estoque: '',
   id_produto_pai: '',
   fator_conversao: '1',
 })
 
 const title = computed(() => form.id_produto ? `Produto #${form.id_produto}` : 'Novo produto')
+
+const toDecimal = (value: unknown) => {
+  const parsed = Number(String(value ?? '').replace(',', '.').trim())
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
+const quantidadeBase = computed(() => Math.max(0, toDecimal(form.quantidade_estoque)))
+const quantidadeAdicionada = computed(() => Math.max(0, toDecimal(form.adicao_estoque)))
+const deveSomarEstoque = computed(() => Boolean(form.id_produto && String(form.adicao_estoque).trim()))
+const quantidadeFinal = computed(() => {
+  const total = deveSomarEstoque.value
+    ? quantidadeBase.value + quantidadeAdicionada.value
+    : quantidadeBase.value
+
+  return Number(total.toFixed(3))
+})
+const quantidadeFinalFormatada = computed(() => {
+  return new Intl.NumberFormat('pt-BR', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 3,
+  }).format(quantidadeFinal.value)
+})
 
 const resetForm = () => {
   form.id_produto = props.initialValue?.id_produto
@@ -52,6 +76,7 @@ const resetForm = () => {
   form.valor_preco_varejo = String(props.initialValue?.valor_preco_varejo || '')
   form.tipo_produto = String(props.initialValue?.tipo_produto || '')
   form.quantidade_estoque = String(props.initialValue?.quantidade_estoque ?? 0)
+  form.adicao_estoque = ''
   form.id_produto_pai = props.initialValue?.id_produto_pai == null ? '' : String(props.initialValue.id_produto_pai)
   form.fator_conversao = String(props.initialValue?.fator_conversao ?? 1)
 }
@@ -73,7 +98,7 @@ const submit = () => {
     embalagem_saida: String(form.embalagem_saida || '').trim(),
     valor_preco_varejo: String(form.valor_preco_varejo || '').trim() || null,
     tipo_produto: String(form.tipo_produto || '').trim() || null,
-    quantidade_estoque: form.quantidade_estoque,
+    quantidade_estoque: String(quantidadeFinal.value),
     id_produto_pai: form.id_produto_pai === '' ? null : form.id_produto_pai,
     fator_conversao: form.fator_conversao === '' ? null : form.fator_conversao,
   })
@@ -114,11 +139,26 @@ const submit = () => {
           <h3 class="text-[11px] font-semibold uppercase">Estoque</h3>
         </div>
 
-        <div class="grid gap-3 sm:grid-cols-3">
+        <div
+          class="grid gap-3"
+          :class="form.id_produto ? 'sm:grid-cols-2 md:grid-cols-[1fr_1fr_96px_1fr_1fr]' : 'sm:grid-cols-3'"
+        >
           <label class="space-y-1">
             <span class="text-[11px] font-semibold uppercase text-slate-500 dark:text-slate-400">Quantidade</span>
-            <Input v-model="form.quantidade_estoque" size="sm" type="number" min="0" step="0.001" placeholder="0" />
+            <Input v-model="form.quantidade_estoque" size="sm" type="number" min="0" step="0.001" inputmode="decimal" placeholder="0" />
           </label>
+
+          <label v-if="form.id_produto" class="space-y-1">
+            <span class="text-[11px] font-semibold uppercase text-slate-500 dark:text-slate-400">Adicionar +</span>
+            <Input v-model="form.adicao_estoque" size="sm" type="number" min="0" step="0.001" inputmode="decimal" placeholder="+0" />
+          </label>
+
+          <div v-if="form.id_produto" class="space-y-1">
+            <span class="text-[11px] font-semibold uppercase text-slate-500 dark:text-slate-400">Saldo</span>
+            <div class="flex min-h-8 items-center rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-sm font-bold tabular-nums text-slate-950 dark:border-slate-700 dark:bg-slate-950 dark:text-white">
+              {{ quantidadeFinalFormatada }}
+            </div>
+          </div>
 
           <label class="space-y-1">
             <span class="text-[11px] font-semibold uppercase text-slate-500 dark:text-slate-400">Embalagem</span>

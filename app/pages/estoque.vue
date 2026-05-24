@@ -6,7 +6,7 @@ import InfiniteScrollTrigger from '../components/InfiniteScrollTrigger.vue'
 import EstoqueProdutoModal from '../components/estoque/EstoqueProdutoModal.vue'
 import EstoqueTabela from '../components/estoque/EstoqueTabela.vue'
 import EstoqueToolbar from '../components/estoque/EstoqueToolbar.vue'
-import type { EstoqueProdutoDraft } from '../../shared/types/Estoque'
+import type { EstoqueProduto, EstoqueProdutoDraft } from '../../shared/types/Estoque'
 import { useAuthStore, useEstoqueStore } from '../stores'
 
 definePageMeta({
@@ -58,20 +58,22 @@ const abrirNovoProduto = () => {
   modalAberto.value = true
 }
 
-const abrirEditarProduto = async (idProduto: number) => {
-  const produto = await estoqueStore.fetchProduto(idProduto)
+const mapProdutoParaDraft = (produto: EstoqueProduto): Partial<EstoqueProdutoDraft> => ({
+  id_produto: produto.id_produto,
+  descricao: produto.descricao,
+  embalagem_saida: produto.embalagem_saida,
+  valor_preco_varejo: produto.valor_preco_varejo,
+  tipo_produto: produto.tipo_produto,
+  quantidade_estoque: produto.quantidade_estoque,
+  id_produto_pai: produto.id_produto_pai,
+  fator_conversao: produto.fator_conversao,
+})
+
+const abrirEditarProduto = (idProduto: number) => {
+  const produto = estoqueStore.selecionarProdutoLocal(idProduto)
   if (!produto) return
 
-  produtoEmEdicao.value = {
-    id_produto: produto.id_produto,
-    descricao: produto.descricao,
-    embalagem_saida: produto.embalagem_saida,
-    valor_preco_varejo: produto.valor_preco_varejo,
-    tipo_produto: produto.tipo_produto,
-    quantidade_estoque: produto.quantidade_estoque,
-    id_produto_pai: produto.id_produto_pai,
-    fator_conversao: produto.fator_conversao,
-  }
+  produtoEmEdicao.value = mapProdutoParaDraft(produto)
   modalAberto.value = true
 }
 

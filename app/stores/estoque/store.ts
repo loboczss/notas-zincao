@@ -112,6 +112,38 @@ export const useEstoqueStore = defineStore('estoque', () => {
     return [...byId.values()]
   }
 
+  const getProdutoLocal = (idProduto: number) => {
+    return produtos.value.find(produto => Number(produto.id_produto) === Number(idProduto)) || null
+  }
+
+  const selecionarProdutoLocal = (idProduto: number) => {
+    const produto = getProdutoLocal(idProduto)
+    if (produto) {
+      produtoAtual.value = produto
+    }
+
+    return produto
+  }
+
+  const salvarProdutoLocal = async (produto: EstoqueProduto) => {
+    const produtoAnterior = getProdutoLocal(produto.id_produto)
+    const quantidadeAnterior = Number(produtoAnterior?.quantidade_estoque || 0)
+    const quantidadeNova = Number(produto.quantidade_estoque || 0)
+
+    produtos.value = produtoAnterior
+      ? produtos.value.map(item => Number(item.id_produto) === Number(produto.id_produto) ? produto : item)
+      : [produto, ...produtos.value]
+
+    produtoAtual.value = produto
+    if (!produtoAnterior) {
+      totalItens.value += 1
+    }
+
+    quantidadeTotalEstoque.value += quantidadeNova - quantidadeAnterior
+    await setOfflineCache(`${ESTOQUE_DETAIL_CACHE_PREFIX}${produto.id_produto}`, produto)
+    await persistListCache()
+  }
+
   const fetchProdutos = async (filters: EstoqueListQuery = {}, options: FetchProdutosOptions = {}) => {
     loadingProdutos.value = true
     clearError()
@@ -248,8 +280,7 @@ export const useEstoqueStore = defineStore('estoque', () => {
         body: payload,
       })
 
-      produtoAtual.value = data.produto
-      await fetchProdutos()
+      await salvarProdutoLocal(data.produto)
       return data.produto
     }
     catch {
@@ -291,8 +322,7 @@ export const useEstoqueStore = defineStore('estoque', () => {
         body: payload,
       })
 
-      produtoAtual.value = data.produto
-      await fetchProdutos()
+      await salvarProdutoLocal(data.produto)
       return data.produto
     }
     catch {
@@ -326,6 +356,8 @@ export const useEstoqueStore = defineStore('estoque', () => {
     errorMessage,
     clearError,
     clearProdutoAtual,
+    getProdutoLocal,
+    selecionarProdutoLocal,
     fetchProdutos,
     searchProdutos,
     fetchProduto,
