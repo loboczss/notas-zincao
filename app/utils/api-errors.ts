@@ -6,6 +6,21 @@ export const getApiErrorStatus = (error: unknown) => {
 }
 
 const getErrorText = (error: unknown) => {
+  const candidate = error as {
+    data?: { message?: unknown; statusMessage?: unknown }
+    response?: { _data?: { message?: unknown; statusMessage?: unknown } }
+    statusMessage?: unknown
+  }
+  const serverMessage = candidate?.data?.statusMessage
+    ?? candidate?.data?.message
+    ?? candidate?.response?._data?.statusMessage
+    ?? candidate?.response?._data?.message
+    ?? candidate?.statusMessage
+
+  if (typeof serverMessage === 'string' && serverMessage.trim()) {
+    return serverMessage
+  }
+
   if (error instanceof Error) return error.message
   return String(error || '')
 }

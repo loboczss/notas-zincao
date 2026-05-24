@@ -1,6 +1,7 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import type { Database } from '~~/app/types/database.types'
 import { assertActiveProfileRole, getAuthUidOrThrow } from '../../utils/permissions'
+import { signNotasStorageUrls } from '../../utils/storage'
 
 export default defineEventHandler(async (event) => {
   const user = await serverSupabaseUser(event)
@@ -54,5 +55,5 @@ export default defineEventHandler(async (event) => {
     deleted_by_profile: profiles.find(p => p.auth_uid === n.deleted_by) || null
   }))
 
-  return { success: true, notas: notasComPerfis || [] }
+  return { success: true, notas: await signNotasStorageUrls(client as any, notasComPerfis || []) }
 })

@@ -111,9 +111,10 @@ const duplicateNota = computed<NotaRetiradaListItem | null>(() => {
   const chaveNfe = digitsOnly(String(form.chave_nfe || ''))
 
   return notasStore.notas.find((nota) => {
-    const mesmoNumeroSerie = numeroNota && nota.numero_nota === numeroNota && nota.serie_nota === serieNota
+    const mesmoNumero = Boolean(numeroNota && nota.numero_nota === numeroNota)
+    const mesmoNumeroSerie = mesmoNumero && nota.serie_nota === serieNota
     const mesmaChave = chaveNfe && digitsOnly(String((nota as unknown as { chave_nfe?: string }).chave_nfe || '')) === chaveNfe
-    return mesmoNumeroSerie || !!mesmaChave
+    return mesmoNumero || mesmoNumeroSerie || !!mesmaChave
   }) || null
 })
 

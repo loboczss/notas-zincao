@@ -3,11 +3,37 @@ import { randomUUID } from 'node:crypto'
 import type { NotaRetiradaDraft } from '../../../shared/types/NotasRetirada'
 import { vincularProdutosAoEstoque } from '../../services/estoque/match-produtos'
 import { assertCanCreateNota, getAuthUidOrThrow } from '../../utils/permissions'
-import { NOTAS_RETIRADA_STORAGE_BUCKET } from '../../utils/storage'
+import { NOTAS_RETIRADA_STORAGE_BUCKET, signNotaStorageUrls } from '../../utils/storage'
 
 const requiredFields = ['nome_cliente', 'numero_nota', 'data_compra', 'produtos'] as const
 const storageBucket = NOTAS_RETIRADA_STORAGE_BUCKET
 const allowedStatus = ['pendente', 'parcial', 'retirada', 'cancelada'] as const
+const notaReturnSelect = [
+  'id',
+  'contato_id',
+  'owner_user_id',
+  'nome_cliente',
+  'documento_cliente',
+  'telefone_cliente',
+  'numero_nota',
+  'serie_nota',
+  'chave_nfe',
+  'data_compra',
+  'data_prevista_retirada',
+  'data_retirada',
+  'valor_total',
+  'desconto_total',
+  'observacoes',
+  'status_retirada',
+  'criado_em',
+  'atualizado_em',
+  'retirada_confirmada_por',
+  'produtos',
+  'foto_url',
+  'foto_cliente_url',
+  'comprovante_retirada_url',
+  'historico_retiradas',
+].join(', ')
 
 const badRequest = (statusMessage: string) => createError({ statusCode: 400, statusMessage })
 
@@ -215,7 +241,11 @@ const uploadImageDataUrl = async (
     })
   }
 
-  return path
+  const { data: publicUrlData } = (client as any).storage
+    .from(storageBucket)
+    .getPublicUrl(path)
+
+  return publicUrlData?.publicUrl || path
 }
 
 const createContatoId = () => `crm-${Date.now()}-${randomUUID().slice(0, 8)}`
@@ -343,6 +373,7 @@ export const notasCreatePostHandler = defineEventHandler(async (event) => {
 
   const numeroNota = String(body.numero_nota || '').trim()
   const serieNota = String(body.serie_nota || '').trim() || '1'
+  const chaveNfe = normalizeDigits(body.chave_nfe)
   const produtosBase = normalizeProdutos(body.produtos)
   const dataCompra = normalizeDate(body.data_compra)
   const dataPrevistaRetirada = normalizeDate(body.data_prevista_retirada)
@@ -371,6 +402,54 @@ export const notasCreatePostHandler = defineEventHandler(async (event) => {
   }
   if (!fotoCupomDataUrl) throw badRequest('Foto do cupom e obrigatoria.')
 
+  const { data: existingNumeroNotas, error: existingNumeroError } = await (client as any)
+    .from('notas_retirada')
+    .select('id, nome_cliente, numero_nota, serie_nota, deleted_at')
+    .eq('owner_user_id', authUid)
+    .eq('numero_nota', numeroNota)
+    .limit(5)
+
+  if (existingNumeroError) {
+    console.error('[api/notas/create] existing numero check error:', existingNumeroError.message)
+    throw mapSupabaseCreateError(existingNumeroError)
+  }
+
+  const existingNumeroNota = Array.isArray(existingNumeroNotas)
+    ? existingNumeroNotas.find((nota: any) => !nota.deleted_at) || existingNumeroNotas[0]
+    : null
+  if (existingNumeroNota) {
+    const location = existingNumeroNota.deleted_at ? 'na lixeira' : 'ativa'
+    throw createError({
+      statusCode: 409,
+      statusMessage: `Ja existe uma nota ${location} com o numero ${numeroNota}: serie ${existingNumeroNota.serie_nota}.`,
+    })
+  }
+
+  if (chaveNfe) {
+    const { data: existingChaveNotas, error: existingChaveError } = await (client as any)
+      .from('notas_retirada')
+      .select('id, nome_cliente, numero_nota, serie_nota, deleted_at')
+      .eq('owner_user_id', authUid)
+      .eq('chave_nfe', chaveNfe)
+      .limit(5)
+
+    if (existingChaveError) {
+      console.error('[api/notas/create] existing chave check error:', existingChaveError.message)
+      throw mapSupabaseCreateError(existingChaveError)
+    }
+
+    const existingChaveNota = Array.isArray(existingChaveNotas)
+      ? existingChaveNotas.find((nota: any) => !nota.deleted_at) || existingChaveNotas[0]
+      : null
+    if (existingChaveNota) {
+      const location = existingChaveNota.deleted_at ? 'na lixeira' : 'ativa'
+      throw createError({
+        statusCode: 409,
+        statusMessage: `Ja existe uma nota ${location} com essa chave: ${existingChaveNota.serie_nota}-${existingChaveNota.numero_nota}.`,
+      })
+    }
+  }
+
   let produtos
   try {
     produtos = await vincularProdutosAoEstoque(client as any, produtosBase)
@@ -381,26 +460,6 @@ export const notasCreatePostHandler = defineEventHandler(async (event) => {
     throw createError({
       statusCode: 500,
       statusMessage: 'Nao foi possivel vincular os produtos ao estoque.',
-    })
-  }
-
-  const { data: existingNota, error: existingNotaError } = await (client as any)
-    .from('notas_retirada')
-    .select('id')
-    .eq('owner_user_id', authUid)
-    .eq('numero_nota', numeroNota)
-    .eq('serie_nota', serieNota)
-    .maybeSingle()
-
-  if (existingNotaError) {
-    console.error('[api/notas/create] existing note check error:', existingNotaError.message)
-    throw mapSupabaseCreateError(existingNotaError)
-  }
-
-  if (existingNota) {
-    throw createError({
-      statusCode: 409,
-      statusMessage: 'Essa nota (numero/serie) ja foi cadastrada.',
     })
   }
 
@@ -447,7 +506,7 @@ export const notasCreatePostHandler = defineEventHandler(async (event) => {
     telefone_cliente: crmContato.telefone_cliente || normalizeDigits(body.telefone_cliente),
     numero_nota: numeroNota,
     serie_nota: serieNota,
-    chave_nfe: String(body.chave_nfe || '').trim() || null,
+    chave_nfe: chaveNfe || null,
     data_compra: dataCompra,
     data_prevista_retirada: dataPrevistaRetirada || null,
     produtos,
@@ -460,7 +519,7 @@ export const notasCreatePostHandler = defineEventHandler(async (event) => {
   const { data, error } = await (client as any)
     .from('notas_retirada')
     .insert(payload)
-    .select('id, nome_cliente, numero_nota, serie_nota, status_retirada')
+    .select(notaReturnSelect)
     .single()
 
   if (error) {
@@ -470,7 +529,10 @@ export const notasCreatePostHandler = defineEventHandler(async (event) => {
 
   return {
     success: true,
-    nota: data,
+    nota: await signNotaStorageUrls(client as any, {
+      ...data,
+      cadastrado_por_nome: String(user.user_metadata?.nome || user.email || '').trim() || null,
+    }),
   }
 })
 

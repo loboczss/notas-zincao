@@ -71,6 +71,7 @@ export type NotaRetiradaListItem = {
   nome_cliente: string
   numero_nota: string
   serie_nota: string
+  chave_nfe?: string | null
   data_compra: string
   data_retirada?: string | null
   valor_total: number | null

@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { useToast } from '../../composables/useToast'
-import { getApiErrorMessage } from '../../utils/api-errors'
+import { getApiErrorMessage, getApiErrorStatus, isNetworkFetchError } from '../../utils/api-errors'
 import { getApiFetch } from '../../utils/api-fetch'
 import {
   enqueueOfflineRequest,
@@ -53,6 +53,7 @@ const createOfflineNota = (payload: NotaRetiradaDraft, id = createOfflineNotaId(
   nome_cliente: payload.nome_cliente,
   numero_nota: payload.numero_nota,
   serie_nota: payload.serie_nota || '1',
+  chave_nfe: payload.chave_nfe || null,
   data_compra: payload.data_compra,
   data_retirada: null,
   valor_total: payload.valor_total ?? null,
@@ -222,7 +223,18 @@ export const useNotasStore = defineStore('notas', () => {
       ? { ...item, ...notaAtualizada }
       : item
 
-    notas.value = notas.value.map(mergeListItem)
+    const isDeleted = Boolean((notaAtualizada as NotaRetiradaDetalheItem & { deleted_at?: string | null }).deleted_at)
+    const existsMainList = notas.value.some(nota => nota.id === notaAtualizada.id)
+
+    if (isDeleted) {
+      notas.value = notas.value.filter(nota => nota.id !== notaAtualizada.id)
+    }
+    else {
+      notas.value = existsMainList
+        ? notas.value.map(mergeListItem)
+        : [notaAtualizada, ...notas.value]
+    }
+
     lixeira.value = lixeira.value.map(mergeListItem)
 
     const retiradaItem = toDetalheNota(notaAtualizada)
@@ -404,6 +416,14 @@ export const useNotasStore = defineStore('notas', () => {
     return offlineNota
   }
 
+  const shouldQueueCreateAfterError = (error: unknown) => {
+    if (!import.meta.client) return false
+    if (!getOnlineStatus()) return true
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) return true
+
+    return getApiErrorStatus(error) === null && isNetworkFetchError(error)
+  }
+
   const createNota = async (payload: NotaRetiradaDraft) => {
     creatingNota.value = true
     clearError()
@@ -417,13 +437,7 @@ export const useNotasStore = defineStore('notas', () => {
 
       const data = await getApiFetch()<{
         success: boolean
-        nota: {
-          id: string
-          nome_cliente: string
-          numero_nota: string
-          serie_nota: string
-          status_retirada: NotaRetiradaStatus
-        }
+        nota: NotaRetiradaDetalheItem
       }>('/api/notas/create', {
         method: 'POST',
         body: payload,
@@ -431,22 +445,18 @@ export const useNotasStore = defineStore('notas', () => {
 
       await fetchNotas()
       if (data?.nota?.id) {
-        const createdLocalNota = createOfflineNota({
-          ...payload,
-          status_retirada: data.nota.status_retirada,
-          serie_nota: data.nota.serie_nota,
-          numero_nota: data.nota.numero_nota,
-        }, data.nota.id)
-
-        await replaceNotaInCaches(toDetalheNota({
-          ...createdLocalNota,
-          id: data.nota.id,
-          nome_cliente: data.nota.nome_cliente || createdLocalNota.nome_cliente,
-        }))
+        await replaceNotaInCaches(toDetalheNota(data.nota))
       }
       return data
     }
     catch (error) {
+      if (!shouldQueueCreateAfterError(error)) {
+        const msg = getApiErrorMessage(error, 'Falha ao salvar nota.')
+        errorMessage.value = msg
+        showError(msg)
+        return { success: false, nota: null }
+      }
+
       const offlineNota = await queueCreateNota(payload)
       clearError()
       showSuccess('Nota salva offline. Ela sera sincronizada quando a internet voltar.')

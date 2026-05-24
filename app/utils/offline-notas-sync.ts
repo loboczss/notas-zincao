@@ -391,6 +391,7 @@ const toListItem = (nota: OfflineNotaSyncData | NotaRetiradaDetalheItem): NotaRe
   nome_cliente: nota.nome_cliente,
   numero_nota: nota.numero_nota,
   serie_nota: nota.serie_nota,
+  chave_nfe: nota.chave_nfe,
   data_compra: nota.data_compra,
   data_retirada: nota.data_retirada,
   valor_total: nota.valor_total,
