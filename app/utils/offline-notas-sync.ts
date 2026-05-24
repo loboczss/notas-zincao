@@ -532,26 +532,28 @@ const matchesLocalNotaFilters = (
   return searchable.includes(search)
 }
 
+const notaSortKey = (nota: NotaRetiradaDetalheItem) => {
+  return String(nota.criado_em || nota.data_compra || '')
+}
+
+const sortNotasByCriadoEmDesc = (notas: NotaRetiradaDetalheItem[]) => {
+  return notas.sort((a, b) => {
+    const keyA = notaSortKey(a)
+    const keyB = notaSortKey(b)
+    if (keyA === keyB) return String(b.id).localeCompare(String(a.id))
+    return keyA < keyB ? 1 : -1
+  })
+}
+
 export const queryOfflineNotasLocal = async (
   filters: OfflineNotasLocalQuery = {},
 ): Promise<OfflineNotasLocalQueryResult> => {
   const requestedPage = Math.max(1, filters.page || 1)
   const requestedPageSize = Math.max(1, filters.page_size || 20)
   const start = (requestedPage - 1) * requestedPageSize
-  const end = start + requestedPageSize
-  const items: NotaRetiradaListItem[] = []
   const meta = await getOfflineNotasSyncMeta()
-  const hasFilters = Boolean(
-    normalizeSearchText(filters.search)
-    || (filters.status && filters.status !== 'todos')
-    || String(filters.data_inicio || '').trim()
-    || String(filters.data_fim || '').trim(),
-  )
-  const canUseMetaTotal = !hasFilters && Boolean(meta?.lastCompletedAt)
-  let total = canUseMetaTotal
-    ? (filters.includeDeleted ? (meta?.activeNotes || 0) + (meta?.deletedNotes || 0) : meta?.activeNotes || 0)
-    : 0
-  let matched = 0
+  const matched: NotaRetiradaDetalheItem[] = []
+  const seenIds = new Set<string>()
   let scanned = 0
 
   await scanOfflineCacheByPrefix<NotaRetiradaDetalheItem>(
@@ -561,22 +563,18 @@ export const queryOfflineNotasLocal = async (
       const detail = entry.value
       if (!detail || !matchesLocalNotaFilters(detail, filters, filters.includeDeleted)) return
 
-      if (canUseMetaTotal) {
-        if (matched >= start && items.length < requestedPageSize) {
-          items.push(toListItem(detail))
-        }
-        matched += 1
-        return items.length >= requestedPageSize ? false : undefined
-      }
-
-      if (total >= start && total < end) {
-        items.push(toListItem(detail))
-      }
-      total += 1
+      const id = String(detail.id)
+      if (seenIds.has(id)) return
+      seenIds.add(id)
+      matched.push(detail)
     },
   )
 
+  sortNotasByCriadoEmDesc(matched)
+
+  const total = matched.length
   const totalPages = Math.max(1, Math.ceil(total / requestedPageSize))
+  const items = matched.slice(start, start + requestedPageSize).map(toListItem)
 
   return {
     notas: items,
