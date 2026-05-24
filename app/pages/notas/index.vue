@@ -25,6 +25,8 @@ const { success: showSuccess, error: showError } = useToast()
 const apiFetch = getApiFetch()
 const supabaseClient = useSupabaseClient()
 
+notasStore.clearList()
+
 const searchTerm = ref('')
 const statusFilter = ref<'todos' | NotaRetiradaStatus>('todos')
 const dataInicio = ref('')

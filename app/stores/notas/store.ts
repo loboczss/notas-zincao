@@ -834,6 +834,13 @@ export const useNotasStore = defineStore('notas', () => {
     }
   }
 
+  const clearList = () => {
+    notas.value = []
+    page.value = 1
+    totalNotas.value = 0
+    totalPaginas.value = 1
+  }
+
   const reset = () => {
     notas.value = []
     notasRetirada.value = []
@@ -934,6 +941,7 @@ export const useNotasStore = defineStore('notas', () => {
     registrarRetirada,
     atualizarStatusNota,
     deleteNota,
+    clearList,
     reset,
   }
 })
