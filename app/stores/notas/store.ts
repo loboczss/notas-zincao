@@ -273,6 +273,11 @@ export const useNotasStore = defineStore('notas', () => {
   }
 
   const fetchNotas = async (filters: NotasListFilters = {}, options: FetchNotasOptions = {}) => {
+    if (!options.append) {
+      notas.value = []
+      totalNotas.value = 0
+      totalPaginas.value = 1
+    }
     loadingNotas.value = true
     clearError()
 
@@ -829,6 +834,26 @@ export const useNotasStore = defineStore('notas', () => {
     }
   }
 
+  const reset = () => {
+    notas.value = []
+    notasRetirada.value = []
+    notaDetalheAtual.value = null
+    lixeira.value = []
+    historicoAtual.value = []
+    loadingNotas.value = false
+    loadingRetirada.value = false
+    loadingLixeira.value = false
+    loadingHistorico.value = false
+    extractingNota.value = false
+    creatingNota.value = false
+    savingRetirada.value = false
+    page.value = 1
+    pageSize.value = 20
+    totalNotas.value = 0
+    totalPaginas.value = 1
+    errorMessage.value = ''
+  }
+
   const deleteNota = async (notaId: string) => {
     clearError()
     const id = String(notaId || '').trim()
@@ -909,5 +934,6 @@ export const useNotasStore = defineStore('notas', () => {
     registrarRetirada,
     atualizarStatusNota,
     deleteNota,
+    reset,
   }
 })

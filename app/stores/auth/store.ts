@@ -11,6 +11,11 @@ import {
   getCachedAuthProfile,
   getCachedAuthSession,
 } from '../../utils/auth-session-cache'
+import { clearUserScopedOfflineData } from '../../utils/offline-db'
+import { useNotasStore } from '../notas/store'
+import { useEstoqueStore } from '../estoque/store'
+import { useCrmStore } from '../crm/store'
+import { useAdminUsersStore } from '../admin/users/store'
 import type { SignInPayload, SignUpPayload } from '../../../shared/types/Auth'
 import type { UserProfile } from '../../../shared/types/Profile'
 import type { Database } from '../../types/database.types'
@@ -166,6 +171,13 @@ export const useAuthStore = defineStore('auth', () => {
     return true
   }
 
+  const resetUserScopedStores = () => {
+    useNotasStore().reset()
+    useEstoqueStore().reset()
+    useCrmStore().reset()
+    useAdminUsersStore().reset()
+  }
+
   const signOut = async () => {
     try {
       await supabase.auth.signOut()
@@ -174,6 +186,15 @@ export const useAuthStore = defineStore('auth', () => {
       clearCachedAuthState()
       session.value = null
       profile.value = null
+      resetUserScopedStores()
+      if (import.meta.client) {
+        try {
+          await clearUserScopedOfflineData()
+        }
+        catch (error) {
+          console.warn('[auth] failed to clear offline data on signOut', error)
+        }
+      }
     }
   }
 

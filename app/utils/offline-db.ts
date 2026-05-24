@@ -276,6 +276,58 @@ export const getOfflineCache = async <T>(key: string) => {
   return entry?.value ?? null
 }
 
+export const deleteOfflineCache = async (key: string) => {
+  if (!isOfflineStorageAvailable()) return
+  await runStore<undefined>(CACHE_STORE, 'readwrite', store => store.delete(key))
+}
+
+export const deleteOfflineCachesByPrefix = async (prefix: string) => {
+  if (!isOfflineStorageAvailable()) return 0
+
+  const db = await openDb()
+
+  return await new Promise<number>((resolve, reject) => {
+    const transaction = db.transaction(CACHE_STORE, 'readwrite')
+    const store = transaction.objectStore(CACHE_STORE)
+    const range = IDBKeyRange.bound(prefix, `${prefix}￿`)
+    const request = store.openCursor(range)
+    let removed = 0
+
+    request.onsuccess = () => {
+      const cursor = request.result
+      if (!cursor) return
+      cursor.delete()
+      removed += 1
+      cursor.continue()
+    }
+
+    transaction.oncomplete = () => resolve(removed)
+    transaction.onerror = () => reject(transaction.error)
+    transaction.onabort = () => reject(transaction.error)
+    request.onerror = () => reject(request.error)
+  })
+}
+
+const clearObjectStore = async (storeName: string) => {
+  if (!isOfflineStorageAvailable()) return
+  await runStore<undefined>(storeName, 'readwrite', store => store.clear())
+}
+
+const USER_SCOPED_CACHE_PREFIXES = ['notas:', 'estoque:']
+
+export const clearUserScopedOfflineData = async () => {
+  if (!isOfflineStorageAvailable()) return
+
+  for (const prefix of USER_SCOPED_CACHE_PREFIXES) {
+    await deleteOfflineCachesByPrefix(prefix)
+  }
+
+  await clearObjectStore(QUEUE_STORE)
+  await clearObjectStore(ID_MAPPING_STORE)
+
+  notifyOfflineQueueChanged()
+}
+
 export const scanOfflineCacheByPrefix = async <T>(
   prefix: string,
   visitor: (entry: OfflineCacheEntry<T>, index: number) => false | void,

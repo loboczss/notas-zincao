@@ -342,6 +342,20 @@ export const useEstoqueStore = defineStore('estoque', () => {
     return createProduto(payload)
   }
 
+  const reset = () => {
+    produtos.value = []
+    produtoAtual.value = null
+    page.value = 1
+    pageSize.value = 30
+    totalItens.value = 0
+    totalPaginas.value = 1
+    quantidadeTotalEstoque.value = 0
+    loadingProdutos.value = false
+    loadingProduto.value = false
+    savingProduto.value = false
+    errorMessage.value = ''
+  }
+
   return {
     produtos,
     produtoAtual,
@@ -364,5 +378,6 @@ export const useEstoqueStore = defineStore('estoque', () => {
     createProduto,
     updateProduto,
     saveProduto,
+    reset,
   }
 })

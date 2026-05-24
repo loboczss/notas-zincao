@@ -77,6 +77,13 @@ export const useCrmStore = defineStore('crm', () => {
     }
   }
 
+  const reset = () => {
+    contatos.value = []
+    loadingContatos.value = false
+    savingContato.value = false
+    errorMessage.value = ''
+  }
+
   return {
     contatos,
     loadingContatos,
@@ -86,5 +93,6 @@ export const useCrmStore = defineStore('crm', () => {
     clearContatos,
     fetchContatos,
     upsertContato,
+    reset,
   }
 })

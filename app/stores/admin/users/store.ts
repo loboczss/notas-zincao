@@ -266,6 +266,20 @@ export const useAdminUsersStore = defineStore('admin-users', () => {
     }
   }
 
+  const reset = () => {
+    usuarios.value = []
+    loadingUsuarios.value = false
+    savingUsuario.value = false
+    errorMessage.value = ''
+    successMessage.value = ''
+    page.value = 1
+    pageSize.value = 20
+    totalItems.value = 0
+    totalPages.value = 1
+    sortBy.value = 'membro_desde'
+    sortDir.value = 'desc'
+  }
+
   return {
     usuarios,
     loadingUsuarios,
@@ -288,5 +302,6 @@ export const useAdminUsersStore = defineStore('admin-users', () => {
     inviteUser,
     deleteUser,
     resetUserPassword,
+    reset,
   }
 })
