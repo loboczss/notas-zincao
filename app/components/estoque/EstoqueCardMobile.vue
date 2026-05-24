@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Pencil, Boxes } from 'lucide-vue-next'
+import { Pencil } from 'lucide-vue-next'
 import type { EstoqueProduto } from '../../../shared/types/Estoque'
 
 const props = withDefaults(defineProps<{
@@ -20,47 +20,61 @@ const quantidadeFormatada = computed(() => {
     maximumFractionDigits: 3,
   }).format(Number(props.produto.quantidade_estoque || 0))
 })
+
+const precoFormatado = computed(() => {
+  const value = Number(String(props.produto.valor_preco_varejo || '').replace(',', '.'))
+  if (!Number.isFinite(value) || value <= 0) return null
+
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(value)
+})
 </script>
 
 <template>
-  <article class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-    <div class="flex items-start justify-between gap-3">
-      <div>
-        <p class="text-xs font-medium text-slate-500 dark:text-slate-400">
-          Produto #{{ props.produto.id_produto }}
-        </p>
-        <h3 class="mt-1 text-base font-bold tracking-tight text-slate-900 dark:text-slate-100">
-          {{ props.produto.descricao }}
-        </h3>
+  <article class="rounded-lg border border-slate-200 bg-white px-3 py-2.5 dark:border-slate-800 dark:bg-slate-900">
+    <div class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+      <div class="min-w-0">
+        <div class="flex min-w-0 items-center gap-2">
+          <span class="shrink-0 rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+            #{{ props.produto.id_produto }}
+          </span>
+          <h3 class="truncate text-sm font-bold text-slate-950 dark:text-slate-100">
+            {{ props.produto.descricao }}
+          </h3>
+        </div>
+
+        <div class="mt-1 flex min-w-0 items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+          <span class="truncate">{{ props.produto.tipo_produto || 'Sem tipo' }}</span>
+          <span class="text-slate-300 dark:text-slate-700">/</span>
+          <span class="shrink-0">{{ props.produto.embalagem_saida || '-' }}</span>
+          <template v-if="precoFormatado">
+            <span class="text-slate-300 dark:text-slate-700">/</span>
+            <span class="shrink-0">{{ precoFormatado }}</span>
+          </template>
+        </div>
       </div>
+
+      <div class="flex shrink-0 items-center gap-2">
+        <div class="w-16 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-right dark:border-slate-800 dark:bg-slate-950">
+          <p class="text-[9px] font-semibold uppercase leading-none text-slate-400">Qtd</p>
+          <p class="mt-0.5 text-sm font-black tabular-nums text-slate-950 dark:text-white">
+            {{ quantidadeFormatada }}
+          </p>
+        </div>
 
         <button
           v-if="props.canEdit"
           type="button"
-          class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+          class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-brand-600 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-brand-300"
+          title="Editar produto"
+          aria-label="Editar produto"
           @click="emit('edit', props.produto.id_produto)"
         >
           <Pencil class="h-4 w-4" />
-          Editar
         </button>
+      </div>
     </div>
-
-    <dl class="mt-4 grid grid-cols-2 gap-3 text-sm">
-      <div>
-        <dt class="text-slate-500 dark:text-slate-400">Tipo</dt>
-        <dd class="font-medium text-slate-800 dark:text-slate-200">{{ props.produto.tipo_produto || '-' }}</dd>
-      </div>
-      <div>
-        <dt class="text-slate-500 dark:text-slate-400">Embalagem</dt>
-        <dd class="font-medium text-slate-800 dark:text-slate-200">{{ props.produto.embalagem_saida }}</dd>
-      </div>
-      <div class="col-span-2 rounded-xl border border-slate-100 bg-slate-50 p-3 dark:border-slate-800/60 dark:bg-slate-800/40">
-        <dt class="inline-flex items-center gap-2 text-slate-500 dark:text-slate-400">
-          <Boxes class="h-4 w-4" />
-          Quantidade em estoque
-        </dt>
-        <dd class="mt-1 text-lg font-black tracking-tight text-slate-900 dark:text-slate-100">{{ quantidadeFormatada }}</dd>
-      </div>
-    </dl>
   </article>
 </template>
