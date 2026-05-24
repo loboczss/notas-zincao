@@ -176,6 +176,7 @@ export const useNotasStore = defineStore('notas', () => {
   const errorMessage = ref('')
   const page = ref(1)
   const pageSize = ref(20)
+  let activeFetchId = 0
   const totalNotas = ref(0)
   const totalPaginas = ref(1)
 
@@ -293,6 +294,9 @@ export const useNotasStore = defineStore('notas', () => {
   }
 
   const fetchNotas = async (filters: NotasListFilters = {}, options: FetchNotasOptions = {}) => {
+    const fetchId = ++activeFetchId
+    const isLatest = () => fetchId === activeFetchId
+
     if (!options.append) {
       notas.value = []
       totalNotas.value = 0
@@ -322,6 +326,8 @@ export const useNotasStore = defineStore('notas', () => {
         },
       })
 
+      if (!isLatest()) return notas.value
+
       const rawNotas = data.notas || []
 
       notas.value = options.append
@@ -338,6 +344,8 @@ export const useNotasStore = defineStore('notas', () => {
       return notas.value
     }
     catch (error) {
+      if (!isLatest()) return notas.value
+
       const localQuery = await queryOfflineNotasLocal({
         search: filters.search,
         status: filters.status,
@@ -346,6 +354,8 @@ export const useNotasStore = defineStore('notas', () => {
         page: filters.page || page.value,
         page_size: filters.page_size || pageSize.value,
       })
+
+      if (!isLatest()) return notas.value
 
       if (localQuery.hasSyncedCache) {
         notas.value = options.append
@@ -371,6 +381,9 @@ export const useNotasStore = defineStore('notas', () => {
         const cachedNotas = await Promise.all(
           (cached.notas || []).map(nota => prepareNotaForOfflineCache(nota)),
         )
+
+        if (!isLatest()) return notas.value
+
         const filtered = filterLocalNotas(cachedNotas, filters)
         const localPage = paginateLocalNotas(
           filtered,
@@ -393,7 +406,9 @@ export const useNotasStore = defineStore('notas', () => {
       return []
     }
     finally {
-      loadingNotas.value = false
+      if (fetchId === activeFetchId) {
+        loadingNotas.value = false
+      }
     }
   }
 
@@ -469,7 +484,6 @@ export const useNotasStore = defineStore('notas', () => {
         body: payload,
       })
 
-      await fetchNotas()
       if (data?.nota?.id) {
         await replaceNotaInCaches(toDetalheNota(data.nota))
       }
