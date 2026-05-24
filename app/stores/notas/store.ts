@@ -210,6 +210,26 @@ export const useNotasStore = defineStore('notas', () => {
     return detalhe
   }
 
+  const hydrateAndPersistNotasInBackground = (snapshot: NotaRetiradaListItem[]) => {
+    void (async () => {
+      try {
+        const hydrated = await Promise.all(snapshot.map(prepareNotaForOfflineCache))
+        const byId = new Map(hydrated.map(item => [String(item.id), item]))
+
+        notas.value = notas.value.map((nota) => {
+          const replacement = byId.get(String(nota.id))
+          return replacement || nota
+        })
+
+        await persistNotasCache()
+        await Promise.all(hydrated.map(persistNotaDetailCache))
+      }
+      catch (error) {
+        console.warn('[notas] background hydration failed', error)
+      }
+    })()
+  }
+
   const findNotaLocal = (notaId: string) => {
     const id = String(notaId)
     return notas.value.find(nota => nota.id === id)
@@ -302,18 +322,19 @@ export const useNotasStore = defineStore('notas', () => {
         },
       })
 
-      const incomingNotas = await Promise.all(
-        (data.notas || []).map(nota => prepareNotaForOfflineCache(nota)),
-      )
+      const rawNotas = data.notas || []
+
       notas.value = options.append
-        ? mergeNotas(notas.value, incomingNotas)
-        : incomingNotas
+        ? mergeNotas(notas.value, rawNotas)
+        : rawNotas
       page.value = data.pagination?.page || 1
       pageSize.value = data.pagination?.page_size || (filters.page_size || pageSize.value)
       totalNotas.value = data.pagination?.total || notas.value.length
       totalPaginas.value = data.pagination?.total_pages || 1
-      await persistNotasCache()
-      await Promise.all(notas.value.map(persistNotaDetailCache))
+
+      const snapshotForCache = notas.value.slice()
+      hydrateAndPersistNotasInBackground(snapshotForCache)
+
       return notas.value
     }
     catch (error) {

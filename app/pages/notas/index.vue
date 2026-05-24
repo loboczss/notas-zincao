@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { AlertTriangle, Pencil, Save, Trash2, XCircle } from 'lucide-vue-next'
 import type { NotaAdminEditRequest, NotaRetiradaStatus } from '../../../shared/types/NotasRetirada'
 import AppPageShell from '../../components/layout/AppPageShell.vue'
@@ -286,6 +286,45 @@ const aplicarFiltros = async () => {
   paginaAtual.value = 1
   await carregarNotas()
 }
+
+const SEARCH_MIN_CHARS = 3
+const SEARCH_DEBOUNCE_MS = 300
+let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null
+let lastDispatchedSearch = ''
+
+const dispatchSearch = () => {
+  if (searchDebounceTimer) {
+    clearTimeout(searchDebounceTimer)
+    searchDebounceTimer = null
+  }
+  if (searchTerm.value === lastDispatchedSearch) return
+  lastDispatchedSearch = searchTerm.value
+  aplicarFiltros()
+}
+
+watch(searchTerm, (value) => {
+  const trimmed = value.trim()
+
+  if (searchDebounceTimer) {
+    clearTimeout(searchDebounceTimer)
+    searchDebounceTimer = null
+  }
+
+  if (trimmed.length === 0) {
+    if (lastDispatchedSearch === '') return
+    lastDispatchedSearch = ''
+    aplicarFiltros()
+    return
+  }
+
+  if (trimmed.length < SEARCH_MIN_CHARS) return
+
+  searchDebounceTimer = setTimeout(dispatchSearch, SEARCH_DEBOUNCE_MS)
+})
+
+onUnmounted(() => {
+  if (searchDebounceTimer) clearTimeout(searchDebounceTimer)
+})
 
 const irPaginaAnterior = async () => {
   if (paginaAtual.value <= 1 || notasStore.loadingNotas) return
