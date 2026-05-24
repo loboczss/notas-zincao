@@ -11,6 +11,7 @@ import type {
 } from '../../shared/types/OfflineNotasSync'
 import { getApiFetch } from './api-fetch'
 import {
+  deleteOfflineCache,
   getOfflineCache,
   getOfflineQueue,
   getOnlineStatus,
@@ -46,6 +47,7 @@ export type OfflineNotasSyncAssetCache = {
 export type OfflineNotasSyncMeta = {
   lastStartedAt: string | null
   lastCompletedAt: string | null
+  lastFullSyncAt: string | null
   permissions: OfflineNotasSyncPermissions | null
   includeDeleted: boolean
   totalCloudNotes: number
@@ -58,6 +60,8 @@ export type OfflineNotasSyncMeta = {
   uploadedQueueItems: number
   failedQueueItems: number
   pendingQueueItems: number
+  prunedNotes: number
+  prunedAssets: number
 }
 
 export type OfflineNotasSyncSummary = OfflineNotasSyncMeta & {
@@ -102,9 +106,13 @@ export type OfflineNotasSyncProgressEvent =
       summary: OfflineNotasSyncSummary
     }
 
+export type SyncOfflineNotasMode = 'full' | 'delta'
+
 export type SyncOfflineNotasCompletoOptions = {
   pageSize?: number
   includeDeleted?: boolean
+  mode?: SyncOfflineNotasMode
+  since?: string | null
   onProgress?: (event: OfflineNotasSyncProgressEvent) => void
 }
 
@@ -124,6 +132,7 @@ const NOTAS_RETIRADA_STORAGE_BUCKET = 'notas-retirada'
 const emptyMeta = (): OfflineNotasSyncMeta => ({
   lastStartedAt: null,
   lastCompletedAt: null,
+  lastFullSyncAt: null,
   permissions: null,
   includeDeleted: true,
   totalCloudNotes: 0,
@@ -136,6 +145,8 @@ const emptyMeta = (): OfflineNotasSyncMeta => ({
   uploadedQueueItems: 0,
   failedQueueItems: 0,
   pendingQueueItems: 0,
+  prunedNotes: 0,
+  prunedAssets: 0,
 })
 
 const cloneJson = <T>(value: T): T => {
@@ -578,14 +589,67 @@ export const queryOfflineNotasLocal = async (
   }
 }
 
-const fetchNotasSyncPage = async (page: number, pageSize: number, includeDeleted: boolean) => {
+const fetchNotasSyncPage = async (
+  page: number,
+  pageSize: number,
+  includeDeleted: boolean,
+  since?: string | null,
+) => {
+  const query: Record<string, string | number> = {
+    page,
+    page_size: pageSize,
+    include_deleted: includeDeleted ? 'true' : 'false',
+  }
+  if (since) {
+    query.since = since
+  }
   return await getApiFetch()<OfflineNotasSyncResponse>('/api/sync/notas', {
-    query: {
-      page,
-      page_size: pageSize,
-      include_deleted: includeDeleted ? 'true' : 'false',
-    },
+    query,
   })
+}
+
+const pruneStaleNotaCaches = async (
+  preservedIds: Set<string>,
+  preservedAssetKeys: Set<string>,
+) => {
+  const staleDetailKeys: string[] = []
+  const staleHistoricoKeys: string[] = []
+  const staleAssetKeys: string[] = []
+
+  await scanOfflineCacheByPrefix(NOTAS_DETAIL_CACHE_PREFIX, (entry) => {
+    const id = entry.key.slice(NOTAS_DETAIL_CACHE_PREFIX.length)
+    if (!preservedIds.has(id)) staleDetailKeys.push(entry.key)
+  })
+
+  await scanOfflineCacheByPrefix(NOTAS_HISTORICO_CACHE_PREFIX, (entry) => {
+    const id = entry.key.slice(NOTAS_HISTORICO_CACHE_PREFIX.length)
+    if (!preservedIds.has(id)) staleHistoricoKeys.push(entry.key)
+  })
+
+  await scanOfflineCacheByPrefix(OFFLINE_NOTAS_SYNC_ASSET_PREFIX, (entry) => {
+    if (!preservedAssetKeys.has(entry.key)) staleAssetKeys.push(entry.key)
+  })
+
+  await Promise.all([
+    ...staleDetailKeys.map(deleteOfflineCache),
+    ...staleHistoricoKeys.map(deleteOfflineCache),
+    ...staleAssetKeys.map(deleteOfflineCache),
+  ])
+
+  return {
+    prunedNotes: staleDetailKeys.length,
+    prunedAssets: staleAssetKeys.length,
+  }
+}
+
+const collectOfflineQueueProtectedIds = async () => {
+  const queue = await getOfflineQueue('notas')
+  const ids = new Set<string>()
+  for (const entry of queue) {
+    if (entry.entityId) ids.add(entry.entityId)
+    if (entry.clientId) ids.add(entry.clientId)
+  }
+  return ids
 }
 
 export const getOfflineNotasSyncMeta = async () => {
@@ -631,10 +695,17 @@ export const syncOfflineNotasCompleto = async (
   const startedAt = new Date().toISOString()
   const pageSize = options.pageSize || DEFAULT_PAGE_SIZE
   const includeDeleted = options.includeDeleted ?? true
+  const mode: SyncOfflineNotasMode = options.mode || 'full'
+  const since = mode === 'delta' ? (options.since ?? null) : null
+
+  const previousMeta = await getOfflineNotasSyncMeta()
   const meta = {
     ...emptyMeta(),
+    ...(previousMeta || {}),
     lastStartedAt: startedAt,
     includeDeleted,
+    prunedNotes: 0,
+    prunedAssets: 0,
   }
 
   let uploadedQueueItems = 0
@@ -650,6 +721,8 @@ export const syncOfflineNotasCompleto = async (
 
   const activePreview: NotaRetiradaDetalheItem[] = []
   const deletedPreview: NotaRetiradaDetalheItem[] = []
+  const seenNoteIds = new Set<string>()
+  const seenAssetKeys = new Set<string>()
   let page = 1
   let hasMore = true
   let totalCloudNotes = 0
@@ -663,7 +736,7 @@ export const syncOfflineNotasCompleto = async (
   let failedAssets = 0
 
   while (hasMore) {
-    const response = await fetchNotasSyncPage(page, pageSize, includeDeleted)
+    const response = await fetchNotasSyncPage(page, pageSize, includeDeleted, since)
     permissions = response.permissions
     totalCloudNotes = response.pagination.total
     discoveredAssets += response.progress.download.returned_assets
@@ -683,6 +756,7 @@ export const syncOfflineNotasCompleto = async (
 
     for (const item of response.notas) {
       const data = cloneJson(item.data)
+      seenNoteIds.add(String(item.id))
       options.onProgress?.({
         stage: 'note',
         note: item,
@@ -692,6 +766,7 @@ export const syncOfflineNotasCompleto = async (
       })
 
       for (const asset of item.assets) {
+        seenAssetKeys.add(assetCacheKey(asset))
         try {
           const assetResult = await resolveAssetDataUrl(asset)
           if (assetResult.dataUrl) {
@@ -759,41 +834,85 @@ export const syncOfflineNotasCompleto = async (
     }
 
     await setOfflineCaches<unknown>(pageCacheEntries)
-    await persistNotasCollectionsPreview(activePreview, deletedPreview, {
-      activeNotes: activeNotesCount,
-      deletedNotes: deletedNotesCount,
-    })
+    if (mode === 'full') {
+      await persistNotasCollectionsPreview(activePreview, deletedPreview, {
+        activeNotes: activeNotesCount,
+        deletedNotes: deletedNotesCount,
+      })
+    }
     await yieldToBrowser()
 
     hasMore = response.pagination.has_more
     page = response.pagination.next_page || page + 1
   }
 
-  await persistNotasCollectionsPreview(activePreview, deletedPreview, {
-    activeNotes: activeNotesCount,
-    deletedNotes: deletedNotesCount,
-  })
+  let prunedNotes = 0
+  let prunedAssets = 0
+
+  if (mode === 'full') {
+    await persistNotasCollectionsPreview(activePreview, deletedPreview, {
+      activeNotes: activeNotesCount,
+      deletedNotes: deletedNotesCount,
+    })
+
+    const protectedIds = await collectOfflineQueueProtectedIds()
+    const preservedIds = new Set<string>([...seenNoteIds, ...protectedIds])
+    const pruneResult = await pruneStaleNotaCaches(preservedIds, seenAssetKeys)
+    prunedNotes = pruneResult.prunedNotes
+    prunedAssets = pruneResult.prunedAssets
+  }
 
   const completedAt = new Date().toISOString()
-  const summary: OfflineNotasSyncSummary = {
+  const baseSummary: OfflineNotasSyncSummary = {
     ...meta,
     completed: true,
     lastCompletedAt: completedAt,
-    permissions,
-    totalCloudNotes,
+    lastFullSyncAt: mode === 'full' ? completedAt : (meta.lastFullSyncAt || null),
+    permissions: permissions || meta.permissions,
     downloadedNotes: processedNotes,
-    activeNotes: activeNotesCount,
-    deletedNotes: deletedNotesCount,
     downloadedAssets,
     cachedAssets,
     failedAssets,
     uploadedQueueItems,
     failedQueueItems,
     pendingQueueItems,
+    prunedNotes,
+    prunedAssets,
+    totalCloudNotes: mode === 'full' ? totalCloudNotes : (meta.totalCloudNotes || totalCloudNotes),
+    activeNotes: mode === 'full' ? activeNotesCount : meta.activeNotes,
+    deletedNotes: mode === 'full' ? deletedNotesCount : meta.deletedNotes,
   }
+
+  const summary = mode === 'full'
+    ? baseSummary
+    : await reconcileDeltaMetaCounts(baseSummary)
 
   await setOfflineCache(OFFLINE_NOTAS_SYNC_META_KEY, summary)
   options.onProgress?.({ stage: 'done', summary })
 
   return summary
+}
+
+const reconcileDeltaMetaCounts = async (
+  summary: OfflineNotasSyncSummary,
+): Promise<OfflineNotasSyncSummary> => {
+  let active = 0
+  let deleted = 0
+
+  await scanOfflineCacheByPrefix<NotaRetiradaDetalheItem>(
+    NOTAS_DETAIL_CACHE_PREFIX,
+    (entry) => {
+      const detail = entry.value as (NotaRetiradaDetalheItem & { deleted_at?: string | null }) | undefined
+      if (!detail) return
+      if (detail.deleted_at) deleted += 1
+      else active += 1
+    },
+  )
+
+  return {
+    ...summary,
+    activeNotes: active,
+    deletedNotes: deleted,
+    totalCloudNotes: active + deleted,
+  }
 }

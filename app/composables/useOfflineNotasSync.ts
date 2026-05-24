@@ -69,7 +69,8 @@ const download = ref({
 const notes = ref<OfflineNotaSyncNoteProgress[]>([])
 const lastAutoAttemptAt = ref(0)
 
-const AUTO_SYNC_COOLDOWN_MS = 5 * 60 * 1000
+const AUTO_SYNC_COOLDOWN_MS = 2 * 60 * 1000
+const FULL_SYNC_MAX_AGE_MS = 6 * 60 * 60 * 1000
 
 const resetRunState = () => {
   phase.value = 'idle'
@@ -228,10 +229,11 @@ const refreshLocalSnapshot = async () => {
 
 type SyncAllNotasOptions = {
   automatic?: boolean
+  mode?: 'full' | 'delta'
+  since?: string | null
 }
 
-const syncAllNotas = async (_options: SyncAllNotasOptions = {}) => {
-  void _options
+const syncAllNotas = async (options: SyncAllNotasOptions = {}) => {
   if (running.value) return summary.value
 
   resetRunState()
@@ -239,9 +241,13 @@ const syncAllNotas = async (_options: SyncAllNotasOptions = {}) => {
   phase.value = 'uploading'
   startedAt.value = new Date().toISOString()
 
+  const mode = options.mode || 'full'
+
   try {
     const result = await syncOfflineNotasCompleto({
       includeDeleted: true,
+      mode,
+      since: options.since ?? null,
       onProgress: applyProgress,
     })
     summary.value = result
@@ -253,7 +259,9 @@ const syncAllNotas = async (_options: SyncAllNotasOptions = {}) => {
   catch (error) {
     phase.value = 'error'
     errorMessage.value = getApiErrorMessage(error, 'Falha ao sincronizar notas.')
-    useToast().error(errorMessage.value)
+    if (!options.automatic) {
+      useToast().error(errorMessage.value)
+    }
     throw error
   }
   finally {
@@ -261,21 +269,31 @@ const syncAllNotas = async (_options: SyncAllNotasOptions = {}) => {
   }
 }
 
-const autoSyncIfNeeded = async (options: { force?: boolean } = {}) => {
+const isFullSyncDue = (meta: OfflineNotasSyncMeta | null | undefined) => {
+  if (!meta?.lastFullSyncAt) return true
+  const last = Date.parse(meta.lastFullSyncAt)
+  if (!Number.isFinite(last)) return true
+  return Date.now() - last >= FULL_SYNC_MAX_AGE_MS
+}
+
+const autoSyncIfNeeded = async (options: { force?: boolean; mode?: 'full' | 'delta' } = {}) => {
   if (!import.meta.client || running.value || !getOnlineStatus()) return summary.value
 
   await refreshLocalSnapshot()
-  const hasCompletedSync = Boolean(localSnapshot.value.meta?.lastCompletedAt)
   const now = Date.now()
 
-  if (!options.force && hasCompletedSync) return localSnapshot.value.meta
   if (!options.force && now - lastAutoAttemptAt.value < AUTO_SYNC_COOLDOWN_MS) {
     return summary.value || localSnapshot.value.meta
   }
 
+  const meta = localSnapshot.value.meta
+  const fullDue = options.mode === 'full' || isFullSyncDue(meta)
+  const mode: 'full' | 'delta' = options.mode || (fullDue ? 'full' : 'delta')
+  const since = mode === 'delta' ? (meta?.lastCompletedAt || null) : null
+
   lastAutoAttemptAt.value = now
   try {
-    return await syncAllNotas({ automatic: true })
+    return await syncAllNotas({ automatic: true, mode, since })
   }
   catch (error) {
     lastAutoAttemptAt.value = 0
