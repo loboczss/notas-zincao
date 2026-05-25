@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
-import { Lock, Check } from 'lucide-vue-next'
+import { Check, Lock } from 'lucide-vue-next'
 import { useSupabaseClient } from '#imports'
 import { useToast } from '../../composables/useToast'
 import { getApiErrorMessage } from '../../utils/api-errors'
@@ -46,56 +46,51 @@ const salvarSenha = async () => {
 </script>
 
 <template>
-  <div class="grid grid-cols-1 gap-6">
-    <div class="relative overflow-hidden rounded-3xl">
-      <div class="absolute inset-0 rounded-3xl border border-white/20 bg-white/40 backdrop-blur-2xl dark:border-white/5 dark:bg-slate-900/40" />
-      <div class="relative p-6">
-        <div class="mb-6 flex items-center gap-3">
-          <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900">
-            <Lock class="h-4 w-4" />
-          </div>
-          <h2 class="text-lg font-black text-slate-900 dark:text-white">Senha</h2>
-        </div>
-
-        <form class="grid grid-cols-1 gap-4 sm:grid-cols-2" @submit.prevent="salvarSenha">
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-slate-500 dark:text-slate-400">
-              Nova senha
-            </label>
-            <input
-              v-model="senhaForm.nova"
-              type="password"
-              autocomplete="new-password"
-              placeholder="Minimo 6 caracteres"
-              class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 transition-colors placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/40 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder:text-slate-600"
-            />
-          </div>
-
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-slate-500 dark:text-slate-400">
-              Confirmar senha
-            </label>
-            <input
-              v-model="senhaForm.confirmacao"
-              type="password"
-              autocomplete="new-password"
-              placeholder="Repita a nova senha"
-              class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 transition-colors placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/40 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder:text-slate-600"
-            />
-          </div>
-
-          <div class="flex flex-col gap-3 sm:col-span-2">
-            <button
-              type="submit"
-              :disabled="!senhaForm.nova || !senhaForm.confirmacao || senhaStatus === 'loading'"
-              class="inline-flex w-fit items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white transition-all hover:scale-[1.02] active:scale-95 disabled:pointer-events-none disabled:opacity-40 dark:bg-white dark:text-slate-900"
-            >
-              <Check class="h-4 w-4" />
-              {{ senhaStatus === 'loading' ? 'Salvando...' : 'Alterar senha' }}
-            </button>
-          </div>
-        </form>
-      </div>
+  <section class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5">
+    <div class="mb-4 flex items-center gap-2">
+      <Lock class="h-4 w-4 text-slate-500 dark:text-slate-400" />
+      <h2 class="text-sm font-semibold text-slate-950 dark:text-slate-50">
+        Senha
+      </h2>
     </div>
-  </div>
+
+    <form class="grid gap-3 sm:grid-cols-2" @submit.prevent="salvarSenha">
+      <div class="space-y-1.5">
+        <label class="text-xs font-medium text-slate-600 dark:text-slate-300">
+          Nova senha
+        </label>
+        <input
+          v-model="senhaForm.nova"
+          type="password"
+          autocomplete="new-password"
+          placeholder="Minimo 6 caracteres"
+          class="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50 dark:placeholder:text-slate-600"
+        >
+      </div>
+
+      <div class="space-y-1.5">
+        <label class="text-xs font-medium text-slate-600 dark:text-slate-300">
+          Confirmar senha
+        </label>
+        <input
+          v-model="senhaForm.confirmacao"
+          type="password"
+          autocomplete="new-password"
+          placeholder="Repita a nova senha"
+          class="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50 dark:placeholder:text-slate-600"
+        >
+      </div>
+
+      <div class="sm:col-span-2">
+        <button
+          type="submit"
+          :disabled="!senhaForm.nova || !senhaForm.confirmacao || senhaStatus === 'loading'"
+          class="inline-flex h-10 w-full items-center justify-center gap-2 rounded-md bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800 disabled:pointer-events-none disabled:opacity-40 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200 sm:w-auto"
+        >
+          <Check class="h-4 w-4" />
+          {{ senhaStatus === 'loading' ? 'Salvando...' : 'Salvar senha' }}
+        </button>
+      </div>
+    </form>
+  </section>
 </template>

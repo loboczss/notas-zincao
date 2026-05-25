@@ -19,6 +19,7 @@ import { useAdminUsersStore } from '../admin/users/store'
 import type { SignInPayload, SignUpPayload } from '../../../shared/types/Auth'
 import type { UserProfile } from '../../../shared/types/Profile'
 import type { Database } from '../../types/database.types'
+import { AppRoute } from '../../constants/routes'
 import { signInWithEmailAndPassword } from './login'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -227,7 +228,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/confirm`,
+        redirectTo: `${window.location.origin}${AppRoute.redefinirSenha}`,
       })
 
       if (error) {

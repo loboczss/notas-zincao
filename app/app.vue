@@ -9,7 +9,12 @@ import MobileBottomNav from './components/layout/MobileBottomNav.vue'
 import { AppRoute, getPageTitle } from './constants/routes'
 
 const route = useRoute()
-const exibirHeader = computed(() => route.path !== AppRoute.login)
+const authOnlyRoutes = new Set<string>([
+  AppRoute.login,
+  AppRoute.confirm,
+  AppRoute.redefinirSenha,
+])
+const exibirHeader = computed(() => !authOnlyRoutes.has(route.path))
 const pageTitle = computed(() => getPageTitle(route.path))
 const sidebarCollapsed = useState<boolean>('sidebar-collapsed', () => false)
 
