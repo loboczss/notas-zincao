@@ -102,12 +102,12 @@ watch(() => props.successMessage, (value) => {
           <label 
             class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all"
             :class="form.role === 'admin' 
-              ? 'border-brand-500 bg-brand-50/50 dark:bg-brand-950/20 dark:border-brand-500' 
+              ? 'border-rose-500/40 bg-rose-500/10 dark:border-rose-400/45 dark:bg-rose-500/10'
               : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300'"
           >
             <input type="radio" v-model="form.role" value="admin" class="sr-only" />
             <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-              :class="form.role === 'admin' ? 'bg-brand-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'"
+              :class="form.role === 'admin' ? 'bg-rose-500 text-white shadow-sm shadow-rose-500/25' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'"
             >
               <Shield class="w-4 h-4" />
             </div>
@@ -121,12 +121,12 @@ watch(() => props.successMessage, (value) => {
           <label 
             class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all"
             :class="form.role === 'colaborador' 
-              ? 'border-brand-500 bg-brand-50/50 dark:bg-brand-950/20 dark:border-brand-500' 
+              ? 'border-indigo-500/40 bg-indigo-500/10 dark:border-indigo-400/45 dark:bg-indigo-500/10'
               : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300'"
           >
             <input type="radio" v-model="form.role" value="colaborador" class="sr-only" />
             <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-              :class="form.role === 'colaborador' ? 'bg-brand-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'"
+              :class="form.role === 'colaborador' ? 'bg-indigo-500 text-white shadow-sm shadow-indigo-500/25' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'"
             >
               <UserPlus class="w-4 h-4" />
             </div>
@@ -140,12 +140,12 @@ watch(() => props.successMessage, (value) => {
           <label 
             class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all"
             :class="form.role === 'visualizador' 
-              ? 'border-brand-500 bg-brand-50/50 dark:bg-brand-950/20 dark:border-brand-500' 
+              ? 'border-slate-400/60 bg-slate-500/10 dark:border-slate-400/45 dark:bg-slate-500/10'
               : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300'"
           >
             <input type="radio" v-model="form.role" value="visualizador" class="sr-only" />
             <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-              :class="form.role === 'visualizador' ? 'bg-brand-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'"
+              :class="form.role === 'visualizador' ? 'bg-slate-600 text-white shadow-sm shadow-slate-500/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'"
             >
               <X class="w-4 h-4" />
             </div>
@@ -159,12 +159,12 @@ watch(() => props.successMessage, (value) => {
           <label 
             class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all"
             :class="form.role === 'vendedor' 
-              ? 'border-brand-500 bg-brand-50/50 dark:bg-brand-950/20 dark:border-brand-500' 
+              ? 'border-emerald-500/40 bg-emerald-500/10 dark:border-emerald-400/45 dark:bg-emerald-500/10'
               : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300'"
           >
             <input type="radio" v-model="form.role" value="vendedor" class="sr-only" />
             <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-              :class="form.role === 'vendedor' ? 'bg-brand-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'"
+              :class="form.role === 'vendedor' ? 'bg-emerald-500 text-white shadow-sm shadow-emerald-500/25' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'"
             >
               <Tag class="w-4 h-4" />
             </div>

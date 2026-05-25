@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Shield, User, ToggleLeft, ToggleRight } from 'lucide-vue-next'
+import { Eye, Settings, Shield, Tag, User } from 'lucide-vue-next'
 import Card from '../Card.vue'
 import type { AdminUserRecord } from '../../../shared/types/AdminUsers'
 
@@ -19,24 +19,27 @@ const formatDate = (dateString: string) => {
   })
 }
 
-const getRoleBadgeClass = (role: string) => {
-  switch (String(role || '').toLowerCase()) {
+const normalizeRoleValue = (role: string | null | undefined) => String(role || '').trim().toLowerCase()
+
+const getRoleBadgeClass = (role: string | null | undefined) => {
+  switch (normalizeRoleValue(role)) {
     case 'admin':
-      return 'bg-brand-500/10 text-brand-600 dark:text-brand-400 border-brand-500/20'
+      return 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/25 shadow-sm shadow-rose-500/10'
     case 'colaborador':
+      return 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/25 shadow-sm shadow-indigo-500/10'
     case 'operador':
-      return 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20'
+      return 'bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border-cyan-500/25 shadow-sm shadow-cyan-500/10'
     case 'visualizador':
-      return 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20'
+      return 'bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/25'
     case 'vendedor':
-      return 'bg-brand-500/10 text-brand-600 dark:text-brand-400 border-brand-500/20 shadow-sm'
+      return 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/25 shadow-sm shadow-emerald-500/10'
     default:
       return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
   }
 }
 
 const getRoleLabel = (role: string) => {
-  switch (String(role || '').toLowerCase()) {
+  switch (normalizeRoleValue(role)) {
     case 'admin': return 'Admin'
     case 'colaborador': return 'Colaborador'
     case 'operador': return 'Operador'
@@ -116,7 +119,10 @@ const getStatusLabel = (status: string) => {
             <!-- Permissão -->
             <td class="py-3.5 px-4">
               <span :class="['inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase border', getRoleBadgeClass(String(user.role || ''))]">
-                <Shield v-if="user.role === 'admin'" class="w-3 h-3" />
+                <Shield v-if="normalizeRoleValue(user.role) === 'admin'" class="w-3 h-3" />
+                <Tag v-else-if="normalizeRoleValue(user.role) === 'vendedor'" class="w-3 h-3" />
+                <Eye v-else-if="normalizeRoleValue(user.role) === 'visualizador'" class="w-3 h-3" />
+                <Settings v-else-if="normalizeRoleValue(user.role) === 'operador'" class="w-3 h-3" />
                 <User v-else class="w-3 h-3" />
                 {{ getRoleLabel(String(user.role || '')) }}
               </span>

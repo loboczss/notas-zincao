@@ -83,6 +83,10 @@ const operacaoItems: SidebarItem[] = [
 ]
 
 const adminItems = computed<SidebarItem[]>(() => {
+  if (!isAdmin.value) {
+    return []
+  }
+
   const items: SidebarItem[] = [
     {
       label: 'Auditoria',
@@ -91,13 +95,11 @@ const adminItems = computed<SidebarItem[]>(() => {
     },
   ]
 
-  if (isAdmin.value) {
-    items.unshift({
-      label: 'Usuarios',
-      to: AppRoute.adminUsuarios,
-      icon: Users,
-    })
-  }
+  items.unshift({
+    label: 'Usuarios',
+    to: AppRoute.adminUsuarios,
+    icon: Users,
+  })
 
   return items
 })
@@ -115,7 +117,7 @@ const sections = computed(() => [
     title: 'Administracao',
     items: adminItems.value,
   },
-])
+].filter(section => section.items.length > 0))
 
 const isActive = (item: SidebarItem) => {
   if (item.exact) {

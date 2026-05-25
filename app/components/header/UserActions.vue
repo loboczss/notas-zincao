@@ -141,18 +141,19 @@ const mobileNavItems = computed<MobileNavItem[]>(() => {
       icon: CloudUpload,
       exact: true,
     },
-    {
-      label: 'Auditoria',
-      to: AppRoute.adminLixeira,
-      icon: Trash2,
-    },
   ]
 
   if (isAdmin.value) {
-    items.splice(6, 0, {
+    items.push({
       label: 'Usuarios',
       to: AppRoute.adminUsuarios,
       icon: Users,
+    })
+
+    items.push({
+      label: 'Auditoria',
+      to: AppRoute.adminLixeira,
+      icon: Trash2,
     })
   }
 

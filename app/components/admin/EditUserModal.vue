@@ -191,12 +191,12 @@ const resetPassword = async () => {
             <label 
               class="group flex items-center gap-3.5 p-3.5 rounded-2xl border cursor-pointer transition-all duration-300"
               :class="selectedRole === 'admin' 
-                ? 'border-brand-500/30 bg-brand-500/10 dark:border-brand-500/50 dark:bg-brand-500/5 shadow-lg shadow-brand-500/5' 
+                ? 'border-rose-500/35 bg-rose-500/10 dark:border-rose-400/45 dark:bg-rose-500/10 shadow-lg shadow-rose-500/5'
                 : 'border-slate-200/50 dark:border-white/5 bg-white dark:bg-slate-900/20 hover:border-slate-300 dark:hover:border-white/10 hover:bg-slate-50/50 dark:hover:bg-slate-900/40'"
             >
               <input type="radio" v-model="selectedRole" value="admin" class="sr-only" />
               <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-300"
-                :class="selectedRole === 'admin' ? 'bg-brand-500 text-white shadow-md shadow-brand-500/20' : 'bg-slate-100 dark:bg-slate-800/80 text-slate-500 group-hover:text-slate-300'"
+                :class="selectedRole === 'admin' ? 'bg-rose-500 text-white shadow-md shadow-rose-500/20' : 'bg-slate-100 dark:bg-slate-800/80 text-slate-500 group-hover:text-slate-300'"
               >
                 <Shield class="w-4 h-4" />
               </div>
@@ -205,7 +205,7 @@ const resetPassword = async () => {
                 <span class="block text-[10px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5">Acesso irrestrito às configurações do sistema.</span>
               </div>
               <div class="w-4 h-4 rounded-full border flex items-center justify-center transition-all shrink-0 duration-300"
-                :class="selectedRole === 'admin' ? 'border-brand-500 bg-brand-500 text-white' : 'border-slate-300 dark:border-slate-700 bg-transparent'"
+                :class="selectedRole === 'admin' ? 'border-rose-500 bg-rose-500 text-white' : 'border-slate-300 dark:border-slate-700 bg-transparent'"
               >
                 <Check v-if="selectedRole === 'admin'" class="w-2.5 h-2.5" />
               </div>
@@ -215,12 +215,12 @@ const resetPassword = async () => {
             <label 
               class="group flex items-center gap-3.5 p-3.5 rounded-2xl border cursor-pointer transition-all duration-300"
               :class="isColaboradorSelected 
-                ? 'border-brand-500/30 bg-brand-500/10 dark:border-brand-500/50 dark:bg-brand-500/5 shadow-lg shadow-brand-500/5' 
+                ? 'border-indigo-500/35 bg-indigo-500/10 dark:border-indigo-400/45 dark:bg-indigo-500/10 shadow-lg shadow-indigo-500/5'
                 : 'border-slate-200/50 dark:border-white/5 bg-white dark:bg-slate-900/20 hover:border-slate-300 dark:hover:border-white/10 hover:bg-slate-50/50 dark:hover:bg-slate-900/40'"
             >
               <input type="radio" v-model="selectedRole" value="colaborador" class="sr-only" />
               <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-300"
-                :class="isColaboradorSelected ? 'bg-brand-500 text-white shadow-md shadow-brand-500/20' : 'bg-slate-100 dark:bg-slate-800/80 text-slate-500 group-hover:text-slate-300'"
+                :class="isColaboradorSelected ? 'bg-indigo-500 text-white shadow-md shadow-indigo-500/20' : 'bg-slate-100 dark:bg-slate-800/80 text-slate-500 group-hover:text-slate-300'"
               >
                 <User class="w-4 h-4" />
               </div>
@@ -229,7 +229,7 @@ const resetPassword = async () => {
                 <span class="block text-[10px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5">Gestão completa de notas, pedidos e movimentações.</span>
               </div>
               <div class="w-4 h-4 rounded-full border flex items-center justify-center transition-all shrink-0 duration-300"
-                :class="isColaboradorSelected ? 'border-brand-500 bg-brand-500 text-white' : 'border-slate-300 dark:border-slate-700 bg-transparent'"
+                :class="isColaboradorSelected ? 'border-indigo-500 bg-indigo-500 text-white' : 'border-slate-300 dark:border-slate-700 bg-transparent'"
               >
                 <Check v-if="isColaboradorSelected" class="w-2.5 h-2.5" />
               </div>
@@ -239,12 +239,12 @@ const resetPassword = async () => {
             <label 
               class="group flex items-center gap-3.5 p-3.5 rounded-2xl border cursor-pointer transition-all duration-300"
               :class="selectedRole === 'visualizador' 
-                ? 'border-brand-500/30 bg-brand-500/10 dark:border-brand-500/50 dark:bg-brand-500/5 shadow-lg shadow-brand-500/5' 
+                ? 'border-slate-400/50 bg-slate-500/10 dark:border-slate-400/45 dark:bg-slate-500/10 shadow-lg shadow-slate-500/5'
                 : 'border-slate-200/50 dark:border-white/5 bg-white dark:bg-slate-900/20 hover:border-slate-300 dark:hover:border-white/10 hover:bg-slate-50/50 dark:hover:bg-slate-900/40'"
             >
               <input type="radio" v-model="selectedRole" value="visualizador" class="sr-only" />
               <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-300"
-                :class="selectedRole === 'visualizador' ? 'bg-brand-500 text-white shadow-md shadow-brand-500/20' : 'bg-slate-100 dark:bg-slate-800/80 text-slate-500 group-hover:text-slate-300'"
+                :class="selectedRole === 'visualizador' ? 'bg-slate-600 text-white shadow-md shadow-slate-500/20' : 'bg-slate-100 dark:bg-slate-800/80 text-slate-500 group-hover:text-slate-300'"
               >
                 <X class="w-4 h-4" />
               </div>
@@ -253,7 +253,7 @@ const resetPassword = async () => {
                 <span class="block text-[10px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5">Consulta rápida de registros e geração de relatórios.</span>
               </div>
               <div class="w-4 h-4 rounded-full border flex items-center justify-center transition-all shrink-0 duration-300"
-                :class="selectedRole === 'visualizador' ? 'border-brand-500 bg-brand-500 text-white' : 'border-slate-300 dark:border-slate-700 bg-transparent'"
+                :class="selectedRole === 'visualizador' ? 'border-slate-600 bg-slate-600 text-white' : 'border-slate-300 dark:border-slate-700 bg-transparent'"
               >
                 <Check v-if="selectedRole === 'visualizador'" class="w-2.5 h-2.5" />
               </div>
@@ -263,12 +263,12 @@ const resetPassword = async () => {
             <label 
               class="group flex items-center gap-3.5 p-3.5 rounded-2xl border cursor-pointer transition-all duration-300"
               :class="selectedRole === 'vendedor' 
-                ? 'border-brand-500/30 bg-brand-500/10 dark:border-brand-500/50 dark:bg-brand-500/5 shadow-lg shadow-brand-500/5' 
+                ? 'border-emerald-500/35 bg-emerald-500/10 dark:border-emerald-400/45 dark:bg-emerald-500/10 shadow-lg shadow-emerald-500/5'
                 : 'border-slate-200/50 dark:border-white/5 bg-white dark:bg-slate-900/20 hover:border-slate-300 dark:hover:border-white/10 hover:bg-slate-50/50 dark:hover:bg-slate-900/40'"
             >
               <input type="radio" v-model="selectedRole" value="vendedor" class="sr-only" />
               <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-300"
-                :class="selectedRole === 'vendedor' ? 'bg-brand-500 text-white shadow-md shadow-brand-500/20' : 'bg-slate-100 dark:bg-slate-800/80 text-slate-500 group-hover:text-slate-300'"
+                :class="selectedRole === 'vendedor' ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20' : 'bg-slate-100 dark:bg-slate-800/80 text-slate-500 group-hover:text-slate-300'"
               >
                 <Tag class="w-4 h-4" />
               </div>
@@ -277,7 +277,7 @@ const resetPassword = async () => {
                 <span class="block text-[10px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5">Gestão simplificada para lançamento de vendas e notas.</span>
               </div>
               <div class="w-4 h-4 rounded-full border flex items-center justify-center transition-all shrink-0 duration-300"
-                :class="selectedRole === 'vendedor' ? 'border-brand-500 bg-brand-500 text-white' : 'border-slate-300 dark:border-slate-700 bg-transparent'"
+                :class="selectedRole === 'vendedor' ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-300 dark:border-slate-700 bg-transparent'"
               >
                 <Check v-if="selectedRole === 'vendedor'" class="w-2.5 h-2.5" />
               </div>
