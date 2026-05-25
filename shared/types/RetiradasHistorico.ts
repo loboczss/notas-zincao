@@ -15,7 +15,22 @@ export type RetiradaHistoricoEvento = {
   reducao_zinco_10: number
 }
 
-export type RetiradaHistoricoSortKey = 'data' | 'nome_cliente' | 'itens' | 'reducao_zinco_10'
+export type RetiradaHistoricoResumo = {
+  eventos: number
+  itens: number
+  quantidade_total: number
+  reducao_zinco_10: number
+}
+
+export type RetiradaHistoricoFiltros = {
+  search: string
+  data_inicio: string
+  data_fim: string
+  hora_inicio: string
+  hora_fim: string
+}
+
+export type RetiradaHistoricoSortKey = 'data' | 'nome_cliente' | 'itens' | 'quantidade_total' | 'reducao_zinco_10'
 
 export type RetiradaHistoricoSortOrder = 'asc' | 'desc'
 

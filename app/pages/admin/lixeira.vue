@@ -8,7 +8,8 @@ import {
   AlertCircle,
   FileText,
   User,
-  Calendar
+  Calendar,
+  Loader2
 } from 'lucide-vue-next'
 import { useNotasStore } from '~~/app/stores'
 import AppPageShell from '~~/app/components/layout/AppPageShell.vue'
@@ -24,10 +25,11 @@ definePageMeta({
 })
 
 const notasStore = useNotasStore()
-const { info: showInfo, error: showError } = useToast()
+const { error: showError } = useToast()
 const search = ref('')
 const modalHistoricoAberto = ref(false)
 const loadingVisualizacao = ref(false)
+const restaurandoId = ref<string | null>(null)
 const notaSelecionada = ref<any | null>(null)
 const notaAuditoriaSelecionada = ref<any | null>(null)
 const historicoAuditoria = ref<any[]>([])
@@ -101,9 +103,22 @@ const fecharHistorico = () => {
 }
 
 const restaurarNota = async (id: string) => {
-  // Implementação futura ou via API de restore se disponível
-  void id
-  showInfo('Funcao de restaurar nota sera implementada em breve.')
+  if (restaurandoId.value) return
+
+  const confirmar = !import.meta.client || window.confirm('Restaurar esta nota para a lista principal?')
+  if (!confirmar) return
+
+  restaurandoId.value = id
+
+  try {
+    const restored = await notasStore.restoreNota(id)
+    if (restored && notaAuditoriaSelecionada.value?.id === id) {
+      fecharHistorico()
+    }
+  }
+  finally {
+    restaurandoId.value = null
+  }
 }
 </script>
 
@@ -210,10 +225,14 @@ const restaurarNota = async (id: string) => {
           </button>
           <button 
             @click="restaurarNota(nota.id)"
-            class="px-3 py-2 border border-slate-200 dark:border-slate-800 hover:border-brand-500/50 hover:bg-brand-500/5 text-slate-400 hover:text-brand-600 rounded-lg transition-all"
+            type="button"
+            class="px-3 py-2 border border-slate-200 dark:border-slate-800 hover:border-brand-500/50 hover:bg-brand-500/5 text-slate-400 hover:text-brand-600 rounded-lg transition-all disabled:cursor-wait disabled:opacity-60"
             title="Restaurar Nota"
+            :disabled="restaurandoId === nota.id"
+            :aria-busy="restaurandoId === nota.id"
           >
-            <RotateCcw class="h-4 w-4" />
+            <Loader2 v-if="restaurandoId === nota.id" class="h-4 w-4 animate-spin" />
+            <RotateCcw v-else class="h-4 w-4" />
           </button>
         </div>
       </Card>
@@ -266,20 +285,34 @@ const restaurarNota = async (id: string) => {
               </div>
             </div>
 
-            <dl class="grid grid-cols-1 gap-3 text-xs sm:grid-cols-2 sm:text-right">
-              <div>
-                <dt class="font-semibold uppercase tracking-wide text-slate-400">Excluido em</dt>
-                <dd class="mt-1 font-bold text-slate-900 dark:text-white">
-                  {{ formatDateTime(notaAuditoriaSelecionada.deleted_at) }}
-                </dd>
-              </div>
-              <div>
-                <dt class="font-semibold uppercase tracking-wide text-slate-400">Por</dt>
-                <dd class="mt-1 font-bold text-slate-900 dark:text-white">
-                  {{ getDeletedByName(notaAuditoriaSelecionada) }}
-                </dd>
-              </div>
-            </dl>
+            <div class="flex flex-col items-stretch gap-3 sm:items-end">
+              <dl class="grid grid-cols-1 gap-3 text-xs sm:grid-cols-2 sm:text-right">
+                <div>
+                  <dt class="font-semibold uppercase tracking-wide text-slate-400">Excluido em</dt>
+                  <dd class="mt-1 font-bold text-slate-900 dark:text-white">
+                    {{ formatDateTime(notaAuditoriaSelecionada.deleted_at) }}
+                  </dd>
+                </div>
+                <div>
+                  <dt class="font-semibold uppercase tracking-wide text-slate-400">Por</dt>
+                  <dd class="mt-1 font-bold text-slate-900 dark:text-white">
+                    {{ getDeletedByName(notaAuditoriaSelecionada) }}
+                  </dd>
+                </div>
+              </dl>
+
+              <button
+                type="button"
+                class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-brand-500 disabled:cursor-wait disabled:opacity-60 dark:bg-brand-500 dark:hover:bg-brand-600"
+                :disabled="restaurandoId === notaAuditoriaSelecionada.id"
+                :aria-busy="restaurandoId === notaAuditoriaSelecionada.id"
+                @click="restaurarNota(notaAuditoriaSelecionada.id)"
+              >
+                <Loader2 v-if="restaurandoId === notaAuditoriaSelecionada.id" class="h-3.5 w-3.5 animate-spin" />
+                <RotateCcw v-else class="h-3.5 w-3.5" />
+                Restaurar nota
+              </button>
+            </div>
           </div>
         </Card>
 

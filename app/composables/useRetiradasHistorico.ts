@@ -1,6 +1,8 @@
 import { computed, ref } from 'vue'
 import type {
   RetiradaHistoricoEvento,
+  RetiradaHistoricoFiltros,
+  RetiradaHistoricoResumo,
   RetiradaHistoricoSortKey,
   RetiradaHistoricoSortOption,
   RetiradaHistoricoSortOrder,
@@ -13,6 +15,7 @@ const sortOptions: RetiradaHistoricoSortOption[] = [
   { key: 'data', label: 'Data', description: 'momento da retirada' },
   { key: 'nome_cliente', label: 'Cliente', description: 'nome do cliente' },
   { key: 'itens', label: 'Itens', description: 'quantidade de produtos' },
+  { key: 'quantidade_total', label: 'Qtd.', description: 'quantidade total retirada' },
   { key: 'reducao_zinco_10', label: 'Zinco', description: 'baixa estimada no Zinco' },
 ]
 
@@ -21,10 +24,18 @@ type CarregarHistoricoOptions = {
   append?: boolean
 }
 
+const emptyResumo = (): RetiradaHistoricoResumo => ({
+  eventos: 0,
+  itens: 0,
+  quantidade_total: 0,
+  reducao_zinco_10: 0,
+})
+
 export const useRetiradasHistorico = () => {
   const apiFetch = getApiFetch()
   const { error: showError } = useToast()
   const historico = ref<RetiradaHistoricoEvento[]>([])
+  const resumo = ref<RetiradaHistoricoResumo>(emptyResumo())
   const loading = ref(false)
   const errorMessage = ref('')
   const currentPage = ref(1)
@@ -33,6 +44,13 @@ export const useRetiradasHistorico = () => {
   const totalPages = ref(1)
   const sortKey = ref<RetiradaHistoricoSortKey>('data')
   const sortOrder = ref<RetiradaHistoricoSortOrder>('desc')
+  const filtros = ref<RetiradaHistoricoFiltros>({
+    search: '',
+    data_inicio: '',
+    data_fim: '',
+    hora_inicio: '',
+    hora_fim: '',
+  })
 
   const historicoInicio = computed(() => {
     if (!totalHistorico.value) return 0
@@ -52,6 +70,16 @@ export const useRetiradasHistorico = () => {
     const option = sortOptions.find(item => item.key === sortKey.value)
     const direction = sortOrder.value === 'asc' ? 'crescente' : 'decrescente'
     return `${option?.description || 'ordem atual'} em ordem ${direction}`
+  })
+
+  const hasActiveFilters = computed(() => {
+    return Boolean(
+      filtros.value.search
+      || filtros.value.data_inicio
+      || filtros.value.data_fim
+      || filtros.value.hora_inicio
+      || filtros.value.hora_fim,
+    )
   })
 
   const mergeHistorico = (current: RetiradaHistoricoEvento[], incoming: RetiradaHistoricoEvento[]) => {
@@ -85,12 +113,18 @@ export const useRetiradasHistorico = () => {
           total: number
           total_pages: number
         }
+        resumo?: RetiradaHistoricoResumo
       }>('/api/dashboard/retiradas-historico', {
         query: {
           page: pageToLoad,
           page_size: pageSize.value,
           sort_key: sortKey.value,
           sort_order: sortOrder.value,
+          search: filtros.value.search,
+          data_inicio: filtros.value.data_inicio,
+          data_fim: filtros.value.data_fim,
+          hora_inicio: filtros.value.hora_inicio,
+          hora_fim: filtros.value.hora_fim,
         },
       })
 
@@ -101,11 +135,13 @@ export const useRetiradasHistorico = () => {
       totalHistorico.value = Number(response.pagination?.total || 0)
       totalPages.value = Number(response.pagination?.total_pages || 1)
       currentPage.value = Number(response.pagination?.page || 1)
+      resumo.value = response.resumo || emptyResumo()
     }
     catch (error) {
       console.error('[retiradas/historico]', error)
       if (!options.append) {
         historico.value = []
+        resumo.value = emptyResumo()
         totalHistorico.value = 0
         totalPages.value = 1
       }
@@ -130,6 +166,33 @@ export const useRetiradasHistorico = () => {
     await carregarHistorico({ page: 1 })
   }
 
+  const aplicarFiltros = async () => {
+    currentPage.value = 1
+    await carregarHistorico({ page: 1 })
+  }
+
+  const limparFiltros = async () => {
+    filtros.value = {
+      search: '',
+      data_inicio: '',
+      data_fim: '',
+      hora_inicio: '',
+      hora_fim: '',
+    }
+    currentPage.value = 1
+    await carregarHistorico({ page: 1 })
+  }
+
+  const aplicarOrdenacao = async (
+    key: RetiradaHistoricoSortKey,
+    order: RetiradaHistoricoSortOrder,
+  ) => {
+    sortKey.value = key
+    sortOrder.value = order
+    currentPage.value = 1
+    await carregarHistorico({ page: 1 })
+  }
+
   const carregarMaisHistorico = async () => {
     if (!hasMoreHistorico.value || loading.value) return
     await carregarHistorico({
@@ -140,6 +203,7 @@ export const useRetiradasHistorico = () => {
 
   return {
     historico,
+    resumo,
     loading,
     errorMessage,
     currentPage,
@@ -150,10 +214,15 @@ export const useRetiradasHistorico = () => {
     sortOrder,
     sortOptions,
     sortDescription,
+    filtros,
+    hasActiveFilters,
     historicoInicio,
     historicoFim,
     hasMoreHistorico,
     carregarHistorico,
+    aplicarFiltros,
+    limparFiltros,
+    aplicarOrdenacao,
     toggleSort,
     carregarMaisHistorico,
   }

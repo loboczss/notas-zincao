@@ -11,35 +11,46 @@ import RetiradasHistoricoToolbar from '../components/retiradas/RetiradasHistoric
 import RetiradasPullRefresh from '../components/retiradas/RetiradasPullRefresh.vue'
 import { useRetiradasHistorico } from '../composables/useRetiradasHistorico'
 import { useToast } from '../composables/useToast'
-import { getApiFetch } from '../utils/api-fetch'
+import { getApiAuthHeaders, getApiFetch, getApiUrl } from '../utils/api-fetch'
 import { getApiErrorMessage } from '../utils/api-errors'
-import type { RetiradaHistoricoEvento } from '../../shared/types/RetiradasHistorico'
+import type { RetiradaHistoricoEvento, RetiradaHistoricoFiltros } from '../../shared/types/RetiradasHistorico'
 
 definePageMeta({
   middleware: 'auth',
 })
 
 const apiFetch = getApiFetch()
+const supabaseClient = useSupabaseClient()
 const { error: showError } = useToast()
 const {
   historico,
+  resumo,
   loading,
   totalHistorico,
   sortKey,
   sortOrder,
   sortOptions,
   sortDescription,
+  filtros,
+  hasActiveFilters,
   historicoInicio,
   historicoFim,
   hasMoreHistorico,
   carregarHistorico,
-  toggleSort,
+  aplicarFiltros,
+  limparFiltros,
+  aplicarOrdenacao,
   carregarMaisHistorico,
 } = useRetiradasHistorico()
 
 const modalAberto = ref(false)
 const notaDetalhe = ref<any | null>(null)
 const loadingDetalhe = ref(false)
+const exportLoading = ref<'csv' | 'pdf' | false>(false)
+
+const atualizarFiltros = (value: RetiradaHistoricoFiltros) => {
+  filtros.value = value
+}
 
 const abrirDetalheNota = async (evento: RetiradaHistoricoEvento) => {
   const notaId = String(evento?.id_nota || '').trim()
@@ -66,6 +77,51 @@ const fecharDetalheNota = () => {
   modalAberto.value = false
 }
 
+const exportarHistorico = async (format: 'csv' | 'pdf') => {
+  if (exportLoading.value) return
+
+  exportLoading.value = format
+
+  try {
+    const params = new URLSearchParams({
+      format,
+      sort_key: sortKey.value,
+      sort_order: sortOrder.value,
+    })
+
+    if (filtros.value.search) params.set('search', filtros.value.search)
+    if (filtros.value.data_inicio) params.set('data_inicio', filtros.value.data_inicio)
+    if (filtros.value.data_fim) params.set('data_fim', filtros.value.data_fim)
+    if (filtros.value.hora_inicio) params.set('hora_inicio', filtros.value.hora_inicio)
+    if (filtros.value.hora_fim) params.set('hora_fim', filtros.value.hora_fim)
+
+    const response = await fetch(getApiUrl(`/api/dashboard/retiradas-historico/export?${params.toString()}`), {
+      headers: await getApiAuthHeaders(supabaseClient),
+    })
+
+    if (!response.ok) {
+      throw new Error('Erro ao exportar historico.')
+    }
+
+    const blob = await response.blob()
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `historico-retiradas-${new Date().toISOString().split('T')[0]}.${format}`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }
+  catch (error) {
+    console.error('[retiradas/export]', error)
+    showError(getApiErrorMessage(error, 'Falha ao exportar historico de retiradas.'))
+  }
+  finally {
+    exportLoading.value = false
+  }
+}
+
 onMounted(() => {
   carregarHistorico()
 })
@@ -88,11 +144,20 @@ onMounted(() => {
           :fim="historicoFim"
           :total="totalHistorico"
           :loading="loading"
+          :resumo="resumo"
           :sort-key="sortKey"
           :sort-order="sortOrder"
           :sort-options="sortOptions"
           :sort-description="sortDescription"
-          @sort="toggleSort"
+          :filtros="filtros"
+          :has-active-filters="hasActiveFilters"
+          :export-loading="exportLoading"
+          @update:filtros="atualizarFiltros"
+          @update-sort="({ key, order }) => aplicarOrdenacao(key, order)"
+          @apply="aplicarFiltros"
+          @clear="limparFiltros"
+          @refresh="carregarHistorico"
+          @export="exportarHistorico"
         />
 
         <RetiradasHistoricoState

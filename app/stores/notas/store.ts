@@ -199,6 +199,10 @@ export const useNotasStore = defineStore('notas', () => {
     await setOfflineCache(NOTAS_RETIRADA_CACHE_KEY, notasRetirada.value)
   }
 
+  const persistLixeiraCache = async () => {
+    await setOfflineCache(NOTAS_LIXEIRA_CACHE_KEY, lixeira.value)
+  }
+
   const prepareNotaForOfflineCache = async (nota: NotaRetiradaListItem | NotaRetiradaDetalheItem) => {
     const detalhe = toDetalheNota(nota)
     const cached = await getOfflineCache<NotaRetiradaDetalheItem>(`${NOTAS_DETAIL_CACHE_PREFIX}${detalhe.id}`)
@@ -257,7 +261,14 @@ export const useNotasStore = defineStore('notas', () => {
         : [notaAtualizada, ...notas.value]
     }
 
-    lixeira.value = lixeira.value.map(mergeListItem)
+    if (isDeleted) {
+      lixeira.value = lixeira.value.some(nota => nota.id === notaAtualizada.id)
+        ? lixeira.value.map(mergeListItem)
+        : [notaAtualizada, ...lixeira.value]
+    }
+    else {
+      lixeira.value = lixeira.value.filter(nota => nota.id !== notaAtualizada.id)
+    }
 
     const retiradaItem = toDetalheNota(notaAtualizada)
     const shouldStayOnRetiradaList = ['pendente', 'parcial'].includes(retiradaItem.status_retirada)
@@ -276,6 +287,7 @@ export const useNotasStore = defineStore('notas', () => {
     await Promise.all([
       persistNotasCache(),
       persistRetiradaCache(),
+      persistLixeiraCache(),
       persistNotaDetailCache(notaAtualizada),
     ])
   }
@@ -942,6 +954,7 @@ export const useNotasStore = defineStore('notas', () => {
       await Promise.all([
         persistNotasCache(),
         persistRetiradaCache(),
+        persistLixeiraCache(),
       ])
 
       showSuccess('Nota excluida com seguranca.')
@@ -949,6 +962,49 @@ export const useNotasStore = defineStore('notas', () => {
     }
     catch (error) {
       const msg = getApiErrorMessage(error, 'Falha ao excluir nota.')
+      errorMessage.value = msg
+      showError(msg)
+      return false
+    }
+  }
+
+  const restoreNota = async (notaId: string) => {
+    clearError()
+    const id = String(notaId || '').trim()
+
+    if (!id) {
+      const msg = 'Nota invalida para restauracao.'
+      errorMessage.value = msg
+      showError(msg)
+      return false
+    }
+
+    if (!getOnlineStatus()) {
+      const msg = 'A restauracao de notas exige conexao para validar permissao de administrador.'
+      errorMessage.value = msg
+      showError(msg)
+      return false
+    }
+
+    try {
+      const data = await getApiFetch()<{
+        success: boolean
+        restoredId?: string
+        nota?: NotaRetiradaDetalheItem
+      }>(`/api/notas/${encodeURIComponent(id)}/restore`, {
+        method: 'POST',
+      })
+
+      if (!data?.success || !data.nota) {
+        throw new Error('A restauracao nao foi confirmada pelo servidor.')
+      }
+
+      await replaceNotaInCaches(toDetalheNota(data.nota))
+      showSuccess('Nota restaurada com sucesso.')
+      return true
+    }
+    catch (error) {
+      const msg = getApiErrorMessage(error, 'Falha ao restaurar nota.')
       errorMessage.value = msg
       showError(msg)
       return false
@@ -985,6 +1041,7 @@ export const useNotasStore = defineStore('notas', () => {
     registrarRetirada,
     atualizarStatusNota,
     deleteNota,
+    restoreNota,
     clearList,
     reset,
   }

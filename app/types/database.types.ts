@@ -117,6 +117,7 @@ export type Database = {
           deleted_at?: string | null
           deleted_by?: string | null
         }
+        Relationships: []
       }
       notas_historico_edicao: {
         Row: {
@@ -143,6 +144,7 @@ export type Database = {
           dados_anteriores?: unknown | null
           dados_novos?: unknown | null
         }
+        Relationships: []
       }
       crm_zincao: {
         Row: {
@@ -196,6 +198,7 @@ export type Database = {
           fase_obra?: string | null
           compras_cliente?: unknown | null
         }
+        Relationships: []
       }
       bd_estoque_geral: {
         Row: {
@@ -234,6 +237,7 @@ export type Database = {
           IDPRODUTOPAI?: number | null
           FATORCONVERSAO?: number | null
         }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -278,13 +282,19 @@ export type Database = {
           updated_by?: string | null
           foto_perfil?: string | null
         }
+        Relationships: []
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      restaurar_nota_retirada: {
+        Args: {
+          p_nota_id: string
+        }
+        Returns: Database['public']['Tables']['notas_retirada']['Row']
+      }
     }
     Enums: {
       [_ in never]: never

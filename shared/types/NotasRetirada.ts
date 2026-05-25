@@ -84,6 +84,11 @@ export type NotaRetiradaListItem = {
   foto_cliente_url?: string | null
   comprovante_retirada_url?: string | null
   cadastrado_por_nome?: string | null
+  deleted_at?: string | null
+  deleted_by?: string | null
+  deleted_by_profile?: {
+    nome?: string | null
+  } | null
   _offlineStatus?: 'pending_create' | 'pending_update' | 'pending_delete' | 'pending_retirada' | 'pending_status'
 }
 

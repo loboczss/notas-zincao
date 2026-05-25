@@ -62,7 +62,13 @@ export default defineEventHandler(async (event) => {
   }
 
   // 2. Buscar os nomes dos perfis para os usuários do histórico
-  const userIds = [...new Set(historico?.map((h: any) => h.user_id).filter(Boolean))]
+  const userIds = Array.from(
+    new Set<string>(
+      (historico || [])
+        .map((h: any) => h.user_id)
+        .filter((id: unknown): id is string => typeof id === 'string' && id.length > 0),
+    ),
+  )
   
   let profiles: any[] = []
   if (userIds.length > 0) {

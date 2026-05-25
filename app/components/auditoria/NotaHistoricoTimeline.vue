@@ -7,6 +7,7 @@ import {
   ArrowRight, 
   FileEdit, 
   Trash2, 
+  RotateCcw,
   CheckCircle2, 
   Info,
   Clock
@@ -34,7 +35,8 @@ const getActionType = (item: any) => {
   const novos = getParsedData(item.dados_novos)
   
   if (!antes && novos) return 'create'
-  if (novos?.deleted_at) return 'delete'
+  if (novos?.acao === 'restore' || (antes?.deleted_at && novos && 'deleted_at' in novos && novos.deleted_at === null)) return 'restore'
+  if (novos?.acao === 'soft_delete' || novos?.deleted_at) return 'delete'
   return 'edit'
 }
 
@@ -42,6 +44,7 @@ const getIcon = (item: any) => {
   const type = getActionType(item)
   if (type === 'create') return CheckCircle2
   if (type === 'delete') return Trash2
+  if (type === 'restore') return RotateCcw
   return FileEdit
 }
 
@@ -49,6 +52,7 @@ const getIconColor = (item: any) => {
   const type = getActionType(item)
   if (type === 'create') return 'text-emerald-500 border-emerald-500/20 bg-emerald-50 dark:bg-emerald-500/10'
   if (type === 'delete') return 'text-rose-500 border-rose-500/20 bg-rose-50 dark:bg-rose-500/10'
+  if (type === 'restore') return 'text-brand-500 border-brand-500/20 bg-brand-50 dark:bg-brand-500/10'
   return 'text-amber-500 border-amber-500/20 bg-amber-50 dark:bg-amber-500/10'
 }
 
@@ -74,7 +78,7 @@ const getChanges = (item: any) => {
     const newVal = novos[key]
     
     if ([
-      'updated_at', 'atualizado_em', 'deleted_at', 'deleted_by', 
+      'updated_at', 'atualizado_em', 'deleted_at', 'deleted_by', 'acao', 'restored_at', 'restored_by',
       'id', 'owner_user_id', 'criado_em', 'historico_retiradas'
     ].includes(key)) continue
     
@@ -177,6 +181,7 @@ const formatFieldName = (key: string) => {
             <div class="flex items-center gap-2">
               <span v-if="getActionType(item) === 'delete'" class="px-3 py-1 rounded-full text-[10px] font-black uppercase bg-rose-500 text-white">Nota Excluída</span>
               <span v-else-if="getActionType(item) === 'create'" class="px-3 py-1 rounded-full text-[10px] font-black uppercase bg-emerald-500 text-white">Nota Criada</span>
+              <span v-else-if="getActionType(item) === 'restore'" class="px-3 py-1 rounded-full text-[10px] font-black uppercase bg-brand-600 text-white">Nota Restaurada</span>
             </div>
           </div>
 
@@ -229,6 +234,10 @@ const formatFieldName = (key: string) => {
             <div v-else-if="getActionType(item) === 'delete'" class="flex items-center gap-3 text-rose-500">
               <Trash2 class="h-4 w-4" />
               <p class="text-sm font-bold italic">Nota movida para a lixeira.</p>
+            </div>
+            <div v-else-if="getActionType(item) === 'restore'" class="flex items-center gap-3 text-brand-600 dark:text-brand-400">
+              <RotateCcw class="h-4 w-4" />
+              <p class="text-sm font-bold italic">Nota restaurada para a lista principal.</p>
             </div>
             <p v-else class="text-xs text-zinc-400 italic">Alteração realizada com sucesso.</p>
           </div>
