@@ -148,6 +148,23 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
     })
   }
 
+  const requestId = typeof body.request_id === 'string' && body.request_id.trim()
+    ? body.request_id.trim()
+    : null
+
+  const bodyQuantidades = body.produtos_retirada.map(item => ({
+    nome: String(item?.nome || '').trim(),
+    quantidade_retirada: toNumber(item?.quantidade_retirada) ?? 0,
+  }))
+
+  console.log('[api/notas/:id/retirada] request received', {
+    notaId: id,
+    authUid,
+    requestId,
+    produtos_retirada: bodyQuantidades,
+    observacoes: typeof body.observacoes === 'string' ? body.observacoes.slice(0, 80) : null,
+  })
+
   const client = await serverSupabaseClient(event)
   await assertActiveProfileRole(
     client as any,
@@ -155,6 +172,59 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
     ['admin', 'colaborador'],
     'Somente administradores ou colaboradores podem registrar retirada.',
   )
+
+  const retornarNotaAtual = async (motivo: string) => {
+    const { data: notaIdempotente, error: idempotenteError } = await (client as any)
+      .from('notas_retirada')
+      .select('id, status_retirada, data_retirada, comprovante_retirada_url, historico_retiradas, atualizado_em')
+      .eq('id', id)
+      .single()
+
+    if (idempotenteError || !notaIdempotente) {
+      throw createError({
+        statusCode: 500,
+        statusMessage: `Falha ao recuperar a nota apos detectar retirada duplicada (${motivo}).`,
+      })
+    }
+
+    return {
+      success: true,
+      nota: await signNotaStorageUrls(client as any, notaIdempotente),
+      idempotent: true as const,
+    }
+  }
+
+  if (requestId) {
+    const { error: idemInsertError } = await (client as any)
+      .from('retirada_idempotency')
+      .insert({
+        request_id: requestId,
+        nota_id: id,
+        user_id: authUid,
+      })
+
+    if (idemInsertError) {
+      const code = (idemInsertError as { code?: string }).code
+      if (code === '23505') {
+        console.log('[api/notas/:id/retirada] duplicate request_id rejected by idempotency table', {
+          notaId: id,
+          requestId,
+        })
+        return await retornarNotaAtual('idempotency_table')
+      }
+
+      if (code === '42P01') {
+        console.warn('[api/notas/:id/retirada] retirada_idempotency table missing — apply migration 20260524_retirada_idempotency.sql')
+      }
+      else {
+        console.warn('[api/notas/:id/retirada] idempotency insert failed (continuing without guard)', {
+          requestId,
+          code,
+          message: idemInsertError.message,
+        })
+      }
+    }
+  }
 
   const { data: notaAtual, error: notaError } = await (client as any)
     .from('notas_retirada')
@@ -167,6 +237,22 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
       statusCode: 404,
       statusMessage: 'Nota não encontrada.',
     })
+  }
+
+  if (requestId) {
+    const historicoExistente = Array.isArray(notaAtual.historico_retiradas)
+      ? notaAtual.historico_retiradas as NotaRetiradaHistoricoItem[]
+      : []
+
+    const jaProcessada = historicoExistente.some(item => item?.request_id === requestId)
+
+    if (jaProcessada) {
+      console.log('[api/notas/:id/retirada] duplicate request_id detected in historico, skipping', {
+        notaId: id,
+        requestId,
+      })
+      return await retornarNotaAtual('historico')
+    }
   }
 
   const retiradaMap = new Map<string, number>()
@@ -227,6 +313,17 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
     }
 
     if (idProdutoEstoque !== null) {
+      console.log('[api/notas/:id/retirada] calling baixar_estoque_produto', {
+        notaId: id,
+        requestId,
+        produto_nome: produto.nome,
+        produto_index: produto.index,
+        id_produto_estoque: idProdutoEstoque,
+        p_quantidade_solicitada: produto.retiradaSolicitada,
+        quantidade_total_nota: produto.quantidadeTotal,
+        quantidade_retirada_anterior: produto.quantidadeRetiradaAtual,
+      })
+
       const { data: baixaData, error: baixaError } = await (client as any)
         .rpc('baixar_estoque_produto', {
           p_id_produto: idProdutoEstoque,
@@ -246,6 +343,14 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
         produto.retiradaSolicitada,
         toNumber(primeiraLinha?.quantidade_retirada) ?? 0,
       ))
+
+      console.log('[api/notas/:id/retirada] baixar_estoque_produto result', {
+        notaId: id,
+        requestId,
+        produto_nome: produto.nome,
+        retirada_efetiva: retiradaEfetiva,
+        estoque_restante: toNumber(primeiraLinha?.estoque_restante),
+      })
     }
 
     retiradasEfetivas.set(produto.index, {
@@ -314,6 +419,7 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
       }))
       .filter(item => item.quantidade > 0),
     observacoes: body.observacoes ?? null,
+    request_id: requestId,
     // Campos legados mantidos para compatibilidade de consumidores antigos
     status_anterior: statusAnterior,
     status_novo: statusRetirada,

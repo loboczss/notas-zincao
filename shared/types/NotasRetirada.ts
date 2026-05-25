@@ -36,6 +36,7 @@ export type NotaRetiradaHistoricoItem = {
     quantidade_solicitada?: number
   }>
   observacoes?: string | null
+  request_id?: string | null
   // Campos legados para retrocompatibilidade de registros antigos
   status_anterior?: NotaRetiradaStatus | null
   status_novo?: NotaRetiradaStatus
@@ -107,6 +108,7 @@ export type NotaRegistrarRetiradaRequest = {
   produtos_retirada: NotaRetiradaProdutoInput[]
   foto_cliente_retirada_data_url: string
   observacoes?: string | null
+  request_id?: string
 }
 
 export type NotaRetiradaStatusUpdateRequest = {

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, watch } from 'vue'
-import { Boxes, Link2, Package } from 'lucide-vue-next'
+import { Boxes, Link2, Package, Plus } from 'lucide-vue-next'
 import Botao from '../Botao.vue'
 import Input from '../Input.vue'
 import type { EstoqueProdutoDraft } from '../../../shared/types/Estoque'
@@ -54,20 +54,14 @@ const toDecimal = (value: unknown) => {
 
 const quantidadeBase = computed(() => Math.max(0, toDecimal(form.quantidade_estoque)))
 const quantidadeAdicionada = computed(() => Math.max(0, toDecimal(form.adicao_estoque)))
-const deveSomarEstoque = computed(() => Boolean(form.id_produto && String(form.adicao_estoque).trim()))
-const quantidadeFinal = computed(() => {
-  const total = deveSomarEstoque.value
-    ? quantidadeBase.value + quantidadeAdicionada.value
-    : quantidadeBase.value
+const podeAdicionar = computed(() => Boolean(form.id_produto) && quantidadeAdicionada.value > 0)
 
-  return Number(total.toFixed(3))
-})
-const quantidadeFinalFormatada = computed(() => {
-  return new Intl.NumberFormat('pt-BR', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 3,
-  }).format(quantidadeFinal.value)
-})
+const aplicarAdicao = () => {
+  if (!podeAdicionar.value) return
+  const novoTotal = Number((quantidadeBase.value + quantidadeAdicionada.value).toFixed(3))
+  form.quantidade_estoque = String(novoTotal)
+  form.adicao_estoque = ''
+}
 
 const resetForm = () => {
   form.id_produto = props.initialValue?.id_produto
@@ -98,7 +92,7 @@ const submit = () => {
     embalagem_saida: String(form.embalagem_saida || '').trim(),
     valor_preco_varejo: String(form.valor_preco_varejo || '').trim() || null,
     tipo_produto: String(form.tipo_produto || '').trim() || null,
-    quantidade_estoque: String(quantidadeFinal.value),
+    quantidade_estoque: String(Number(quantidadeBase.value.toFixed(3))),
     id_produto_pai: form.id_produto_pai === '' ? null : form.id_produto_pai,
     fator_conversao: form.fator_conversao === '' ? null : form.fator_conversao,
   })
@@ -141,7 +135,7 @@ const submit = () => {
 
         <div
           class="grid gap-3"
-          :class="form.id_produto ? 'sm:grid-cols-2 md:grid-cols-[1fr_1fr_96px_1fr_1fr]' : 'sm:grid-cols-3'"
+          :class="form.id_produto ? 'sm:grid-cols-2 md:grid-cols-4' : 'sm:grid-cols-3'"
         >
           <label class="space-y-1">
             <span class="text-[11px] font-semibold uppercase text-slate-500 dark:text-slate-400">Quantidade</span>
@@ -149,16 +143,30 @@ const submit = () => {
           </label>
 
           <label v-if="form.id_produto" class="space-y-1">
-            <span class="text-[11px] font-semibold uppercase text-slate-500 dark:text-slate-400">Adicionar +</span>
-            <Input v-model="form.adicao_estoque" size="sm" type="number" min="0" step="0.001" inputmode="decimal" placeholder="+0" />
-          </label>
-
-          <div v-if="form.id_produto" class="space-y-1">
-            <span class="text-[11px] font-semibold uppercase text-slate-500 dark:text-slate-400">Saldo</span>
-            <div class="flex min-h-8 items-center rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-sm font-bold tabular-nums text-slate-950 dark:border-slate-700 dark:bg-slate-950 dark:text-white">
-              {{ quantidadeFinalFormatada }}
+            <span class="text-[11px] font-semibold uppercase text-slate-500 dark:text-slate-400">Adicionar</span>
+            <div class="flex gap-1">
+              <Input
+                v-model="form.adicao_estoque"
+                size="sm"
+                type="number"
+                min="0"
+                step="0.001"
+                inputmode="decimal"
+                placeholder="+0"
+                @keydown.enter.prevent="aplicarAdicao"
+              />
+              <button
+                type="button"
+                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-600 text-white transition-colors hover:bg-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-brand-500 dark:hover:bg-brand-600"
+                :disabled="!podeAdicionar"
+                aria-label="Somar ao estoque"
+                title="Somar ao estoque"
+                @click="aplicarAdicao"
+              >
+                <Plus class="h-4 w-4" />
+              </button>
             </div>
-          </div>
+          </label>
 
           <label class="space-y-1">
             <span class="text-[11px] font-semibold uppercase text-slate-500 dark:text-slate-400">Embalagem</span>

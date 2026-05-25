@@ -330,10 +330,15 @@ const submitRetirada = async () => {
     return
   }
 
+  const requestId = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : `retirada-${Date.now()}-${Math.random().toString(36).slice(2, 12)}`
+
   const payload: NotaRegistrarRetiradaRequest = {
     produtos_retirada,
     foto_cliente_retirada_data_url: fotoDataUrl.value,
     observacoes: observacoesRetirada.value.trim() || undefined,
+    request_id: requestId,
   }
 
   saving.value = true

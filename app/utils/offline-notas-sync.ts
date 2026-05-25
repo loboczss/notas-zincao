@@ -150,11 +150,15 @@ const emptyMeta = (): OfflineNotasSyncMeta => ({
 })
 
 const cloneJson = <T>(value: T): T => {
-  if (typeof structuredClone === 'function') {
-    return structuredClone(value)
+  try {
+    return JSON.parse(JSON.stringify(value)) as T
   }
-
-  return JSON.parse(JSON.stringify(value)) as T
+  catch {
+    if (typeof structuredClone === 'function') {
+      return structuredClone(value)
+    }
+    throw new Error('Falha ao clonar dados da nota offline.')
+  }
 }
 
 const yieldToBrowser = () => new Promise<void>((resolve) => {

@@ -6,6 +6,7 @@ import { getApiFetch } from '../../utils/api-fetch'
 import {
   enqueueOfflineRequest,
   getOfflineCache,
+  getOfflineQueue,
   getOnlineStatus,
   setOfflineCache,
 } from '../../utils/offline-db'
@@ -585,11 +586,19 @@ export const useNotasStore = defineStore('notas', () => {
   }
 
   const applyLocalRetirada = async (notaId: string, payload: NotaRegistrarRetiradaRequest) => {
-    const base = notaDetalheAtual.value?.id === notaId
+    const baseReativo = notaDetalheAtual.value?.id === notaId
       ? notaDetalheAtual.value
       : (await getOfflineCache<NotaRetiradaDetalheItem>(`${NOTAS_DETAIL_CACHE_PREFIX}${notaId}`)) || findNotaLocal(notaId)
 
-    if (!base) return null
+    if (!baseReativo) return null
+
+    let base: NotaRetiradaListItem | NotaRetiradaDetalheItem
+    try {
+      base = JSON.parse(JSON.stringify(baseReativo)) as NotaRetiradaListItem | NotaRetiradaDetalheItem
+    }
+    catch {
+      base = baseReativo
+    }
 
     const detalhe = toDetalheNota(base)
     const retiradaMap = new Map<string, number>()
