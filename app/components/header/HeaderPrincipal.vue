@@ -1,25 +1,19 @@
 <script lang="ts">
 export default {
-  name: 'HeaderPrincipal'
+  name: 'HeaderPrincipal',
 }
 </script>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted } from 'vue'
-import { LayoutDashboard, FilePlus2, FileText, Boxes, Trash2, Users, CloudUpload, ClipboardList } from 'lucide-vue-next'
-import { useRoute } from 'vue-router'
+import { onMounted, onUnmounted, ref } from 'vue'
 import Logo from './Logo.vue'
-import NavLink from './NavLink.vue'
 import UserActions from './UserActions.vue'
-import { AppRoute } from '../../constants/routes'
+import DarkModeToggle from '../DarkModeToggle.vue'
 import { useAuthStore } from '../../stores'
 
-const route = useRoute()
 const authStore = useAuthStore()
-const isActive = (path: string) => route.path === path || route.path.startsWith(`${path}/`)
-const isAdmin = computed(() => String(authStore.profile?.role || '').trim().toLowerCase() === 'admin')
-
 const isScrolled = ref(false)
+
 const handleScroll = () => {
   isScrolled.value = window.scrollY > 20
 }
@@ -27,6 +21,7 @@ const handleScroll = () => {
 onMounted(() => {
   window.addEventListener('scroll', handleScroll)
   handleScroll()
+
   if (!authStore.profile) {
     authStore.getMe()
   }
@@ -38,56 +33,22 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <header 
-    class="sticky top-0 z-40 h-16 w-full"
-  >
-    <!-- Dynamic backdrop -->
-    <div 
+  <header class="sticky top-0 z-40 h-16 w-full md:hidden">
+    <div
       class="absolute inset-0 transition-colors duration-300"
       :class="[
-        isScrolled 
-          ? 'bg-white border-b border-slate-200 dark:bg-slate-950 dark:border-slate-800'
-          : 'bg-transparent border-b border-transparent'
+        isScrolled
+          ? 'border-b border-slate-200 bg-white/95 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/95'
+          : 'border-b border-transparent bg-white/80 backdrop-blur-lg dark:bg-slate-950/80',
       ]"
     />
-    
-    <div class="relative mx-auto max-w-7xl px-4 sm:px-6 h-16 flex items-center justify-between">
-      <!-- Left: Brand -->
-      <div class="flex items-center">
-        <Logo />
-      </div>
 
-      <!-- Center: Navigation -->
-      <nav class="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-1">
-        <NavLink :to="AppRoute.home" :active="isActive(AppRoute.home)" :icon="LayoutDashboard">
-          Dashboard
-        </NavLink>
-        <NavLink :to="AppRoute.notas" :active="isActive(AppRoute.notas)" :icon="FileText">
-          Notas
-        </NavLink>
-        <NavLink :to="AppRoute.retiradas" :active="isActive(AppRoute.retiradas)" :icon="ClipboardList">
-          Retiradas
-        </NavLink>
-        <NavLink :to="AppRoute.estoque" :active="isActive(AppRoute.estoque)" :icon="Boxes">
-          Estoque
-        </NavLink>
-        <NavLink :to="AppRoute.cadastrarNota" :active="isActive(AppRoute.cadastrarNota)" :icon="FilePlus2">
-          Cadastrar
-        </NavLink>
-        <NavLink :to="AppRoute.sincronizacao" :active="isActive(AppRoute.sincronizacao)" :icon="CloudUpload">
-          Sync
-        </NavLink>
-        <NavLink v-if="isAdmin" :to="AppRoute.adminUsuarios" :active="isActive(AppRoute.adminUsuarios)" :icon="Users">
-          Usuários
-        </NavLink>
-        <NavLink :to="AppRoute.adminLixeira" :active="isActive(AppRoute.adminLixeira)" :icon="Trash2">
-          Auditoria
-        </NavLink>
-      </nav>
+    <div class="relative flex h-16 items-center justify-between px-4 sm:px-6">
+      <Logo />
 
-      <!-- Right: Actions -->
       <div class="flex items-center gap-2">
-        <div class="h-6 w-px bg-slate-200 dark:bg-white/10 mx-1 hidden sm:block" />
+        <DarkModeToggle />
+        <div class="hidden h-6 w-px bg-slate-200 dark:bg-white/10 sm:block" />
         <UserActions />
       </div>
     </div>

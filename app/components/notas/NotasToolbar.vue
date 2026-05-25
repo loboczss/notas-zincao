@@ -37,15 +37,15 @@ const hasAdvancedFilters = computed(() => {
 </script>
 
 <template>
-  <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+  <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5">
     <div class="flex flex-col gap-4">
-      <div class="flex flex-wrap items-center justify-between gap-3">
-        <div>
+      <div class="grid gap-3 md:flex md:items-start md:justify-between">
+        <div class="min-w-0">
           <h2 class="text-sm font-semibold text-slate-900 dark:text-white">Filtros</h2>
         </div>
 
-        <div class="flex items-center gap-3">
-          <div class="text-xs text-slate-500">
+        <div class="flex flex-wrap items-center gap-2 md:justify-end">
+          <div class="rounded-md bg-slate-50 px-2.5 py-1 text-xs text-slate-500 dark:bg-slate-800/70 dark:text-slate-400">
             Resultados:
             <span class="font-medium text-slate-900 dark:text-white">{{ props.resultCount }}</span>
             de {{ props.totalCount }}
@@ -53,7 +53,7 @@ const hasAdvancedFilters = computed(() => {
 
           <button
             type="button"
-            class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+            class="inline-flex h-9 items-center justify-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
             :class="hasAdvancedFilters ? 'border-brand-200 bg-brand-50 text-brand-700 dark:border-brand-500/30 dark:bg-brand-500/10 dark:text-brand-300' : ''"
             aria-controls="notas-filtros-avancados"
             :aria-expanded="advancedOpen"
@@ -76,7 +76,7 @@ const hasAdvancedFilters = computed(() => {
             :value="props.searchTerm"
             type="text"
             placeholder="Nome, numero ou serie..."
-            class="block w-full rounded-md border border-slate-200 bg-white py-1.5 pl-9 pr-3 text-sm text-slate-900 outline-none transition-colors focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+            class="block h-10 w-full rounded-md border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-900 outline-none transition-colors focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             @input="emit('update:searchTerm', ($event.target as HTMLInputElement).value)"
             @keyup.enter="emit('apply')"
           >
@@ -91,14 +91,18 @@ const hasAdvancedFilters = computed(() => {
         leave-from-class="translate-y-0 opacity-100"
         leave-to-class="-translate-y-1 opacity-0"
       >
-        <div v-if="advancedOpen" id="notas-filtros-avancados" class="space-y-4">
+        <div
+          v-if="advancedOpen"
+          id="notas-filtros-avancados"
+          class="border-t border-slate-200 pt-4 dark:border-slate-800"
+        >
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div class="flex flex-col gap-1.5">
               <label class="text-xs font-medium text-slate-700 dark:text-slate-300">Status</label>
               <div class="relative">
                 <select
                   :value="props.statusFilter"
-                  class="block w-full appearance-none rounded-md border border-slate-200 bg-white py-1.5 pl-3 pr-8 text-sm text-slate-900 outline-none transition-colors focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:[color-scheme:dark]"
+                  class="block h-10 w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-8 text-sm text-slate-900 outline-none transition-colors focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:[color-scheme:dark]"
                   @change="emit('update:statusFilter', ($event.target as HTMLSelectElement).value as 'todos' | NotaRetiradaStatus)"
                 >
                   <option value="todos">Todos Status</option>
@@ -118,7 +122,7 @@ const hasAdvancedFilters = computed(() => {
               <input
                 :value="props.dataInicio"
                 type="date"
-                class="block w-full rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-900 outline-none transition-colors focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:[color-scheme:dark]"
+                class="block h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition-colors focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:[color-scheme:dark]"
                 @input="emit('update:dataInicio', ($event.target as HTMLInputElement).value)"
               >
             </div>
@@ -128,16 +132,16 @@ const hasAdvancedFilters = computed(() => {
               <input
                 :value="props.dataFim"
                 type="date"
-                class="block w-full rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-900 outline-none transition-colors focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:[color-scheme:dark]"
+                class="block h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition-colors focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:[color-scheme:dark]"
                 @input="emit('update:dataFim', ($event.target as HTMLInputElement).value)"
               >
             </div>
           </div>
 
-          <div class="flex flex-wrap items-center gap-2 lg:flex-nowrap">
+          <div class="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <button
               type="button"
-              class="flex flex-1 items-center justify-center gap-2 rounded-md bg-brand-600 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-brand-500 active:bg-brand-700 disabled:opacity-50 lg:flex-none"
+              class="inline-flex h-10 w-full items-center justify-center gap-2 rounded-md bg-brand-600 px-4 text-sm font-medium text-white transition hover:bg-brand-500 active:bg-brand-700 disabled:opacity-50 sm:w-auto"
               :disabled="props.loading"
               @click="emit('apply')"
             >
@@ -148,7 +152,7 @@ const hasAdvancedFilters = computed(() => {
             <div class="flex w-full items-center gap-2 sm:w-auto">
               <button
                 type="button"
-                class="flex h-[34px] w-[34px] flex-none items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                class="flex h-10 w-10 flex-none items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
                 :disabled="props.loading"
                 title="Atualizar"
                 @click="emit('refresh')"
@@ -160,7 +164,7 @@ const hasAdvancedFilters = computed(() => {
 
               <button
                 type="button"
-                class="flex flex-1 items-center justify-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 sm:flex-none"
+                class="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 sm:flex-none"
                 :disabled="!!props.exportLoading"
                 @click="emit('export', 'csv')"
               >
@@ -171,7 +175,7 @@ const hasAdvancedFilters = computed(() => {
 
               <button
                 type="button"
-                class="flex flex-1 items-center justify-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 sm:flex-none"
+                class="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 sm:flex-none"
                 :disabled="!!props.exportLoading"
                 @click="emit('export', 'pdf')"
               >

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { AlertTriangle, Pencil, Save, Trash2, XCircle } from 'lucide-vue-next'
 import type { NotaAdminEditRequest, NotaRetiradaStatus } from '../../../shared/types/NotasRetirada'
 import AppPageShell from '../../components/layout/AppPageShell.vue'
@@ -47,9 +47,6 @@ const isPulling = ref(false)
 const pullRefreshing = ref(false)
 const pullStartY = ref(0)
 const pullDistance = ref(0)
-const filterShell = ref<HTMLElement | null>(null)
-const filterSpacerHeight = ref(152)
-let filterResizeObserver: ResizeObserver | null = null
 const resumoNotas = ref<{
   total_notas: number
   pendentes: number
@@ -253,33 +250,8 @@ const exportarRelatorio = async (format: 'csv' | 'pdf') => {
   }
 }
 
-const updateFilterSpacer = () => {
-  const reservedGap = 16
-  filterSpacerHeight.value = (filterShell.value?.offsetHeight || 136) + reservedGap
-}
-
 onMounted(async () => {
-  await nextTick()
-  updateFilterSpacer()
-
-  if (import.meta.client) {
-    window.addEventListener('resize', updateFilterSpacer)
-
-    if ('ResizeObserver' in window && filterShell.value) {
-      filterResizeObserver = new ResizeObserver(updateFilterSpacer)
-      filterResizeObserver.observe(filterShell.value)
-    }
-  }
-
   await carregarNotas()
-})
-
-onUnmounted(() => {
-  if (!import.meta.client) return
-
-  window.removeEventListener('resize', updateFilterSpacer)
-  filterResizeObserver?.disconnect()
-  filterResizeObserver = null
 })
 
 const aplicarFiltros = async () => {
@@ -478,31 +450,24 @@ const stats = computed(() => {
     hide-header
   >
     <div class="animate-fade-in font-sans">
-      <div :style="{ height: `${filterSpacerHeight}px` }" aria-hidden="true" />
-
-      <div
-        ref="filterShell"
-        class="fixed inset-x-0 top-16 z-30 bg-slate-50 px-4 pb-3 pt-1 dark:bg-slate-950 md:px-8"
-      >
-        <div class="mx-auto max-w-7xl">
-          <NotasToolbar
-            :search-term="searchTerm"
-            :status-filter="statusFilter"
-            :data-inicio="dataInicio"
-            :data-fim="dataFim"
-            :total-count="notasStore.totalNotas"
-            :result-count="notasFiltradas.length"
-            :loading="notasStore.loadingNotas"
-            :export-loading="exportLoading"
-            @update:search-term="searchTerm = $event"
-            @update:status-filter="statusFilter = $event; aplicarFiltros()"
-            @update:data-inicio="dataInicio = $event"
-            @update:data-fim="dataFim = $event"
-            @apply="aplicarFiltros"
-            @refresh="carregarNotas"
-            @export="exportarRelatorio"
-          />
-        </div>
+      <div class="mb-6">
+        <NotasToolbar
+          :search-term="searchTerm"
+          :status-filter="statusFilter"
+          :data-inicio="dataInicio"
+          :data-fim="dataFim"
+          :total-count="notasStore.totalNotas"
+          :result-count="notasFiltradas.length"
+          :loading="notasStore.loadingNotas"
+          :export-loading="exportLoading"
+          @update:search-term="searchTerm = $event"
+          @update:status-filter="statusFilter = $event; aplicarFiltros()"
+          @update:data-inicio="dataInicio = $event"
+          @update:data-fim="dataFim = $event"
+          @apply="aplicarFiltros"
+          @refresh="carregarNotas"
+          @export="exportarRelatorio"
+        />
       </div>
 
       <div

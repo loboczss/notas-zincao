@@ -31,7 +31,6 @@ const togglePreference = () => {
 
 <template>
   <button
-    id="theme-toggle"
     type="button"
     @click="togglePreference"
     class="relative h-10 w-10 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 transition-all duration-300 hover:scale-105 active:scale-95 shadow-sm"
