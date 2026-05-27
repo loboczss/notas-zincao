@@ -29,11 +29,22 @@ export type NotaRetiradaHistoricoItem = {
   data: string
   responsavel_id: string
   responsavel_nome?: string | null
+  tipo?: 'retirada' | 'tentativa_sem_baixa'
+  retirada_efetuada?: boolean
+  motivo_falha?: string | null
   fotos?: string[]
   itens_retirados?: Array<{
     index: number
     quantidade: number
     quantidade_solicitada?: number
+    id_produto_estoque?: number | null
+    id_produto_estoque_baixa?: number | null
+  }>
+  itens_solicitados?: Array<{
+    index: number
+    quantidade: number
+    id_produto_estoque?: number | null
+    id_produto_estoque_baixa?: number | null
   }>
   observacoes?: string | null
   request_id?: string | null

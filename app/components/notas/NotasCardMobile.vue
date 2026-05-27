@@ -25,6 +25,27 @@ const valorFormatado = computed(() => {
   }).format(valor)
 })
 
+const toNumber = (value: unknown) => {
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+  if (typeof value === 'string') {
+    const normalized = value.replace(',', '.').trim()
+    const parsed = Number(normalized)
+    return Number.isFinite(parsed) ? parsed : 0
+  }
+  return 0
+}
+
+const quantidadeTotalFormatada = computed(() => {
+  const total = Array.isArray(props.nota.produtos)
+    ? props.nota.produtos.reduce((sum, produto) => sum + Math.max(0, toNumber(produto.quantidade)), 0)
+    : 0
+
+  return new Intl.NumberFormat('pt-BR', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(total)
+})
+
 const cadastradoPor = computed(() => {
   return String(props.nota.cadastrado_por_nome || '').trim() || 'Criador nao identificado'
 })
@@ -56,6 +77,10 @@ const cadastradoPor = computed(() => {
         <div class="flex flex-col gap-1">
           <span class="text-xs text-slate-500">Valor Total</span>
           <span class="text-sm font-medium text-slate-900 dark:text-slate-200">{{ valorFormatado }}</span>
+        </div>
+        <div class="flex flex-col gap-1">
+          <span class="text-xs text-slate-500">Qtd Total</span>
+          <span class="text-sm font-medium text-slate-900 dark:text-slate-200">{{ quantidadeTotalFormatada }}</span>
         </div>
       </div>
 

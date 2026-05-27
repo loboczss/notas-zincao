@@ -10,18 +10,30 @@ defineProps<{
 const emit = defineEmits<{
   (e: 'preview', url: string): void
 }>()
+
+const isTentativaSemBaixa = (item: any) => item?.retirada_efetuada === false || item?.tipo === 'tentativa_sem_baixa'
+
+const getMarkerClass = (item: any) => {
+  if (isTentativaSemBaixa(item)) return 'bg-amber-500'
+  return item?.itens_retirados?.length ? 'bg-emerald-500' : 'bg-slate-400'
+}
+
+const getTitle = (item: any) => {
+  if (isTentativaSemBaixa(item)) return 'Tentativa sem baixa'
+  return item?.itens_retirados?.length ? 'Retirada registrada' : 'Dados alterados'
+}
 </script>
 
 <template>
   <div class="relative pb-4 pl-4 font-sans last:pb-0">
     <div
       class="absolute left-0 top-1.5 h-2 w-2 rounded-full"
-      :class="item.itens_retirados?.length ? 'bg-emerald-500' : 'bg-slate-400'"
+      :class="getMarkerClass(item)"
     />
 
     <div class="min-w-0">
       <p class="text-sm font-bold text-slate-950 dark:text-white">
-        {{ item.itens_retirados?.length ? 'Retirada registrada' : 'Dados alterados' }}
+        {{ getTitle(item) }}
       </p>
       <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
         {{ formatDateTime(item.data) }} por {{ item.responsavel_nome || 'Sistema' }}
@@ -41,6 +53,10 @@ const emit = defineEmits<{
           </span>
         </div>
       </div>
+
+      <p v-if="isTentativaSemBaixa(item) && item.motivo_falha" class="mt-2 text-xs font-semibold text-amber-700 dark:text-amber-300">
+        {{ item.motivo_falha }}
+      </p>
 
       <div v-if="item.fotos?.length" class="mt-2 flex gap-2 overflow-x-auto">
         <button

@@ -22,6 +22,15 @@ type ProdutoNormalizadoRetirada = {
   idProdutoEstoque: number | null
 }
 
+type RetiradaEfetiva = {
+  quantidade: number
+  quantidade_solicitada: number
+  id_produto_estoque: number | null
+  id_produto_estoque_baixa: number | null
+}
+
+const RETIRADA_SEM_BAIXA_MESSAGE = 'Nenhum produto foi retirado. O estoque do produto pai vinculado esta zerado ou insuficiente para esta baixa.'
+
 const toNumber = (value: unknown) => {
   if (typeof value === 'number' && Number.isFinite(value)) {
     return value
@@ -104,6 +113,50 @@ const uploadRetiradaPhoto = async (client: any, ownerUserId: string, dataUrl: st
   return path
 }
 
+const getItensSolicitadosKey = (items: NonNullable<NotaRetiradaHistoricoItem['itens_solicitados']>) => {
+  return JSON.stringify(
+    items
+      .map(item => ({
+        index: Number(item.index),
+        quantidade: Number(item.quantidade),
+        id_produto_estoque_baixa: item.id_produto_estoque_baixa ?? null,
+      }))
+      .sort((a, b) => a.index - b.index),
+  )
+}
+
+const throwRetiradaSemBaixa = () => {
+  throw createError({
+    statusCode: 409,
+    statusMessage: RETIRADA_SEM_BAIXA_MESSAGE,
+  })
+}
+
+const resolveProdutoBaixaEstoque = async (client: any, idProdutoEstoque: number) => {
+  const { data, error } = await (client as any)
+    .from('bd_estoque_geral')
+    .select('IDPRODUTO, IDPRODUTOPAI')
+    .eq('IDPRODUTO', idProdutoEstoque)
+    .maybeSingle()
+
+  if (error) {
+    console.error('[api/notas/:id/retirada] stock product parent lookup error:', error.message)
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Nao foi possivel validar o produto pai no estoque.',
+    })
+  }
+
+  const parentId = toNumber(data?.IDPRODUTOPAI)
+
+  return {
+    idProdutoEstoque,
+    idProdutoBaixa: parentId !== undefined && parentId > 0
+      ? Math.trunc(parentId)
+      : idProdutoEstoque,
+  }
+}
+
 export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
   const user = await serverSupabaseUser(event)
 
@@ -173,7 +226,7 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
     'Somente administradores ou colaboradores podem registrar retirada.',
   )
 
-  const retornarNotaAtual = async (motivo: string) => {
+  const retornarNotaAtual = async (motivo: string, duplicateRequestId?: string | null) => {
     const { data: notaIdempotente, error: idempotenteError } = await (client as any)
       .from('notas_retirada')
       .select('id, status_retirada, data_retirada, comprovante_retirada_url, historico_retiradas, atualizado_em')
@@ -185,6 +238,24 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
         statusCode: 500,
         statusMessage: `Falha ao recuperar a nota apos detectar retirada duplicada (${motivo}).`,
       })
+    }
+
+    const historicoIdempotente = Array.isArray(notaIdempotente.historico_retiradas)
+      ? notaIdempotente.historico_retiradas as NotaRetiradaHistoricoItem[]
+      : []
+    const eventoDuplicado = duplicateRequestId
+      ? historicoIdempotente.find(item => item?.request_id === duplicateRequestId)
+      : null
+
+    if (duplicateRequestId && !eventoDuplicado) {
+      throw createError({
+        statusCode: 409,
+        statusMessage: 'Esta retirada ja esta em processamento. Atualize a nota antes de tentar novamente.',
+      })
+    }
+
+    if (eventoDuplicado?.retirada_efetuada === false || eventoDuplicado?.tipo === 'tentativa_sem_baixa') {
+      throwRetiradaSemBaixa()
     }
 
     return {
@@ -210,7 +281,7 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
           notaId: id,
           requestId,
         })
-        return await retornarNotaAtual('idempotency_table')
+        return await retornarNotaAtual('idempotency_table', requestId)
       }
 
       if (code === '42P01') {
@@ -251,7 +322,7 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
         notaId: id,
         requestId,
       })
-      return await retornarNotaAtual('historico')
+      return await retornarNotaAtual('historico', requestId)
     }
   }
 
@@ -297,14 +368,14 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
       .filter((item: ProdutoNormalizadoRetirada | null): item is ProdutoNormalizadoRetirada => item !== null)
     : []
 
-  const retiradasEfetivas = new Map<number, { quantidade: number; quantidade_solicitada: number }>()
+  const retiradasEfetivas = new Map<number, RetiradaEfetiva>()
 
   for (const produto of produtosNormalizados) {
     if (produto.retiradaSolicitada <= 0) {
       continue
     }
 
-    let retiradaEfetiva = produto.retiradaSolicitada
+    let retiradaEfetiva = 0
     let idProdutoEstoque = produto.idProdutoEstoque
 
     if (idProdutoEstoque === null) {
@@ -313,12 +384,14 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
     }
 
     if (idProdutoEstoque !== null) {
+      const produtoBaixa = await resolveProdutoBaixaEstoque(client as any, idProdutoEstoque)
       console.log('[api/notas/:id/retirada] calling baixar_estoque_produto', {
         notaId: id,
         requestId,
         produto_nome: produto.nome,
         produto_index: produto.index,
         id_produto_estoque: idProdutoEstoque,
+        id_produto_estoque_baixa: produtoBaixa.idProdutoBaixa,
         p_quantidade_solicitada: produto.retiradaSolicitada,
         quantidade_total_nota: produto.quantidadeTotal,
         quantidade_retirada_anterior: produto.quantidadeRetiradaAtual,
@@ -326,7 +399,7 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
 
       const { data: baixaData, error: baixaError } = await (client as any)
         .rpc('baixar_estoque_produto', {
-          p_id_produto: idProdutoEstoque,
+          p_id_produto: produtoBaixa.idProdutoBaixa,
           p_quantidade_solicitada: produto.retiradaSolicitada,
         })
 
@@ -348,14 +421,26 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
         notaId: id,
         requestId,
         produto_nome: produto.nome,
+        id_produto_estoque: idProdutoEstoque,
+        id_produto_estoque_baixa: produtoBaixa.idProdutoBaixa,
         retirada_efetiva: retiradaEfetiva,
         estoque_restante: toNumber(primeiraLinha?.estoque_restante),
       })
+
+      retiradasEfetivas.set(produto.index, {
+        quantidade: retiradaEfetiva,
+        quantidade_solicitada: produto.retiradaSolicitada,
+        id_produto_estoque: idProdutoEstoque,
+        id_produto_estoque_baixa: produtoBaixa.idProdutoBaixa,
+      })
+      continue
     }
 
     retiradasEfetivas.set(produto.index, {
       quantidade: retiradaEfetiva,
       quantidade_solicitada: produto.retiradaSolicitada,
+      id_produto_estoque: idProdutoEstoque,
+      id_produto_estoque_baixa: null,
     })
   }
 
@@ -396,8 +481,6 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
     ? notaAtual.historico_retiradas
     : []
 
-  const comprovanteRetiradaUrl = await uploadRetiradaPhoto(client as any, authUid, body.foto_cliente_retirada_data_url)
-
   const { data: profile } = await (client as any)
     .from('profiles')
     .select('nome, email')
@@ -405,19 +488,87 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
     .maybeSingle()
 
   const responsavelNome = String(profile?.nome || profile?.email || '').trim() || authUid
+  const itensSolicitados = produtosNormalizados
+    .filter(produto => produto.retiradaSolicitada > 0)
+    .map((produto) => {
+      const retirada = retiradasEfetivas.get(produto.index)
+
+      return {
+        index: produto.index,
+        quantidade: produto.retiradaSolicitada,
+        id_produto_estoque: retirada?.id_produto_estoque ?? produto.idProdutoEstoque,
+        id_produto_estoque_baixa: retirada?.id_produto_estoque_baixa ?? null,
+      }
+    })
+
+  const totalRetiradoNestaSolicitacao = Array.from(retiradasEfetivas.values())
+    .reduce((total, retirada) => total + Math.max(0, retirada.quantidade), 0)
+
+  if (totalRetiradoNestaSolicitacao <= 0) {
+    const itensSolicitadosKey = getItensSolicitadosKey(itensSolicitados)
+    const tentativaSemBaixaJaRegistrada = historicoAtual.some((item: NotaRetiradaHistoricoItem) => {
+      if (item?.retirada_efetuada !== false && item?.tipo !== 'tentativa_sem_baixa') return false
+      const itens = Array.isArray(item.itens_solicitados) ? item.itens_solicitados : []
+      return getItensSolicitadosKey(itens) === itensSolicitadosKey
+    })
+
+    if (!tentativaSemBaixaJaRegistrada) {
+      const comprovanteRetiradaUrl = await uploadRetiradaPhoto(client as any, authUid, body.foto_cliente_retirada_data_url)
+      const tentativaHistorico: NotaRetiradaHistoricoItem = {
+        data: new Date().toISOString(),
+        responsavel_id: authUid,
+        responsavel_nome: responsavelNome,
+        tipo: 'tentativa_sem_baixa',
+        retirada_efetuada: false,
+        motivo_falha: RETIRADA_SEM_BAIXA_MESSAGE,
+        fotos: comprovanteRetiradaUrl ? [comprovanteRetiradaUrl] : [],
+        itens_solicitados: itensSolicitados,
+        itens_retirados: [],
+        observacoes: body.observacoes ?? null,
+        request_id: requestId,
+        status_anterior: statusAnterior,
+        status_novo: statusAnterior || 'pendente',
+        usuario_id: authUid,
+      }
+
+      const { error: tentativaError } = await (client as any)
+        .from('notas_retirada')
+        .update({
+          historico_retiradas: [...historicoAtual, tentativaHistorico],
+        })
+        .eq('id', id)
+
+      if (tentativaError) {
+        console.error('[api/notas/:id/retirada] failed attempt history update error:', tentativaError.message)
+      }
+    }
+
+    throwRetiradaSemBaixa()
+  }
+
+  const comprovanteRetiradaUrl = await uploadRetiradaPhoto(client as any, authUid, body.foto_cliente_retirada_data_url)
 
   const eventoHistorico: NotaRetiradaHistoricoItem = {
     data: new Date().toISOString(),
     responsavel_id: authUid,
     responsavel_nome: responsavelNome,
+    tipo: 'retirada',
+    retirada_efetuada: true,
     fotos: comprovanteRetiradaUrl ? [comprovanteRetiradaUrl] : [],
     itens_retirados: produtosNormalizados
-      .map(produto => ({
-        index: produto.index,
-        quantidade: retiradasEfetivas.get(produto.index)?.quantidade ?? 0,
-        quantidade_solicitada: retiradasEfetivas.get(produto.index)?.quantidade_solicitada ?? 0,
-      }))
+      .map((produto) => {
+        const retirada = retiradasEfetivas.get(produto.index)
+
+        return {
+          index: produto.index,
+          quantidade: retirada?.quantidade ?? 0,
+          quantidade_solicitada: retirada?.quantidade_solicitada ?? 0,
+          id_produto_estoque: retirada?.id_produto_estoque ?? produto.idProdutoEstoque,
+          id_produto_estoque_baixa: retirada?.id_produto_estoque_baixa ?? null,
+        }
+      })
       .filter(item => item.quantidade > 0),
+    itens_solicitados: itensSolicitados,
     observacoes: body.observacoes ?? null,
     request_id: requestId,
     // Campos legados mantidos para compatibilidade de consumidores antigos

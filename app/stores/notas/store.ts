@@ -734,6 +734,13 @@ export const useNotasStore = defineStore('notas', () => {
       return data
     }
     catch (error) {
+      if (!isNetworkFetchError(error)) {
+        const msg = getApiErrorMessage(error, 'Nao foi possivel registrar a retirada.')
+        errorMessage.value = msg
+        showError(msg)
+        return null
+      }
+
       const notaOffline = await queueRetirada(notaId, payload)
       const msg = 'Sem conexao: retirada salva offline para sincronizar depois.'
       errorMessage.value = msg

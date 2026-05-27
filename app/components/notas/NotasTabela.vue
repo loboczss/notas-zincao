@@ -31,6 +31,29 @@ const formatCurrency = (value: number | null | undefined) => {
   }).format(Number(value || 0))
 }
 
+const toNumber = (value: unknown) => {
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+  if (typeof value === 'string') {
+    const normalized = value.replace(',', '.').trim()
+    const parsed = Number(normalized)
+    return Number.isFinite(parsed) ? parsed : 0
+  }
+  return 0
+}
+
+const formatQuantity = (value: unknown) => {
+  return new Intl.NumberFormat('pt-BR', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(toNumber(value))
+}
+
+const quantidadeTotalPedido = (nota: NotaRetiradaListItem) => {
+  return Array.isArray(nota.produtos)
+    ? nota.produtos.reduce((total, produto) => total + Math.max(0, toNumber(produto.quantidade)), 0)
+    : 0
+}
+
 const cadastradoPor = (nota: NotaRetiradaListItem) => {
   return String(nota.cadastrado_por_nome || '').trim() || 'Criador nao identificado'
 }
@@ -53,11 +76,12 @@ const cadastradoPor = (nota: NotaRetiradaListItem) => {
       <div class="hidden md:block">
         <div class="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden dark:border-slate-800 dark:bg-slate-900">
           <!-- Header -->
-          <div class="grid grid-cols-[100px_1fr_120px_120px_140px] items-center gap-4 border-b border-slate-200 bg-slate-50 px-6 py-3 dark:border-slate-800 dark:bg-slate-800/50">
+          <div class="grid grid-cols-[100px_1fr_120px_120px_90px_140px] items-center gap-4 border-b border-slate-200 bg-slate-50 px-6 py-3 dark:border-slate-800 dark:bg-slate-800/50">
             <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Nº Nota</span>
             <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Cliente</span>
             <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Data</span>
             <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Valor</span>
+            <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Qtd Total</span>
             <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Status</span>
 
           </div>
@@ -67,7 +91,7 @@ const cadastradoPor = (nota: NotaRetiradaListItem) => {
             <div
               v-for="nota in props.notas"
               :key="nota.id"
-              class="group grid grid-cols-[100px_1fr_120px_120px_140px] items-center gap-4 px-6 py-3 transition-colors hover:bg-slate-50 cursor-pointer dark:hover:bg-slate-800/50"
+              class="group grid grid-cols-[100px_1fr_120px_120px_90px_140px] items-center gap-4 px-6 py-3 transition-colors hover:bg-slate-50 cursor-pointer dark:hover:bg-slate-800/50"
               @click="emit('open', nota.id)"
             >
               <div class="flex flex-col">
@@ -87,6 +111,10 @@ const cadastradoPor = (nota: NotaRetiradaListItem) => {
 
               <div class="text-sm font-medium text-slate-900 dark:text-slate-200">
                 {{ formatCurrency(nota.valor_total) }}
+              </div>
+
+              <div class="text-sm font-medium text-slate-900 dark:text-slate-200">
+                {{ formatQuantity(quantidadeTotalPedido(nota)) }}
               </div>
 
               <div>
