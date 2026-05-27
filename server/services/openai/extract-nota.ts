@@ -5,7 +5,7 @@ import { serverSupabaseClient } from '#supabase/server'
 import { vincularProdutosAoEstoque } from '../estoque/match-produtos'
 import { getOpenAIClient } from './client'
 
-const NOTA_EXTRACTION_MODEL = 'gpt-5.4-mini'
+const NOTA_EXTRACTION_MODEL = 'gpt-5-nano'
 const NOTA_EXTRACTION_REASONING_EFFORT = 'high'
 
 const notaMissingFields = [
@@ -198,7 +198,7 @@ export async function extractNotaFromImage(
           {
             type: 'input_image',
             image_url: imageDataUrl,
-            detail: 'original',
+            detail: 'high',
           },
         ],
       },
