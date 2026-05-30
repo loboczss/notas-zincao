@@ -5,6 +5,7 @@ import type { NotaRetiradaDraft, NotaMissingField } from '../../shared/types/Not
 import { useToast } from './useToast'
 import { getApiErrorMessage } from '../utils/api-errors'
 import { getApiFetch } from '../utils/api-fetch'
+import { normalizeNotaImageDataUrl } from '../utils/image-compression'
 
 export const useNoteManagement = () => {
   const notasStore = useNotasStore()
@@ -25,12 +26,13 @@ export const useNoteManagement = () => {
     clearMessages()
     
     try {
+      const normalizedImageDataUrl = await normalizeNotaImageDataUrl(imageDataUrl)
       const data = await getApiFetch()<{
         draft: NotaRetiradaDraft
         missingFields: NotaMissingField[]
       }>('/api/openai/extract-nota', {
         method: 'POST',
-        body: { imageDataUrl },
+        body: { imageDataUrl: normalizedImageDataUrl },
       })
       showSuccess('Imagem processada com sucesso!', 'IA')
       return data

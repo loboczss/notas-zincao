@@ -5,6 +5,7 @@ import { ref } from 'vue'
 import Botao from '../Botao.vue'
 import NotaCadastroSection from './NotaCadastroSection.vue'
 import { CADASTRO_NOTA_CAMERA_PENDING_KEY } from '../../constants/camera-capture'
+import { NOTA_IMAGE_MAX_DIMENSION } from '../../utils/image-compression'
 
 const props = withDefaults(defineProps<{
   previewUrl?: string
@@ -59,9 +60,11 @@ const requestNativeImage = async (source: 'camera' | 'photos') => {
     const photo = await Camera.getPhoto({
       allowEditing: false,
       correctOrientation: true,
-      quality: 85,
+      height: NOTA_IMAGE_MAX_DIMENSION,
+      quality: 72,
       resultType: CameraResultType.DataUrl,
       source: source === 'camera' ? CameraSource.Camera : CameraSource.Photos,
+      width: NOTA_IMAGE_MAX_DIMENSION,
     })
     const dataUrl = dataUrlFromPhoto(photo)
 

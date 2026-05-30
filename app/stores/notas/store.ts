@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { useToast } from '../../composables/useToast'
 import { getApiErrorMessage, getApiErrorStatus, isNetworkFetchError } from '../../utils/api-errors'
 import { getApiFetch } from '../../utils/api-fetch'
+import { normalizeNotaImageDataUrl } from '../../utils/image-compression'
 import {
   enqueueOfflineRequest,
   getOfflineCache,
@@ -430,9 +431,10 @@ export const useNotasStore = defineStore('notas', () => {
     clearError()
 
     try {
+      const normalizedImageDataUrl = await normalizeNotaImageDataUrl(imageDataUrl)
       const data = await getApiFetch()<NotaExtractionResponse>('/api/openai/extract-nota', {
         method: 'POST',
-        body: { imageDataUrl },
+        body: { imageDataUrl: normalizedImageDataUrl },
       })
 
       return data

@@ -16,6 +16,7 @@ import { useCrmStore, useNotasStore } from '../stores'
 import { useToast } from '../composables/useToast'
 import { AppRoute } from '../constants/routes'
 import { CADASTRO_NOTA_RESTORED_IMAGE_STATE_KEY } from '../constants/camera-capture'
+import { normalizeNotaImageDataUrl } from '../utils/image-compression'
 
 definePageMeta({
   middleware: 'auth',
@@ -299,10 +300,19 @@ const selecionarContato = (contato: CrmContato) => {
   crmStore.clearContatos()
 }
 
-const selecionarImagemDataUrl = (dataUrl: string) => {
+const selecionarImagemDataUrl = async (dataUrl: string) => {
   if (!dataUrl.startsWith('data:image/')) return
 
-  imageDataUrl.value = dataUrl
+  try {
+    imageDataUrl.value = await normalizeNotaImageDataUrl(dataUrl)
+  }
+  catch (error) {
+    imageDataUrl.value = ''
+    const message = error instanceof Error
+      ? error.message
+      : 'Nao foi possivel preparar a imagem para envio.'
+    showError(message)
+  }
 }
 
 const selecionarImagem = async (event: Event) => {
@@ -321,16 +331,16 @@ const selecionarImagem = async (event: Event) => {
       reader.onerror = () => reject(new Error('Falha ao ler imagem'))
       reader.readAsDataURL(file)
     })
-    selecionarImagemDataUrl(dataUrl)
+    await selecionarImagemDataUrl(dataUrl)
   } finally {
     target.value = ''
   }
 }
 
-watch(restoredImageDataUrl, (dataUrl) => {
+watch(restoredImageDataUrl, async (dataUrl) => {
   if (!dataUrl) return
 
-  selecionarImagemDataUrl(dataUrl)
+  await selecionarImagemDataUrl(dataUrl)
   restoredImageDataUrl.value = ''
 }, { immediate: true })
 

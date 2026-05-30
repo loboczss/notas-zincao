@@ -59,6 +59,10 @@ export const getApiErrorMessage = (error: unknown, fallback = 'Falha ao comunica
     return 'Voce nao tem permissao para executar esta acao.'
   }
 
+  if (status === 413) {
+    return 'Imagem muito grande para enviar. Tire uma foto mais proxima do documento ou recorte a imagem e tente novamente.'
+  }
+
   if (isNetworkFetchError(error)) {
     return 'Sem conexao com o servidor. Verifique a internet e tente novamente.'
   }
