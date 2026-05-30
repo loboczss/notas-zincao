@@ -15,6 +15,7 @@ import {
   FilePlus2,
   FileText,
   Gauge,
+  PackageSearch,
   Trash2,
   Users,
   Warehouse,
@@ -63,6 +64,12 @@ const principalItems: SidebarItem[] = [
     label: 'Estoque',
     to: AppRoute.estoque,
     icon: Warehouse,
+    exact: true,
+  },
+  {
+    label: 'Stock Integrin',
+    to: AppRoute.stockIntegrin,
+    icon: PackageSearch,
     exact: true,
   },
 ]

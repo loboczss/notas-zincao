@@ -7,9 +7,17 @@ import {
   toAdminUserRecord,
 } from '../../../../utils/admin-users'
 import type { AdminUpdateUserRolePayload } from '../../../../../shared/types/AdminUsers'
+import { assertRateLimit } from '../../../../utils/rate-limit'
 
 export default defineEventHandler(async (event) => {
   const requesterAuthUid = await getCurrentAuthUid(event)
+  assertRateLimit(event, {
+    key: 'admin:mutation',
+    limit: 30,
+    windowMs: 60_000,
+    userId: requesterAuthUid,
+  })
+
   const client = await getAdminUsersClient(event)
 
   await assertAdminAccess(client, requesterAuthUid)

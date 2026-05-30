@@ -4,7 +4,6 @@ import type { NotaExtractionRequest, NotaExtractionResponse } from './NotasRetir
 export type OpenAIChatRequest = {
   message: string
   model?: OpenAIModelId
-  systemPrompt?: string
   imageDataUrl?: string
 }
 

@@ -113,6 +113,28 @@ export default defineNuxtConfig({
     build: {
       sourcemap: false,
       rollupOptions: {
+        output: {
+          manualChunks(id) {
+            const normalizedId = id.replace(/\\/g, '/')
+
+            if (normalizedId.includes('/node_modules/@supabase/')) {
+              return 'supabase'
+            }
+
+            if (normalizedId.includes('/node_modules/lucide-vue-next/')) {
+              return 'lucide'
+            }
+
+            if (
+              normalizedId.includes('/node_modules/vue')
+              || normalizedId.includes('/node_modules/@vue/')
+              || normalizedId.includes('/node_modules/pinia/')
+              || normalizedId.includes('/node_modules/vue-router/')
+            ) {
+              return 'vue-vendor'
+            }
+          },
+        },
         onwarn(warning, warn) {
           if (
             warning.plugin === 'nuxt:module-preload-polyfill'

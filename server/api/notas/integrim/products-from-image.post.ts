@@ -2,6 +2,7 @@ import { serverSupabaseUser } from '#supabase/server'
 import type { OpenAINotaExtractionRequest } from '../../../../shared/types/OpenAI'
 import type { NotaImageProductsResponse } from '../../../../shared/types/NotasRetirada'
 import { extractNotaProductsFromImage } from '../../../services/openai'
+import { assertRateLimit } from '../../../utils/rate-limit'
 
 const MAX_IMAGE_DATA_URL_LENGTH = 1_200_000
 
@@ -14,6 +15,13 @@ export default defineEventHandler(async (event) => {
       statusMessage: 'Sessao expirada. Faca login novamente.',
     })
   }
+
+  assertRateLimit(event, {
+    key: 'integrim:products-from-image',
+    limit: 10,
+    windowMs: 60_000,
+    userId: user.id || user.sub,
+  })
 
   let body: OpenAINotaExtractionRequest
   try {

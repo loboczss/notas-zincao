@@ -1,0 +1,13 @@
+{
+  "$schema": "https://unpkg.com/knip@latest/schema.json",
+  "ignore": [
+    ".agents/**",
+    "android/app/build/**",
+    "android/build/**",
+    "android/app/src/main/assets/public/**",
+    "graphify-out/**",
+    "global.d.ts",
+    "public/offline-sw.js",
+    "tailwind.config.js"
+  ]
+}

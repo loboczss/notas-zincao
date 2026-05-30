@@ -6,9 +6,9 @@ import type {
 } from '../../../shared/types/OfflineNotasSync'
 import { NOTAS_RETIRADA_STORAGE_BUCKET, getNotasRetiradaStoragePath } from '../../utils/storage'
 
-export const OFFLINE_NOTAS_SYNC_DEFAULT_PAGE_SIZE = 50
-export const OFFLINE_NOTAS_SYNC_MAX_PAGE_SIZE = 100
-export const OFFLINE_NOTAS_SYNC_SIGNED_URL_TTL_SECONDS = 60 * 60
+const OFFLINE_NOTAS_SYNC_DEFAULT_PAGE_SIZE = 50
+const OFFLINE_NOTAS_SYNC_MAX_PAGE_SIZE = 100
+const OFFLINE_NOTAS_SYNC_SIGNED_URL_TTL_SECONDS = 60 * 60
 
 export const OFFLINE_NOTAS_SYNC_SELECT = [
   'id',
@@ -187,7 +187,7 @@ export const createSignedUrlMap = async (
   return { signedUrlByPath, expiresAt }
 }
 
-export const attachSignedUrlsToAssets = (
+const attachSignedUrlsToAssets = (
   assets: OfflineNotaAsset[],
   signed: SignedUrlResult,
 ) => assets.map(asset => ({

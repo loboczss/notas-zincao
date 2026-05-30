@@ -1,6 +1,7 @@
 import { serverSupabaseUser } from '#supabase/server'
 import type { OpenAINotaExtractionRequest } from '../../../shared/types/OpenAI'
 import { extractNotaFromImage } from '../../services/openai'
+import { assertRateLimit } from '../../utils/rate-limit'
 
 const MAX_IMAGE_DATA_URL_LENGTH = 1_200_000
 
@@ -13,6 +14,13 @@ export const openaiExtractNotaPostHandler = defineEventHandler(async (event) => 
       statusMessage: 'Unauthorized',
     })
   }
+
+  assertRateLimit(event, {
+    key: 'openai:extract-nota',
+    limit: 12,
+    windowMs: 60_000,
+    userId: user.id || user.sub,
+  })
 
   let body: OpenAINotaExtractionRequest
   try {
@@ -43,7 +51,7 @@ export const openaiExtractNotaPostHandler = defineEventHandler(async (event) => 
     return await extractNotaFromImage(event, body.imageDataUrl)
   }
   catch (error) {
-    console.error('[api/openai/extract-nota] error:', error)
+    console.error('[api/openai/extract-nota] error:', error instanceof Error ? error.message : 'unknown error')
     throw createError({
       statusCode: 502,
       statusMessage: 'OpenAI extraction failed.',

@@ -45,10 +45,10 @@ const VALID_SORT_KEYS: RetiradaHistoricoSortKey[] = [
   'reducao_zinco_10',
 ]
 
-export const isIsoDateOnly = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value)
-export const isHourMinute = (value: string) => /^([01]\d|2[0-3]):[0-5]\d$/.test(value)
+const isIsoDateOnly = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value)
+const isHourMinute = (value: string) => /^([01]\d|2[0-3]):[0-5]\d$/.test(value)
 
-export const normalizeRetiradaText = (value: unknown) =>
+const normalizeRetiradaText = (value: unknown) =>
   String(value || '')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')

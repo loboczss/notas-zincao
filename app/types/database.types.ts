@@ -320,8 +320,6 @@ export type Database = {
 }
 
 export type NotaRetiradaRow = Database['public']['Tables']['notas_retirada']['Row']
-export type NotaRetiradaInsert = Database['public']['Tables']['notas_retirada']['Insert']
-export type NotaRetiradaUpdate = Database['public']['Tables']['notas_retirada']['Update']
 export type EstoqueProdutoRow = Database['public']['Tables']['bd_estoque_geral']['Row']
 export type EstoqueProdutoInsert = Database['public']['Tables']['bd_estoque_geral']['Insert']
 export type EstoqueProdutoUpdate = Database['public']['Tables']['bd_estoque_geral']['Update']

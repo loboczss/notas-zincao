@@ -1,9 +1,8 @@
-const CACHE_NAME = 'notas-zincao-shell-v1'
+const CACHE_NAME = 'notas-zincao-shell-v2'
 const CORE_ASSETS = [
   '/',
   '/manifest.webmanifest',
   '/logomarca.png',
-  '/logomarca.svg',
   '/logomarca.ico',
 ]
 

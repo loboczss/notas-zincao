@@ -1,8 +1,6 @@
 import { $fetch, type $Fetch } from 'ofetch'
 import { useRuntimeConfig, useSupabaseClient } from '#imports'
 import { useRequestFetch } from '#app/composables/ssr'
-import { isNetworkFetchError } from './api-errors'
-import { getCachedAuthSession } from './auth-session-cache'
 
 const normalizeApiBaseUrl = (value?: string) => String(value || '').trim().replace(/\/+$/, '')
 
@@ -38,21 +36,9 @@ export const getApiAuthHeaders = async (supabaseClient = resolveSupabaseClient()
     const token = data.session?.access_token
     if (token) {
       headers.set('Authorization', `Bearer ${token}`)
-      return headers
-    }
-
-    const cachedToken = getCachedAuthSession()?.access_token
-    if (cachedToken) {
-      headers.set('Authorization', `Bearer ${cachedToken}`)
     }
   }
-  catch (error) {
-    const cachedToken = isNetworkFetchError(error) ? getCachedAuthSession()?.access_token : null
-    if (cachedToken) {
-      headers.set('Authorization', `Bearer ${cachedToken}`)
-      return headers
-    }
-
+  catch {
     // Same-origin SSR/browser requests can still rely on Supabase cookies.
   }
 

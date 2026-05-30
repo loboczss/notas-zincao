@@ -205,17 +205,11 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
     ? body.request_id.trim()
     : null
 
-  const bodyQuantidades = body.produtos_retirada.map(item => ({
-    nome: String(item?.nome || '').trim(),
-    quantidade_retirada: toNumber(item?.quantidade_retirada) ?? 0,
-  }))
-
-  console.log('[api/notas/:id/retirada] request received', {
+  console.info('[api/notas/:id/retirada] request received', {
     notaId: id,
-    authUid,
     requestId,
-    produtos_retirada: bodyQuantidades,
-    observacoes: typeof body.observacoes === 'string' ? body.observacoes.slice(0, 80) : null,
+    itemCount: body.produtos_retirada.length,
+    hasObservacoes: typeof body.observacoes === 'string' && body.observacoes.trim().length > 0,
   })
 
   const client = await serverSupabaseClient(event)
@@ -277,7 +271,7 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
     if (idemInsertError) {
       const code = (idemInsertError as { code?: string }).code
       if (code === '23505') {
-        console.log('[api/notas/:id/retirada] duplicate request_id rejected by idempotency table', {
+        console.info('[api/notas/:id/retirada] duplicate request_id rejected by idempotency table', {
           notaId: id,
           requestId,
         })
@@ -318,7 +312,7 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
     const jaProcessada = historicoExistente.some(item => item?.request_id === requestId)
 
     if (jaProcessada) {
-      console.log('[api/notas/:id/retirada] duplicate request_id detected in historico, skipping', {
+      console.info('[api/notas/:id/retirada] duplicate request_id detected in historico, skipping', {
         notaId: id,
         requestId,
       })
@@ -385,17 +379,6 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
 
     if (idProdutoEstoque !== null) {
       const produtoBaixa = await resolveProdutoBaixaEstoque(client as any, idProdutoEstoque)
-      console.log('[api/notas/:id/retirada] calling baixar_estoque_produto', {
-        notaId: id,
-        requestId,
-        produto_nome: produto.nome,
-        produto_index: produto.index,
-        id_produto_estoque: idProdutoEstoque,
-        id_produto_estoque_baixa: produtoBaixa.idProdutoBaixa,
-        p_quantidade_solicitada: produto.retiradaSolicitada,
-        quantidade_total_nota: produto.quantidadeTotal,
-        quantidade_retirada_anterior: produto.quantidadeRetiradaAtual,
-      })
 
       const { data: baixaData, error: baixaError } = await (client as any)
         .rpc('baixar_estoque_produto', {
@@ -416,16 +399,6 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
         produto.retiradaSolicitada,
         toNumber(primeiraLinha?.quantidade_retirada) ?? 0,
       ))
-
-      console.log('[api/notas/:id/retirada] baixar_estoque_produto result', {
-        notaId: id,
-        requestId,
-        produto_nome: produto.nome,
-        id_produto_estoque: idProdutoEstoque,
-        id_produto_estoque_baixa: produtoBaixa.idProdutoBaixa,
-        retirada_efetiva: retiradaEfetiva,
-        estoque_restante: toNumber(primeiraLinha?.estoque_restante),
-      })
 
       retiradasEfetivas.set(produto.index, {
         quantidade: retiradaEfetiva,

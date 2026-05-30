@@ -7,6 +7,7 @@ import {
 } from '../../../../utils/admin-users'
 import type { AdminResetUserPasswordResponse } from '../../../../../shared/types/AdminUsers'
 import { isResendConfigured, sendEmailWithResend } from '../../../../services/email/resend'
+import { assertRateLimit } from '../../../../utils/rate-limit'
 
 type ProfileEmailRow = {
   email?: string | null
@@ -41,6 +42,13 @@ const buildCustomResetEmailHtml = (params: {
 
 export default defineEventHandler(async (event): Promise<AdminResetUserPasswordResponse> => {
   const requesterAuthUid = await getCurrentAuthUid(event)
+  assertRateLimit(event, {
+    key: 'admin:identity',
+    limit: 10,
+    windowMs: 10 * 60_000,
+    userId: requesterAuthUid,
+  })
+
   const client = await getAdminUsersClient(event)
 
   await assertAdminAccess(client, requesterAuthUid)

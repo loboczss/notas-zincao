@@ -1,5 +1,4 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
-import type { Database } from '../../../app/types/database.types'
 
 const toNumber = (value: unknown) => {
   if (typeof value === 'number' && Number.isFinite(value)) return value
@@ -11,6 +10,18 @@ const toNumber = (value: unknown) => {
   return 0
 }
 
+const toInteger = (value: unknown) => Math.trunc(toNumber(value))
+
+type DashboardMetricsRow = {
+  produto_10_id?: number | string | null
+  produto_10_nome?: string | null
+  produto_10_saldo_estoque?: number | string | null
+  produto_10_notas_pendentes_com_produto?: number | string | null
+  produto_10_quantidade_pendente_notas?: number | string | null
+  produto_10_percentual_comprometido?: number | string | null
+  produto_10_quantidade_filhos?: number | string | null
+}
+
 export default defineEventHandler(async (event) => {
   const user = await serverSupabaseUser(event)
 
@@ -18,99 +29,46 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
   }
 
-  const client = await serverSupabaseClient<Database>(event)
+  const client = await serverSupabaseClient(event)
 
-  const { data: produtoBase, error: produtoBaseError } = await (client as any)
-    .from('bd_estoque_geral')
-    .select('IDPRODUTO, DESCRICAO, QUANTIDADEESTOQUE, IDPRODUTOPAI, FATORCONVERSAO')
-    .eq('IDPRODUTO', 10)
+  const { data, error } = await (client as any)
+    .from('dashboard_metrics')
+    .select(`
+      produto_10_id,
+      produto_10_nome,
+      produto_10_saldo_estoque,
+      produto_10_notas_pendentes_com_produto,
+      produto_10_quantidade_pendente_notas,
+      produto_10_percentual_comprometido,
+      produto_10_quantidade_filhos
+    `)
+    .eq('id', 'global')
     .maybeSingle()
 
-  if (produtoBaseError) {
-    console.error('[api/dashboard/produto-10] produto base error:', produtoBaseError.message)
-    throw createError({ statusCode: 500, statusMessage: 'Não foi possível carregar o produto base do estoque.' })
+  if (error) {
+    console.error('[api/dashboard/produto-10] error:', error.message)
+    throw createError({ statusCode: 500, statusMessage: 'Nao foi possivel carregar os dados do produto prioritario.' })
   }
 
-  if (!produtoBase) {
-    throw createError({ statusCode: 404, statusMessage: 'Produto ID 10 não encontrado no estoque.' })
+  if (!data) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Metricas do dashboard ainda nao foram inicializadas.',
+    })
   }
 
-  const { data: produtosFilhos, error: filhosError } = await (client as any)
-    .from('bd_estoque_geral')
-    .select('IDPRODUTO, DESCRICAO, QUANTIDADEESTOQUE, IDPRODUTOPAI, FATORCONVERSAO')
-    .eq('IDPRODUTOPAI', 10)
-
-  if (filhosError) {
-    console.error('[api/dashboard/produto-10] filhos error:', filhosError.message)
-    throw createError({ statusCode: 500, statusMessage: 'Não foi possível carregar os produtos filhos do estoque.' })
-  }
-
-  const produtosRelacionados = [produtoBase, ...((produtosFilhos || []) as any[])]
-  const conversaoPorId = new Map<number, number>()
-  for (const produto of produtosRelacionados) {
-    const id = Number(produto.IDPRODUTO || 0)
-    if (!id) continue
-    if (id === 10) {
-      conversaoPorId.set(id, 1)
-      continue
-    }
-    const fator = Number(produto.FATORCONVERSAO || 0)
-    conversaoPorId.set(id, fator > 0 ? fator : 1)
-  }
-
-  const idsRelacionados = [...conversaoPorId.keys()]
-
-  const { data: notasPendentes, error: notasError } = await (client as any)
-    .from('notas_retirada')
-    .select('id, produtos')
-    .eq('status_retirada', 'pendente')
-
-  if (notasError) {
-    console.error('[api/dashboard/produto-10] notas error:', notasError.message)
-    throw createError({ statusCode: 500, statusMessage: 'Não foi possível carregar as notas pendentes.' })
-  }
-
-  let quantidadePendenteNotas = 0
-  const notasComProduto = new Set<string>()
-
-  for (const nota of (notasPendentes || []) as Array<{ id: string; produtos?: any[] }>) {
-    const produtos = Array.isArray(nota.produtos) ? nota.produtos : []
-    let notaTemProduto = false
-
-    for (const item of produtos) {
-      const idProduto = Number(item?.id_produto_estoque || 0)
-      if (!idsRelacionados.includes(idProduto)) continue
-
-      const quantidade = toNumber(item?.quantidade)
-      const quantidadeRetirada = toNumber(item?.quantidade_retirada)
-      const saldoPendente = Math.max(0, quantidade - quantidadeRetirada)
-      const fator = conversaoPorId.get(idProduto) || 1
-
-      quantidadePendenteNotas += saldoPendente * fator
-      notaTemProduto = true
-    }
-
-    if (notaTemProduto && nota.id) {
-      notasComProduto.add(String(nota.id))
-    }
-  }
-
-  const saldoEstoque = Number(produtoBase.QUANTIDADEESTOQUE || 0)
-  const quantidadePendenteConvertida = Number(quantidadePendenteNotas.toFixed(3))
-  const percentualComprometido = saldoEstoque > 0
-    ? Math.min(100, Math.round((quantidadePendenteConvertida / saldoEstoque) * 100))
-    : 0
+  const metrics = data as DashboardMetricsRow
 
   return {
     success: true,
     produto: {
-      id: Number(produtoBase.IDPRODUTO || 10),
-      nome: String(produtoBase.DESCRICAO || 'Produto ID 10'),
-      saldo_estoque: Number(saldoEstoque.toFixed(3)),
-      notas_pendentes_com_produto: notasComProduto.size,
-      quantidade_pendente_notas: quantidadePendenteConvertida,
-      percentual_comprometido: percentualComprometido,
-      quantidade_filhos: (produtosFilhos || []).length,
+      id: toInteger(metrics.produto_10_id) || 10,
+      nome: String(metrics.produto_10_nome || 'Produto ID 10'),
+      saldo_estoque: toNumber(metrics.produto_10_saldo_estoque),
+      notas_pendentes_com_produto: toInteger(metrics.produto_10_notas_pendentes_com_produto),
+      quantidade_pendente_notas: toNumber(metrics.produto_10_quantidade_pendente_notas),
+      percentual_comprometido: toInteger(metrics.produto_10_percentual_comprometido),
+      quantidade_filhos: toInteger(metrics.produto_10_quantidade_filhos),
     },
   }
 })

@@ -6,14 +6,13 @@ import { getApiErrorMessage, isNetworkFetchError, isUnauthorizedError } from '..
 import { getApiFetch } from '../../utils/api-fetch'
 import {
   cacheAuthProfile,
-  cacheAuthSession,
   clearCachedAuthState,
   getCachedAuthProfile,
-  getCachedAuthSession,
 } from '../../utils/auth-session-cache'
 import { clearUserScopedOfflineData } from '../../utils/offline-db'
 import { useNotasStore } from '../notas/store'
 import { useEstoqueStore } from '../estoque/store'
+import { useStockIntegrinStore } from '../stock-integrin/store'
 import { useCrmStore } from '../crm/store'
 import { useAdminUsersStore } from '../admin/users/store'
 import type { SignInPayload, SignUpPayload } from '../../../shared/types/Auth'
@@ -38,8 +37,6 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const fetchSession = async () => {
-    const cachedSession = getCachedAuthSession()
-
     try {
       const { data, error } = await supabase.auth.getSession()
 
@@ -48,14 +45,8 @@ export const useAuthStore = defineStore('auth', () => {
       }
 
       session.value = data.session
-      cacheAuthSession(data.session)
     }
     catch (error) {
-      if (cachedSession && (isNetworkFetchError(error) || (import.meta.client && !navigator.onLine))) {
-        session.value = cachedSession
-        return
-      }
-
       if (isUnauthorizedError(error)) {
         clearCachedAuthState()
         session.value = null
@@ -122,7 +113,6 @@ export const useAuthStore = defineStore('auth', () => {
 
       if (data.session) {
         session.value = data.session
-        cacheAuthSession(data.session)
       }
     }
     catch (error) {
@@ -175,6 +165,7 @@ export const useAuthStore = defineStore('auth', () => {
   const resetUserScopedStores = () => {
     useNotasStore().reset()
     useEstoqueStore().reset()
+    useStockIntegrinStore().reset()
     useCrmStore().reset()
     useAdminUsersStore().reset()
   }

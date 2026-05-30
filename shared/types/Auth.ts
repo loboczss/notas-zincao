@@ -9,8 +9,3 @@ export type SignUpPayload = {
   nome: string
   redirectTo?: string
 }
-
-export type AuthResult = {
-  success: boolean
-  message?: string
-}

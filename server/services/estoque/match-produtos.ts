@@ -94,7 +94,7 @@ const buildSearchTerms = (nome: string) => {
   return [...new Set(terms)]
 }
 
-export const buscarSugestoesProdutoEstoque = async (client: any, nome: string, limit = 12) => {
+const buscarSugestoesProdutoEstoque = async (client: any, nome: string, limit = 12) => {
   const searchTerms = buildSearchTerms(nome)
   if (!searchTerms.length) {
     return [] as EstoqueCandidate[]
@@ -124,7 +124,7 @@ export const buscarSugestoesProdutoEstoque = async (client: any, nome: string, l
   return (data || []) as EstoqueCandidate[]
 }
 
-export const buscarProdutosEstoquePorIds = async (client: any, ids: number[]) => {
+const buscarProdutosEstoquePorIds = async (client: any, ids: number[]) => {
   const uniqueIds = [...new Set(ids.filter(id => Number.isFinite(id) && id > 0))]
   if (!uniqueIds.length) {
     return new Map<number, EstoqueCandidate>()

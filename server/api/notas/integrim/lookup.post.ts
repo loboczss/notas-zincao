@@ -1,6 +1,7 @@
 import { serverSupabaseUser } from '#supabase/server'
 import type { NotaIntegrimLookupRequest } from '../../../../shared/types/NotasRetirada'
 import { lookupNotaIntegrim } from '../../../services/integrim/client'
+import { assertRateLimit } from '../../../utils/rate-limit'
 
 const isHttpError = (error: unknown) => Boolean(error && typeof error === 'object' && 'statusCode' in error)
 
@@ -13,6 +14,13 @@ export default defineEventHandler(async (event) => {
       statusMessage: 'Sessao expirada. Faca login novamente.',
     })
   }
+
+  assertRateLimit(event, {
+    key: 'integrim:lookup',
+    limit: 30,
+    windowMs: 60_000,
+    userId: user.id || user.sub,
+  })
 
   let body: NotaIntegrimLookupRequest
   try {

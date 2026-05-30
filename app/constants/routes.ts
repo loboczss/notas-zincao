@@ -7,6 +7,7 @@ export const AppRoute = {
   retiradas: '/retiradas',
   sincronizacao: '/sincronizacao',
   estoque: '/estoque',
+  stockIntegrin: '/stock-integrin',
   cadastrarNota: '/cadastrar-nota',
   profile: '/profile',
   adminUsuarios: '/admin/usuarios',
@@ -34,6 +35,7 @@ export const getPageTitle = (path: string) => {
   if (path.startsWith(`${AppRoute.notas}/`) && path.endsWith('/retirada')) return 'Retirada da Nota'
   if (path.startsWith(`${AppRoute.notas}/`) && path.endsWith('/historico')) return 'Historico de Auditoria'
   if (path === AppRoute.estoque) return 'Estoque'
+  if (path === AppRoute.stockIntegrin) return 'Stock Integrin'
   if (path === AppRoute.cadastrarNota) return 'Cadastrar Nota'
   if (path === AppRoute.profile) return 'Perfil'
   if (path === AppRoute.adminUsuarios) return 'Usuarios'

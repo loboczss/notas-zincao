@@ -1,13 +1,7 @@
-import type { Session } from '@supabase/supabase-js'
 import type { UserProfile } from '../../shared/types/Profile'
 
 const AUTH_SESSION_CACHE_KEY = 'notas-zincao:auth-session'
 const AUTH_PROFILE_CACHE_KEY = 'notas-zincao:auth-profile'
-
-type CachedSessionPayload = {
-  session: Session
-  cachedAt: string
-}
 
 type CachedProfilePayload = {
   profile: UserProfile
@@ -16,18 +10,6 @@ type CachedProfilePayload = {
 
 const canUseStorage = () => {
   return import.meta.client && typeof window !== 'undefined' && typeof window.localStorage !== 'undefined'
-}
-
-const isValidSession = (session: Partial<Session> | null | undefined): session is Session => {
-  return Boolean(
-    session
-    && typeof session.access_token === 'string'
-    && session.access_token
-    && typeof session.refresh_token === 'string'
-    && session.refresh_token
-    && session.user
-    && typeof session.user.id === 'string',
-  )
 }
 
 const readJson = <T>(key: string): T | null => {
@@ -52,25 +34,6 @@ const writeJson = (key: string, value: unknown) => {
   catch {
     // Storage may be unavailable in private mode or under device quota pressure.
   }
-}
-
-export const getCachedAuthSession = () => {
-  const cached = readJson<CachedSessionPayload>(AUTH_SESSION_CACHE_KEY)
-  return isValidSession(cached?.session) ? cached.session : null
-}
-
-export const cacheAuthSession = (session: Session | null | undefined) => {
-  if (!canUseStorage()) return
-
-  if (!isValidSession(session)) {
-    window.localStorage.removeItem(AUTH_SESSION_CACHE_KEY)
-    return
-  }
-
-  writeJson(AUTH_SESSION_CACHE_KEY, {
-    session,
-    cachedAt: new Date().toISOString(),
-  } satisfies CachedSessionPayload)
 }
 
 export const getCachedAuthProfile = () => {

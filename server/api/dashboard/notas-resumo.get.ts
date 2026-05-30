@@ -9,12 +9,19 @@ const toNumber = (value: unknown) => {
   return 0
 }
 
-type NotaResumoItem = {
-  status_retirada?: 'pendente' | 'parcial' | 'retirada' | 'cancelada' | null
-  produtos?: Array<{
-    quantidade?: number | string | null
-    quantidade_retirada?: number | string | null
-  }> | null
+const toInteger = (value: unknown) => Math.trunc(toNumber(value))
+
+type DashboardMetricsRow = {
+  total_notas?: number | string | null
+  pendentes?: number | string | null
+  parciais?: number | string | null
+  retiradas?: number | string | null
+  canceladas?: number | string | null
+  pecas_compradas?: number | string | null
+  pecas_entregues?: number | string | null
+  pecas_pendentes?: number | string | null
+  percentual_entrega?: number | string | null
+  updated_at?: string | null
 }
 
 export default defineEventHandler(async (event) => {
@@ -27,8 +34,21 @@ export default defineEventHandler(async (event) => {
   const client = await serverSupabaseClient(event)
 
   const { data, error } = await (client as any)
-    .from('notas_retirada')
-    .select('status_retirada, produtos')
+    .from('dashboard_metrics')
+    .select(`
+      total_notas,
+      pendentes,
+      parciais,
+      retiradas,
+      canceladas,
+      pecas_compradas,
+      pecas_entregues,
+      pecas_pendentes,
+      percentual_entrega,
+      updated_at
+    `)
+    .eq('id', 'global')
+    .maybeSingle()
 
   if (error) {
     console.error('[api/dashboard/notas-resumo] error:', error.message)
@@ -38,49 +58,28 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const notas = (data || []) as NotaResumoItem[]
-
-  let pendentes = 0
-  let parciais = 0
-  let retiradas = 0
-  let canceladas = 0
-
-  let pecasCompradas = 0
-  let pecasEntregues = 0
-
-  for (const nota of notas) {
-    const status = String(nota?.status_retirada || '').toLowerCase()
-    if (status === 'pendente') pendentes += 1
-    if (status === 'parcial') parciais += 1
-    if (status === 'retirada') retiradas += 1
-    if (status === 'cancelada') canceladas += 1
-
-    const produtos = Array.isArray(nota?.produtos) ? nota.produtos : []
-    for (const produto of produtos) {
-      pecasCompradas += toNumber(produto?.quantidade)
-      pecasEntregues += toNumber(produto?.quantidade_retirada)
-    }
+  if (!data) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Metricas do dashboard ainda nao foram inicializadas.',
+    })
   }
 
-  const pecasCompradasRounded = Math.round(pecasCompradas * 100) / 100
-  const pecasEntreguesRounded = Math.round(pecasEntregues * 100) / 100
-  const pecasPendentes = Math.max(0, Math.round((pecasCompradas - pecasEntregues) * 100) / 100)
-  const percentualEntrega = pecasCompradas > 0
-    ? Math.round((pecasEntregues / pecasCompradas) * 100)
-    : 0
+  const metrics = data as DashboardMetricsRow
 
   return {
     success: true,
     resumo: {
-      total_notas: notas.length,
-      pendentes,
-      parciais,
-      retiradas,
-      canceladas,
-      pecas_compradas: pecasCompradasRounded,
-      pecas_entregues: pecasEntreguesRounded,
-      pecas_pendentes: pecasPendentes,
-      percentual_entrega: percentualEntrega,
+      total_notas: toInteger(metrics.total_notas),
+      pendentes: toInteger(metrics.pendentes),
+      parciais: toInteger(metrics.parciais),
+      retiradas: toInteger(metrics.retiradas),
+      canceladas: toInteger(metrics.canceladas),
+      pecas_compradas: toNumber(metrics.pecas_compradas),
+      pecas_entregues: toNumber(metrics.pecas_entregues),
+      pecas_pendentes: toNumber(metrics.pecas_pendentes),
+      percentual_entrega: toInteger(metrics.percentual_entrega),
+      updated_at: metrics.updated_at || null,
     },
   }
 })

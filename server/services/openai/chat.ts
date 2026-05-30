@@ -2,6 +2,8 @@ import type { OpenAIChatRequest, OpenAIChatResponse } from '../../../shared/type
 import { DEFAULT_OPENAI_MODEL, isOpenAIModelSupported } from '../../../shared/constants/OpenAIModels'
 import { getOpenAIClient } from './client'
 
+const OPENAI_CHAT_SYSTEM_PROMPT = 'Voce e um assistente util e objetivo.'
+
 export async function createOpenAIChat(
   event: Parameters<typeof useRuntimeConfig>[0],
   payload: OpenAIChatRequest,
@@ -30,7 +32,7 @@ export async function createOpenAIChat(
     messages: [
       {
         role: 'system',
-        content: payload.systemPrompt || 'Você é um assistente útil e objetivo.',
+        content: OPENAI_CHAT_SYSTEM_PROMPT,
       },
       {
         role: 'user',

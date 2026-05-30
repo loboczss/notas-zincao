@@ -2,6 +2,7 @@ import { serverSupabaseUser } from '#supabase/server'
 import type { OpenAIChatRequest } from '../../../shared/types/OpenAI'
 import { isOpenAIModelSupported } from '../../../shared/constants/OpenAIModels'
 import { createOpenAIChat } from '../../services/openai'
+import { assertRateLimit } from '../../utils/rate-limit'
 
 export const openaiChatPostHandler = defineEventHandler(async (event) => {
   const user = await serverSupabaseUser(event)
@@ -12,6 +13,13 @@ export const openaiChatPostHandler = defineEventHandler(async (event) => {
       statusMessage: 'Unauthorized',
     })
   }
+
+  assertRateLimit(event, {
+    key: 'openai:chat',
+    limit: 20,
+    windowMs: 60_000,
+    userId: user.id || user.sub,
+  })
 
   const body = await readBody<OpenAIChatRequest>(event)
 
@@ -66,12 +74,11 @@ export const openaiChatPostHandler = defineEventHandler(async (event) => {
     return await createOpenAIChat(event, {
       message: trimmedMessage,
       model: body.model,
-      systemPrompt: body.systemPrompt,
       imageDataUrl: body.imageDataUrl,
     })
   }
   catch (error) {
-    console.error('[api/openai/chat] error:', error)
+    console.error('[api/openai/chat] error:', error instanceof Error ? error.message : 'unknown error')
     throw createError({
       statusCode: 502,
       statusMessage: 'OpenAI request failed.',

@@ -7,6 +7,7 @@ import {
 } from '../../../utils/admin-users'
 import type { AdminInviteUserPayload, AdminInviteUserResponse } from '../../../../shared/types/AdminUsers'
 import { isResendConfigured, sendEmailWithResend } from '../../../services/email/resend'
+import { assertRateLimit } from '../../../utils/rate-limit'
 
 const isValidEmail = (value: string) => /.+@.+\..+/.test(value)
 
@@ -33,6 +34,13 @@ const buildInviteEmailHtml = (params: { nome: string; role: string }) => {
 
 export default defineEventHandler(async (event): Promise<AdminInviteUserResponse> => {
   const requesterAuthUid = await getCurrentAuthUid(event)
+  assertRateLimit(event, {
+    key: 'admin:identity',
+    limit: 10,
+    windowMs: 10 * 60_000,
+    userId: requesterAuthUid,
+  })
+
   const client = await getAdminUsersClient(event)
 
   await assertAdminAccess(client, requesterAuthUid)

@@ -476,7 +476,7 @@ export const notasCreatePostHandler = defineEventHandler(async (event) => {
     produtos = await vincularProdutosAoEstoque(client as any, produtosBase)
   }
   catch (error) {
-    console.error('[api/notas/create] estoque match error:', error)
+    console.error('[api/notas/create] estoque match error:', error instanceof Error ? error.message : 'unknown error')
     if (isHttpError(error)) throw error
     throw createError({
       statusCode: 500,
@@ -492,7 +492,7 @@ export const notasCreatePostHandler = defineEventHandler(async (event) => {
     })
   }
   catch (error) {
-    console.error('[api/notas/create] crm error:', error)
+    console.error('[api/notas/create] crm error:', error instanceof Error ? error.message : 'unknown error')
     if (isHttpError(error)) throw error
     throw createError({
       statusCode: 500,
@@ -509,7 +509,7 @@ export const notasCreatePostHandler = defineEventHandler(async (event) => {
       : null
   }
   catch (error) {
-    console.error('[api/notas/create] storage error:', error)
+    console.error('[api/notas/create] storage error:', error instanceof Error ? error.message : 'unknown error')
     if (isHttpError(error)) throw error
     throw createError({
       statusCode: 500,
