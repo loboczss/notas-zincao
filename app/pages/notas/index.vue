@@ -2,13 +2,6 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { AlertTriangle, Pencil, Save, Trash2, XCircle } from 'lucide-vue-next'
 import type { NotaAdminEditRequest, NotaRetiradaStatus } from '../../../shared/types/NotasRetirada'
-import AppPageShell from '../../components/layout/AppPageShell.vue'
-import InfiniteScrollTrigger from '../../components/InfiniteScrollTrigger.vue'
-import ModalGlobal from '../../components/ModalGlobal.vue'
-import NotaDetalheModal from '../../components/notas/NotaDetalheModal.vue'
-import NotasKpiGrid from '../../components/notas/NotasKpiGrid.vue'
-import NotasTabela from '../../components/notas/NotasTabela.vue'
-import NotasToolbar from '../../components/notas/NotasToolbar.vue'
 import { useAuthStore, useNotasStore } from '../../stores'
 import { useToast } from '../../composables/useToast'
 import { getApiErrorMessage } from '../../utils/api-errors'
@@ -18,6 +11,12 @@ import { getApiAuthHeaders, getApiFetch, getApiUrl } from '../../utils/api-fetch
 definePageMeta({
   middleware: 'auth',
 })
+
+type DetalheModalHandle = {
+  iniciarEdicao: () => void
+  cancelarEdicao: () => void
+  salvarEdicao: () => void
+}
 
 const notasStore = useNotasStore()
 const authStore = useAuthStore()
@@ -35,7 +34,7 @@ const paginaAtual = ref(1)
 const itensPorPagina = ref(20)
 const modalAberto = ref(false)
 const notaDetalhe = ref<any | null>(null)
-const detalheModalRef = ref<InstanceType<typeof NotaDetalheModal> | null>(null)
+const detalheModalRef = ref<DetalheModalHandle | null>(null)
 const detalheEditMode = ref(false)
 const loadingDetalhe = ref(false)
 const savingEdicao = ref(false)
@@ -445,9 +444,10 @@ const stats = computed(() => {
 </script>
 
 <template>
-  <AppPageShell
+  <LayoutAppPageShell
+    eyebrow="Notas"
     title="Notas de Retirada"
-    hide-header
+    description="Consulte, filtre e acompanhe o status das notas de retirada."
   >
     <div class="animate-fade-in font-sans">
       <div class="mb-6">
@@ -643,7 +643,7 @@ const stats = computed(() => {
         </div>
 
         <div v-else class="p-6 md:p-8">
-          <NotaDetalheModal
+          <NotasNotaDetalheModal
             ref="detalheModalRef"
             :nota="notaDetalhe"
             :is-admin="isAdmin"
@@ -717,5 +717,5 @@ const stats = computed(() => {
         </div>
       </ModalGlobal>
     </div>
-  </AppPageShell>
+  </LayoutAppPageShell>
 </template>

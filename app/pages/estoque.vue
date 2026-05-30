@@ -1,11 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { ShieldAlert } from 'lucide-vue-next'
-import AppPageShell from '../components/layout/AppPageShell.vue'
-import InfiniteScrollTrigger from '../components/InfiniteScrollTrigger.vue'
-import EstoqueProdutoModal from '../components/estoque/EstoqueProdutoModal.vue'
-import EstoqueTabela from '../components/estoque/EstoqueTabela.vue'
-import EstoqueToolbar from '../components/estoque/EstoqueToolbar.vue'
 import type { EstoqueProduto, EstoqueProdutoDraft } from '../../shared/types/Estoque'
 import { useAuthStore, useEstoqueStore } from '../stores'
 
@@ -95,9 +90,10 @@ onMounted(async () => {
 </script>
 
 <template>
-  <AppPageShell
+  <LayoutAppPageShell
     eyebrow="Estoque"
     title="Gestão de estoque"
+    description="Consulte e mantenha os produtos disponiveis para retirada."
   >
     <div class="space-y-3">
       <div
@@ -143,5 +139,5 @@ onMounted(async () => {
       :loading="estoqueStore.savingProduto"
       @save="salvarProduto"
     />
-  </AppPageShell>
+  </LayoutAppPageShell>
 </template>

@@ -1,11 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import AuthPageShell from '../components/layout/AuthPageShell.vue'
-import DarkModeToggle from '../components/DarkModeToggle.vue'
-import LoginTabs from '../components/login/LoginTabs.vue'
-import LoginForm from '../components/login/LoginForm.vue'
-import RegisterForm from '../components/login/RegisterForm.vue'
 import { useAuthStore } from '../stores'
 import { useToast } from '../composables/useToast'
 import { AppRoute } from '../constants/routes'
@@ -54,14 +49,13 @@ const handleCadastro = async (payload: { nome: string; email: string; password: 
 </script>
 
 <template>
-  <AuthPageShell
+  <LayoutAuthPageShell
     title="Acessar conta"
     description="Entre no sistema ou crie seu cadastro."
-    width-class="max-w-lg"
   >
-    <div class="absolute top-8 right-8 z-20 animate-fade-in" style="animation-delay: 400ms;">
+    <template #headerAside>
       <DarkModeToggle />
-    </div>
+    </template>
 
     <div class="space-y-8">
       <div class="animate-fade-in-up" style="animation-delay: 100ms;">
@@ -76,7 +70,7 @@ const handleCadastro = async (payload: { nome: string; email: string; password: 
             @submit="handleLogin"
           />
 
-          <RegisterForm
+          <LoginRegisterForm
             v-else
             :loading="loading"
             @submit="handleCadastro"
@@ -84,7 +78,7 @@ const handleCadastro = async (payload: { nome: string; email: string; password: 
         </div>
       </div>
     </div>
-  </AuthPageShell>
+  </LayoutAuthPageShell>
 </template>
 
 <style scoped>

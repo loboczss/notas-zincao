@@ -1,12 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { UserPlus, Search, Users, ShieldCheck, UserCheck } from 'lucide-vue-next'
-import AppPageShell from '../../components/layout/AppPageShell.vue'
-import Botao from '../../components/Botao.vue'
-import Card from '../../components/Card.vue'
-import UserManagementTable from '../../components/admin/UserManagementTable.vue'
-import InviteUserModal from '../../components/admin/InviteUserModal.vue'
-import EditUserModal from '../../components/admin/EditUserModal.vue'
 import type {
   AdminInviteUserPayload,
   AdminUsersListQuery,
@@ -143,7 +137,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <AppPageShell
+  <LayoutAppPageShell
     eyebrow="Painel Administrativo"
     title="Controle de Usuários"
     description="Gerencie os colaboradores com acesso ao sistema de Notas Zincão."
@@ -243,7 +237,7 @@ onMounted(async () => {
       </div>
 
       <!-- Tabela -->
-      <UserManagementTable
+      <AdminUserManagementTable
         :usuarios="adminUsersStore.usuarios"
         :loading="adminUsersStore.loadingUsuarios"
         @edit-role="abrirModalEdit"
@@ -288,14 +282,14 @@ onMounted(async () => {
 
     </div>
 
-    <InviteUserModal 
+    <AdminInviteUserModal
       v-model="modalInviteAberto" 
       :loading="adminUsersStore.savingUsuario"
       :success-message="adminUsersStore.successMessage"
       @invited="handleInvited"
     />
     
-    <EditUserModal 
+    <AdminEditUserModal
       v-model="modalEditAberto" 
       :usuario="usuarioSelecionado"
       :loading="adminUsersStore.savingUsuario"
@@ -303,5 +297,5 @@ onMounted(async () => {
       @deleted="handleDeleteUser"
       @reset-password="handleResetPassword"
     />
-  </AppPageShell>
+  </LayoutAppPageShell>
 </template>

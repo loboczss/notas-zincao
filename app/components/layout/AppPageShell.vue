@@ -5,12 +5,14 @@ const props = withDefaults(
     title: string
     description?: string
     widthClass?: string
+    contentClass?: string
     hideHeader?: boolean
   }>(),
   {
     eyebrow: 'Painel',
     description: '',
     widthClass: 'max-w-7xl',
+    contentClass: 'space-y-6',
     hideHeader: false,
   },
 )
@@ -39,7 +41,9 @@ const props = withDefaults(
         </div>
       </header>
 
-      <slot />
+      <section :class="props.contentClass">
+        <slot />
+      </section>
     </div>
   </main>
 </template>

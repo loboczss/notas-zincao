@@ -10,10 +10,12 @@ const props = withDefaults(
     title: string
     description?: string
     widthClass?: string
+    contentClass?: string
   }>(),
   {
     description: '',
     widthClass: 'max-w-md',
+    contentClass: 'space-y-6',
   },
 )
 </script>
@@ -22,6 +24,9 @@ const props = withDefaults(
   <main class="relative min-h-screen overflow-hidden bg-slate-50 text-slate-950 transition-colors duration-300 dark:bg-[#050816] dark:text-slate-100">
     <div class="absolute inset-0 bg-gradient-to-b from-slate-50 via-white to-slate-100 dark:from-[#050816] dark:via-[#060a14] dark:to-[#0b1020]" />
     <div class="absolute inset-x-0 top-0 h-px bg-slate-200/80 dark:bg-white/10" />
+    <div v-if="$slots.headerAside" class="absolute right-5 top-5 z-20 sm:right-8 sm:top-8">
+      <slot name="headerAside" />
+    </div>
 
     <div class="relative z-10 flex min-h-screen w-full items-center justify-center px-5 py-10 sm:px-8">
       <section class="relative w-full max-w-full" :class="props.widthClass">
@@ -34,7 +39,7 @@ const props = withDefaults(
           </p>
         </div>
 
-        <div class="mt-8">
+        <div class="mt-8" :class="props.contentClass">
           <slot />
         </div>
       </section>

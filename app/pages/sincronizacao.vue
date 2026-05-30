@@ -1,12 +1,5 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
-import AppPageShell from '../components/layout/AppPageShell.vue'
-import InfiniteScrollTrigger from '../components/InfiniteScrollTrigger.vue'
-import OfflineQueueList from '../components/offline/OfflineQueueList.vue'
-import OfflineNotasSyncNoteList from '../components/offline/OfflineNotasSyncNoteList.vue'
-import OfflineNotasSyncPanel from '../components/offline/OfflineNotasSyncPanel.vue'
-import OfflineNotasSyncProgress from '../components/offline/OfflineNotasSyncProgress.vue'
-import OfflineSummaryCards from '../components/offline/OfflineSummaryCards.vue'
 import { useOfflineNotasSync } from '../composables/useOfflineNotasSync'
 import { useOfflineStatus } from '../composables/useOfflineStatus'
 import { useToast } from '../composables/useToast'
@@ -74,7 +67,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <AppPageShell
+  <LayoutAppPageShell
     eyebrow="Offline"
     title="Sincronizacao"
     description="Acompanhe notas, retiradas e alteracoes salvas no aparelho aguardando envio."
@@ -130,5 +123,5 @@ onMounted(async () => {
         @load-more="loadMoreQueueEntries"
       />
     </div>
-  </AppPageShell>
+  </LayoutAppPageShell>
 </template>

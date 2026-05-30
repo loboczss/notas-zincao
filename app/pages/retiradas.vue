@@ -1,14 +1,5 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import AppPageShell from '../components/layout/AppPageShell.vue'
-import InfiniteScrollTrigger from '../components/InfiniteScrollTrigger.vue'
-import ModalGlobal from '../components/ModalGlobal.vue'
-import NotaDetalheModal from '../components/notas/NotaDetalheModal.vue'
-import RetiradasHistoricoMobileList from '../components/retiradas/RetiradasHistoricoMobileList.vue'
-import RetiradasHistoricoState from '../components/retiradas/RetiradasHistoricoState.vue'
-import RetiradasHistoricoTable from '../components/retiradas/RetiradasHistoricoTable.vue'
-import RetiradasHistoricoToolbar from '../components/retiradas/RetiradasHistoricoToolbar.vue'
-import RetiradasPullRefresh from '../components/retiradas/RetiradasPullRefresh.vue'
 import { useRetiradasHistorico } from '../composables/useRetiradasHistorico'
 import { useToast } from '../composables/useToast'
 import { getApiAuthHeaders, getApiFetch, getApiUrl } from '../utils/api-fetch'
@@ -128,11 +119,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <AppPageShell
+  <LayoutAppPageShell
     eyebrow="Retiradas"
     title="Historico de retiradas"
     description="Consulta simples das entregas registradas por nota, retirado por e produtos retirados."
-    width-class="max-w-6xl"
   >
     <RetiradasPullRefresh
       :refreshing="loading"
@@ -216,11 +206,11 @@ onMounted(() => {
       </div>
 
       <div v-else class="p-6 md:p-8">
-        <NotaDetalheModal
+        <NotasNotaDetalheModal
           :nota="notaDetalhe"
           :is-admin="false"
         />
       </div>
     </ModalGlobal>
-  </AppPageShell>
+  </LayoutAppPageShell>
 </template>

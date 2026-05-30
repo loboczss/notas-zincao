@@ -16,12 +16,17 @@ watch(user, () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
-    <div class="flex flex-col items-center gap-4">
-      <div class="h-12 w-12 border-4 border-slate-200 dark:border-slate-800 border-t-yellow-400 rounded-full animate-spin" />
-      <p class="text-slate-500 dark:text-slate-400 font-medium animate-pulse">
+  <LayoutAuthPageShell
+    title="Confirmando conta"
+    description="Estamos validando seu acesso."
+  >
+    <Card padding-class="p-6">
+      <div class="flex flex-col items-center gap-4 text-center">
+        <div class="h-12 w-12 animate-spin rounded-full border-4 border-slate-200 border-t-brand-500 dark:border-slate-800" />
+        <p class="font-medium text-slate-500 animate-pulse dark:text-slate-400">
         Confirmando sua conta...
-      </p>
-    </div>
-  </div>
+        </p>
+      </div>
+    </Card>
+  </LayoutAuthPageShell>
 </template>

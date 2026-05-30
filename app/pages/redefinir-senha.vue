@@ -4,8 +4,6 @@ import { useRoute, useRouter } from 'vue-router'
 import type { EmailOtpType, Session } from '@supabase/supabase-js'
 import { AlertCircle, CheckCircle2, LockKeyhole } from 'lucide-vue-next'
 import { useSupabaseClient } from '#imports'
-import AuthPageShell from '../components/layout/AuthPageShell.vue'
-import DarkModeToggle from '../components/DarkModeToggle.vue'
 import { useToast } from '../composables/useToast'
 import { getApiErrorMessage } from '../utils/api-errors'
 import { AppRoute } from '../constants/routes'
@@ -176,16 +174,15 @@ onMounted(() => {
 </script>
 
 <template>
-  <AuthPageShell
+  <LayoutAuthPageShell
     title="Redefinir senha"
     description="Crie uma nova senha para acessar sua conta."
-    width-class="max-w-md"
   >
-    <div class="absolute right-8 top-8 z-20">
+    <template #headerAside>
       <DarkModeToggle />
-    </div>
+    </template>
 
-    <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <Card padding-class="p-5">
       <div class="mb-5 flex items-start gap-3">
         <div
           class="flex h-10 w-10 shrink-0 items-center justify-center rounded-md"
@@ -215,62 +212,61 @@ onMounted(() => {
           <label class="text-xs font-medium text-slate-600 dark:text-slate-300">
             Nova senha
           </label>
-          <input
+          <Input
             v-model="form.senha"
             type="password"
             autocomplete="new-password"
             placeholder="Minimo 6 caracteres"
-            class="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50 dark:placeholder:text-slate-600"
             :disabled="isBusy"
-          >
+          />
         </div>
 
         <div class="space-y-1.5">
           <label class="text-xs font-medium text-slate-600 dark:text-slate-300">
             Confirmar senha
           </label>
-          <input
+          <Input
             v-model="form.confirmacao"
             type="password"
             autocomplete="new-password"
             placeholder="Repita a nova senha"
-            class="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50 dark:placeholder:text-slate-600"
             :disabled="isBusy"
-          >
+          />
         </div>
 
         <p class="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
           Por seguranca, a senha atual nunca e exibida. Voce pode apenas criar uma nova.
         </p>
 
-        <button
+        <Botao
           type="submit"
-          class="inline-flex h-10 w-full items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800 disabled:pointer-events-none disabled:opacity-40 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
+          class="w-full"
           :disabled="!canSubmit || isBusy"
         >
           {{ status === 'saving' ? 'Salvando...' : 'Salvar nova senha' }}
-        </button>
+        </Botao>
       </form>
 
       <div v-else class="space-y-3">
-        <button
+        <Botao
           v-if="status === 'success'"
           type="button"
-          class="inline-flex h-10 w-full items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
+          class="w-full"
           @click="voltarLogin"
         >
           Ir para o login
-        </button>
+        </Botao>
 
-        <button
+        <Botao
           v-if="status === 'error'"
           type="button"
-          class="inline-flex h-10 w-full items-center justify-center rounded-md border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+          variant="secondary"
+          class="w-full"
           @click="voltarLogin"
         >
           Solicitar novo link
-        </button>
+        </Botao>
       </div>
-    </div>
-  </AuthPageShell>
+    </Card>
+  </LayoutAuthPageShell>
 </template>

@@ -2,14 +2,6 @@
 import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import { LoaderCircle } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
-import AppPageShell from '../components/layout/AppPageShell.vue'
-import ModalGlobal from '../components/ModalGlobal.vue'
-import NotaCadastroCaptura from '../components/nota-cadastro/NotaCadastroCaptura.vue'
-import NotaCadastroCliente from '../components/nota-cadastro/NotaCadastroCliente.vue'
-import NotaCadastroFiscal from '../components/nota-cadastro/NotaCadastroFiscal.vue'
-import NotaCadastroLayout from '../components/nota-cadastro/NotaCadastroLayout.vue'
-import NotaCadastroProdutos from '../components/nota-cadastro/NotaCadastroProdutos.vue'
-import Botao from '../components/Botao.vue'
 import type { CrmContato } from '../../shared/types/CRM'
 import type { NotaIntegrimLookupCandidate, NotaProduto, NotaRetiradaDraft, NotaRetiradaListItem } from '../../shared/types/NotasRetirada'
 import { useCrmStore, useNotasStore } from '../stores'
@@ -736,10 +728,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <AppPageShell
+  <LayoutAppPageShell
     title="Cadastrar nota de retirada"
     eyebrow="Retiradas"
-    width-class="max-w-5xl"
+    description="Cadastre uma nota e vincule os produtos para retirada."
   >
 
 
@@ -886,5 +878,5 @@ onMounted(() => {
         </li>
       </ul>
     </div>
-  </AppPageShell>
+  </LayoutAppPageShell>
 </template>

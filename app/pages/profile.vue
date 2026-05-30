@@ -1,8 +1,5 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import ProfileHeader from '../components/profile/ProfileHeader.vue'
-import ProfileSettings from '../components/profile/ProfileSettings.vue'
-import AppPageShell from '../components/layout/AppPageShell.vue'
 import { useAuthStore } from '../stores'
 
 definePageMeta({
@@ -17,14 +14,14 @@ onMounted(async () => {
 </script>
 
 <template>
-  <AppPageShell
+  <LayoutAppPageShell
     eyebrow=""
     title="Perfil"
-    width-class="max-w-2xl"
+    description="Gerencie seus dados de acesso e preferencias."
   >
     <div class="space-y-4">
       <ProfileHeader />
       <ProfileSettings />
     </div>
-  </AppPageShell>
+  </LayoutAppPageShell>
 </template>

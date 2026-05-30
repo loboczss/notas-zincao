@@ -5,13 +5,6 @@ import { ArrowLeft, Camera, Images, ListChecks, LoaderCircle, X } from 'lucide-v
 
 import { useRoute, useRouter } from 'vue-router'
 import type { NotaRegistrarRetiradaRequest, NotaRetiradaDetalheItem } from '../../../../shared/types/NotasRetirada'
-import AppPageShell from '../../../components/layout/AppPageShell.vue'
-import Botao from '../../../components/Botao.vue'
-import Input from '../../../components/Input.vue'
-import NotaCadastroField from '../../../components/nota-cadastro/NotaCadastroField.vue'
-import NotaCadastroLayout from '../../../components/nota-cadastro/NotaCadastroLayout.vue'
-import NotaCadastroSection from '../../../components/nota-cadastro/NotaCadastroSection.vue'
-import NotasStatusBadge from '../../../components/notas/NotasStatusBadge.vue'
 import { useNotasStore } from '../../../stores'
 import { useToast } from '../../../composables/useToast'
 import { AppRoute } from '../../../constants/routes'
@@ -361,10 +354,10 @@ await carregarDetalhe()
 </script>
 
 <template>
-  <AppPageShell
+  <LayoutAppPageShell
     eyebrow="Retiradas"
     title="Registrar retirada"
-    width-class="max-w-5xl"
+    description="Informe quantidades, responsavel e comprovantes da retirada."
   >
     <div
       v-if="loading"
@@ -652,5 +645,5 @@ await carregarDetalhe()
         Voltar para notas
       </Botao>
     </div>
-  </AppPageShell>
+  </LayoutAppPageShell>
 </template>

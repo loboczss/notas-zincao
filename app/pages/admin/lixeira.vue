@@ -12,11 +12,6 @@ import {
   Loader2
 } from 'lucide-vue-next'
 import { useNotasStore } from '~~/app/stores'
-import AppPageShell from '~~/app/components/layout/AppPageShell.vue'
-import Card from '~~/app/components/Card.vue'
-import ModalGlobal from '~~/app/components/ModalGlobal.vue'
-import NotaDetalheModal from '~~/app/components/notas/NotaDetalheModal.vue'
-import NotaHistoricoTimeline from '~~/app/components/auditoria/NotaHistoricoTimeline.vue'
 import { AppRoute } from '~~/app/constants/routes'
 import { useToast } from '~~/app/composables/useToast'
 
@@ -123,7 +118,7 @@ const restaurarNota = async (id: string) => {
 </script>
 
 <template>
-  <AppPageShell
+  <LayoutAppPageShell
     eyebrow="Área de Auditoria"
     title="Lixeira de Notas"
     description="Gerencie e visualize notas que foram excluídas logicamente do sistema."
@@ -316,7 +311,7 @@ const restaurarNota = async (id: string) => {
           </div>
         </Card>
 
-        <NotaDetalheModal
+        <NotasNotaDetalheModal
           :nota="notaSelecionada"
           :is-admin="false"
           :show-retirada-action="false"
@@ -337,12 +332,12 @@ const restaurarNota = async (id: string) => {
             </div>
           </div>
 
-          <NotaHistoricoTimeline
+          <AuditoriaNotaHistoricoTimeline
             :historico="historicoAuditoria"
             :loading="notasStore.loadingHistorico"
           />
         </Card>
       </div>
     </ModalGlobal>
-  </AppPageShell>
+  </LayoutAppPageShell>
 </template>
