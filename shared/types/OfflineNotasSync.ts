@@ -26,6 +26,7 @@ export type OfflineNotaSyncData = {
   id: string
   owner_user_id: string
   contato_id: string | null
+  idempresa: number | null
   foto_url: string | null
   foto_cliente_url: string | null
   nome_cliente: string

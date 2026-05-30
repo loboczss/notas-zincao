@@ -11,6 +11,7 @@ const allowedStatus = ['pendente', 'parcial', 'retirada', 'cancelada'] as const
 const notaReturnSelect = [
   'id',
   'contato_id',
+  'idempresa',
   'owner_user_id',
   'nome_cliente',
   'documento_cliente',
@@ -192,6 +193,13 @@ const mapSupabaseCreateError = (error: any) => {
       return createError({
         statusCode: 500,
         statusMessage: 'Banco desatualizado: aplique a migration da coluna contato_id.',
+      })
+    }
+
+    if (message.includes('idempresa')) {
+      return createError({
+        statusCode: 500,
+        statusMessage: 'Banco desatualizado: aplique a migration da coluna idempresa.',
       })
     }
   }
@@ -384,6 +392,10 @@ export const notasCreatePostHandler = defineEventHandler(async (event) => {
   const statusInicial = allowedStatus.includes(body.status_retirada as any)
     ? body.status_retirada
     : 'pendente'
+  const rawIdEmpresa: unknown = (body as Record<string, unknown>).idempresa
+  const idempresa = rawIdEmpresa === null || rawIdEmpresa === undefined || rawIdEmpresa === ''
+    ? undefined
+    : toInteger(rawIdEmpresa)
 
   const missing = requiredFields.filter((field) => {
     if (field === 'produtos') return produtosBase.length === 0
@@ -401,13 +413,22 @@ export const notasCreatePostHandler = defineEventHandler(async (event) => {
     throw badRequest('desconto_total nao pode ser maior que valor_total.')
   }
   if (!fotoCupomDataUrl) throw badRequest('Foto do cupom e obrigatoria.')
+  if (rawIdEmpresa !== null && rawIdEmpresa !== undefined && rawIdEmpresa !== '' && (!idempresa || idempresa < 1 || idempresa > 6)) {
+    throw badRequest('idempresa invalido. Use um numero entre 1 e 6.')
+  }
 
-  const { data: existingNumeroNotas, error: existingNumeroError } = await (client as any)
+  let existingNumeroRequest = (client as any)
     .from('notas_retirada')
-    .select('id, nome_cliente, numero_nota, serie_nota, deleted_at')
+    .select('id, nome_cliente, numero_nota, serie_nota, idempresa, deleted_at')
     .eq('owner_user_id', authUid)
     .eq('numero_nota', numeroNota)
     .limit(5)
+
+  if (idempresa !== undefined) {
+    existingNumeroRequest = existingNumeroRequest.eq('idempresa', idempresa)
+  }
+
+  const { data: existingNumeroNotas, error: existingNumeroError } = await existingNumeroRequest
 
   if (existingNumeroError) {
     console.error('[api/notas/create] existing numero check error:', existingNumeroError.message)
@@ -501,6 +522,7 @@ export const notasCreatePostHandler = defineEventHandler(async (event) => {
     contato_id: crmContato.contato_id,
     foto_url: fotoCupomUrl,
     ...(fotoClienteUrl ? { foto_cliente_url: fotoClienteUrl } : {}),
+    ...(idempresa !== undefined ? { idempresa } : {}),
     nome_cliente: crmContato.nome,
     documento_cliente: normalizeDigits(body.documento_cliente),
     telefone_cliente: crmContato.telefone_cliente || normalizeDigits(body.telefone_cliente),

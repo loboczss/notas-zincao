@@ -26,7 +26,7 @@ export default defineEventHandler(async (event) => {
 
   const { data, error } = await (client as any)
     .from('notas_retirada')
-    .select('id, contato_id, owner_user_id, nome_cliente, documento_cliente, telefone_cliente, numero_nota, serie_nota, chave_nfe, data_compra, data_prevista_retirada, data_retirada, valor_total, desconto_total, observacoes, status_retirada, criado_em, atualizado_em, retirada_confirmada_por, produtos, foto_url, foto_cliente_url, comprovante_retirada_url, historico_retiradas')
+    .select('id, contato_id, idempresa, owner_user_id, nome_cliente, documento_cliente, telefone_cliente, numero_nota, serie_nota, chave_nfe, data_compra, data_prevista_retirada, data_retirada, valor_total, desconto_total, observacoes, status_retirada, criado_em, atualizado_em, retirada_confirmada_por, produtos, foto_url, foto_cliente_url, comprovante_retirada_url, historico_retiradas')
     .eq('id', id)
     .single()
 

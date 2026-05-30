@@ -26,6 +26,9 @@ import {
 
 import type {
   NotaExtractionResponse,
+  NotaIntegrimLookupRequest,
+  NotaIntegrimLookupResponse,
+  NotaImageProductsResponse,
   NotaRetiradaDraft,
   NotaRetiradaHistoricoItem,
   NotaRegistrarRetiradaRequest,
@@ -52,6 +55,7 @@ const createOfflineNotaId = () => `offline-nota-${Date.now()}-${crypto.randomUUI
 const createOfflineNota = (payload: NotaRetiradaDraft, id = createOfflineNotaId()): NotaRetiradaListItem => ({
   id,
   contato_id: payload.contato_id || null,
+  idempresa: payload.idempresa ?? null,
   nome_cliente: payload.nome_cliente,
   numero_nota: payload.numero_nota,
   serie_nota: payload.serie_nota || '1',
@@ -173,6 +177,9 @@ export const useNotasStore = defineStore('notas', () => {
   const loadingNotas = ref(false)
   const loadingRetirada = ref(false)
   const extractingNota = ref(false)
+  const lookingUpIntegrimNota = ref(false)
+  const lookingUpIntegrimImage = ref(false)
+  const extractingImageProducts = ref(false)
   const creatingNota = ref(false)
   const savingRetirada = ref(false)
   const errorMessage = ref('')
@@ -445,6 +452,65 @@ export const useNotasStore = defineStore('notas', () => {
     }
     finally {
       extractingNota.value = false
+    }
+  }
+
+  const lookupNotaIntegrim = async (payload: NotaIntegrimLookupRequest) => {
+    lookingUpIntegrimNota.value = true
+    clearError()
+
+    try {
+      return await getApiFetch()<NotaIntegrimLookupResponse>('/api/notas/integrim/lookup', {
+        method: 'POST',
+        body: payload,
+      })
+    }
+    catch (error) {
+      errorMessage.value = getApiErrorMessage(error, 'Falha ao consultar a nota na Integrim.')
+      return null
+    }
+    finally {
+      lookingUpIntegrimNota.value = false
+    }
+  }
+
+  const lookupNotaIntegrimFromImage = async (imageDataUrl: string) => {
+    lookingUpIntegrimImage.value = true
+    clearError()
+
+    try {
+      const normalizedImageDataUrl = await normalizeNotaImageDataUrl(imageDataUrl)
+      return await getApiFetch()<NotaIntegrimLookupResponse>('/api/notas/integrim/lookup-from-image', {
+        method: 'POST',
+        body: { imageDataUrl: normalizedImageDataUrl },
+      })
+    }
+    catch (error) {
+      errorMessage.value = getApiErrorMessage(error, 'Falha ao identificar a nota pela foto.')
+      return null
+    }
+    finally {
+      lookingUpIntegrimImage.value = false
+    }
+  }
+
+  const extractNotaProductsFromImage = async (imageDataUrl: string) => {
+    extractingImageProducts.value = true
+    clearError()
+
+    try {
+      const normalizedImageDataUrl = await normalizeNotaImageDataUrl(imageDataUrl)
+      return await getApiFetch()<NotaImageProductsResponse>('/api/notas/integrim/products-from-image', {
+        method: 'POST',
+        body: { imageDataUrl: normalizedImageDataUrl },
+      })
+    }
+    catch (error) {
+      errorMessage.value = getApiErrorMessage(error, 'Falha ao ler produtos da foto.')
+      return null
+    }
+    finally {
+      extractingImageProducts.value = false
     }
   }
 
@@ -917,6 +983,9 @@ export const useNotasStore = defineStore('notas', () => {
     loadingLixeira.value = false
     loadingHistorico.value = false
     extractingNota.value = false
+    lookingUpIntegrimNota.value = false
+    lookingUpIntegrimImage.value = false
+    extractingImageProducts.value = false
     creatingNota.value = false
     savingRetirada.value = false
     page.value = 1
@@ -1032,6 +1101,9 @@ export const useNotasStore = defineStore('notas', () => {
     loadingLixeira,
     loadingHistorico,
     extractingNota,
+    lookingUpIntegrimNota,
+    lookingUpIntegrimImage,
+    extractingImageProducts,
     creatingNota,
     savingRetirada,
     page,
@@ -1046,6 +1118,9 @@ export const useNotasStore = defineStore('notas', () => {
     fetchLixeira,
     fetchHistorico,
     extractNota,
+    lookupNotaIntegrim,
+    lookupNotaIntegrimFromImage,
+    extractNotaProductsFromImage,
     createNota,
     registrarRetirada,
     atualizarStatusNota,

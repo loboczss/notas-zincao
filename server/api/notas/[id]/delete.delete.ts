@@ -9,6 +9,7 @@ const NOTA_AUDIT_SELECT = [
   'id',
   'owner_user_id',
   'contato_id',
+  'idempresa',
   'nome_cliente',
   'documento_cliente',
   'telefone_cliente',

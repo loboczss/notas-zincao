@@ -248,7 +248,7 @@ export default defineEventHandler(async (event) => {
     .from('notas_retirada')
     .update(payload)
     .eq('id', id)
-    .select('id, contato_id, nome_cliente, documento_cliente, telefone_cliente, numero_nota, serie_nota, data_compra, data_retirada, valor_total, desconto_total, status_retirada, criado_em, produtos, foto_url, foto_cliente_url, comprovante_retirada_url, historico_retiradas, atualizado_em')
+    .select('id, contato_id, idempresa, nome_cliente, documento_cliente, telefone_cliente, numero_nota, serie_nota, data_compra, data_retirada, valor_total, desconto_total, status_retirada, criado_em, produtos, foto_url, foto_cliente_url, comprovante_retirada_url, historico_retiradas, atualizado_em')
     .single()
 
   if (error) {

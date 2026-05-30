@@ -50,6 +50,7 @@ export type Database = {
           foto_url: string | null
           foto_cliente_url: string | null
           contato_id: string | null
+          idempresa: number | null
           nome_cliente: string
           documento_cliente: string | null
           telefone_cliente: string | null
@@ -78,6 +79,7 @@ export type Database = {
           foto_url?: string | null
           foto_cliente_url?: string | null
           contato_id?: string | null
+          idempresa?: number | null
           nome_cliente: string
           documento_cliente?: string | null
           telefone_cliente?: string | null
@@ -106,6 +108,7 @@ export type Database = {
           foto_url?: string | null
           foto_cliente_url?: string | null
           contato_id?: string | null
+          idempresa?: number | null
           nome_cliente?: string
           documento_cliente?: string | null
           telefone_cliente?: string | null

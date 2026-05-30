@@ -11,12 +11,15 @@ import NotaCadastroLayout from '../components/nota-cadastro/NotaCadastroLayout.v
 import NotaCadastroProdutos from '../components/nota-cadastro/NotaCadastroProdutos.vue'
 import Botao from '../components/Botao.vue'
 import type { CrmContato } from '../../shared/types/CRM'
-import type { NotaProduto, NotaRetiradaDraft, NotaRetiradaListItem } from '../../shared/types/NotasRetirada'
+import type { NotaIntegrimLookupCandidate, NotaProduto, NotaRetiradaDraft, NotaRetiradaListItem } from '../../shared/types/NotasRetirada'
 import { useCrmStore, useNotasStore } from '../stores'
 import { useToast } from '../composables/useToast'
 import { AppRoute } from '../constants/routes'
 import { CADASTRO_NOTA_RESTORED_IMAGE_STATE_KEY } from '../constants/camera-capture'
 import { normalizeNotaImageDataUrl } from '../utils/image-compression'
+import { readNfeKeyFromQrImage } from '../utils/nota-qr'
+import type { NfeKeyParts } from '~~/shared/utils/nfe-chave'
+import { parseNfeKey } from '~~/shared/utils/nfe-chave'
 
 definePageMeta({
   middleware: 'auth',
@@ -25,14 +28,15 @@ definePageMeta({
 const router = useRouter()
 const notasStore = useNotasStore()
 const crmStore = useCrmStore()
-const { error: showError, warning: showWarning } = useToast()
+const { success: showSuccess, error: showError, warning: showWarning } = useToast()
 
 const form = reactive<NotaRetiradaDraft>({
+  idempresa: null,
   nome_cliente: '',
   telefone_cliente: '',
   documento_cliente: '',
   numero_nota: '',
-  serie_nota: '1',
+  serie_nota: '',
   chave_nfe: '',
   data_compra: '',
   observacoes: '',
@@ -43,20 +47,37 @@ const form = reactive<NotaRetiradaDraft>({
 })
 
 const errors = reactive<Record<string, string>>({})
+const imageDataUrl = ref('')
+const restoredImageDataUrl = useState<string>(CADASTRO_NOTA_RESTORED_IMAGE_STATE_KEY, () => '')
+const successModalOpen = ref(false)
+const createdNota = ref<{ id: string; numero_nota: string; serie_nota: string } | null>(null)
+const integrimLookupMessage = ref('')
+const integrimForcedCompanyId = ref('')
+const aiChaveNfeSugerida = ref('')
+const qrLookupHints = ref<NfeKeyParts | null>(null)
+const showIntegrimAdvanced = ref(false)
+const integrimCandidates = ref<NotaIntegrimLookupCandidate[]>([])
 
 // Limpar erros automaticamente conforme o usuário preenche/altera os campos
 watch(() => form.nome_cliente, () => { delete errors.nome_cliente })
 watch(() => form.telefone_cliente, () => { delete errors.telefone_cliente })
 watch(() => form.documento_cliente, () => { delete errors.documento_cliente })
-watch(() => form.numero_nota, () => { delete errors.numero_nota })
-watch(() => form.serie_nota, () => { delete errors.serie_nota })
+watch(() => form.numero_nota, () => {
+  delete errors.numero_nota
+  integrimLookupMessage.value = ''
+  integrimCandidates.value = []
+  if (digitsOnly(String(form.chave_nfe || '')).length !== 44) {
+    aiChaveNfeSugerida.value = ''
+  }
+})
+watch(() => form.serie_nota, () => {
+  delete errors.serie_nota
+  integrimLookupMessage.value = ''
+  integrimCandidates.value = []
+})
 watch(() => form.chave_nfe, () => { delete errors.chave_nfe })
 watch(() => form.data_compra, () => { delete errors.data_compra })
 watch(() => form.produtos, () => { delete errors.produtos }, { deep: true })
-const imageDataUrl = ref('')
-const restoredImageDataUrl = useState<string>(CADASTRO_NOTA_RESTORED_IMAGE_STATE_KEY, () => '')
-const successModalOpen = ref(false)
-const createdNota = ref<{ id: string; numero_nota: string; serie_nota: string } | null>(null)
 let crmSearchTimer: ReturnType<typeof setTimeout> | null = null
 
 const toNumber = (value: unknown) => {
@@ -109,14 +130,16 @@ const valorLiquido = computed(() => Math.max(0, valorBrutoNumber.value - descont
 
 const duplicateNota = computed<NotaRetiradaListItem | null>(() => {
   const numeroNota = form.numero_nota.trim()
-  const serieNota = (form.serie_nota || '1').trim()
+  const serieNota = String(form.serie_nota || '').trim()
   const chaveNfe = digitsOnly(String(form.chave_nfe || ''))
+  const empresaNota = form.idempresa ? Number(form.idempresa) : null
 
   return notasStore.notas.find((nota) => {
     const mesmoNumero = Boolean(numeroNota && nota.numero_nota === numeroNota)
     const mesmoNumeroSerie = mesmoNumero && nota.serie_nota === serieNota
+    const mesmaEmpresa = !empresaNota || !nota.idempresa || Number(nota.idempresa) === empresaNota
     const mesmaChave = chaveNfe && digitsOnly(String((nota as unknown as { chave_nfe?: string }).chave_nfe || '')) === chaveNfe
-    return mesmoNumero || mesmoNumeroSerie || !!mesmaChave
+    return (mesmoNumeroSerie && mesmaEmpresa) || !!mesmaChave
   }) || null
 })
 
@@ -132,7 +155,8 @@ const requiredFieldsReady = computed(() => {
     && String(form.serie_nota || '').trim()
     && String(form.data_compra || '').trim()
     && digitsOnly(String(form.chave_nfe || '')).length === 44
-    && form.produtos.some(produto => String(produto.nome || '').trim()),
+    && form.produtos.some(produto => String(produto.nome || '').trim())
+    && Boolean(imageDataUrl.value)
   )
 })
 
@@ -147,6 +171,14 @@ const validationErrorEntries = computed(() => {
 const saveButtonLabel = computed(() => {
   if (notasStore.creatingNota) return 'Salvando...'
   return 'Salvar nota'
+})
+
+const integrimLookupLoading = computed(() => {
+  return notasStore.lookingUpIntegrimNota || notasStore.extractingImageProducts
+})
+
+const fotoLookupLoading = computed(() => {
+  return notasStore.lookingUpIntegrimImage || notasStore.lookingUpIntegrimNota || notasStore.extractingImageProducts
 })
 
 const divergenceWarning = computed(() => {
@@ -164,7 +196,7 @@ const divergenceWarning = computed(() => {
     return ''
   }
 
-  return `[Conferência automática IA] Total da foto: ${valorExtraido.toFixed(2)} | Soma dos itens: ${somaProdutos.toFixed(2)}`
+  return `[Conferência automática] Total informado: ${valorExtraido.toFixed(2)} | Soma dos itens: ${somaProdutos.toFixed(2)}`
 })
 
 const resetErrors = () => {
@@ -220,6 +252,10 @@ const validateForm = () => {
 
   if (!form.produtos.length || !form.produtos.some((produto) => String(produto.nome || '').trim())) {
     errors.produtos = 'Adicione ao menos um produto válido.'
+  }
+
+  if (!imageDataUrl.value) {
+    errors.foto_cupom_data_url = 'Foto do cupom e obrigatoria.'
   }
 
   return Object.keys(errors).length === 0
@@ -305,6 +341,9 @@ const selecionarImagemDataUrl = async (dataUrl: string) => {
 
   try {
     imageDataUrl.value = await normalizeNotaImageDataUrl(dataUrl)
+    delete errors.foto_cupom_data_url
+    qrLookupHints.value = null
+    void scanQrHintsFromImage()
   }
   catch (error) {
     imageDataUrl.value = ''
@@ -313,6 +352,32 @@ const selecionarImagemDataUrl = async (dataUrl: string) => {
       : 'Nao foi possivel preparar a imagem para envio.'
     showError(message)
   }
+}
+
+const applyFiscalKeyHints = (hints: NfeKeyParts, options: { overwriteLookupFields?: boolean } = {}) => {
+  qrLookupHints.value = hints
+  aiChaveNfeSugerida.value = hints.chave_nfe
+  form.chave_nfe = hints.chave_nfe
+  delete errors.chave_nfe
+
+  if (options.overwriteLookupFields || !String(form.numero_nota || '').trim()) {
+    form.numero_nota = hints.numero_nota
+  }
+
+  if (options.overwriteLookupFields || !String(form.serie_nota || '').trim()) {
+    form.serie_nota = hints.serie_nota
+  }
+}
+
+const scanQrHintsFromImage = async () => {
+  if (!imageDataUrl.value) return null
+
+  const hints = await readNfeKeyFromQrImage(imageDataUrl.value)
+  if (hints) {
+    applyFiscalKeyHints(hints)
+  }
+
+  return hints
 }
 
 const selecionarImagem = async (event: Event) => {
@@ -383,6 +448,180 @@ const analisarImagem = async () => {
   for (const field of response.missingFields || []) {
     errors[field] = 'Campo obrigatório não identificado pela IA. Confira manualmente.'
   }
+}
+
+const formatCurrency = (value: number | null | undefined) => {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(toNumber(value))
+}
+
+const formatCandidateDate = (value: string) => {
+  const raw = String(value || '').slice(0, 10)
+  if (!raw) return 'Sem data'
+  const [year, month, day] = raw.split('-')
+  return year && month && day ? `${day}/${month}/${year}` : raw
+}
+
+const candidateKey = (candidate: NotaIntegrimLookupCandidate) => {
+  return `${candidate.idempresa}:${candidate.idplanilha}`
+}
+
+const aplicarDraftIntegrim = (draft: NotaRetiradaDraft, missingFields: string[] = [], chaveNfeFromImage = '') => {
+  const existingChave = digitsOnly(String(form.chave_nfe || ''))
+  const nextChave = digitsOnly(chaveNfeFromImage || String(draft.chave_nfe || '') || (existingChave.length === 44 ? existingChave : ''))
+  form.idempresa = draft.idempresa ?? null
+  form.nome_cliente = String(draft.nome_cliente || '').trim()
+  form.telefone_cliente = formatPhone(String(draft.telefone_cliente || ''))
+  form.documento_cliente = formatDocument(String(draft.documento_cliente || ''))
+  form.numero_nota = String(draft.numero_nota || '').trim()
+  form.serie_nota = String(draft.serie_nota || '').trim()
+  form.chave_nfe = nextChave
+  form.data_compra = String(draft.data_compra || '').trim()
+  form.observacoes = String(draft.observacoes || '').trim()
+  form.desconto_total = toNumber(draft.desconto_total)
+  form.produtos = Array.isArray(draft.produtos) ? draft.produtos.map(normalizeProduto) : []
+  form.valor_total = toNumber(draft.valor_total) || totalProdutos.value
+  ensureWarningInObservacoes()
+
+  resetErrors()
+  const resolvedMissingFields = missingFields.filter((field) => {
+    if (field === 'chave_nfe' && digitsOnly(String(form.chave_nfe || '')).length === 44) return false
+    if (field === 'produtos' && form.produtos.some(produto => String(produto.nome || '').trim())) return false
+    return true
+  })
+
+  for (const field of resolvedMissingFields) {
+    errors[field] = 'Campo obrigatorio nao retornado pela Integrim. Confira manualmente.'
+  }
+}
+
+const buscarNotaIntegrim = async (candidate?: NotaIntegrimLookupCandidate) => {
+  const numeroNota = digitsOnly(String(form.numero_nota || ''))
+  const serieNota = String(form.serie_nota || '').trim()
+
+  if (!numeroNota) {
+    errors.numero_nota = 'Numero da nota e obrigatorio.'
+    showWarning('Informe o numero da nota para buscar.')
+    await scrollToFirstError()
+    return
+  }
+
+  form.numero_nota = numeroNota
+  if (!candidate && digitsOnly(String(form.chave_nfe || '')).length !== 44) {
+    aiChaveNfeSugerida.value = ''
+  }
+  const forcedCompanyRaw = integrimForcedCompanyId.value.trim()
+  let forcedCompany: number | undefined
+
+  if (!candidate && forcedCompanyRaw) {
+    const parsedCompany = Number(forcedCompanyRaw)
+    if (!Number.isInteger(parsedCompany) || parsedCompany < 1 || parsedCompany > 6) {
+      showWarning('ID da empresa invalido. Use um numero entre 1 e 6.')
+      return
+    }
+    forcedCompany = parsedCompany
+  }
+
+  const response = await notasStore.lookupNotaIntegrim({
+    numero_nota: numeroNota,
+    ...(serieNota ? { serie_nota: serieNota } : {}),
+    ...(candidate ? { idempresa: candidate.idempresa, idplanilha: candidate.idplanilha } : {}),
+    ...(!candidate && forcedCompany ? { idempresa: forcedCompany } : {}),
+  })
+
+  if (!response) {
+    showError(notasStore.errorMessage || 'Nao foi possivel consultar a nota na Integrim.')
+    return
+  }
+
+  integrimLookupMessage.value = response.message
+
+  if (!response.found) {
+    integrimCandidates.value = []
+    showWarning(response.message)
+    return
+  }
+
+  if (!response.draft) {
+    integrimCandidates.value = response.candidates || []
+    showWarning(response.message)
+    return
+  }
+
+  integrimCandidates.value = []
+  aplicarDraftIntegrim(response.draft, response.missingFields || [], aiChaveNfeSugerida.value)
+  await preencherProdutosPelaFotoSeNecessario()
+  integrimLookupMessage.value = `Nota encontrada na empresa ${response.draft.idempresa || response.candidate?.idempresa}.`
+  showSuccess(integrimLookupMessage.value)
+}
+
+const preencherProdutosPelaFotoSeNecessario = async () => {
+  const hasProdutos = form.produtos.some(produto => String(produto.nome || '').trim())
+  if (hasProdutos || !imageDataUrl.value) return
+
+  const response = await notasStore.extractNotaProductsFromImage(imageDataUrl.value)
+  if (!response?.produtos?.length) return
+
+  form.produtos = response.produtos.map(normalizeProduto)
+  form.valor_total = totalProdutos.value || valorBrutoNumber.value
+  delete errors.produtos
+  ensureWarningInObservacoes()
+}
+
+const buscarNotaIntegrimPorFoto = async () => {
+  if (!imageDataUrl.value) {
+    errors.foto_cupom_data_url = 'Foto do cupom e obrigatoria.'
+    showWarning('Adicione a foto da nota para buscar pela foto.')
+    await scrollToFirstError()
+    return
+  }
+
+  const qrHints = qrLookupHints.value || await scanQrHintsFromImage()
+  if (qrHints?.numero_nota) {
+    applyFiscalKeyHints(qrHints, { overwriteLookupFields: true })
+    await buscarNotaIntegrim()
+    return
+  }
+
+  const response = await notasStore.lookupNotaIntegrimFromImage(imageDataUrl.value)
+  if (!response) {
+    showError(notasStore.errorMessage || 'Nao foi possivel identificar a nota pela foto.')
+    return
+  }
+
+  const chaveNfe = digitsOnly(response.hints?.chave_nfe || '')
+  aiChaveNfeSugerida.value = chaveNfe.length === 44 ? chaveNfe : ''
+  if (aiChaveNfeSugerida.value) {
+    form.chave_nfe = aiChaveNfeSugerida.value
+    delete errors.chave_nfe
+    const keyHints = parseNfeKey(aiChaveNfeSugerida.value)
+    if (keyHints) {
+      qrLookupHints.value = keyHints
+      applyFiscalKeyHints(keyHints, { overwriteLookupFields: true })
+    }
+  }
+
+  integrimLookupMessage.value = response.message
+
+  if (!response.found) {
+    integrimCandidates.value = []
+    showWarning(response.message)
+    return
+  }
+
+  if (!response.draft) {
+    integrimCandidates.value = response.candidates || []
+    showWarning(response.message)
+    return
+  }
+
+  integrimCandidates.value = []
+  aplicarDraftIntegrim(response.draft, response.missingFields || [], aiChaveNfeSugerida.value)
+  await preencherProdutosPelaFotoSeNecessario()
+  integrimLookupMessage.value = `Nota encontrada na empresa ${response.draft.idempresa || response.candidate?.idempresa}.`
+  showSuccess(integrimLookupMessage.value)
 }
 
 const addProduto = () => {
@@ -468,18 +707,25 @@ const cadastrarOutra = async () => {
   createdNota.value = null
   notasStore.clearError()
   imageDataUrl.value = ''
+  form.idempresa = null
   form.contato_id = undefined
   form.telefone_cliente = ''
   form.documento_cliente = ''
   form.nome_cliente = ''
   form.numero_nota = ''
-  form.serie_nota = '1'
+  form.serie_nota = ''
   form.chave_nfe = ''
   form.data_compra = ''
   form.observacoes = ''
   form.produtos = []
   form.valor_total = 0
   form.desconto_total = 0
+  integrimLookupMessage.value = ''
+  integrimForcedCompanyId.value = ''
+  aiChaveNfeSugerida.value = ''
+  qrLookupHints.value = null
+  showIntegrimAdvanced.value = false
+  integrimCandidates.value = []
   resetErrors()
   crmStore.clearContatos()
 }
@@ -506,10 +752,10 @@ onMounted(() => {
       <template #side>
         <NotaCadastroCaptura
           :preview-url="imageDataUrl"
-          :loading="notasStore.extractingNota"
+          :lookup-loading="fotoLookupLoading"
           @select-image="selecionarImagem"
           @select-image-data-url="selecionarImagemDataUrl"
-          @analyze="analisarImagem"
+          @lookup-from-image="buscarNotaIntegrimPorFoto"
         />
         <NotaCadastroCliente
           :nome-cliente="form.nome_cliente"
@@ -530,7 +776,7 @@ onMounted(() => {
 
       <NotaCadastroFiscal
         :numero-nota="form.numero_nota"
-        :serie-nota="form.serie_nota || '1'"
+        :serie-nota="String(form.serie_nota || '')"
         :chave-nfe="String(form.chave_nfe || '')"
         :data-compra="form.data_compra"
         :valor-total="valorBrutoNumber.toFixed(2)"
@@ -538,6 +784,10 @@ onMounted(() => {
         :valor-liquido="valorLiquido.toFixed(2)"
         :observacoes="String(form.observacoes || '')"
         :errors="errors"
+        :lookup-loading="integrimLookupLoading"
+        :lookup-message="integrimLookupMessage"
+        :show-advanced-lookup="showIntegrimAdvanced"
+        :advanced-company-id="integrimForcedCompanyId"
         @update:numero-nota="form.numero_nota = $event"
         @update:serie-nota="form.serie_nota = $event"
         @update:chave-nfe="form.chave_nfe = digitsOnly($event)"
@@ -546,7 +796,38 @@ onMounted(() => {
         @update:desconto-total="form.desconto_total = toNumber($event)"
         @update:valor-liquido="atualizarValorLiquido"
         @update:observacoes="form.observacoes = $event"
+        @update:advanced-company-id="integrimForcedCompanyId = digitsOnly($event)"
+        @toggle-advanced-lookup="showIntegrimAdvanced = !showIntegrimAdvanced"
+        @lookup-nota="buscarNotaIntegrim()"
       />
+
+      <div
+        v-if="integrimCandidates.length > 1"
+        class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-100"
+      >
+        <p class="mb-2 font-bold">
+          Selecione a nota correta
+        </p>
+        <div class="grid gap-2 md:grid-cols-2">
+          <button
+            v-for="candidate in integrimCandidates"
+            :key="candidateKey(candidate)"
+            type="button"
+            class="rounded-lg border border-amber-200 bg-white p-3 text-left transition hover:border-amber-400 hover:bg-amber-50 dark:border-amber-900/60 dark:bg-slate-950 dark:hover:border-amber-500 dark:hover:bg-amber-950/40"
+            @click="buscarNotaIntegrim(candidate)"
+          >
+            <span class="block text-xs font-black uppercase tracking-wide text-amber-700 dark:text-amber-300">
+              Empresa {{ candidate.idempresa }} - Serie {{ candidate.serie_nota }} - Modelo {{ candidate.modelo }}
+            </span>
+            <span class="mt-1 block font-semibold text-slate-900 dark:text-slate-100">
+              {{ candidate.nome_cliente || 'Cliente nao informado' }}
+            </span>
+            <span class="mt-1 block text-xs text-slate-600 dark:text-slate-300">
+              {{ formatCandidateDate(candidate.data_compra) }} - {{ formatCurrency(candidate.valor_total) }}
+            </span>
+          </button>
+        </div>
+      </div>
 
       <NotaCadastroProdutos
         :produtos="form.produtos"
@@ -589,7 +870,7 @@ onMounted(() => {
           variant="accent"
           class="w-full sm:w-auto sm:min-w-36"
           :aria-disabled="!saveReady"
-          :disabled="notasStore.creatingNota"
+          :disabled="notasStore.creatingNota || !saveReady"
           @click="saveNota"
         >
           <LoaderCircle v-if="notasStore.creatingNota" class="h-4 w-4 animate-spin" />

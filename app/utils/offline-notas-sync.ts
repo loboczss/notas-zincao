@@ -403,6 +403,7 @@ export const hydrateNotaOfflineMediaFromCache = async <T extends Record<string, 
 const toListItem = (nota: OfflineNotaSyncData | NotaRetiradaDetalheItem): NotaRetiradaListItem => ({
   id: nota.id,
   contato_id: nota.contato_id,
+  idempresa: nota.idempresa,
   nome_cliente: nota.nome_cliente,
   numero_nota: nota.numero_nota,
   serie_nota: nota.serie_nota,

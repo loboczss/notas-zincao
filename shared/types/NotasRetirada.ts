@@ -58,6 +58,7 @@ export type NotaRetiradaStatus = 'pendente' | 'parcial' | 'retirada' | 'cancelad
 
 export type NotaRetiradaDraft = {
   contato_id?: string
+  idempresa?: number | null
   telefone_cliente?: string
   documento_cliente?: string
   foto_url?: string
@@ -80,6 +81,7 @@ export type NotaRetiradaDraft = {
 export type NotaRetiradaListItem = {
   id: string
   contato_id?: string | null
+  idempresa?: number | null
   nome_cliente: string
   numero_nota: string
   serie_nota: string
@@ -161,4 +163,47 @@ export type NotaExtractionRequest = {
 export type NotaExtractionResponse = {
   draft: NotaRetiradaDraft
   missingFields: NotaMissingField[]
+}
+
+export type NotaIntegrimLookupCandidate = {
+  idempresa: number
+  idplanilha: number
+  numero_nota: string
+  serie_nota: string
+  modelo: string
+  nome_cliente: string
+  documento_cliente: string
+  data_compra: string
+  valor_total: number | null
+}
+
+export type NotaIntegrimLookupRequest = {
+  numero_nota: string
+  serie_nota?: string | null
+  idempresa?: number | null
+  idplanilha?: number | null
+}
+
+export type NotaIntegrimLookupHints = {
+  numero_nota: string
+  serie_nota: string
+  chave_nfe: string
+  missingFields: Array<'numero_nota' | 'serie_nota' | 'chave_nfe'>
+}
+
+export type NotaImageProductsResponse = {
+  success: true
+  produtos: NotaProduto[]
+  missingFields: Array<'produtos'>
+}
+
+export type NotaIntegrimLookupResponse = {
+  success: true
+  found: boolean
+  message: string
+  draft?: NotaRetiradaDraft
+  candidate?: NotaIntegrimLookupCandidate
+  candidates?: NotaIntegrimLookupCandidate[]
+  missingFields?: NotaMissingField[]
+  hints?: NotaIntegrimLookupHints
 }

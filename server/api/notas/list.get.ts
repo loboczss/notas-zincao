@@ -142,7 +142,7 @@ export const notasListGetHandler = defineEventHandler(async (event) => {
 
   let request = (client as any)
     .from('notas_retirada')
-    .select('id, owner_user_id, contato_id, nome_cliente, numero_nota, serie_nota, chave_nfe, data_compra, data_retirada, valor_total, desconto_total, status_retirada, criado_em, produtos, foto_url, foto_cliente_url, comprovante_retirada_url, historico_retiradas', { count: 'exact' })
+    .select('id, owner_user_id, contato_id, idempresa, nome_cliente, numero_nota, serie_nota, chave_nfe, data_compra, data_retirada, valor_total, desconto_total, status_retirada, criado_em, produtos, foto_url, foto_cliente_url, comprovante_retirada_url, historico_retiradas', { count: 'exact' })
     .is('deleted_at', null)
     .order('criado_em', { ascending: false })
 
