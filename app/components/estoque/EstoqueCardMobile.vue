@@ -64,16 +64,13 @@ const precoFormatado = computed(() => {
           </p>
         </div>
 
-        <button
+        <IconButton
           v-if="props.canEdit"
-          type="button"
-          class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-brand-600 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-brand-300"
-          title="Editar produto"
-          aria-label="Editar produto"
+          label="Editar produto"
           @click="emit('edit', props.produto.id_produto)"
         >
           <Pencil class="h-4 w-4" />
-        </button>
+        </IconButton>
       </div>
     </div>
   </article>

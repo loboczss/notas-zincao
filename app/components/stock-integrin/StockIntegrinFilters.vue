@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Search } from 'lucide-vue-next'
-import Botao from '../Botao.vue'
-import Input from '../Input.vue'
 
 const props = withDefaults(defineProps<{
   searchTerm: string
@@ -50,27 +48,23 @@ const companyOptions = computed(() => {
       />
     </label>
 
-    <select
-      :value="props.idempresa"
-      class="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
+    <SelectInput
+      :model-value="props.idempresa"
       aria-label="Empresa"
-      @change="emit('update:idempresa', ($event.target as HTMLSelectElement).value)"
+      @update:model-value="emit('update:idempresa', $event)"
     >
       <option value="">Todas empresas</option>
       <option v-for="empresa in companyOptions" :key="empresa" :value="String(empresa)">
         Empresa {{ empresa }}
       </option>
-    </select>
+    </SelectInput>
 
-    <label class="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-200 px-3 text-sm font-semibold text-slate-700 dark:border-slate-800 dark:text-slate-200">
-      <input
-        :checked="props.onlyAvailable"
-        type="checkbox"
-        class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
-        @change="emit('update:onlyAvailable', ($event.target as HTMLInputElement).checked)"
-      >
+    <CheckboxField
+      :model-value="props.onlyAvailable"
+      @update:model-value="emit('update:onlyAvailable', $event)"
+    >
       Com saldo
-    </label>
+    </CheckboxField>
 
     <Botao
       type="submit"

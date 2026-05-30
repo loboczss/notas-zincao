@@ -139,104 +139,74 @@ onMounted(async () => {
 <template>
   <LayoutAppPageShell
     eyebrow="Painel Administrativo"
-    title="Controle de Usuários"
-    description="Gerencie os colaboradores com acesso ao sistema de Notas Zincão."
+    title="Controle de usuarios"
+    description="Gerencie os colaboradores com acesso ao sistema de Notas Zincao."
   >
     <template #headerAside>
       <Botao variant="primary" class="flex items-center gap-2" @click="abrirModalInvite">
         <UserPlus class="w-4 h-4" />
-        <span>Convidar Usuário</span>
+        <span>Convidar usuario</span>
       </Botao>
     </template>
 
-    <div class="mt-6 space-y-6">
-      <!-- Cards Informativos -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card padding-class="p-5">
-          <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-xl bg-brand-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center">
-              <Users class="w-5 h-5" />
-            </div>
-            <div>
-              <span class="text-2xl font-black text-slate-900 dark:text-white">{{ totalUsers }}</span>
-              <span class="block text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">Total de Usuários</span>
-            </div>
-          </div>
-        </Card>
+    <div class="space-y-4">
+      <div class="grid gap-4 sm:grid-cols-3">
+        <PageStatCard label="Total de usuarios" :value="totalUsers">
+          <template #icon>
+            <Users class="h-5 w-5" />
+          </template>
+        </PageStatCard>
 
-        <Card padding-class="p-5">
-          <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-              <ShieldCheck class="w-5 h-5" />
-            </div>
-            <div>
-              <span class="text-2xl font-black text-slate-900 dark:text-white">{{ adminUsers }}</span>
-              <span class="block text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">Administradores</span>
-            </div>
-          </div>
-        </Card>
+        <PageStatCard label="Administradores" :value="adminUsers" tone="indigo">
+          <template #icon>
+            <ShieldCheck class="h-5 w-5" />
+          </template>
+        </PageStatCard>
 
-        <Card padding-class="p-5">
-          <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-xl bg-green-500/10 text-green-600 dark:text-green-400 flex items-center justify-center">
-              <UserCheck class="w-5 h-5" />
-            </div>
-            <div>
-              <span class="text-2xl font-black text-slate-900 dark:text-white">{{ activeUsers }}</span>
-              <span class="block text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">Contas Ativas</span>
-            </div>
-          </div>
-        </Card>
+        <PageStatCard label="Contas ativas" :value="activeUsers" tone="emerald">
+          <template #icon>
+            <UserCheck class="h-5 w-5" />
+          </template>
+        </PageStatCard>
       </div>
 
-      <!-- Barra de Busca e Filtros -->
-      <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div class="flex items-center relative w-full max-w-md">
-          <Search class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400" />
-          <input
+      <PageToolbar>
+        <div class="relative w-full lg:max-w-md">
+          <Search class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Input
             v-model="busca"
             type="text"
             placeholder="Buscar por nome ou e-mail..."
-            class="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600"
+            class="pl-10"
             @keyup.enter="aplicarFiltros"
           />
         </div>
 
-        <div class="flex flex-wrap items-center gap-2">
-          <select
-            v-model="statusFiltro"
-            class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition-colors focus:border-brand-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
-          >
+        <template #actions>
+          <SelectInput v-model="statusFiltro" class="w-full sm:w-auto">
             <option value="todos">Todos os status</option>
             <option value="ativo">Ativo</option>
             <option value="inativo">Inativo</option>
             <option value="pendente">Pendente</option>
-          </select>
+          </SelectInput>
 
-          <select
-            v-model="sortBy"
-            class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition-colors focus:border-brand-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
-          >
+          <SelectInput v-model="sortBy" class="w-full sm:w-auto">
             <option value="membro_desde">Ordenar por data</option>
             <option value="nome">Ordenar por nome</option>
             <option value="email">Ordenar por e-mail</option>
             <option value="status">Ordenar por status</option>
-            <option value="role">Ordenar por permissão</option>
-          </select>
+            <option value="role">Ordenar por permissao</option>
+          </SelectInput>
 
-          <select
-            v-model="sortDir"
-            class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition-colors focus:border-brand-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
-          >
+          <SelectInput v-model="sortDir" class="w-full sm:w-auto">
             <option value="desc">Decrescente</option>
             <option value="asc">Crescente</option>
-          </select>
+          </SelectInput>
 
           <Botao variant="secondary" @click="aplicarFiltros">Filtrar</Botao>
-        </div>
-      </div>
+        </template>
+      </PageToolbar>
 
-      <!-- Tabela -->
       <AdminUserManagementTable
         :usuarios="adminUsersStore.usuarios"
         :loading="adminUsersStore.loadingUsuarios"
@@ -244,41 +214,17 @@ onMounted(async () => {
         @toggle-status="handleToggleStatus"
       />
 
-      <Card class="flex flex-wrap items-center justify-between gap-4 text-sm" padding-class="px-4 py-3">
-        <p class="text-slate-600 dark:text-slate-300">
-          Página {{ adminUsersStore.page }} de {{ adminUsersStore.totalPages }} · {{ adminUsersStore.totalItems }} usuários
-        </p>
-
-        <div class="flex items-center gap-2">
-          <select
-            :value="String(adminUsersStore.pageSize)"
-            class="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold text-slate-700 transition-colors focus:border-brand-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
-            @change="mudarPageSize(($event.target as HTMLSelectElement).value)"
-          >
-            <option value="20">20 / página</option>
-            <option value="50">50 / página</option>
-            <option value="100">100 / página</option>
-          </select>
-
-          <button
-            type="button"
-            class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-            :disabled="adminUsersStore.loadingUsuarios || adminUsersStore.page <= 1"
-            @click="irPaginaAnterior"
-          >
-            Anterior
-          </button>
-
-          <button
-            type="button"
-            class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-            :disabled="adminUsersStore.loadingUsuarios || adminUsersStore.page >= adminUsersStore.totalPages"
-            @click="irProximaPagina"
-          >
-            Próxima
-          </button>
-        </div>
-      </Card>
+      <PagePagination
+        :page="adminUsersStore.page"
+        :total-pages="adminUsersStore.totalPages"
+        :total-items="adminUsersStore.totalItems"
+        :page-size="adminUsersStore.pageSize"
+        :loading="adminUsersStore.loadingUsuarios"
+        label="usuarios"
+        @update:page-size="mudarPageSize"
+        @previous="irPaginaAnterior"
+        @next="irProximaPagina"
+      />
 
     </div>
 

@@ -119,56 +119,58 @@ const restaurarNota = async (id: string) => {
 
 <template>
   <LayoutAppPageShell
-    eyebrow="Área de Auditoria"
-    title="Lixeira de Notas"
-    description="Gerencie e visualize notas que foram excluídas logicamente do sistema."
+    eyebrow="Area de auditoria"
+    title="Lixeira de notas"
+    description="Gerencie e visualize notas que foram excluidas logicamente do sistema."
   >
     <template #headerAside>
-      <div class="flex flex-col sm:flex-row items-center gap-3">
+      <div class="flex flex-col items-center gap-3 sm:flex-row">
         <div class="relative w-full sm:w-auto">
-          <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-          <input 
+          <Search class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Input
             v-model="search"
-            type="text" 
+            type="text"
             placeholder="Buscar na lixeira..."
-            class="pl-9 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none transition-all w-full sm:w-64"
+            class="w-full pl-9 sm:w-64"
           />
         </div>
-        <button 
+        <Botao
+          type="button"
+          variant="secondary"
+          class="w-full sm:w-auto"
           @click="navigateTo(AppRoute.notas)"
-          class="flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-semibold transition-all"
         >
           <ArrowLeft class="h-4 w-4" />
           Voltar
-        </button>
+        </Botao>
       </div>
     </template>
 
-    <!-- Info Alert -->
-    <div class="bg-amber-50/50 dark:bg-amber-500/5 border border-amber-200/60 dark:border-amber-500/20 rounded-xl p-4 mb-6 flex gap-3 items-start">
-      <AlertCircle class="h-5 w-5 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
-      <div class="text-sm text-amber-800 dark:text-amber-400">
-        <span class="font-bold">Notas nesta lista não são visíveis no Dashboard principal.</span>
-        <span class="block sm:inline sm:ml-1 opacity-90">Elas permanecem no banco de dados para fins de auditoria e conformidade legal.</span>
+    <div class="space-y-4">
+      <PageNotice variant="warning" title="Notas fora do dashboard principal">
+        <template #icon>
+          <AlertCircle class="h-5 w-5" />
+        </template>
+        Elas permanecem no banco de dados para fins de auditoria e conformidade legal.
+      </PageNotice>
+
+      <PageEmptyState
+        v-if="!notasStore.loadingLixeira && filteredLixeira.length === 0"
+        title="Lixeira vazia"
+        description="Nenhuma nota excluida foi encontrada."
+      >
+        <template #icon>
+          <Trash2 class="h-7 w-7" />
+        </template>
+      </PageEmptyState>
+
+      <div v-else-if="notasStore.loadingLixeira" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Card v-for="i in 6" :key="i" padding-class="p-4">
+          <div class="h-40 animate-pulse rounded-lg bg-slate-100 dark:bg-slate-800" />
+        </Card>
       </div>
-    </div>
 
-    <!-- Empty State -->
-    <div v-if="!notasStore.loadingLixeira && filteredLixeira.length === 0" class="bg-white dark:bg-slate-900 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl py-20 text-center">
-      <div class="h-16 w-16 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4">
-        <Trash2 class="h-8 w-8 text-slate-300 dark:text-slate-600" />
-      </div>
-      <h3 class="text-slate-900 dark:text-slate-100 font-bold text-base">Lixeira vazia</h3>
-      <p class="text-slate-500 text-sm mt-1">Nenhuma nota excluída foi encontrada.</p>
-    </div>
-
-    <!-- Loading State -->
-    <div v-else-if="notasStore.loadingLixeira" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div v-for="i in 6" :key="i" class="h-48 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse"></div>
-    </div>
-
-    <!-- Grid de Notas Deletadas -->
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div v-else class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       <Card 
         v-for="nota in filteredLixeira" 
         :key="nota.id"
@@ -211,26 +213,30 @@ const restaurarNota = async (id: string) => {
         </div>
 
         <div class="flex gap-2">
-          <button 
+          <Botao
+            type="button"
+            class="flex-1"
+            size="sm"
             @click="verHistorico(nota)"
-            class="flex-1 flex items-center justify-center gap-2 py-2 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 rounded-lg text-xs font-semibold transition-all"
           >
             <History class="h-3.5 w-3.5" />
-            Ver Histórico
-          </button>
-          <button 
-            @click="restaurarNota(nota.id)"
+            Ver historico
+          </Botao>
+          <Botao
             type="button"
-            class="px-3 py-2 border border-slate-200 dark:border-slate-800 hover:border-brand-500/50 hover:bg-brand-500/5 text-slate-400 hover:text-brand-600 rounded-lg transition-all disabled:cursor-wait disabled:opacity-60"
-            title="Restaurar Nota"
+            variant="secondary"
+            size="sm"
+            title="Restaurar nota"
             :disabled="restaurandoId === nota.id"
             :aria-busy="restaurandoId === nota.id"
+            @click="restaurarNota(nota.id)"
           >
             <Loader2 v-if="restaurandoId === nota.id" class="h-4 w-4 animate-spin" />
             <RotateCcw v-else class="h-4 w-4" />
-          </button>
+          </Botao>
         </div>
       </Card>
+      </div>
     </div>
 
     <ModalGlobal
@@ -296,9 +302,9 @@ const restaurarNota = async (id: string) => {
                 </div>
               </dl>
 
-              <button
+              <Botao
                 type="button"
-                class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-brand-500 disabled:cursor-wait disabled:opacity-60 dark:bg-brand-500 dark:hover:bg-brand-600"
+                size="sm"
                 :disabled="restaurandoId === notaAuditoriaSelecionada.id"
                 :aria-busy="restaurandoId === notaAuditoriaSelecionada.id"
                 @click="restaurarNota(notaAuditoriaSelecionada.id)"
@@ -306,7 +312,7 @@ const restaurarNota = async (id: string) => {
                 <Loader2 v-if="restaurandoId === notaAuditoriaSelecionada.id" class="h-3.5 w-3.5 animate-spin" />
                 <RotateCcw v-else class="h-3.5 w-3.5" />
                 Restaurar nota
-              </button>
+              </Botao>
             </div>
           </div>
         </Card>

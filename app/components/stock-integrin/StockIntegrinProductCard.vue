@@ -9,10 +9,26 @@ import {
 const props = defineProps<{
   produto: StockIntegrinProduto
 }>()
+
+const emit = defineEmits<{
+  (e: 'select', produto: StockIntegrinProduto): void
+}>()
+
+const selecionarProduto = () => {
+  emit('select', props.produto)
+}
 </script>
 
 <template>
-  <article class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+  <article
+    class="cursor-pointer rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition hover:border-brand-200 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-brand-700 dark:hover:bg-slate-950/60"
+    role="button"
+    tabindex="0"
+    :aria-label="`Abrir detalhes de ${props.produto.descrcomproduto}`"
+    @click="selecionarProduto"
+    @keydown.enter.prevent="selecionarProduto"
+    @keydown.space.prevent="selecionarProduto"
+  >
     <div class="flex items-start justify-between gap-3">
       <div class="min-w-0">
         <p class="font-semibold text-slate-950 dark:text-slate-50">

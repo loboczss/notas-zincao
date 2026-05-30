@@ -801,11 +801,11 @@ onMounted(() => {
           Selecione a nota correta
         </p>
         <div class="grid gap-2 md:grid-cols-2">
-          <button
+          <CardButton
             v-for="candidate in integrimCandidates"
             :key="candidateKey(candidate)"
-            type="button"
-            class="rounded-lg border border-amber-200 bg-white p-3 text-left transition hover:border-amber-400 hover:bg-amber-50 dark:border-amber-900/60 dark:bg-slate-950 dark:hover:border-amber-500 dark:hover:bg-amber-950/40"
+            variant="warning"
+            class="p-3"
             @click="buscarNotaIntegrim(candidate)"
           >
             <span class="block text-xs font-black uppercase tracking-wide text-amber-700 dark:text-amber-300">
@@ -817,7 +817,7 @@ onMounted(() => {
             <span class="mt-1 block text-xs text-slate-600 dark:text-slate-300">
               {{ formatCandidateDate(candidate.data_compra) }} - {{ formatCurrency(candidate.valor_total) }}
             </span>
-          </button>
+          </CardButton>
         </div>
       </div>
 

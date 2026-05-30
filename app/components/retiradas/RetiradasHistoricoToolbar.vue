@@ -124,39 +124,36 @@ const advancedFiltersCount = computed(() => {
         </div>
 
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <button
+          <Botao
             type="button"
-            class="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+            variant="secondary"
             :disabled="loading"
-            title="Atualizar"
             @click="emit('refresh')"
           >
             <RotateCw class="h-4 w-4" :class="loading ? 'animate-spin' : ''" />
             <span>Atualizar</span>
-          </button>
+          </Botao>
 
           <div class="grid grid-cols-2 gap-2">
-            <button
+            <Botao
               type="button"
-              class="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-slate-950 px-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
               :disabled="!!exportLoading"
               @click="emit('export', 'csv')"
             >
               <Loader2 v-if="exportLoading === 'csv'" class="h-4 w-4 animate-spin" />
               <FileDown v-else class="h-4 w-4" />
               <span>CSV</span>
-            </button>
+            </Botao>
 
-            <button
+            <Botao
               type="button"
-              class="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-slate-950 px-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
               :disabled="!!exportLoading"
               @click="emit('export', 'pdf')"
             >
               <Loader2 v-if="exportLoading === 'pdf'" class="h-4 w-4 animate-spin" />
               <FileDown v-else class="h-4 w-4" />
               <span>PDF</span>
-            </button>
+            </Botao>
           </div>
         </div>
       </div>
@@ -189,32 +186,31 @@ const advancedFiltersCount = computed(() => {
             <span class="mb-1.5 block text-xs font-semibold text-slate-600 dark:text-slate-300">Buscar</span>
             <span class="relative block">
               <Search class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <input
-                :value="filtros.search"
+              <Input
+                :model-value="filtros.search"
                 type="search"
                 placeholder="Cliente, nota, produto..."
-                class="h-10 w-full rounded-md border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/15 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-                @input="updateFilter('search', ($event.target as HTMLInputElement).value)"
+                class="pl-9"
+                @update:model-value="updateFilter('search', $event)"
                 @keyup.enter="emit('apply')"
-              >
+              />
             </span>
           </label>
 
           <div class="grid grid-cols-2 gap-2 sm:flex sm:items-center">
-            <button
+            <Botao
               type="button"
-              class="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-brand-600 px-4 text-sm font-semibold text-white transition hover:bg-brand-500 disabled:cursor-not-allowed disabled:opacity-60"
               :disabled="loading"
               @click="emit('apply')"
             >
               <Loader2 v-if="loading" class="h-4 w-4 animate-spin" />
               <Filter v-else class="h-4 w-4" />
               <span>Filtrar</span>
-            </button>
+            </Botao>
 
-            <button
+            <Botao
               type="button"
-              class="inline-flex h-10 items-center justify-center gap-2 rounded-md border px-4 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
+              variant="secondary"
               :class="filtersOpen || advancedFiltersCount ? 'border-brand-200 bg-brand-50 text-brand-700 hover:bg-brand-100 dark:border-brand-500/30 dark:bg-brand-500/10 dark:text-brand-300' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'"
               :aria-expanded="filtersOpen"
               aria-controls="retiradas-filtros-avancados"
@@ -230,17 +226,18 @@ const advancedFiltersCount = computed(() => {
                 {{ advancedFiltersCount }}
               </span>
               <ChevronDown class="h-4 w-4 transition-transform" :class="{ 'rotate-180': filtersOpen }" />
-            </button>
+            </Botao>
 
-            <button
+            <Botao
               type="button"
-              class="col-span-2 inline-flex h-10 items-center justify-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 sm:col-span-1"
+              variant="secondary"
+              class="col-span-2 sm:col-span-1"
               :disabled="loading || !hasActiveFilters"
               @click="emit('clear')"
             >
               <X class="h-4 w-4" />
               <span>Limpar</span>
-            </button>
+            </Botao>
           </div>
         </div>
 
@@ -264,12 +261,12 @@ const advancedFiltersCount = computed(() => {
                     <span class="mb-1.5 block text-xs font-semibold text-slate-600 dark:text-slate-300">Dia</span>
                     <span class="relative block">
                       <Calendar class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                      <input
-                        :value="filtros.data_inicio"
+                      <Input
+                        :model-value="filtros.data_inicio"
                         type="date"
-                        class="h-10 w-full rounded-md border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/15 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:[color-scheme:dark]"
-                        @input="updateFilter('data_inicio', ($event.target as HTMLInputElement).value)"
-                      >
+                        class="pl-9"
+                        @update:model-value="updateFilter('data_inicio', $event)"
+                      />
                     </span>
                   </label>
 
@@ -277,12 +274,12 @@ const advancedFiltersCount = computed(() => {
                     <span class="mb-1.5 block text-xs font-semibold text-slate-600 dark:text-slate-300">Ate</span>
                     <span class="relative block">
                       <Calendar class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                      <input
-                        :value="filtros.data_fim"
+                      <Input
+                        :model-value="filtros.data_fim"
                         type="date"
-                        class="h-10 w-full rounded-md border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/15 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:[color-scheme:dark]"
-                        @input="updateFilter('data_fim', ($event.target as HTMLInputElement).value)"
-                      >
+                        class="pl-9"
+                        @update:model-value="updateFilter('data_fim', $event)"
+                      />
                     </span>
                   </label>
 
@@ -290,12 +287,12 @@ const advancedFiltersCount = computed(() => {
                     <span class="mb-1.5 block text-xs font-semibold text-slate-600 dark:text-slate-300">Hora inicial</span>
                     <span class="relative block">
                       <Clock class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                      <input
-                        :value="filtros.hora_inicio"
+                      <Input
+                        :model-value="filtros.hora_inicio"
                         type="time"
-                        class="h-10 w-full rounded-md border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/15 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:[color-scheme:dark]"
-                        @input="updateFilter('hora_inicio', ($event.target as HTMLInputElement).value)"
-                      >
+                        class="pl-9"
+                        @update:model-value="updateFilter('hora_inicio', $event)"
+                      />
                     </span>
                   </label>
 
@@ -303,12 +300,12 @@ const advancedFiltersCount = computed(() => {
                     <span class="mb-1.5 block text-xs font-semibold text-slate-600 dark:text-slate-300">Hora final</span>
                     <span class="relative block">
                       <Clock class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                      <input
-                        :value="filtros.hora_fim"
+                      <Input
+                        :model-value="filtros.hora_fim"
                         type="time"
-                        class="h-10 w-full rounded-md border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/15 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:[color-scheme:dark]"
-                        @input="updateFilter('hora_fim', ($event.target as HTMLInputElement).value)"
-                      >
+                        class="pl-9"
+                        @update:model-value="updateFilter('hora_fim', $event)"
+                      />
                     </span>
                   </label>
                 </div>
@@ -325,11 +322,11 @@ const advancedFiltersCount = computed(() => {
                 <label class="block">
                   <span class="mb-1.5 block text-xs font-semibold text-slate-600 dark:text-slate-300">Campo</span>
                   <span class="relative block">
-                    <select
-                      :value="sortKey"
-                      class="h-10 w-full appearance-none rounded-md border border-slate-200 bg-white px-3 pr-9 text-sm font-semibold text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/15 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:[color-scheme:dark]"
+                    <SelectInput
+                      :model-value="sortKey"
+                      class="appearance-none pr-9 font-semibold"
                       :disabled="loading"
-                      @change="updateSortKey(($event.target as HTMLSelectElement).value)"
+                      @update:model-value="updateSortKey"
                     >
                       <option
                         v-for="option in sortOptions"
@@ -338,7 +335,7 @@ const advancedFiltersCount = computed(() => {
                       >
                         {{ option.label }}
                       </option>
-                    </select>
+                    </SelectInput>
                     <ChevronDown class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   </span>
                 </label>
@@ -346,15 +343,15 @@ const advancedFiltersCount = computed(() => {
                 <label class="block">
                   <span class="mb-1.5 block text-xs font-semibold text-slate-600 dark:text-slate-300">Direcao</span>
                   <span class="relative block">
-                    <select
-                      :value="sortOrder"
-                      class="h-10 w-full appearance-none rounded-md border border-slate-200 bg-white px-3 pr-9 text-sm font-semibold text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/15 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:[color-scheme:dark]"
+                    <SelectInput
+                      :model-value="sortOrder"
+                      class="appearance-none pr-9 font-semibold"
                       :disabled="loading"
-                      @change="updateSortOrder(($event.target as HTMLSelectElement).value)"
+                      @update:model-value="updateSortOrder"
                     >
                       <option value="desc">Decrescente</option>
                       <option value="asc">Crescente</option>
-                    </select>
+                    </SelectInput>
                     <ChevronDown class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   </span>
                 </label>

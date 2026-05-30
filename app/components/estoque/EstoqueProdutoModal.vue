@@ -155,16 +155,15 @@ const submit = () => {
                 placeholder="+0"
                 @keydown.enter.prevent="aplicarAdicao"
               />
-              <button
-                type="button"
-                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-600 text-white transition-colors hover:bg-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-brand-500 dark:hover:bg-brand-600"
+              <IconButton
+                label="Somar ao estoque"
+                size="sm"
+                variant="primary"
                 :disabled="!podeAdicionar"
-                aria-label="Somar ao estoque"
-                title="Somar ao estoque"
                 @click="aplicarAdicao"
               >
                 <Plus class="h-4 w-4" />
-              </button>
+              </IconButton>
             </div>
           </label>
 

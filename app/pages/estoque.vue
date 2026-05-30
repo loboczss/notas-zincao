@@ -96,13 +96,12 @@ onMounted(async () => {
     description="Consulte e mantenha os produtos disponiveis para retirada."
   >
     <div class="space-y-3">
-      <div
-        v-if="!isAdmin"
-        class="flex items-start gap-2 rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-xs text-brand-800 dark:border-brand-900/50 dark:bg-brand-500/10 dark:text-brand-200"
-      >
-        <ShieldAlert class="mt-0.5 h-4 w-4 shrink-0" />
+      <PageNotice v-if="!isAdmin" variant="info">
+        <template #icon>
+          <ShieldAlert class="h-4 w-4" />
+        </template>
         <p>Seu perfil está em modo somente leitura nesta tela.</p>
-      </div>
+      </PageNotice>
 
       <EstoqueToolbar
         :search-term="searchTerm"

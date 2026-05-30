@@ -433,7 +433,7 @@ await carregarDetalhe()
               :data-has-error="errors.foto ? 'true' : undefined"
               class="space-y-2"
             >
-              <button
+              <CardButton
                 type="button"
                 class="flex w-full min-h-40 flex-col items-center justify-center rounded-lg border border-dashed bg-slate-50/70 p-3 text-center transition hover:border-brand-500 hover:bg-white dark:bg-slate-950/40 dark:hover:border-brand-400 dark:hover:bg-slate-950"
                 :class="errors.foto ? 'border-rose-300 dark:border-rose-800' : 'border-slate-300 dark:border-slate-700'"
@@ -459,7 +459,7 @@ await carregarDetalhe()
                     </p>
                   </div>
                 </div>
-              </button>
+              </CardButton>
 
               <p v-if="errors.foto" class="text-[11px] font-semibold text-rose-600 dark:text-rose-300">
                 {{ errors.foto }}
@@ -470,34 +470,39 @@ await carregarDetalhe()
                 class="rounded-lg border border-slate-200 bg-white p-2 shadow-sm dark:border-slate-800 dark:bg-slate-950"
               >
                 <div class="grid grid-cols-2 gap-2">
-                  <button
+                  <Botao
                     type="button"
-                    class="flex h-10 items-center justify-center gap-2 rounded-md bg-brand-600 px-3 text-xs font-bold text-white transition hover:bg-brand-500 active:bg-brand-700 disabled:cursor-wait disabled:opacity-70"
+                    size="sm"
+                    class="w-full"
                     :disabled="nativeCaptureLoading"
                     @click="triggerCamera"
                   >
                     <LoaderCircle v-if="nativeCaptureLoading" class="h-4 w-4 animate-spin" />
                     <Camera v-else class="h-4 w-4" />
                     <span>Tirar foto</span>
-                  </button>
-                  <button
+                  </Botao>
+                  <Botao
                     type="button"
-                    class="flex h-10 items-center justify-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 text-xs font-bold text-slate-700 transition hover:border-brand-500 hover:bg-white disabled:cursor-wait disabled:opacity-70 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-brand-500"
+                    variant="secondary"
+                    size="sm"
+                    class="w-full"
                     :disabled="nativeCaptureLoading"
                     @click="triggerGallery"
                   >
                     <Images class="h-4 w-4" />
                     <span>Galeria</span>
-                  </button>
+                  </Botao>
                 </div>
-                <button
+                <Botao
                   type="button"
-                  class="mt-2 flex h-8 w-full items-center justify-center gap-1.5 rounded-md text-[11px] font-semibold text-slate-500 transition hover:bg-slate-50 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-200"
+                  variant="secondary"
+                  size="sm"
+                  class="mt-2 w-full"
                   @click="closePicker"
                 >
                   <X class="h-3.5 w-3.5" />
                   <span>Cancelar</span>
-                </button>
+                </Botao>
               </div>
             </div>
 

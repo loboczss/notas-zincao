@@ -15,6 +15,14 @@ const props = withDefaults(defineProps<{
 }>(), {
   loadingInitial: false,
 })
+
+const emit = defineEmits<{
+  (e: 'select', produto: StockIntegrinProduto): void
+}>()
+
+const selecionarProduto = (produto: StockIntegrinProduto) => {
+  emit('select', produto)
+}
 </script>
 
 <template>
@@ -41,7 +49,13 @@ const props = withDefaults(defineProps<{
           <tr
             v-for="produto in props.produtos"
             :key="produto.id"
-            class="transition hover:bg-slate-50 dark:hover:bg-slate-950/60"
+            class="cursor-pointer transition hover:bg-slate-50 focus:bg-slate-50 focus:outline-none dark:hover:bg-slate-950/60 dark:focus:bg-slate-950/60"
+            tabindex="0"
+            role="button"
+            :aria-label="`Abrir detalhes de ${produto.descrcomproduto}`"
+            @click="selecionarProduto(produto)"
+            @keydown.enter.prevent="selecionarProduto(produto)"
+            @keydown.space.prevent="selecionarProduto(produto)"
           >
             <td class="max-w-md px-4 py-3">
               <p class="font-semibold text-slate-950 dark:text-slate-50">
@@ -95,6 +109,7 @@ const props = withDefaults(defineProps<{
         v-for="produto in props.produtos"
         :key="produto.id"
         :produto="produto"
+        @select="selecionarProduto"
       />
 
       <div

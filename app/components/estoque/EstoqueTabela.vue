@@ -82,16 +82,14 @@ const formatPreco = (value?: number | string | null) => {
                 <span class="block truncate">{{ produto.produto_pai?.descricao || '-' }}</span>
               </td>
               <td class="px-3 py-2 text-right">
-                <button
+                <IconButton
                   v-if="props.canEdit"
-                  type="button"
-                  class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-brand-600 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-brand-300"
-                  title="Editar produto"
-                  aria-label="Editar produto"
+                  label="Editar produto"
+                  size="sm"
                   @click="emit('edit', produto.id_produto)"
                 >
                   <Pencil class="h-4 w-4" />
-                </button>
+                </IconButton>
               </td>
             </tr>
           </tbody>

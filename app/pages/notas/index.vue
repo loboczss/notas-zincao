@@ -501,50 +501,6 @@ const stats = computed(() => {
           />
 
           <div class="space-y-4">
-        <div v-if="false" class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm dark:border-slate-800 dark:bg-slate-900">
-          <div class="text-xs text-slate-500">
-            <span>Página <span class="font-medium text-slate-900 dark:text-white">{{ notasStore.page }}</span> de {{ notasStore.totalPaginas }}</span>
-            <span class="mx-2 hidden sm:inline">•</span>
-            <span class="hidden sm:inline">Exibindo {{ intervaloNotas.inicio }}-{{ intervaloNotas.fim }} de {{ notasStore.totalNotas }}</span>
-          </div>
-
-          <div class="flex items-center gap-3">
-            <div class="flex items-center gap-2">
-              <label class="text-xs text-slate-500">Itens</label>
-              <select
-                :value="String(itensPorPagina)"
-                class="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-900 outline-none focus:border-brand-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-                @change="mudarItensPorPagina(($event.target as HTMLSelectElement).value)"
-              >
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="30">30</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-              </select>
-            </div>
-
-            <div class="flex items-center gap-1">
-              <button
-                type="button"
-                class="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-                :disabled="notasStore.loadingNotas || notasStore.page <= 1"
-                @click="irPaginaAnterior"
-              >
-                Anterior
-              </button>
-              <button
-                type="button"
-                class="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-                :disabled="notasStore.loadingNotas || notasStore.page >= notasStore.totalPaginas"
-                @click="irProximaPagina"
-              >
-                Próxima
-              </button>
-            </div>
-          </div>
-        </div>
-
         <NotasTabela
           :notas="notasFiltradas"
           :loading="notasLoadingInicial"
@@ -588,49 +544,39 @@ const stats = computed(() => {
 
         <template #header-actions>
           <div v-if="isAdmin && notaDetalhe && !loadingDetalhe" class="flex items-center gap-2">
-            <button
+            <IconButton
               v-if="!detalheEditMode"
-              type="button"
-              class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
-              aria-label="Editar nota"
-              title="Editar nota"
+              label="Editar nota"
               @click="iniciarEdicaoDetalhe"
             >
               <Pencil class="h-4 w-4" />
-            </button>
-            <button
+            </IconButton>
+            <IconButton
               v-if="!detalheEditMode"
-              type="button"
-              class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-rose-200 bg-white text-rose-600 transition hover:bg-rose-50 hover:text-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-rose-900/70 dark:bg-slate-900 dark:text-rose-300 dark:hover:bg-rose-950/30"
+              label="Excluir nota"
+              variant="danger"
               :disabled="deletingNota"
-              aria-label="Excluir nota"
-              title="Excluir nota"
               @click="abrirConfirmacaoExclusao"
             >
               <Trash2 class="h-4 w-4" />
-            </button>
+            </IconButton>
 
             <template v-else>
-              <button
-                type="button"
-                class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-sky-600 text-white transition hover:bg-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30 disabled:opacity-60 dark:bg-sky-500 dark:hover:bg-sky-600"
+              <IconButton
+                variant="primary"
                 :disabled="savingEdicao"
-                :aria-label="savingEdicao ? 'Salvando nota' : 'Salvar alteracoes'"
-                :title="savingEdicao ? 'Salvando...' : 'Salvar alteracoes'"
+                :label="savingEdicao ? 'Salvando nota' : 'Salvar alteracoes'"
                 @click="salvarEdicaoDetalhe"
               >
                 <Save class="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500/20 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+              </IconButton>
+              <IconButton
                 :disabled="savingEdicao"
-                aria-label="Cancelar edicao"
-                title="Cancelar edicao"
+                label="Cancelar edicao"
                 @click="cancelarEdicaoDetalhe"
               >
                 <XCircle class="h-4 w-4" />
-              </button>
+              </IconButton>
             </template>
           </div>
         </template>
@@ -696,23 +642,23 @@ const stats = computed(() => {
           </div>
 
           <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <button
+            <Botao
               type="button"
-              class="inline-flex h-10 items-center justify-center rounded-lg px-4 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+              variant="secondary"
               :disabled="deletingNota"
               @click="cancelarExclusaoNota"
             >
               Cancelar
-            </button>
-            <button
+            </Botao>
+            <Botao
               type="button"
-              class="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-rose-600 px-4 text-sm font-semibold text-white transition hover:bg-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+              variant="danger"
               :disabled="deletingNota"
               @click="confirmarExclusaoNota"
             >
               <Trash2 class="h-4 w-4" />
               {{ deletingNota ? 'Excluindo...' : 'Excluir nota' }}
-            </button>
+            </Botao>
           </div>
         </div>
       </ModalGlobal>

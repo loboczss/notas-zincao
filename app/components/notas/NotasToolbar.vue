@@ -51,9 +51,10 @@ const hasAdvancedFilters = computed(() => {
             de {{ props.totalCount }}
           </div>
 
-          <button
+          <Botao
             type="button"
-            class="inline-flex h-9 items-center justify-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+            variant="secondary"
+            size="sm"
             :class="hasAdvancedFilters ? 'border-brand-200 bg-brand-50 text-brand-700 dark:border-brand-500/30 dark:bg-brand-500/10 dark:text-brand-300' : ''"
             aria-controls="notas-filtros-avancados"
             :aria-expanded="advancedOpen"
@@ -62,7 +63,7 @@ const hasAdvancedFilters = computed(() => {
             <SlidersHorizontal class="h-3.5 w-3.5" />
             <span>{{ advancedOpen ? 'Ocultar' : 'Mais filtros' }}</span>
             <ChevronDown class="h-3.5 w-3.5 transition-transform" :class="{ 'rotate-180': advancedOpen }" />
-          </button>
+          </Botao>
         </div>
       </div>
 
@@ -72,14 +73,14 @@ const hasAdvancedFilters = computed(() => {
           <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
             <Search class="h-4 w-4 text-slate-400" />
           </div>
-          <input
-            :value="props.searchTerm"
+          <Input
+            :model-value="props.searchTerm"
             type="text"
             placeholder="Nome, numero ou serie..."
-            class="block h-10 w-full rounded-md border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-900 outline-none transition-colors focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-            @input="emit('update:searchTerm', ($event.target as HTMLInputElement).value)"
+            class="pl-9"
+            @update:model-value="emit('update:searchTerm', $event)"
             @keyup.enter="emit('apply')"
-          >
+          />
         </div>
       </div>
 
@@ -100,17 +101,17 @@ const hasAdvancedFilters = computed(() => {
             <div class="flex flex-col gap-1.5">
               <label class="text-xs font-medium text-slate-700 dark:text-slate-300">Status</label>
               <div class="relative">
-                <select
-                  :value="props.statusFilter"
-                  class="block h-10 w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-8 text-sm text-slate-900 outline-none transition-colors focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:[color-scheme:dark]"
-                  @change="emit('update:statusFilter', ($event.target as HTMLSelectElement).value as 'todos' | NotaRetiradaStatus)"
+                <SelectInput
+                  :model-value="props.statusFilter"
+                  class="appearance-none pr-8"
+                  @update:model-value="emit('update:statusFilter', $event as 'todos' | NotaRetiradaStatus)"
                 >
                   <option value="todos">Todos Status</option>
                   <option value="pendente">Pendentes</option>
                   <option value="parcial">Parciais</option>
                   <option value="retirada">Concluidas</option>
                   <option value="cancelada">Canceladas</option>
-                </select>
+                </SelectInput>
                 <div class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
                   <ChevronDown class="h-3.5 w-3.5" />
                 </div>
@@ -119,70 +120,68 @@ const hasAdvancedFilters = computed(() => {
 
             <div class="flex flex-col gap-1.5">
               <label class="text-xs font-medium text-slate-700 dark:text-slate-300">Data Inicial</label>
-              <input
-                :value="props.dataInicio"
+              <Input
+                :model-value="props.dataInicio"
                 type="date"
-                class="block h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition-colors focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:[color-scheme:dark]"
-                @input="emit('update:dataInicio', ($event.target as HTMLInputElement).value)"
-              >
+                @update:model-value="emit('update:dataInicio', $event)"
+              />
             </div>
 
             <div class="flex flex-col gap-1.5">
               <label class="text-xs font-medium text-slate-700 dark:text-slate-300">Data Final</label>
-              <input
-                :value="props.dataFim"
+              <Input
+                :model-value="props.dataFim"
                 type="date"
-                class="block h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition-colors focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:[color-scheme:dark]"
-                @input="emit('update:dataFim', ($event.target as HTMLInputElement).value)"
-              >
+                @update:model-value="emit('update:dataFim', $event)"
+              />
             </div>
           </div>
 
           <div class="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <button
+            <Botao
               type="button"
-              class="inline-flex h-10 w-full items-center justify-center gap-2 rounded-md bg-brand-600 px-4 text-sm font-medium text-white transition hover:bg-brand-500 active:bg-brand-700 disabled:opacity-50 sm:w-auto"
+              class="w-full sm:w-auto"
               :disabled="props.loading"
               @click="emit('apply')"
             >
               <Loader2 v-if="props.loading" class="h-4 w-4 animate-spin" />
               <span>Filtrar</span>
-            </button>
+            </Botao>
 
             <div class="flex w-full items-center gap-2 sm:w-auto">
-              <button
-                type="button"
-                class="flex h-10 w-10 flex-none items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+              <IconButton
+                label="Atualizar"
                 :disabled="props.loading"
-                title="Atualizar"
                 @click="emit('refresh')"
               >
                 <RotateCw class="h-4 w-4" :class="props.loading ? 'animate-spin' : ''" />
-              </button>
+              </IconButton>
 
               <div class="hidden h-5 w-px bg-slate-200 dark:bg-slate-700 sm:block" />
 
-              <button
+              <Botao
                 type="button"
-                class="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 sm:flex-none"
+                variant="secondary"
+                class="flex-1 sm:flex-none"
                 :disabled="!!props.exportLoading"
                 @click="emit('export', 'csv')"
               >
                 <Loader2 v-if="props.exportLoading === 'csv'" class="h-4 w-4 animate-spin" />
                 <FileDown v-else class="h-4 w-4" />
                 <span>CSV</span>
-              </button>
+              </Botao>
 
-              <button
+              <Botao
                 type="button"
-                class="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 sm:flex-none"
+                variant="secondary"
+                class="flex-1 sm:flex-none"
                 :disabled="!!props.exportLoading"
                 @click="emit('export', 'pdf')"
               >
                 <Loader2 v-if="props.exportLoading === 'pdf'" class="h-4 w-4 animate-spin" />
                 <FileDown v-else class="h-4 w-4" />
                 <span>PDF</span>
-              </button>
+              </Botao>
             </div>
           </div>
         </div>

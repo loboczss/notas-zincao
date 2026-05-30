@@ -18,11 +18,10 @@ const emit = defineEmits<{
 
 <template>
   <div class="space-y-2 md:hidden">
-    <button
+    <CardButton
       v-for="evento in historico"
       :key="`${evento.id_nota}-${evento.data}-mobile`"
-      type="button"
-      class="w-full rounded-lg border border-slate-200 bg-white p-3 text-left transition active:scale-[0.99] dark:border-slate-800 dark:bg-slate-900"
+      class="p-3 active:scale-[0.99]"
       @click="emit('open', evento)"
     >
       <div class="flex min-w-0 items-start justify-between gap-3">
@@ -73,6 +72,6 @@ const emit = defineEmits<{
           </p>
         </div>
       </div>
-    </button>
+    </CardButton>
   </div>
 </template>

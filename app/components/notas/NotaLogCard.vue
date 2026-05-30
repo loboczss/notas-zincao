@@ -59,15 +59,14 @@ const getTitle = (item: any) => {
       </p>
 
       <div v-if="item.fotos?.length" class="mt-2 flex gap-2 overflow-x-auto">
-        <button
+        <ThumbnailButton
           v-for="(foto, fIdx) in item.fotos"
           :key="fIdx"
-          type="button"
-          class="h-10 w-10 shrink-0 overflow-hidden rounded-md border border-slate-200 dark:border-slate-800"
+          :src="foto"
+          alt="Foto da retirada"
+          label="Abrir foto da retirada"
           @click="emit('preview', foto)"
-        >
-          <img :src="foto" alt="Foto da retirada" class="h-full w-full object-cover">
-        </button>
+        />
       </div>
 
       <div v-if="item.observacoes" class="mt-2 flex items-start gap-1.5 text-xs italic text-slate-500 dark:text-slate-400">

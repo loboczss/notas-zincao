@@ -11,6 +11,7 @@ import {
   Plus,
   Trash2,
   UserRound,
+  X,
 } from 'lucide-vue-next'
 import type { NotaAdminEditRequest, NotaRetiradaDetalheItem } from '../../../shared/types/NotasRetirada'
 import NotasStatusBadge from './NotasStatusBadge.vue'
@@ -292,28 +293,28 @@ defineExpose({
             <div v-else class="mt-3 grid gap-3">
               <label class="space-y-1">
                 <span class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Nome</span>
-                <input
+                <Input
                   v-model="editDraft.nome_cliente"
                   type="text"
-                  class="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-sky-400 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
-                >
+                  class="font-semibold"
+                />
               </label>
               <div class="grid gap-3 sm:grid-cols-2">
                 <label class="space-y-1">
                   <span class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Telefone</span>
-                  <input
-                    v-model="editDraft.telefone_cliente"
+                  <Input
+                    :model-value="editDraft.telefone_cliente || ''"
                     type="text"
-                    class="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-sky-400 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
-                  >
+                    @update:model-value="editDraft.telefone_cliente = $event"
+                  />
                 </label>
                 <label class="space-y-1">
                   <span class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Documento</span>
-                  <input
-                    v-model="editDraft.documento_cliente"
+                  <Input
+                    :model-value="editDraft.documento_cliente || ''"
                     type="text"
-                    class="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-sky-400 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
-                  >
+                    @update:model-value="editDraft.documento_cliente = $event"
+                  />
                 </label>
               </div>
             </div>
@@ -353,15 +354,16 @@ defineExpose({
             </p>
           </div>
 
-          <button
+          <Botao
             v-if="editMode"
             type="button"
-            class="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-slate-200 px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-800"
+            variant="secondary"
+            size="sm"
             @click="adicionarProduto"
           >
             <Plus class="h-4 w-4" />
             Novo
-          </button>
+          </Botao>
         </div>
 
         <div v-if="!editMode" class="space-y-2 p-4 md:p-5">
@@ -384,47 +386,47 @@ defineExpose({
           >
             <label class="space-y-1">
               <span class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Produto</span>
-              <input
+              <Input
                 v-model="produto.nome"
                 type="text"
-                class="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-sky-400 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
-              >
+                class="font-semibold"
+              />
             </label>
             <label class="space-y-1">
               <span class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Qtd</span>
-              <input
-                v-model.number="produto.quantidade"
+              <Input
+                :model-value="String(produto.quantidade ?? '')"
                 type="number"
                 step="0.01"
-                class="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-sky-400 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
-              >
+                @update:model-value="produto.quantidade = toNumber($event)"
+              />
             </label>
             <label class="space-y-1">
                   <span class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Retirado</span>
-              <input
-                v-model.number="produto.quantidade_retirada"
+              <Input
+                :model-value="String(produto.quantidade_retirada ?? '')"
                 type="number"
                 step="0.01"
-                class="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-sky-400 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
-              >
+                @update:model-value="produto.quantidade_retirada = toNumber($event)"
+              />
             </label>
             <label class="space-y-1">
               <span class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">ID estoque</span>
-              <input
-                v-model.number="produto.id_produto_estoque"
+              <Input
+                :model-value="String(produto.id_produto_estoque ?? '')"
                 type="number"
-                class="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-sky-400 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
-              >
+                @update:model-value="produto.id_produto_estoque = toNumber($event)"
+              />
             </label>
-            <button
+            <IconButton
               type="button"
-              class="flex h-10 w-full items-center justify-center rounded-lg text-slate-400 transition hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/30 dark:hover:text-rose-300 md:w-10"
-              aria-label="Remover item"
-              title="Remover item"
+              label="Remover item"
+              variant="danger"
+              class="w-full md:w-10"
               @click="removerProduto(index)"
             >
               <Trash2 class="h-4 w-4" />
-            </button>
+            </IconButton>
           </div>
         </div>
       </section>
@@ -436,14 +438,14 @@ defineExpose({
             <h4 class="text-[11px] font-semibold uppercase tracking-wide">Evidencia fiscal</h4>
           </div>
 
-          <button
+          <CardButton
             v-if="nota.foto_url"
             type="button"
-            class="group mt-3 block aspect-[4/3] w-full overflow-hidden rounded-lg border border-slate-100 bg-slate-50 text-left dark:border-slate-800 dark:bg-slate-950"
+            class="group mt-3 block aspect-[4/3] overflow-hidden p-0"
             @click="previewImage = nota.foto_url"
           >
             <img :src="nota.foto_url" alt="Foto da nota" class="h-full w-full object-cover transition duration-200 group-hover:opacity-85">
-          </button>
+          </CardButton>
 
           <div v-else class="mt-3 rounded-lg border border-dashed border-slate-200 px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
             Nenhuma foto anexada.
@@ -507,14 +509,14 @@ defineExpose({
         <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" @click="previewImage = null" />
 
         <div class="relative max-h-full max-w-full overflow-hidden rounded-xl bg-black shadow-2xl">
-          <button
+          <IconButton
             type="button"
-            class="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-lg bg-black/50 text-white transition hover:bg-black/75"
-            aria-label="Fechar preview"
+            label="Fechar preview"
+            class="absolute right-4 top-4 z-10 bg-black/50 text-white hover:bg-black/75"
             @click="previewImage = null"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
-          </button>
+            <X class="h-4 w-4" />
+          </IconButton>
 
           <img
             :src="previewImage"
