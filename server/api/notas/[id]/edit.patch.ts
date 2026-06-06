@@ -1,6 +1,10 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import type { Database } from '../../../../app/types/database.types'
-import type { NotaAdminEditRequest, NotaRetiradaHistoricoItem, NotaProduto } from '../../../../shared/types/NotasRetirada'
+import type { NotaAdminEditRequest, NotaRetiradaHistoricoItem, NotaProduto, NotaRetiradaStatus } from '../../../../shared/types/NotasRetirada'
+import {
+  clampNotaProdutoQuantidadeRetirada,
+  getNotaRetiradaStatusFromProdutos,
+} from '../../../../shared/utils/notas-retirada-status'
 import { vincularProdutosAoEstoque } from '../../../services/estoque/match-produtos'
 import { signNotaStorageUrls } from '../../../utils/storage'
 
@@ -117,7 +121,7 @@ export default defineEventHandler(async (event) => {
 
   const { data: notaAtual, error: notaError } = await (client as any)
     .from('notas_retirada')
-    .select('id, nome_cliente, documento_cliente, telefone_cliente, contato_id, produtos, observacoes, historico_retiradas')
+    .select('id, nome_cliente, documento_cliente, telefone_cliente, contato_id, produtos, observacoes, status_retirada, data_retirada, retirada_confirmada_por, comprovante_retirada_url, historico_retiradas')
     .eq('id', id)
     .single()
 
@@ -160,7 +164,21 @@ export default defineEventHandler(async (event) => {
     }
 
     const produtosVinculados = await vincularProdutosAoEstoque(client as any, produtosNormalizados)
-    payload.produtos = produtosVinculados
+    const produtosComRetiradaNormalizada = produtosVinculados.map(clampNotaProdutoQuantidadeRetirada)
+    const statusRetirada = getNotaRetiradaStatusFromProdutos(produtosComRetiradaNormalizada)
+
+    payload.produtos = produtosComRetiradaNormalizada
+    payload.status_retirada = statusRetirada
+
+    if (statusRetirada === 'pendente') {
+      payload.data_retirada = null
+      payload.retirada_confirmada_por = null
+      payload.comprovante_retirada_url = null
+    }
+    else {
+      payload.data_retirada = notaAtual.data_retirada || new Date().toISOString()
+      payload.retirada_confirmada_por = notaAtual.retirada_confirmada_por || authUid
+    }
   }
 
   const alteracoes: string[] = []
@@ -219,6 +237,10 @@ export default defineEventHandler(async (event) => {
     if (prodDiffs.length > 0) {
       alteracoes.push(`Itens: (${prodDiffs.join(' | ')})`)
     }
+
+    if (payload.status_retirada && notaAtual.status_retirada !== payload.status_retirada) {
+      alteracoes.push(`Status: ${notaAtual.status_retirada || 'pendente'} -> ${payload.status_retirada}`)
+    }
   }
 
 
@@ -238,6 +260,10 @@ export default defineEventHandler(async (event) => {
     fotos: [],
     itens_retirados: [],
     observacoes: descricaoLog,
+    ...(body.produtos !== undefined ? {
+      status_anterior: (notaAtual.status_retirada || null) as NotaRetiradaStatus | null,
+      status_novo: payload.status_retirada as NotaRetiradaStatus,
+    } : {}),
     usuario_id: authUid,
   }
 

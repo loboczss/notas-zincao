@@ -197,6 +197,11 @@ export type NotaImageProductsResponse = {
   missingFields: Array<'produtos'>
 }
 
+export type NotaImageChaveResponse = {
+  success: true
+  hints: NotaIntegrimLookupHints
+}
+
 export type NotaIntegrimLookupResponse = {
   success: true
   found: boolean

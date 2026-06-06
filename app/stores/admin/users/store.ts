@@ -221,8 +221,13 @@ export const useAdminUsersStore = defineStore('admin-users', () => {
         method: 'DELETE',
       })
 
-      usuarios.value = usuarios.value.filter(user => user.auth_uid !== authUid)
-      const msg = data.message || 'Usuário excluído com sucesso.'
+      if (data.user) {
+        upsertLocalUser(data.user)
+      }
+      else {
+        usuarios.value = usuarios.value.filter(user => user.auth_uid !== authUid)
+      }
+      const msg = data.message || 'Usuário inativado com sucesso.'
       successMessage.value = msg
       showSuccess(msg)
       return true

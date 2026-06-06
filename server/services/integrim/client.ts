@@ -7,7 +7,9 @@ import type {
 } from '../../../shared/types/NotasRetirada'
 
 const DEFAULT_COMPANY_IDS = [1, 2, 3, 4, 5, 6]
-const DEFAULT_MODELO = '65'
+const DEFAULT_MODELO = '55'
+// Busca sempre NF-e (55) e NFC-e (65) automaticamente.
+const SUPPORTED_MODELOS = ['55', '65']
 const REQUEST_TIMEOUT_MS = 20_000
 const TOKEN_REFRESH_SAFETY_MS = 5 * 60 * 1000
 
@@ -17,7 +19,7 @@ type IntegrimConfig = {
   password: string
   clientId: string
   clientSecret: string
-  modelo: string
+  modelos: string[]
   companyIds: number[]
 }
 
@@ -103,7 +105,7 @@ const getIntegrimConfig = (): IntegrimConfig => {
     password: String(process.env.INTEGRIM_PASSWORD || '').trim(),
     clientId: String(process.env.INTEGRIM_CLIENT_ID || '').trim(),
     clientSecret: String(process.env.INTEGRIM_CLIENT_SECRET || '').trim(),
-    modelo: String(process.env.INTEGRIM_DEFAULT_MODELO || DEFAULT_MODELO).trim() || DEFAULT_MODELO,
+    modelos: SUPPORTED_MODELOS,
     companyIds: parseCompanyIds(process.env.INTEGRIM_COMPANY_IDS),
   }
 
@@ -412,23 +414,34 @@ const findDocumentsByCompany = async (
   numeroNota: string,
   serieNota?: string | null,
 ) => {
-  const clausulas: IntegrimClause[] = [
-    { campo: 'idempresa', operadorlogico: 'AND', operador: 'IGUAL', valor: idempresa },
-    { campo: 'numnota', operadorlogico: 'AND', operador: 'IGUAL', valor: Number(numeroNota) },
-    { campo: 'modelo', operadorlogico: 'AND', operador: 'IGUAL', valor: config.modelo },
-  ]
+  const documents: IntegrimDocument[] = []
 
-  if (serieNota) {
-    clausulas.push({ campo: 'serienota', operadorlogico: 'AND', operador: 'IGUAL', valor: serieNota })
+  for (const modelo of config.modelos) {
+    const clausulas: IntegrimClause[] = [
+      { campo: 'idempresa', operadorlogico: 'AND', operador: 'IGUAL', valor: idempresa },
+      { campo: 'numnota', operadorlogico: 'AND', operador: 'IGUAL', valor: Number(numeroNota) },
+      { campo: 'modelo', operadorlogico: 'AND', operador: 'IGUAL', valor: modelo },
+    ]
+
+    if (serieNota) {
+      clausulas.push({ campo: 'serienota', operadorlogico: 'AND', operador: 'IGUAL', valor: serieNota })
+    }
+
+    const found = await postServiceAllPages<IntegrimDocument>(
+      config,
+      token,
+      'documentos_fiscais_saida',
+      clausulas,
+      [{ campo: 'dtmovimento', direcao: 'DESC' }],
+    )
+
+    if (found.length) {
+      documents.push(...found)
+      break
+    }
   }
 
-  return await postServiceAllPages<IntegrimDocument>(
-    config,
-    token,
-    'documentos_fiscais_saida',
-    clausulas,
-    [{ campo: 'dtmovimento', direcao: 'DESC' }],
-  )
+  return documents
 }
 
 const findItems = async (

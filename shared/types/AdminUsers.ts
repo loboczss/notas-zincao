@@ -70,6 +70,8 @@ export type AdminDeleteUserResponse = {
   success: boolean
   message: string
   auth_uid: string
+  auth_banned?: boolean
+  user?: AdminUserRecord
 }
 
 export type AdminResetUserPasswordResponse = {

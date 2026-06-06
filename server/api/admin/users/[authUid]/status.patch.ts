@@ -3,6 +3,7 @@ import {
   getAdminUsersClient,
   getCurrentAuthUid,
   PROFILE_ADMIN_SELECT,
+  setSupabaseAuthUserBanned,
   toAdminUserRecord,
 } from '../../../../utils/admin-users'
 import type { AdminUpdateUserStatusPayload } from '../../../../../shared/types/AdminUsers'
@@ -40,12 +41,13 @@ export default defineEventHandler(async (event) => {
   }
 
   const now = new Date().toISOString()
+  const shouldBanAuthUser = status === 'inativo'
 
   const { data, error } = await (client as any)
     .from('profiles')
     .update({
-      deleted_at: status === 'inativo' ? now : null,
-      deleted_by: status === 'inativo' ? requesterAuthUid : null,
+      deleted_at: shouldBanAuthUser ? now : null,
+      deleted_by: shouldBanAuthUser ? requesterAuthUid : null,
       updated_by: requesterAuthUid,
       updated_at: now,
     })
@@ -65,6 +67,14 @@ export default defineEventHandler(async (event) => {
     throw createError({
       statusCode: 404,
       statusMessage: 'Usuario nao encontrado em profiles.',
+    })
+  }
+
+  const authBanUpdated = await setSupabaseAuthUserBanned(event, targetAuthUid, shouldBanAuthUser)
+  if (!authBanUpdated) {
+    console.warn('[api/admin/users] profile status updated but auth ban state was not updated', {
+      targetAuthUid,
+      status,
     })
   }
 

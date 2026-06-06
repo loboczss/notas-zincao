@@ -166,11 +166,11 @@ const saveButtonLabel = computed(() => {
 })
 
 const integrimLookupLoading = computed(() => {
-  return notasStore.lookingUpIntegrimNota || notasStore.extractingImageProducts
+  return notasStore.lookingUpIntegrimNota || notasStore.extractingImageProducts || notasStore.extractingImageChave
 })
 
 const fotoLookupLoading = computed(() => {
-  return notasStore.lookingUpIntegrimImage || notasStore.lookingUpIntegrimNota || notasStore.extractingImageProducts
+  return notasStore.lookingUpIntegrimImage || notasStore.lookingUpIntegrimNota || notasStore.extractingImageProducts || notasStore.extractingImageChave
 })
 
 const divergenceWarning = computed(() => {
@@ -545,6 +545,7 @@ const buscarNotaIntegrim = async (candidate?: NotaIntegrimLookupCandidate) => {
   integrimCandidates.value = []
   aplicarDraftIntegrim(response.draft, response.missingFields || [], aiChaveNfeSugerida.value)
   await preencherProdutosPelaFotoSeNecessario()
+  await preencherChavePelaFotoSeNecessario()
   integrimLookupMessage.value = `Nota encontrada na empresa ${response.draft.idempresa || response.candidate?.idempresa}.`
   showSuccess(integrimLookupMessage.value)
 }
@@ -560,6 +561,24 @@ const preencherProdutosPelaFotoSeNecessario = async () => {
   form.valor_total = totalProdutos.value || valorBrutoNumber.value
   delete errors.produtos
   ensureWarningInObservacoes()
+}
+
+// A Integrim nem sempre devolve a chave NFe. Quando faltar e houver foto,
+// lemos a chave (impressa na nota/DANFE) pela imagem e preenchemos o campo.
+const preencherChavePelaFotoSeNecessario = async () => {
+  if (digitsOnly(String(form.chave_nfe || '')).length === 44 || !imageDataUrl.value) return
+
+  const response = await notasStore.extractNotaChaveFromImage(imageDataUrl.value)
+  const chaveNfe = digitsOnly(response?.hints?.chave_nfe || '')
+  if (chaveNfe.length !== 44) return
+
+  aiChaveNfeSugerida.value = chaveNfe
+  const keyHints = parseNfeKey(chaveNfe)
+  if (keyHints) {
+    qrLookupHints.value = keyHints
+  }
+  form.chave_nfe = chaveNfe
+  delete errors.chave_nfe
 }
 
 const buscarNotaIntegrimPorFoto = async () => {

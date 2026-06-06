@@ -6,6 +6,7 @@ import type {
   NotaRetiradaHistoricoItem,
   NotaRetiradaStatus,
 } from '../../../../shared/types/NotasRetirada'
+import { getNotaRetiradaStatusFromProdutos } from '../../../../shared/utils/notas-retirada-status'
 import { encontrarProdutoEstoque } from '../../../services/estoque/match-produtos'
 import { assertActiveProfileRole } from '../../../utils/permissions'
 import { NOTAS_RETIRADA_STORAGE_BUCKET, signNotaStorageUrls } from '../../../utils/storage'
@@ -439,16 +440,8 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
     })
   }
 
-  const totalItens = produtosAtualizados.length
-  const itensRetirados = produtosAtualizados.filter(item => (item.quantidade_retirada ?? 0) > 0).length
-  const itensCompletos = produtosAtualizados.filter(item => (item.quantidade_retirada ?? 0) >= (item.quantidade ?? 1)).length
-
   const statusAnterior = (notaAtual.status_retirada || null) as NotaRetiradaStatus | null
-  const statusRetirada: NotaRetiradaStatus = itensCompletos === totalItens
-    ? 'retirada'
-    : itensRetirados > 0
-      ? 'parcial'
-      : 'pendente'
+  const statusRetirada = getNotaRetiradaStatusFromProdutos(produtosAtualizados)
 
   const historicoAtual = Array.isArray(notaAtual.historico_retiradas)
     ? notaAtual.historico_retiradas

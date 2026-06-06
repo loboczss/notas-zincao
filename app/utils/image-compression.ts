@@ -1,5 +1,5 @@
-export const NOTA_IMAGE_MAX_DIMENSION = 1800
-export const NOTA_IMAGE_MAX_DATA_URL_LENGTH = 950_000
+export const NOTA_IMAGE_MAX_DIMENSION = 1280
+export const NOTA_IMAGE_MAX_DATA_URL_LENGTH = 300_000
 
 type NotaImageCompressionOptions = {
   maxDimension?: number
@@ -70,9 +70,9 @@ export const normalizeNotaImageDataUrl = async (
 
   const maxDataUrlLength = options.maxDataUrlLength ?? NOTA_IMAGE_MAX_DATA_URL_LENGTH
   const maxDimension = options.maxDimension ?? NOTA_IMAGE_MAX_DIMENSION
-  const minDimension = options.minDimension ?? 1000
-  const initialQuality = options.initialQuality ?? 0.72
-  const minQuality = options.minQuality ?? 0.5
+  const minDimension = options.minDimension ?? 900
+  const initialQuality = options.initialQuality ?? 0.7
+  const minQuality = options.minQuality ?? 0.42
 
   let image: HTMLImageElement
   try {
@@ -92,6 +92,7 @@ export const normalizeNotaImageDataUrl = async (
     initialQuality,
     0.64,
     0.56,
+    0.48,
     minQuality,
   ].filter((quality, index, values) => {
     return quality >= minQuality && values.indexOf(quality) === index

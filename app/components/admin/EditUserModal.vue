@@ -118,18 +118,18 @@ const resetPassword = async () => {
         </div>
       </div>
 
-      <!-- Modo Confirmação Exclusão -->
+      <!-- Modo Confirmação Inativação -->
       <div v-else-if="confirmandoExclusao" class="p-5 rounded-3xl border border-rose-500/20 bg-rose-500/5 backdrop-blur-sm space-y-4 animate-fade-in">
         <div class="flex items-center gap-2 text-rose-500 font-bold text-sm">
           <AlertTriangle class="w-5 h-5" />
-          Excluir Conta
+          Inativar Conta
         </div>
         <p class="text-xs text-slate-400 leading-relaxed">
-          Esta operação é <strong class="text-rose-400">definitiva e irreversível</strong>. Todos os dados vinculados ao perfil de <strong class="text-slate-200">{{ usuario.nome || usuario.email }}</strong> serão desconectados.
+          Esta operação não apaga o usuário nem as notas vinculadas. O perfil de <strong class="text-slate-200">{{ usuario.nome || usuario.email }}</strong> será inativado e o acesso ao sistema será bloqueado.
         </p>
         <div class="flex justify-end gap-2 pt-1">
           <Botao variant="secondary" type="button" class="px-4 py-2 text-xs" @click="confirmandoExclusao = false">Cancelar</Botao>
-          <Botao variant="primary" type="button" class="px-4 py-2 text-xs bg-rose-600 dark:bg-rose-600 hover:bg-rose-700 dark:hover:bg-rose-700 text-white" :disabled="props.loading" @click="excluir">Excluir Definitivamente</Botao>
+          <Botao variant="primary" type="button" class="px-4 py-2 text-xs bg-rose-600 dark:bg-rose-600 hover:bg-rose-700 dark:hover:bg-rose-700 text-white" :disabled="props.loading" @click="excluir">Inativar Usuário</Botao>
         </div>
       </div>
 
@@ -297,14 +297,14 @@ const resetPassword = async () => {
             Recuperar Senha
           </button>
 
-          <!-- Botão Excluir -->
+          <!-- Botão Inativar -->
           <button 
             type="button"
             class="group flex items-center gap-2 text-slate-400 hover:text-rose-500 text-xs font-bold transition-all duration-300"
             @click="confirmandoExclusao = true"
           >
             <Trash2 class="w-4 h-4 text-rose-500 transition-transform group-hover:scale-110 duration-300" />
-            Excluir Usuário
+            Inativar Usuário
           </button>
         </div>
 

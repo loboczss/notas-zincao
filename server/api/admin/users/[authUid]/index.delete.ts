@@ -2,7 +2,9 @@ import {
   assertAdminAccess,
   getAdminUsersClient,
   getCurrentAuthUid,
-  getSupabaseAdminConfigOrThrow,
+  PROFILE_ADMIN_SELECT,
+  setSupabaseAuthUserBanned,
+  toAdminUserRecord,
 } from '../../../../utils/admin-users'
 import { serverSupabaseServiceRole } from '#supabase/server'
 import type { AdminDeleteUserResponse } from '../../../../../shared/types/AdminUsers'
@@ -36,48 +38,47 @@ export default defineEventHandler(async (event): Promise<AdminDeleteUserResponse
     })
   }
 
-  const { supabaseUrl, serviceRoleKey } = getSupabaseAdminConfigOrThrow()
+  const now = new Date().toISOString()
 
-  const authResponse = await fetch(`${supabaseUrl}/auth/v1/admin/users/${targetAuthUid}`, {
-    method: 'DELETE',
-    headers: {
-      apikey: serviceRoleKey,
-      Authorization: `Bearer ${serviceRoleKey}`,
-    },
-  })
-
-  if (!authResponse.ok && authResponse.status !== 404) {
-    const payload = await authResponse.json().catch(() => null)
-    const message = (payload as { msg?: string; error_description?: string; error?: string } | null)?.msg
-      || (payload as { msg?: string; error_description?: string; error?: string } | null)?.error_description
-      || (payload as { msg?: string; error_description?: string; error?: string } | null)?.error
-      || 'Falha ao excluir usuario no Supabase Auth.'
-
-    throw createError({
-      statusCode: authResponse.status,
-      statusMessage: message,
-    })
-  }
-
-  // Usamos serverSupabaseServiceRole para fazer bypass no RLS e permitir que o admin delete outros perfis
+  // Usamos serverSupabaseServiceRole para fazer bypass no RLS e permitir que o admin inative outros perfis.
   const serviceRoleClient = serverSupabaseServiceRole(event)
 
-  const { error: profileDeleteError } = await serviceRoleClient
+  const { data, error: profileUpdateError } = await serviceRoleClient
     .from('profiles')
-    .delete()
+    .update({
+      deleted_at: now,
+      deleted_by: requesterAuthUid,
+      updated_by: requesterAuthUid,
+      updated_at: now,
+    })
     .eq('auth_uid', targetAuthUid)
+    .select(PROFILE_ADMIN_SELECT)
+    .maybeSingle()
 
-  if (profileDeleteError) {
-    console.error('[api/admin/users] delete profile error:', profileDeleteError.message)
+  if (profileUpdateError) {
+    console.error('[api/admin/users] soft delete profile error:', profileUpdateError.message)
     throw createError({
       statusCode: 500,
-      statusMessage: 'Usuario removido no auth, mas falhou ao excluir registro em profiles.',
+      statusMessage: 'Nao foi possivel inativar o usuario.',
     })
   }
+
+  if (!data) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'Usuario nao encontrado em profiles.',
+    })
+  }
+
+  const authBanned = await setSupabaseAuthUserBanned(event, targetAuthUid, true)
 
   return {
     success: true,
-    message: 'Usuario excluido com sucesso.',
+    message: authBanned
+      ? 'Usuario inativado com sucesso.'
+      : 'Usuario inativado no sistema, mas nao foi possivel bloquear o login no Supabase Auth.',
     auth_uid: targetAuthUid,
+    auth_banned: authBanned,
+    user: toAdminUserRecord(data),
   }
 })

@@ -1,5 +1,5 @@
 import type { H3Event } from 'h3'
-import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
+import { serverSupabaseClient, serverSupabaseServiceRole, serverSupabaseUser } from '#supabase/server'
 import type { Database } from '../../app/types/database.types'
 import {
   getAdminUserStatus,
@@ -14,6 +14,8 @@ type AdminUsersClient = Awaited<ReturnType<typeof serverSupabaseClient<Database>
 type ProfileRow = Database['public']['Tables']['profiles']['Row']
 
 export const PROFILE_ADMIN_SELECT = 'id, auth_uid, nome, email, role, workspaces, ultimo_login, deleted_at, updated_at, deleted_by, updated_by, foto_perfil'
+
+export const AUTH_USER_SOFT_DELETE_BAN_DURATION = '876000h'
 
 export const getCurrentAuthUid = async (event: H3Event): Promise<string> => {
   const user = await serverSupabaseUser(event)
@@ -109,5 +111,32 @@ export const getSupabaseAdminConfigOrThrow = () => {
   return {
     supabaseUrl,
     serviceRoleKey,
+  }
+}
+
+export const setSupabaseAuthUserBanned = async (
+  event: H3Event,
+  authUid: string,
+  banned: boolean,
+): Promise<boolean> => {
+  try {
+    const serviceRoleClient = serverSupabaseServiceRole(event)
+    const { error } = await serviceRoleClient.auth.admin.updateUserById(authUid, {
+      ban_duration: banned ? AUTH_USER_SOFT_DELETE_BAN_DURATION : 'none',
+    })
+
+    if (error) {
+      const status = (error as { status?: number }).status
+      if (status !== 404) {
+        console.error('[api/admin/users] auth ban update error:', error.message)
+      }
+      return false
+    }
+
+    return true
+  }
+  catch (error) {
+    console.error('[api/admin/users] auth ban update error:', error instanceof Error ? error.message : error)
+    return false
   }
 }

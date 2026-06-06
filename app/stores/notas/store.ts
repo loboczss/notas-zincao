@@ -23,12 +23,14 @@ import {
   preserveNotaOfflineMediaDataUrls,
   queryOfflineNotasLocal,
 } from '../../utils/offline-notas-sync'
+import { getNotaRetiradaStatusFromProdutos } from '../../../shared/utils/notas-retirada-status'
 
 import type {
   NotaExtractionResponse,
   NotaIntegrimLookupRequest,
   NotaIntegrimLookupResponse,
   NotaImageProductsResponse,
+  NotaImageChaveResponse,
   NotaRetiradaDraft,
   NotaRetiradaHistoricoItem,
   NotaRegistrarRetiradaRequest,
@@ -157,14 +159,7 @@ const toDetalheNota = (nota: NotaRetiradaListItem | NotaRetiradaDetalheItem): No
 })
 
 const getStatusFromProdutos = (produtos: NotaRetiradaDetalheItem['produtos']): NotaRetiradaStatus => {
-  if (!produtos.length) return 'pendente'
-
-  const itensRetirados = produtos.filter(item => toNumber(item.quantidade_retirada) > 0).length
-  const itensCompletos = produtos.filter(item => toNumber(item.quantidade_retirada) >= Math.max(1, toNumber(item.quantidade))).length
-
-  if (itensCompletos === produtos.length) return 'retirada'
-  if (itensRetirados > 0) return 'parcial'
-  return 'pendente'
+  return getNotaRetiradaStatusFromProdutos(produtos)
 }
 
 export const useNotasStore = defineStore('notas', () => {
@@ -180,6 +175,7 @@ export const useNotasStore = defineStore('notas', () => {
   const lookingUpIntegrimNota = ref(false)
   const lookingUpIntegrimImage = ref(false)
   const extractingImageProducts = ref(false)
+  const extractingImageChave = ref(false)
   const creatingNota = ref(false)
   const savingRetirada = ref(false)
   const errorMessage = ref('')
@@ -511,6 +507,26 @@ export const useNotasStore = defineStore('notas', () => {
     }
     finally {
       extractingImageProducts.value = false
+    }
+  }
+
+  const extractNotaChaveFromImage = async (imageDataUrl: string) => {
+    extractingImageChave.value = true
+    clearError()
+
+    try {
+      const normalizedImageDataUrl = await normalizeNotaImageDataUrl(imageDataUrl)
+      return await getApiFetch()<NotaImageChaveResponse>('/api/notas/integrim/chave-from-image', {
+        method: 'POST',
+        body: { imageDataUrl: normalizedImageDataUrl },
+      })
+    }
+    catch (error) {
+      errorMessage.value = getApiErrorMessage(error, 'Falha ao ler a chave da foto.')
+      return null
+    }
+    finally {
+      extractingImageChave.value = false
     }
   }
 
@@ -986,6 +1002,7 @@ export const useNotasStore = defineStore('notas', () => {
     lookingUpIntegrimNota.value = false
     lookingUpIntegrimImage.value = false
     extractingImageProducts.value = false
+    extractingImageChave.value = false
     creatingNota.value = false
     savingRetirada.value = false
     page.value = 1
@@ -1104,6 +1121,7 @@ export const useNotasStore = defineStore('notas', () => {
     lookingUpIntegrimNota,
     lookingUpIntegrimImage,
     extractingImageProducts,
+    extractingImageChave,
     creatingNota,
     savingRetirada,
     page,
@@ -1121,6 +1139,7 @@ export const useNotasStore = defineStore('notas', () => {
     lookupNotaIntegrim,
     lookupNotaIntegrimFromImage,
     extractNotaProductsFromImage,
+    extractNotaChaveFromImage,
     createNota,
     registrarRetirada,
     atualizarStatusNota,
