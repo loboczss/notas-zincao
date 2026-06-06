@@ -23,7 +23,7 @@ import {
   preserveNotaOfflineMediaDataUrls,
   queryOfflineNotasLocal,
 } from '../../utils/offline-notas-sync'
-import { getNotaRetiradaStatusFromProdutos } from '../../../shared/utils/notas-retirada-status'
+import { getNotaRetiradaStatusFromProdutos } from '#shared/utils/notas-retirada-status'
 
 import type {
   NotaExtractionResponse,
