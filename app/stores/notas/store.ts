@@ -44,6 +44,7 @@ type NotasListFilters = {
   status?: 'todos' | NotaRetiradaStatus
   data_inicio?: string
   data_fim?: string
+  venda_futura?: boolean
   page?: number
   page_size?: number
 }
@@ -63,6 +64,7 @@ const createOfflineNota = (payload: NotaRetiradaDraft, id = createOfflineNotaId(
   serie_nota: payload.serie_nota || '1',
   chave_nfe: payload.chave_nfe || null,
   data_compra: payload.data_compra,
+  data_prevista_retirada: payload.data_prevista_retirada || null,
   data_retirada: null,
   valor_total: payload.valor_total ?? null,
   desconto_total: payload.desconto_total ?? null,
@@ -106,10 +108,12 @@ const filterLocalNotas = (items: NotaRetiradaListItem[], filters: NotasListFilte
   const status = filters.status && filters.status !== 'todos' ? filters.status : null
   const dataInicio = String(filters.data_inicio || '').trim()
   const dataFim = String(filters.data_fim || '').trim()
+  const vendaFuturaOnly = Boolean(filters.venda_futura)
 
   return items.filter((nota) => {
     if (status && nota.status_retirada !== status) return false
     if ((dataInicio || dataFim) && !isInsideDateRange(nota.data_compra, dataInicio, dataFim)) return false
+    if (vendaFuturaOnly && !nota.data_prevista_retirada) return false
 
     if (!search) return true
 
@@ -338,6 +342,7 @@ export const useNotasStore = defineStore('notas', () => {
           status: filters.status && filters.status !== 'todos' ? filters.status : undefined,
           data_inicio: filters.data_inicio?.trim() || undefined,
           data_fim: filters.data_fim?.trim() || undefined,
+          venda_futura: filters.venda_futura ? 'true' : undefined,
           page: filters.page || page.value,
           page_size: filters.page_size || pageSize.value,
         },
@@ -368,6 +373,7 @@ export const useNotasStore = defineStore('notas', () => {
         status: filters.status,
         data_inicio: filters.data_inicio,
         data_fim: filters.data_fim,
+        venda_futura: filters.venda_futura,
         page: filters.page || page.value,
         page_size: filters.page_size || pageSize.value,
       })

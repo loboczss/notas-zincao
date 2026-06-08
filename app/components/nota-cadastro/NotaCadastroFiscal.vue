@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { LoaderCircle, Search, SlidersHorizontal } from 'lucide-vue-next'
+import { CalendarClock, LoaderCircle, Search, SlidersHorizontal } from 'lucide-vue-next'
 import Botao from '../Botao.vue'
+import CheckboxField from '../CheckboxField.vue'
 import Input from '../Input.vue'
 import NotaCadastroField from './NotaCadastroField.vue'
 import NotaCadastroSection from './NotaCadastroSection.vue'
@@ -10,6 +11,8 @@ const props = withDefaults(defineProps<{
   serieNota: string
   chaveNfe: string
   dataCompra: string
+  vendaFutura: boolean
+  dataPrevistaRetirada: string
   valorTotal: string
   descontoTotal: string
   valorLiquido: string
@@ -31,6 +34,8 @@ const emit = defineEmits<{
   (e: 'update:serieNota', value: string): void
   (e: 'update:chaveNfe', value: string): void
   (e: 'update:dataCompra', value: string): void
+  (e: 'update:vendaFutura', value: boolean): void
+  (e: 'update:dataPrevistaRetirada', value: string): void
   (e: 'update:valorTotal', value: string): void
   (e: 'update:descontoTotal', value: string): void
   (e: 'update:valorLiquido', value: string): void
@@ -38,6 +43,7 @@ const emit = defineEmits<{
   (e: 'update:advancedCompanyId', value: string): void
   (e: 'lookupNota'): void
   (e: 'toggleAdvancedLookup'): void
+  (e: 'setDataPrevistaDias', value: number): void
 }>()
 </script>
 
@@ -103,6 +109,47 @@ const emit = defineEmits<{
       <NotaCadastroField class="col-span-2 xl:col-span-2" label="Chave NFe" :error="props.errors.chave_nfe">
         <Input :model-value="props.chaveNfe" placeholder="44 digitos" size="sm" @update:model-value="emit('update:chaveNfe', $event)" />
       </NotaCadastroField>
+
+      <div class="col-span-2 xl:col-span-6">
+        <div
+          class="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950/60"
+          :data-has-error="Boolean(props.errors.data_prevista_retirada)"
+        >
+          <div class="grid gap-3 xl:grid-cols-[minmax(180px,220px)_minmax(180px,1fr)_auto] xl:items-end">
+            <CheckboxField
+              :model-value="props.vendaFutura"
+              @update:model-value="emit('update:vendaFutura', $event)"
+            >
+              <span class="inline-flex items-center gap-2">
+                <CalendarClock class="h-4 w-4 text-brand-600 dark:text-brand-300" />
+                Venda futura
+              </span>
+            </CheckboxField>
+
+            <NotaCadastroField label="Retirada prevista" :error="props.errors.data_prevista_retirada">
+              <Input
+                type="date"
+                :model-value="props.dataPrevistaRetirada"
+                size="sm"
+                :disabled="!props.vendaFutura"
+                @update:model-value="emit('update:dataPrevistaRetirada', $event)"
+              />
+            </NotaCadastroField>
+
+            <div class="flex flex-wrap gap-2">
+              <Botao type="button" size="sm" variant="secondary" @click="emit('setDataPrevistaDias', 30)">
+                30 dias
+              </Botao>
+              <Botao type="button" size="sm" variant="secondary" @click="emit('setDataPrevistaDias', 60)">
+                60 dias
+              </Botao>
+              <Botao type="button" size="sm" variant="secondary" @click="emit('setDataPrevistaDias', 90)">
+                90 dias
+              </Botao>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <NotaCadastroField class="xl:col-span-2" label="Valor bruto">
         <Input

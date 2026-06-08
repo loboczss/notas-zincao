@@ -5,6 +5,7 @@ import type { NotaRetiradaListItem } from '../../../shared/types/NotasRetirada'
 import NotasCardMobile from './NotasCardMobile.vue'
 import NotasEmptyState from './NotasEmptyState.vue'
 import NotasStatusBadge from './NotasStatusBadge.vue'
+import NotasVendaFuturaBadge from './NotasVendaFuturaBadge.vue'
 
 const props = withDefaults(defineProps<{
   notas: NotaRetiradaListItem[]
@@ -105,8 +106,9 @@ const cadastradoPor = (nota: NotaRetiradaListItem) => {
                 </span>
               </div>
 
-              <div class="text-sm text-slate-600 dark:text-slate-400">
-                {{ formatDate(nota.data_compra) }}
+              <div class="flex flex-col gap-1 text-sm text-slate-600 dark:text-slate-400">
+                <span>{{ formatDate(nota.data_compra) }}</span>
+                <NotasVendaFuturaBadge :data-prevista-retirada="nota.data_prevista_retirada" />
               </div>
 
               <div class="text-sm font-medium text-slate-900 dark:text-slate-200">

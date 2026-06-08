@@ -30,6 +30,7 @@ const searchTerm = ref('')
 const statusFilter = ref<'todos' | NotaRetiradaStatus>('todos')
 const dataInicio = ref('')
 const dataFim = ref('')
+const vendaFuturaOnly = ref(false)
 const paginaAtual = ref(1)
 const itensPorPagina = ref(20)
 const modalAberto = ref(false)
@@ -112,6 +113,7 @@ const carregarNotas = async (options: { append?: boolean; page?: number } = {}) 
     status: statusFilter.value,
     data_inicio: dataInicio.value,
     data_fim: dataFim.value,
+    venda_futura: vendaFuturaOnly.value,
     page: pageToLoad,
     page_size: itensPorPagina.value,
   }, { append })
@@ -224,6 +226,7 @@ const exportarRelatorio = async (format: 'csv' | 'pdf') => {
     if (statusFilter.value !== 'todos') params.set('status', statusFilter.value)
     if (dataInicio.value) params.set('data_inicio', dataInicio.value)
     if (dataFim.value) params.set('data_fim', dataFim.value)
+    if (vendaFuturaOnly.value) params.set('venda_futura', 'true')
 
     const res = await fetch(getApiUrl(`/api/notas/export?${params.toString()}`), {
       headers: await getApiAuthHeaders(supabaseClient),
@@ -456,6 +459,7 @@ const stats = computed(() => {
           :status-filter="statusFilter"
           :data-inicio="dataInicio"
           :data-fim="dataFim"
+          :venda-futura-only="vendaFuturaOnly"
           :total-count="notasStore.totalNotas"
           :result-count="notasFiltradas.length"
           :loading="notasStore.loadingNotas"
@@ -464,6 +468,7 @@ const stats = computed(() => {
           @update:status-filter="statusFilter = $event; aplicarFiltros()"
           @update:data-inicio="dataInicio = $event"
           @update:data-fim="dataFim = $event"
+          @update:venda-futura-only="vendaFuturaOnly = $event; aplicarFiltros()"
           @apply="aplicarFiltros"
           @refresh="carregarNotas"
           @export="exportarRelatorio"

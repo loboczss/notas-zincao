@@ -99,7 +99,7 @@ export const notasRetiradaListGetHandler = defineEventHandler(async (event) => {
 
   let request = (client as any)
     .from('notas_retirada')
-    .select('id, contato_id, idempresa, nome_cliente, numero_nota, serie_nota, chave_nfe, data_compra, data_retirada, valor_total, desconto_total, status_retirada, criado_em, produtos, foto_url, foto_cliente_url, comprovante_retirada_url, historico_retiradas')
+    .select('id, contato_id, idempresa, nome_cliente, numero_nota, serie_nota, chave_nfe, data_compra, data_prevista_retirada, data_retirada, valor_total, desconto_total, status_retirada, criado_em, produtos, foto_url, foto_cliente_url, comprovante_retirada_url, historico_retiradas')
     .is('deleted_at', null)
     .in('status_retirada', ['pendente', 'parcial'])
     .order('criado_em', { ascending: false })

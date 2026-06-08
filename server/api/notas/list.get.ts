@@ -5,6 +5,11 @@ const allowedStatus = ['pendente', 'parcial', 'retirada', 'cancelada'] as const
 
 const isISODate = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value)
 
+const isTruthyFilter = (value: unknown) => {
+  const raw = String(value || '').trim().toLowerCase()
+  return ['1', 'true', 'sim', 'yes'].includes(raw)
+}
+
 const normalizeForSearch = (value: unknown) => {
   return String(value || '')
     .normalize('NFD')
@@ -133,6 +138,7 @@ export const notasListGetHandler = defineEventHandler(async (event) => {
   const status = String(query.status || '').trim().toLowerCase()
   const dataInicio = String(query.data_inicio || query.date_from || '').trim()
   const dataFim = String(query.data_fim || query.date_to || '').trim()
+  const vendaFuturaOnly = isTruthyFilter(query.venda_futura || query.future_sale)
   const pageRaw = Number(String(query.page || '1').trim())
   const pageSizeRaw = Number(String(query.page_size || '20').trim())
   const page = Number.isFinite(pageRaw) && pageRaw > 0 ? Math.trunc(pageRaw) : 1
@@ -142,7 +148,7 @@ export const notasListGetHandler = defineEventHandler(async (event) => {
 
   let request = (client as any)
     .from('notas_retirada')
-    .select('id, owner_user_id, contato_id, idempresa, nome_cliente, numero_nota, serie_nota, chave_nfe, data_compra, data_retirada, valor_total, desconto_total, status_retirada, criado_em, produtos, foto_url, foto_cliente_url, comprovante_retirada_url, historico_retiradas', { count: 'exact' })
+    .select('id, owner_user_id, contato_id, idempresa, nome_cliente, numero_nota, serie_nota, chave_nfe, data_compra, data_prevista_retirada, data_retirada, valor_total, desconto_total, status_retirada, criado_em, produtos, foto_url, foto_cliente_url, comprovante_retirada_url, historico_retiradas', { count: 'exact' })
     .is('deleted_at', null)
     .order('criado_em', { ascending: false })
 
@@ -156,6 +162,10 @@ export const notasListGetHandler = defineEventHandler(async (event) => {
 
   if (isISODate(dataFim)) {
     request = request.lte('data_compra', dataFim)
+  }
+
+  if (vendaFuturaOnly) {
+    request = request.not('data_prevista_retirada', 'is', null)
   }
 
   const isSearching = Boolean(search)

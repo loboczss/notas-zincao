@@ -6,6 +6,11 @@ const allowedStatus = ['pendente', 'parcial', 'retirada', 'cancelada'] as const
 
 const isISODate = (v: string) => /^\d{4}-\d{2}-\d{2}$/.test(v)
 
+const isTruthyFilter = (value: unknown) => {
+  const raw = String(value || '').trim().toLowerCase()
+  return ['1', 'true', 'sim', 'yes'].includes(raw)
+}
+
 const normalizeForSearch = (value: unknown) =>
   String(value || '')
     .normalize('NFD')
@@ -61,8 +66,15 @@ const normalizeSearch = (v: unknown) =>
 const statusLabel = (s: string) =>
   ({ pendente: 'Pendente', parcial: 'Parcial', retirada: 'Concluída', cancelada: 'Cancelada' }[s] ?? s)
 
-const fmtDate = (d: string | null | undefined) =>
-  d ? new Date(d).toLocaleDateString('pt-BR') : '-'
+const fmtDate = (d: string | null | undefined) => {
+  const raw = String(d || '').slice(0, 10)
+  if (!raw) return '-'
+  const iso = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (iso) return `${iso[3]}/${iso[2]}/${iso[1]}`
+
+  const parsed = new Date(d || '')
+  return Number.isNaN(parsed.getTime()) ? '-' : parsed.toLocaleDateString('pt-BR')
+}
 
 const fmtCurrency = (v: number | null | undefined) =>
   (v ?? 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -95,6 +107,7 @@ function buildCsv(notas: EnrichedNota[], filters: Record<string, string>): strin
   if (filters.status && filters.status !== 'todos') fp.push(`Status: ${statusLabel(filters.status)}`)
   if (filters.dataInicio) fp.push(`De: ${fmtDate(filters.dataInicio)}`)
   if (filters.dataFim) fp.push(`Até: ${fmtDate(filters.dataFim)}`)
+  if (filters.vendaFutura === 'true') fp.push('Tipo: vendas futuras')
   if (filters.search) fp.push(`Busca: "${filters.search}"`)
 
   const totalValor = round2(notas.reduce((a, n) => a + (Number(n.valor_total) || 0), 0))
@@ -117,13 +130,15 @@ function buildCsv(notas: EnrichedNota[], filters: Record<string, string>): strin
     ].join(','),
     '',
     '=== NOTAS ===',
-    'Nº Nota,Série,Cliente,Data Compra,Data Retirada,Valor Total,Status,Qtd Itens,Total Comprado,Total Retirado,Saldo,% Entregue',
+    'Nº Nota,Série,Cliente,Data Compra,Venda Futura,Data Prevista Retirada,Data Retirada,Valor Total,Status,Qtd Itens,Total Comprado,Total Retirado,Saldo,% Entregue',
     ...notas.map(n =>
       [
         escapeCsv(n.numero_nota ?? '-'),
         escapeCsv(n.serie_nota ?? '-'),
         escapeCsv(n.nome_cliente ?? '-'),
         fmtDate(n.data_compra),
+        n.data_prevista_retirada ? 'Sim' : 'Nao',
+        fmtDate(n.data_prevista_retirada),
         fmtDate(n.data_retirada),
         escapeCsv(fmtCurrency(n.valor_total)),
         statusLabel(n.status_retirada ?? '-'),
@@ -171,6 +186,7 @@ async function buildPdf(notas: EnrichedNota[], filters: Record<string, string>):
     if (filters.status && filters.status !== 'todos') fp.push(`Status: ${statusLabel(filters.status)}`)
     if (filters.dataInicio) fp.push(`De: ${fmtDate(filters.dataInicio)}`)
     if (filters.dataFim) fp.push(`Até: ${fmtDate(filters.dataFim)}`)
+    if (filters.vendaFutura === 'true') fp.push('Tipo: vendas futuras')
     if (filters.search) fp.push(`Busca: "${filters.search}"`)
     const filterStr = fp.length ? fp.join(' | ') : 'Sem filtros'
 
@@ -211,6 +227,7 @@ async function buildPdf(notas: EnrichedNota[], filters: Record<string, string>):
       { label: 'Série', w: 38 },
       { label: 'Cliente', w: 132 },
       { label: 'Compra', w: 58 },
+      { label: 'Prevista', w: 58 },
       { label: 'Valor', w: 72 },
       { label: 'Status', w: 62 },
       { label: 'Comprado', w: 55 },
@@ -251,6 +268,7 @@ async function buildPdf(notas: EnrichedNota[], filters: Record<string, string>):
         String(nota.serie_nota ?? '-'),
         String(nota.nome_cliente ?? '-'),
         fmtDate(nota.data_compra),
+        fmtDate(nota.data_prevista_retirada),
         fmtCurrency(nota.valor_total),
         statusLabel(nota.status_retirada ?? '-'),
         String(nota._totalComprado),
@@ -302,16 +320,18 @@ export default defineEventHandler(async (event) => {
   const status = String(q.status || '').trim().toLowerCase()
   const dataInicio = String(q.data_inicio || '').trim()
   const dataFim = String(q.data_fim || '').trim()
+  const vendaFuturaOnly = isTruthyFilter(q.venda_futura || q.future_sale)
 
   let req = (client as any)
     .from('notas_retirada')
-    .select('id, nome_cliente, numero_nota, serie_nota, data_compra, data_retirada, valor_total, status_retirada, produtos')
+    .select('id, nome_cliente, numero_nota, serie_nota, data_compra, data_prevista_retirada, data_retirada, valor_total, status_retirada, produtos')
     .is('deleted_at', null)
     .order('criado_em', { ascending: false })
 
   if ((allowedStatus as readonly string[]).includes(status)) req = req.eq('status_retirada', status)
   if (isISODate(dataInicio)) req = req.gte('data_compra', dataInicio)
   if (isISODate(dataFim)) req = req.lte('data_compra', dataFim)
+  if (vendaFuturaOnly) req = req.not('data_prevista_retirada', 'is', null)
 
   const { data, error } = await req
   if (error) throw createError({ statusCode: 500, statusMessage: 'Não foi possível carregar as notas.' })
@@ -327,7 +347,7 @@ export default defineEventHandler(async (event) => {
 
   const notas = filtered.map(enrichNota)
   const dateStr = new Date().toISOString().split('T')[0]
-  const filterContext = { status, dataInicio, dataFim, search }
+  const filterContext = { status, dataInicio, dataFim, search, vendaFutura: vendaFuturaOnly ? 'true' : '' }
 
   if (format === 'csv') {
     const csv = buildCsv(notas, filterContext)

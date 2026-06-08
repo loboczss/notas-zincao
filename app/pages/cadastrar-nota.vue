@@ -31,6 +31,7 @@ const form = reactive<NotaRetiradaDraft>({
   serie_nota: '',
   chave_nfe: '',
   data_compra: '',
+  data_prevista_retirada: '',
   observacoes: '',
   produtos: [],
   valor_total: 0,
@@ -49,6 +50,7 @@ const aiChaveNfeSugerida = ref('')
 const qrLookupHints = ref<NfeKeyParts | null>(null)
 const showIntegrimAdvanced = ref(false)
 const integrimCandidates = ref<NotaIntegrimLookupCandidate[]>([])
+const vendaFutura = ref(false)
 
 // Limpar erros automaticamente conforme o usuário preenche/altera os campos
 watch(() => form.nome_cliente, () => { delete errors.nome_cliente })
@@ -69,7 +71,14 @@ watch(() => form.serie_nota, () => {
 })
 watch(() => form.chave_nfe, () => { delete errors.chave_nfe })
 watch(() => form.data_compra, () => { delete errors.data_compra })
+watch(() => form.data_prevista_retirada, () => { delete errors.data_prevista_retirada })
 watch(() => form.produtos, () => { delete errors.produtos }, { deep: true })
+watch(vendaFutura, (enabled) => {
+  delete errors.data_prevista_retirada
+  if (!enabled) {
+    form.data_prevista_retirada = ''
+  }
+})
 let crmSearchTimer: ReturnType<typeof setTimeout> | null = null
 
 const toNumber = (value: unknown) => {
@@ -106,6 +115,30 @@ const formatDocument = (value: string) => {
     .replace(/(\d{3})(\d)/, '$1.$2')
     .replace(/(\d{3})(\d)/, '$1/$2')
     .replace(/(\d{4})(\d{1,2})$/, '$1-$2')
+}
+
+const isISODate = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value)
+
+const addDaysToISODate = (value: string, days: number) => {
+  const now = new Date()
+  const today = [
+    now.getFullYear(),
+    String(now.getMonth() + 1).padStart(2, '0'),
+    String(now.getDate()).padStart(2, '0'),
+  ].join('-')
+  const raw = isISODate(value) ? value : today
+  const [yearRaw, monthRaw, dayRaw] = raw.split('-').map(Number)
+  const date = new Date(Number(yearRaw), Number(monthRaw) - 1, Number(dayRaw))
+  date.setDate(date.getDate() + days)
+  const yyyy = date.getFullYear()
+  const mm = String(date.getMonth() + 1).padStart(2, '0')
+  const dd = String(date.getDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
+}
+
+const setDataPrevistaPorDias = (days: number) => {
+  vendaFutura.value = true
+  form.data_prevista_retirada = addDaysToISODate(form.data_compra, days)
 }
 
 const totalProdutos = computed(() => {
@@ -146,6 +179,7 @@ const requiredFieldsReady = computed(() => {
     && String(form.numero_nota || '').trim()
     && String(form.serie_nota || '').trim()
     && String(form.data_compra || '').trim()
+    && (!vendaFutura.value || String(form.data_prevista_retirada || '').trim())
     && digitsOnly(String(form.chave_nfe || '')).length === 44
     && form.produtos.some(produto => String(produto.nome || '').trim())
     && Boolean(imageDataUrl.value)
@@ -235,6 +269,15 @@ const validateForm = () => {
 
   if (!String(form.data_compra || '').trim()) {
     errors.data_compra = 'Data da compra é obrigatória.'
+  }
+
+  const dataCompra = String(form.data_compra || '').trim()
+  const dataPrevistaRetirada = String(form.data_prevista_retirada || '').trim()
+  if (vendaFutura.value && !dataPrevistaRetirada) {
+    errors.data_prevista_retirada = 'Informe a data prevista de retirada.'
+  }
+  else if (vendaFutura.value && (!isISODate(dataPrevistaRetirada) || dataPrevistaRetirada <= dataCompra)) {
+    errors.data_prevista_retirada = 'A data prevista deve ser depois da data da compra.'
   }
 
   const chave = digitsOnly(String(form.chave_nfe || ''))
@@ -430,6 +473,8 @@ const analisarImagem = async () => {
   form.serie_nota = String(response.draft.serie_nota || '1').trim() || '1'
   form.chave_nfe = digitsOnly(String(response.draft.chave_nfe || ''))
   form.data_compra = String(response.draft.data_compra || '').trim()
+  form.data_prevista_retirada = String(response.draft.data_prevista_retirada || '').trim()
+  vendaFutura.value = Boolean(form.data_prevista_retirada)
   form.observacoes = String(response.draft.observacoes || '').trim()
   form.desconto_total = toNumber(response.draft.desconto_total)
   form.produtos = Array.isArray(response.draft.produtos) ? response.draft.produtos.map(normalizeProduto) : []
@@ -471,6 +516,8 @@ const aplicarDraftIntegrim = (draft: NotaRetiradaDraft, missingFields: string[] 
   form.serie_nota = String(draft.serie_nota || '').trim()
   form.chave_nfe = nextChave
   form.data_compra = String(draft.data_compra || '').trim()
+  form.data_prevista_retirada = String(draft.data_prevista_retirada || '').trim()
+  vendaFutura.value = Boolean(form.data_prevista_retirada)
   form.observacoes = String(draft.observacoes || '').trim()
   form.desconto_total = toNumber(draft.desconto_total)
   form.produtos = Array.isArray(draft.produtos) ? draft.produtos.map(normalizeProduto) : []
@@ -693,6 +740,7 @@ const saveNota = async () => {
     telefone_cliente: digitsOnly(String(form.telefone_cliente || '')),
     documento_cliente: digitsOnly(String(form.documento_cliente || '')),
     chave_nfe: digitsOnly(String(form.chave_nfe || '')),
+    data_prevista_retirada: vendaFutura.value ? String(form.data_prevista_retirada || '').trim() : '',
     foto_cupom_data_url: imageDataUrl.value,
     produtos: form.produtos.map(normalizeProduto),
     valor_total: valorBrutoNumber.value,
@@ -727,6 +775,7 @@ const cadastrarOutra = async () => {
   form.serie_nota = ''
   form.chave_nfe = ''
   form.data_compra = ''
+  form.data_prevista_retirada = ''
   form.observacoes = ''
   form.produtos = []
   form.valor_total = 0
@@ -737,6 +786,7 @@ const cadastrarOutra = async () => {
   qrLookupHints.value = null
   showIntegrimAdvanced.value = false
   integrimCandidates.value = []
+  vendaFutura.value = false
   resetErrors()
   crmStore.clearContatos()
 }
@@ -790,6 +840,8 @@ onMounted(() => {
         :serie-nota="String(form.serie_nota || '')"
         :chave-nfe="String(form.chave_nfe || '')"
         :data-compra="form.data_compra"
+        :venda-futura="vendaFutura"
+        :data-prevista-retirada="String(form.data_prevista_retirada || '')"
         :valor-total="valorBrutoNumber.toFixed(2)"
         :desconto-total="String(form.desconto_total ?? '')"
         :valor-liquido="valorLiquido.toFixed(2)"
@@ -803,12 +855,15 @@ onMounted(() => {
         @update:serie-nota="form.serie_nota = $event"
         @update:chave-nfe="form.chave_nfe = digitsOnly($event)"
         @update:data-compra="form.data_compra = $event"
+        @update:venda-futura="vendaFutura = $event"
+        @update:data-prevista-retirada="form.data_prevista_retirada = $event"
         @update:valor-total="atualizarValorTotal"
         @update:desconto-total="form.desconto_total = toNumber($event)"
         @update:valor-liquido="atualizarValorLiquido"
         @update:observacoes="form.observacoes = $event"
         @update:advanced-company-id="integrimForcedCompanyId = digitsOnly($event)"
         @toggle-advanced-lookup="showIntegrimAdvanced = !showIntegrimAdvanced"
+        @set-data-prevista-dias="setDataPrevistaPorDias"
         @lookup-nota="buscarNotaIntegrim()"
       />
 

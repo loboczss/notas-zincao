@@ -8,6 +8,7 @@ const props = withDefaults(defineProps<{
   statusFilter: 'todos' | NotaRetiradaStatus
   dataInicio: string
   dataFim: string
+  vendaFuturaOnly: boolean
   totalCount: number
   resultCount: number
   loading?: boolean
@@ -22,6 +23,7 @@ const emit = defineEmits<{
   (e: 'update:statusFilter', value: 'todos' | NotaRetiradaStatus): void
   (e: 'update:dataInicio', value: string): void
   (e: 'update:dataFim', value: string): void
+  (e: 'update:vendaFuturaOnly', value: boolean): void
   (e: 'apply'): void
   (e: 'refresh'): void
   (e: 'export', format: 'csv' | 'pdf'): void
@@ -33,6 +35,7 @@ const hasAdvancedFilters = computed(() => {
   return props.statusFilter !== 'todos'
     || Boolean(props.dataInicio)
     || Boolean(props.dataFim)
+    || props.vendaFuturaOnly
 })
 </script>
 
@@ -134,6 +137,17 @@ const hasAdvancedFilters = computed(() => {
                 type="date"
                 @update:model-value="emit('update:dataFim', $event)"
               />
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-medium text-slate-700 dark:text-slate-300">Tipo</label>
+              <CheckboxField
+                class="w-full"
+                :model-value="props.vendaFuturaOnly"
+                @update:model-value="emit('update:vendaFuturaOnly', $event)"
+              >
+                Só vendas futuras
+              </CheckboxField>
             </div>
           </div>
 

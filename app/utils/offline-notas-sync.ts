@@ -409,6 +409,7 @@ const toListItem = (nota: OfflineNotaSyncData | NotaRetiradaDetalheItem): NotaRe
   serie_nota: nota.serie_nota,
   chave_nfe: nota.chave_nfe,
   data_compra: nota.data_compra,
+  data_prevista_retirada: nota.data_prevista_retirada,
   data_retirada: nota.data_retirada,
   valor_total: nota.valor_total,
   desconto_total: nota.desconto_total,
@@ -488,6 +489,7 @@ export type OfflineNotasLocalQuery = {
   status?: 'todos' | NotaRetiradaDetalheItem['status_retirada']
   data_inicio?: string
   data_fim?: string
+  venda_futura?: boolean
   page?: number
   page_size?: number
   includeDeleted?: boolean
@@ -514,10 +516,12 @@ const matchesLocalNotaFilters = (
   const status = filters.status && filters.status !== 'todos' ? filters.status : null
   const dataInicio = String(filters.data_inicio || '').trim()
   const dataFim = String(filters.data_fim || '').trim()
+  const vendaFuturaOnly = Boolean(filters.venda_futura)
   const search = normalizeSearchText(filters.search)
 
   if (status && nota.status_retirada !== status) return false
   if ((dataInicio || dataFim) && !isInsideDateRange(nota.data_compra, dataInicio, dataFim)) return false
+  if (vendaFuturaOnly && !nota.data_prevista_retirada) return false
 
   if (!search) return true
 

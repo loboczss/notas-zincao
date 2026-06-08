@@ -20,6 +20,7 @@ import NotaLogCard from './NotaLogCard.vue'
 import Card from '../Card.vue'
 import Botao from '../Botao.vue'
 import { notaRetiradaRoute } from '../../constants/routes'
+import NotasVendaFuturaBadge from './NotasVendaFuturaBadge.vue'
 
 const props = withDefaults(defineProps<{
   nota: NotaRetiradaDetalheItem | null
@@ -69,6 +70,9 @@ const formatDateTime = (value?: string) => {
 }
 
 const formatDate = (value?: string) => {
+  const raw = String(value || '').slice(0, 10)
+  const iso = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (iso) return `${iso[3]}/${iso[2]}/${iso[1]}`
   if (!value) return '-'
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return '-'
@@ -217,6 +221,7 @@ defineExpose({
                 {{ nota.serie_nota || '1' }}-{{ nota.numero_nota }}
               </h3>
               <NotasStatusBadge :status="nota.status_retirada" />
+              <NotasVendaFuturaBadge :data-prevista-retirada="nota.data_prevista_retirada" />
             </div>
           </div>
 
@@ -329,6 +334,10 @@ defineExpose({
               <div class="flex items-center justify-between gap-3">
                 <dt class="text-slate-500 dark:text-slate-400">Compra</dt>
                 <dd class="font-semibold text-slate-950 dark:text-white">{{ formatDate(nota.data_compra) }}</dd>
+              </div>
+              <div v-if="nota.data_prevista_retirada" class="flex items-center justify-between gap-3">
+                <dt class="text-slate-500 dark:text-slate-400">Retirada prevista</dt>
+                <dd class="text-right font-semibold text-amber-700 dark:text-amber-300">{{ formatDate(nota.data_prevista_retirada) }}</dd>
               </div>
               <div class="flex items-center justify-between gap-3">
                 <dt class="text-slate-500 dark:text-slate-400">Criado em</dt>

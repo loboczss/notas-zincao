@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { ChevronRight } from 'lucide-vue-next'
 import type { NotaRetiradaListItem } from '../../../shared/types/NotasRetirada'
 import NotasStatusBadge from './NotasStatusBadge.vue'
+import NotasVendaFuturaBadge from './NotasVendaFuturaBadge.vue'
 
 const props = defineProps<{
   nota: NotaRetiradaListItem
@@ -67,7 +68,10 @@ const cadastradoPor = computed(() => {
             {{ nota.nome_cliente }}
           </h3>
         </div>
-        <NotasStatusBadge :status="nota.status_retirada" />
+        <div class="flex shrink-0 flex-col items-end gap-1">
+          <NotasStatusBadge :status="nota.status_retirada" />
+          <NotasVendaFuturaBadge :data-prevista-retirada="nota.data_prevista_retirada" />
+        </div>
       </div>
 
       <div class="mt-4 grid grid-cols-2 gap-4">
