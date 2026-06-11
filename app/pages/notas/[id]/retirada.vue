@@ -12,6 +12,7 @@ import {
   RETIRADA_FOTO_CAMERA_PENDING_KEY,
   retiradaFotoRestoredImageStateKey,
 } from '../../../constants/camera-capture'
+import { NOTA_IMAGE_MAX_DIMENSION, normalizeNotaImageDataUrl } from '../../../utils/image-compression'
 
 definePageMeta({
   middleware: 'auth',
@@ -48,6 +49,7 @@ const cameraInput = ref<HTMLInputElement | null>(null)
 const galleryInput = ref<HTMLInputElement | null>(null)
 const pickerOpen = ref(false)
 const nativeCaptureLoading = ref(false)
+const fotoProcessing = ref(false)
 const restoredRetiradaImageDataUrl = useState<string>(retiradaFotoRestoredImageStateKey(notaId.value), () => '')
 
 const openPicker = () => {
@@ -194,11 +196,26 @@ const dataUrlFromPhoto = (photo: { dataUrl?: string; base64String?: string; form
   return ''
 }
 
-const selecionarFotoDataUrl = (dataUrl: string) => {
+const selecionarFotoDataUrl = async (dataUrl: string) => {
   if (!dataUrl.startsWith('data:image/')) return
 
-  fotoDataUrl.value = dataUrl
-  fotoPreviewUrl.value = dataUrl
+  fotoProcessing.value = true
+  try {
+    const normalized = await normalizeNotaImageDataUrl(dataUrl)
+    if (!normalized) return
+
+    fotoDataUrl.value = normalized
+    fotoPreviewUrl.value = normalized
+  }
+  catch (error) {
+    const message = error instanceof Error
+      ? error.message
+      : 'Nao foi possivel preparar a foto da retirada.'
+    showError(message)
+  }
+  finally {
+    fotoProcessing.value = false
+  }
 }
 
 const requestNativeImage = async (source: 'camera' | 'photos') => {
@@ -216,14 +233,16 @@ const requestNativeImage = async (source: 'camera' | 'photos') => {
     const photo = await CameraPlugin.getPhoto({
       allowEditing: false,
       correctOrientation: true,
-      quality: 85,
+      height: NOTA_IMAGE_MAX_DIMENSION,
+      quality: 72,
       resultType: CameraResultType.DataUrl,
       source: source === 'camera' ? CameraSource.Camera : CameraSource.Photos,
+      width: NOTA_IMAGE_MAX_DIMENSION,
     })
     const dataUrl = dataUrlFromPhoto(photo)
 
     if (dataUrl) {
-      selecionarFotoDataUrl(dataUrl)
+      await selecionarFotoDataUrl(dataUrl)
     }
 
     return true
@@ -268,7 +287,7 @@ const onSelecionarFoto = async (event: Event) => {
       reader.readAsDataURL(file)
     })
 
-    selecionarFotoDataUrl(dataUrl)
+    await selecionarFotoDataUrl(dataUrl)
   }
   finally {
     target.value = ''
@@ -282,10 +301,10 @@ const limparFoto = () => {
   galleryInput.value && (galleryInput.value.value = '')
 }
 
-watch(restoredRetiradaImageDataUrl, (dataUrl) => {
+watch(restoredRetiradaImageDataUrl, async (dataUrl) => {
   if (!dataUrl) return
 
-  selecionarFotoDataUrl(dataUrl)
+  await selecionarFotoDataUrl(dataUrl)
   restoredRetiradaImageDataUrl.value = ''
 }, { immediate: true })
 
@@ -448,11 +467,12 @@ await carregarDetalhe()
 
                 <div v-else class="space-y-2">
                   <span class="mx-auto flex h-11 w-11 items-center justify-center rounded-lg bg-white text-slate-500 shadow-sm dark:bg-slate-900 dark:text-slate-300">
-                    <Camera class="h-5 w-5" />
+                    <LoaderCircle v-if="fotoProcessing || nativeCaptureLoading" class="h-5 w-5 animate-spin" />
+                    <Camera v-else class="h-5 w-5" />
                   </span>
                   <div>
                     <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">
-                      Camera ou galeria
+                      {{ fotoProcessing ? 'Preparando foto...' : 'Camera ou galeria' }}
                     </p>
                     <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
                       Tire uma foto ou selecione do celular
@@ -474,10 +494,10 @@ await carregarDetalhe()
                     type="button"
                     size="sm"
                     class="w-full"
-                    :disabled="nativeCaptureLoading"
+                    :disabled="nativeCaptureLoading || fotoProcessing"
                     @click="triggerCamera"
                   >
-                    <LoaderCircle v-if="nativeCaptureLoading" class="h-4 w-4 animate-spin" />
+                    <LoaderCircle v-if="nativeCaptureLoading || fotoProcessing" class="h-4 w-4 animate-spin" />
                     <Camera v-else class="h-4 w-4" />
                     <span>Tirar foto</span>
                   </Botao>
@@ -486,7 +506,7 @@ await carregarDetalhe()
                     variant="secondary"
                     size="sm"
                     class="w-full"
-                    :disabled="nativeCaptureLoading"
+                    :disabled="nativeCaptureLoading || fotoProcessing"
                     @click="triggerGallery"
                   >
                     <Images class="h-4 w-4" />
