@@ -32,6 +32,9 @@ capacitor.server.json
 # Graphify derived outputs
 graphify-out/
 
+# Codex temp working files
+.codex-tmp/
+
 # Generated Capacitor web assets
 android/app/src/main/assets/public/
 android/app/build/

@@ -177,13 +177,14 @@ export const vincularProdutosAoEstoque = async (client: any, produtos: NotaProdu
 
   for (const produto of produtos) {
     const nome = String(produto.nome || '').trim()
-    if (!nome) {
+    const idProdutoEstoque = Number(produto.id_produto_estoque || 0)
+    if (!nome && !idProdutoEstoque) {
       continue
     }
 
     let match = null
-    const produtoPorId = Number(produto.id_produto_estoque || 0)
-      ? estoquePorId.get(Number(produto.id_produto_estoque || 0))
+    const produtoPorId = idProdutoEstoque
+      ? estoquePorId.get(idProdutoEstoque)
       : null
 
     if (produtoPorId) {
@@ -193,9 +194,14 @@ export const vincularProdutosAoEstoque = async (client: any, produtos: NotaProdu
       match = await encontrarProdutoEstoque(client, nome)
     }
 
+    const nomeProduto = match?.nome || nome
+    if (!nomeProduto) {
+      continue
+    }
+
     resolvedProducts.push({
       ...produto,
-      nome: match?.nome || nome,
+      nome: nomeProduto,
       ...(match?.id_produto_estoque ? { id_produto_estoque: match.id_produto_estoque } : {}),
       ...(match?.embalagem ? { embalagem: match.embalagem } : {}),
       ...(match?.tipo_produto !== undefined ? { tipo_produto: match.tipo_produto } : {}),

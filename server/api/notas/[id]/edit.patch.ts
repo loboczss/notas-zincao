@@ -39,7 +39,6 @@ const normalizeProdutos = (produtos: NotaProduto[] | undefined) => {
   return produtos
     .map((item) => {
       const nome = String(item?.nome || '').trim()
-      if (!nome) return null
 
       const quantidade = toNumber(item?.quantidade)
       const valorUnitario = toNumber(item?.valor_unitario)
@@ -52,6 +51,7 @@ const normalizeProdutos = (produtos: NotaProduto[] | undefined) => {
       const idProdutoEstoque = toInteger(item?.id_produto_estoque)
       const tipoProdutoRaw = item?.tipo_produto
       const tipoProduto = typeof tipoProdutoRaw === 'string' ? tipoProdutoRaw.trim() || null : null
+      if (!nome && idProdutoEstoque === undefined) return null
 
       return {
         nome,
@@ -164,6 +164,10 @@ export default defineEventHandler(async (event) => {
     }
 
     const produtosVinculados = await vincularProdutosAoEstoque(client as any, produtosNormalizados)
+    if (!produtosVinculados.length) {
+      throw createError({ statusCode: 400, statusMessage: 'Informe ao menos um item valido.' })
+    }
+
     const produtosComRetiradaNormalizada = produtosVinculados.map(clampNotaProdutoQuantidadeRetirada)
     const statusRetirada = getNotaRetiradaStatusFromProdutos(produtosComRetiradaNormalizada)
 

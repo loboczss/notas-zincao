@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   ArrowRight,
@@ -14,6 +14,7 @@ import {
   X,
 } from 'lucide-vue-next'
 import type { NotaAdminEditRequest, NotaRetiradaDetalheItem } from '../../../shared/types/NotasRetirada'
+import type { EstoqueProduto } from '../../../shared/types/Estoque'
 import NotasStatusBadge from './NotasStatusBadge.vue'
 import NotaItemCard from './NotaItemCard.vue'
 import NotaLogCard from './NotaLogCard.vue'
@@ -21,6 +22,7 @@ import Card from '../Card.vue'
 import Botao from '../Botao.vue'
 import { notaRetiradaRoute } from '../../constants/routes'
 import NotasVendaFuturaBadge from './NotasVendaFuturaBadge.vue'
+import { useEstoqueStore } from '../../stores'
 
 const props = withDefaults(defineProps<{
   nota: NotaRetiradaDetalheItem | null
@@ -37,6 +39,13 @@ const emit = defineEmits<{
 }>()
 
 const router = useRouter()
+const estoqueStore = useEstoqueStore()
+
+const produtoLookupTimers = new Map<number, ReturnType<typeof setTimeout>>()
+const produtoLookupRequestIds = ref<Record<number, number>>({})
+const loadingProdutoEstoque = ref<Record<number, boolean>>({})
+const produtoEstoqueError = ref<Record<number, string>>({})
+let produtoLookupSeq = 0
 
 const toNumber = (value: unknown) => {
   if (typeof value === 'number' && Number.isFinite(value)) return value
@@ -46,6 +55,89 @@ const toNumber = (value: unknown) => {
     return Number.isFinite(parsed) ? parsed : 0
   }
   return 0
+}
+
+const normalizeProdutoCodigo = (value: unknown) => String(value || '').replace(/\D/g, '')
+
+const clearProdutoLookupTimer = (index: number) => {
+  const timer = produtoLookupTimers.get(index)
+  if (timer) {
+    clearTimeout(timer)
+    produtoLookupTimers.delete(index)
+  }
+}
+
+const setProdutoLookupLoading = (index: number, value: boolean) => {
+  loadingProdutoEstoque.value[index] = value
+}
+
+const setProdutoLookupError = (index: number, value = '') => {
+  if (value) {
+    produtoEstoqueError.value[index] = value
+  }
+  else {
+    delete produtoEstoqueError.value[index]
+  }
+}
+
+const aplicarProdutoEstoque = (index: number, produtoEstoque: EstoqueProduto) => {
+  const produto = editDraft.value.produtos?.[index]
+  if (!produto) return
+
+  produto.nome = produtoEstoque.descricao
+  produto.id_produto_estoque = produtoEstoque.id_produto
+  produto.embalagem = produtoEstoque.embalagem_saida || ''
+  produto.tipo_produto = produtoEstoque.tipo_produto || null
+  produto.confidence = 1
+}
+
+const buscarProdutoEstoquePorCodigo = async (index: number, codigo: string) => {
+  const idProduto = Number(codigo)
+  if (!Number.isFinite(idProduto) || idProduto <= 0) {
+    return
+  }
+
+  const requestId = ++produtoLookupSeq
+  produtoLookupRequestIds.value[index] = requestId
+  setProdutoLookupLoading(index, true)
+  setProdutoLookupError(index)
+
+  try {
+    const produtoEstoque = await estoqueStore.fetchProduto(idProduto)
+    if (produtoLookupRequestIds.value[index] !== requestId) return
+
+    if (produtoEstoque) {
+      aplicarProdutoEstoque(index, produtoEstoque)
+      return
+    }
+
+    setProdutoLookupError(index, 'Produto nao encontrado no estoque.')
+  }
+  catch {
+    if (produtoLookupRequestIds.value[index] !== requestId) return
+    setProdutoLookupError(index, 'Nao foi possivel buscar o produto.')
+  }
+  finally {
+    if (produtoLookupRequestIds.value[index] === requestId) {
+      setProdutoLookupLoading(index, false)
+    }
+  }
+}
+
+const agendarBuscaProdutoEstoque = (index: number, codigo: string) => {
+  clearProdutoLookupTimer(index)
+
+  if (!codigo) {
+    setProdutoLookupLoading(index, false)
+    setProdutoLookupError(index)
+    return
+  }
+
+  const timer = setTimeout(() => {
+    buscarProdutoEstoquePorCodigo(index, codigo)
+  }, 260)
+
+  produtoLookupTimers.set(index, timer)
 }
 
 const formatQuantity = (value: unknown) => {
@@ -166,6 +258,33 @@ const adicionarProduto = () => {
   editDraft.value.produtos = produtosDraft
 }
 
+const atualizarProdutoNome = (index: number, value: string) => {
+  const produto = editDraft.value.produtos?.[index]
+  if (!produto) return
+
+  produto.nome = value
+
+  const codigo = normalizeProdutoCodigo(value)
+  if (codigo && codigo === value.trim()) {
+    produto.id_produto_estoque = Number(codigo)
+    agendarBuscaProdutoEstoque(index, codigo)
+  }
+}
+
+const atualizarIdProdutoEstoque = (index: number, value: string) => {
+  const produto = editDraft.value.produtos?.[index]
+  if (!produto) return
+
+  const codigo = normalizeProdutoCodigo(value)
+  produto.id_produto_estoque = codigo ? Number(codigo) : null
+
+  if (!codigo) {
+    produto.confidence = undefined
+  }
+
+  agendarBuscaProdutoEstoque(index, codigo)
+}
+
 const removerProduto = (index: number) => {
   if (!Array.isArray(editDraft.value.produtos)) return
   editDraft.value.produtos = editDraft.value.produtos.filter((_, i) => i !== index)
@@ -192,7 +311,7 @@ const salvarEdicao = () => {
       valor_unitario: toNumber(item.valor_unitario),
       valor_total: toNumber(item.valor_total),
       id_produto_estoque: item.id_produto_estoque ? toNumber(item.id_produto_estoque) : null,
-    })).filter(item => item.nome),
+    })).filter(item => item.nome || item.id_produto_estoque),
   }
 
   emit('save-edit', payload)
@@ -204,6 +323,12 @@ defineExpose({
   cancelarEdicao,
   salvarEdicao,
   editMode,
+})
+
+onBeforeUnmount(() => {
+  for (const timer of produtoLookupTimers.values()) {
+    clearTimeout(timer)
+  }
 })
 </script>
 
@@ -396,10 +521,22 @@ defineExpose({
             <label class="space-y-1">
               <span class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Produto</span>
               <Input
-                v-model="produto.nome"
+                :model-value="String(produto.nome || '')"
                 type="text"
                 class="font-semibold"
+                @update:model-value="atualizarProdutoNome(index, $event)"
               />
+              <p v-if="loadingProdutoEstoque[index]" class="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                Buscando produto...
+              </p>
+              <p v-else-if="produtoEstoqueError[index]" class="text-[11px] font-medium text-rose-600 dark:text-rose-300">
+                {{ produtoEstoqueError[index] }}
+              </p>
+              <p v-else-if="produto.id_produto_estoque" class="text-[11px] font-medium text-emerald-700 dark:text-emerald-300">
+                Vinculado ao estoque: #{{ produto.id_produto_estoque }}
+                <span v-if="produto.tipo_produto"> - {{ produto.tipo_produto }}</span>
+                <span v-if="produto.embalagem"> - {{ produto.embalagem }}</span>
+              </p>
             </label>
             <label class="space-y-1">
               <span class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Qtd</span>
@@ -423,8 +560,8 @@ defineExpose({
               <span class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">ID estoque</span>
               <Input
                 :model-value="String(produto.id_produto_estoque ?? '')"
-                type="number"
-                @update:model-value="produto.id_produto_estoque = toNumber($event)"
+                inputmode="numeric"
+                @update:model-value="atualizarIdProdutoEstoque(index, $event)"
               />
             </label>
             <IconButton
