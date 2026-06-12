@@ -1,4 +1,7 @@
-import { runStockIntegrinSync } from '../../services/stock-integrin/sync/index'
+import {
+  runStockIntegrinSync,
+  startStockIntegrinSyncInBackground,
+} from '../../services/stock-integrin/sync/index'
 import { authorizeStockIntegrinAdminOrServiceRole } from '../../utils/stock-integrin-auth'
 import type {
   StockIntegrinSyncRequest,
@@ -31,11 +34,28 @@ export default defineEventHandler(async (event): Promise<StockIntegrinSyncRespon
     serviceRoleLimit: 6,
   })
 
-  return await runStockIntegrinSync({
-    dryRun: Boolean(body?.dry_run),
-    maxPages: parseMaxPages(body?.max_pages),
-    companyIds: parseCompanyIds(body?.company_ids),
-    deactivateStale: typeof body?.deactivate_stale === 'boolean' ? body.deactivate_stale : undefined,
+  const maxPages = parseMaxPages(body?.max_pages)
+  const companyIds = parseCompanyIds(body?.company_ids)
+  const deactivateStale = typeof body?.deactivate_stale === 'boolean' ? body.deactivate_stale : undefined
+
+  // O dry-run termina rapido e devolve amostras na resposta, entao roda inline.
+  if (body?.dry_run) {
+    return await runStockIntegrinSync({
+      dryRun: true,
+      maxPages,
+      companyIds,
+      deactivateStale,
+      triggeredBy,
+    })
+  }
+
+  // A sincronizacao real pode levar minutos: roda em segundo plano no servidor e
+  // responde de imediato com o run_id, evitando o timeout do gateway. O front
+  // acompanha o progresso pelo endpoint /api/stock-integrin/sync-status.
+  return await startStockIntegrinSyncInBackground({
+    maxPages,
+    companyIds,
+    deactivateStale,
     triggeredBy,
   })
 })

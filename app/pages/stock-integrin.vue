@@ -261,6 +261,10 @@ onMounted(async () => {
     stockStore.fetchSyncStatus(),
     carregarProdutos(),
   ])
+
+  // Se ja houver uma sincronizacao em andamento (iniciada antes ou em outra aba),
+  // retoma o acompanhamento do progresso.
+  stockStore.resumeSyncTrackingIfRunning()
 })
 
 onBeforeUnmount(() => {

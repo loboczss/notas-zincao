@@ -18,6 +18,10 @@ type FetchProdutosOptions = {
   append?: boolean
 }
 
+const SYNC_POLL_INTERVAL_MS = 1500
+
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+
 const defaultStats = (): StockIntegrinStats => ({
   saldo_disponivel_total: 0,
   empresas: [],
@@ -142,13 +146,36 @@ export const useStockIntegrinStore = defineStore('stock-integrin', () => {
       if (!syncing.value && !cancelling.value && data?.latest?.status !== 'running') {
         stopSyncPolling()
       }
-    }, 1500)
+    }, SYNC_POLL_INTERVAL_MS)
+  }
+
+  const findRun = (data: StockIntegrinSyncStatusResponse | null, runId: string) => {
+    if (!data) return null
+    return data.runs.find(run => run.id === runId)
+      || (data.latest?.id === runId ? data.latest : null)
+  }
+
+  // Acompanha um run que roda em segundo plano no servidor ate ele terminar.
+  // O fetchSyncStatus atualiza latestRun, o que mantem a barra de progresso viva.
+  const waitForSyncRun = async (runId: string): Promise<StockIntegrinSyncRun | null> => {
+    while (true) {
+      const data = await fetchSyncStatus({ silent: true })
+      const run = findRun(data, runId)
+      if (run && run.status !== 'running') return run
+      await delay(SYNC_POLL_INTERVAL_MS)
+    }
+  }
+
+  // Ao reabrir a pagina com um sync ja em andamento, retoma o polling do progresso.
+  const resumeSyncTrackingIfRunning = () => {
+    if (latestRun.value?.status === 'running') {
+      startSyncPolling()
+    }
   }
 
   const syncNow = async (payload: StockIntegrinSyncRequest = {}) => {
     syncing.value = true
     clearMessages()
-    startSyncPolling()
 
     try {
       const data = await getApiFetch()<StockIntegrinSyncResponse>('/api/stock-integrin/sync', {
@@ -157,12 +184,26 @@ export const useStockIntegrinStore = defineStore('stock-integrin', () => {
       })
 
       lastSyncResult.value = data
-      successMessage.value = data.cancelled
-        ? 'Sincronizacao cancelada com seguranca.'
-        : data.dry_run
-        ? `Teste concluido: ${data.saldos_total} saldos lidos da Integrim.`
-        : `Sincronizacao concluida: ${data.upserted_rows} linhas atualizadas.`
-      await fetchSyncStatus()
+
+      // O dry-run termina junto com a resposta; o sync real roda em segundo plano.
+      if (data.dry_run) {
+        successMessage.value = `Teste concluido: ${data.saldos_total} saldos lidos da Integrim.`
+        await fetchSyncStatus()
+        return data
+      }
+
+      const finishedRun = await waitForSyncRun(data.run_id)
+
+      if (!finishedRun || finishedRun.status === 'success') {
+        successMessage.value = `Sincronizacao concluida: ${finishedRun?.upserted_rows ?? 0} linhas atualizadas.`
+      }
+      else if (finishedRun.status === 'cancelled') {
+        successMessage.value = 'Sincronizacao cancelada com seguranca.'
+      }
+      else {
+        errorMessage.value = finishedRun.error_message || 'Falha ao sincronizar o Stock Integrin.'
+      }
+
       return data
     }
     catch (error) {
@@ -246,6 +287,7 @@ export const useStockIntegrinStore = defineStore('stock-integrin', () => {
     clearMessages,
     fetchProdutos,
     fetchSyncStatus,
+    resumeSyncTrackingIfRunning,
     syncNow,
     cancelSync,
     reset,

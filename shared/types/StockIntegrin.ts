@@ -130,6 +130,9 @@ export type StockIntegrinSyncResponse = {
   dry_run: boolean
   run_id: string
   cancelled?: boolean
+  started?: boolean
+  already_running?: boolean
+  status?: 'running'
   cad_produtos_total: number
   precos_total: number
   saldos_total: number

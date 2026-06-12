@@ -128,6 +128,7 @@ export const runStockIntegrinSync = async (options: StockIntegrinSyncOptions = {
     cancel_requested: false,
   }
   const runId = dryRun ? randomUUID() : await startSyncRun(adminClient!, triggeredBy, metadata)
+  await options.onStarted?.(runId)
   const counters = emptyCounters()
   const cadKeys = new Set<string>()
   const precoKeys = new Set<string>()

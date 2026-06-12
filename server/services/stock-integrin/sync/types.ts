@@ -59,6 +59,7 @@ export type StockIntegrinSyncOptions = {
   companyIds?: number[]
   deactivateStale?: boolean
   triggeredBy?: string
+  onStarted?: (runId: string) => void | Promise<void>
 }
 
 export type StockIntegrinSyncProgressPhase =
