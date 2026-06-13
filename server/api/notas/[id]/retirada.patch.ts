@@ -30,7 +30,25 @@ type RetiradaEfetiva = {
   id_produto_estoque_baixa: number | null
 }
 
+type ProdutoBdEstoque = {
+  IDPRODUTO: number
+  IDPRODUTOPAI: number | null
+}
+
+type ProdutoBaixaEstoque = {
+  origem: 'bd_estoque_geral' | 'stock_integrin'
+  idProdutoEstoque: number
+  idProdutoBaixa: number
+}
+
+type ProdutoStockIntegrinMatch = {
+  idproduto: number
+  idsubproduto: number
+  descrcomproduto: string
+}
+
 const RETIRADA_SEM_BAIXA_MESSAGE = 'Nenhum produto foi retirado. O estoque do produto pai vinculado esta zerado ou insuficiente para esta baixa.'
+const TELHA_ZINCO_PRODUTO_PAI_ID = 10
 
 const toNumber = (value: unknown) => {
   if (typeof value === 'number' && Number.isFinite(value)) {
@@ -48,6 +66,19 @@ const toNumber = (value: unknown) => {
   }
 
   return undefined
+}
+
+const normalizeText = (value: unknown) => String(value || '')
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .toLowerCase()
+  .replace(/[^a-z0-9\s]/g, ' ')
+  .replace(/\s+/g, ' ')
+  .trim()
+
+const isTelhaZincoProduto = (nome: string) => {
+  const normalized = normalizeText(nome)
+  return /\btelhas?\b/.test(normalized) && normalized.includes('zinco')
 }
 
 const parseImageDataUrl = (value: string) => {
@@ -133,7 +164,7 @@ const throwRetiradaSemBaixa = () => {
   })
 }
 
-const resolveProdutoBaixaEstoque = async (client: any, idProdutoEstoque: number) => {
+const buscarProdutoBdEstoque = async (client: any, idProdutoEstoque: number) => {
   const { data, error } = await (client as any)
     .from('bd_estoque_geral')
     .select('IDPRODUTO, IDPRODUTOPAI')
@@ -148,13 +179,121 @@ const resolveProdutoBaixaEstoque = async (client: any, idProdutoEstoque: number)
     })
   }
 
-  const parentId = toNumber(data?.IDPRODUTOPAI)
+  return data as ProdutoBdEstoque | null
+}
+
+const toProdutoBaixaBdEstoque = (idProdutoEstoque: number, produto: ProdutoBdEstoque): ProdutoBaixaEstoque => {
+  const parentId = toNumber(produto?.IDPRODUTOPAI)
 
   return {
-    idProdutoEstoque,
+    origem: 'bd_estoque_geral',
+    idProdutoEstoque: Math.trunc(idProdutoEstoque),
     idProdutoBaixa: parentId !== undefined && parentId > 0
       ? Math.trunc(parentId)
       : idProdutoEstoque,
+  }
+}
+
+const buscarProdutoStockIntegrinPorNome = async (
+  client: any,
+  idempresa: number,
+  nome: string,
+) => {
+  const normalized = normalizeText(nome)
+  if (!normalized || isTelhaZincoProduto(nome)) {
+    return null
+  }
+
+  const primaryTerm = normalized.split(' ').slice(0, 4).join(' ')
+  const { data, error } = await (client as any)
+    .from('stock_integrin')
+    .select('idproduto, idsubproduto, descrcomproduto')
+    .eq('idempresa', idempresa)
+    .eq('is_present', true)
+    .neq('idproduto', TELHA_ZINCO_PRODUTO_PAI_ID)
+    .neq('idsubproduto', TELHA_ZINCO_PRODUTO_PAI_ID)
+    .ilike('descrcomproduto', `%${primaryTerm || normalized}%`)
+    .order('qtdsaldodisponivel', { ascending: false })
+    .limit(10)
+
+  if (error) {
+    console.error('[api/notas/:id/retirada] stock integrin lookup error:', error.message)
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Nao foi possivel buscar o produto no Stock Integrin.',
+    })
+  }
+
+  const candidates = ((data || []) as ProdutoStockIntegrinMatch[])
+    .filter(candidate => !isTelhaZincoProduto(candidate.descrcomproduto))
+    .map((candidate) => {
+      const candidateText = normalizeText(candidate.descrcomproduto)
+      const queryTokens = normalized.split(' ')
+      const score = candidateText === normalized
+        ? 1
+        : queryTokens.filter(token => candidateText.includes(token)).length / Math.max(1, queryTokens.length)
+
+      return { candidate, score }
+    })
+    .sort((a, b) => b.score - a.score)
+
+  const bestMatch = candidates[0]
+  if (!bestMatch || bestMatch.score < 0.65) {
+    return null
+  }
+
+  return bestMatch.candidate
+}
+
+const resolveProdutoBaixaEstoque = async (
+  client: any,
+  produto: ProdutoNormalizadoRetirada,
+  idempresa: number | null,
+): Promise<ProdutoBaixaEstoque | null> => {
+  if (produto.idProdutoEstoque === null) {
+    if (!idempresa || idempresa <= 0) {
+      return null
+    }
+
+    const matchIntegrin = await buscarProdutoStockIntegrinPorNome(client, idempresa, produto.nome)
+    if (!matchIntegrin) {
+      return null
+    }
+
+    return {
+      origem: 'stock_integrin',
+      idProdutoEstoque: Math.trunc(matchIntegrin.idproduto),
+      idProdutoBaixa: Math.trunc(matchIntegrin.idproduto),
+    }
+  }
+
+  const produtoBd = await buscarProdutoBdEstoque(client, produto.idProdutoEstoque)
+  if (produtoBd) {
+    return toProdutoBaixaBdEstoque(produto.idProdutoEstoque, produtoBd)
+  }
+
+  const matchBd = await encontrarProdutoEstoque(client as any, produto.nome)
+  const matchBdId = toNumber(matchBd?.id_produto_estoque)
+  if (matchBdId !== undefined && matchBdId > 0) {
+    const produtoBdPorNome = await buscarProdutoBdEstoque(client, Math.trunc(matchBdId))
+    if (produtoBdPorNome) {
+      return toProdutoBaixaBdEstoque(Math.trunc(matchBdId), produtoBdPorNome)
+    }
+  }
+
+  if (
+    !idempresa
+    || idempresa <= 0
+    || produto.idProdutoEstoque === TELHA_ZINCO_PRODUTO_PAI_ID
+    || isTelhaZincoProduto(produto.nome)
+  ) {
+    return null
+  }
+
+  return {
+    origem: 'stock_integrin',
+    idProdutoEstoque: produto.idProdutoEstoque,
+    idProdutoBaixa: produto.idProdutoEstoque,
   }
 }
 
@@ -294,7 +433,7 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
 
   const { data: notaAtual, error: notaError } = await (client as any)
     .from('notas_retirada')
-    .select('id, owner_user_id, produtos, status_retirada, historico_retiradas')
+    .select('id, owner_user_id, idempresa, produtos, status_retirada, historico_retiradas')
     .eq('id', id)
     .single()
 
@@ -320,6 +459,11 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
       return await retornarNotaAtual('historico', requestId)
     }
   }
+
+  const idEmpresaNota = toNumber(notaAtual.idempresa)
+  const idempresa = idEmpresaNota !== undefined && idEmpresaNota > 0
+    ? Math.trunc(idEmpresaNota)
+    : null
 
   const retiradaMap = new Map<string, number>()
 
@@ -378,14 +522,29 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
       idProdutoEstoque = match?.id_produto_estoque ?? null
     }
 
-    if (idProdutoEstoque !== null) {
-      const produtoBaixa = await resolveProdutoBaixaEstoque(client as any, idProdutoEstoque)
+    const produtoComIdResolvido: ProdutoNormalizadoRetirada = {
+      ...produto,
+      idProdutoEstoque,
+    }
+    const produtoBaixa = await resolveProdutoBaixaEstoque(client as any, produtoComIdResolvido, idempresa)
+
+    if (produtoBaixa !== null) {
+      const rpcName = produtoBaixa.origem === 'stock_integrin'
+        ? 'baixar_stock_integrin_produto'
+        : 'baixar_estoque_produto'
+      const rpcParams = produtoBaixa.origem === 'stock_integrin'
+        ? {
+            p_idempresa: idempresa,
+            p_id_produto: produtoBaixa.idProdutoBaixa,
+            p_quantidade_solicitada: produto.retiradaSolicitada,
+          }
+        : {
+            p_id_produto: produtoBaixa.idProdutoBaixa,
+            p_quantidade_solicitada: produto.retiradaSolicitada,
+          }
 
       const { data: baixaData, error: baixaError } = await (client as any)
-        .rpc('baixar_estoque_produto', {
-          p_id_produto: produtoBaixa.idProdutoBaixa,
-          p_quantidade_solicitada: produto.retiradaSolicitada,
-        })
+        .rpc(rpcName, rpcParams)
 
       if (baixaError) {
         console.error('[api/notas/:id/retirada] stock rpc error:', baixaError.message)
@@ -404,7 +563,7 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
       retiradasEfetivas.set(produto.index, {
         quantidade: retiradaEfetiva,
         quantidade_solicitada: produto.retiradaSolicitada,
-        id_produto_estoque: idProdutoEstoque,
+        id_produto_estoque: produtoBaixa.idProdutoEstoque,
         id_produto_estoque_baixa: produtoBaixa.idProdutoBaixa,
       })
       continue
@@ -419,17 +578,20 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
   }
 
   const produtosAtualizados: NotaProduto[] = produtosNormalizados.map((produto) => {
-    const retiradaEfetiva = retiradasEfetivas.get(produto.index)?.quantidade ?? 0
+    const retirada = retiradasEfetivas.get(produto.index)
+    const retiradaEfetiva = retirada?.quantidade ?? 0
     const quantidadeRetiradaAtualizada = Math.max(
       0,
       Math.min(produto.quantidadeTotal, produto.quantidadeRetiradaAtual + retiradaEfetiva),
     )
+    const idProdutoEstoqueResolvido = retirada?.id_produto_estoque ?? produto.idProdutoEstoque
 
     return {
       ...produto.item,
       nome: produto.nome,
       quantidade: produto.quantidadeTotal,
       quantidade_retirada: quantidadeRetiradaAtualizada,
+      ...(idProdutoEstoqueResolvido !== null ? { id_produto_estoque: idProdutoEstoqueResolvido } : {}),
     }
   })
 

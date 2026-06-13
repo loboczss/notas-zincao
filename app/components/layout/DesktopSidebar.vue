@@ -16,6 +16,7 @@ import {
   FileText,
   Gauge,
   PackageSearch,
+  TrendingUp,
   Trash2,
   Users,
   Warehouse,
@@ -70,6 +71,12 @@ const principalItems: SidebarItem[] = [
     label: 'Stock Integrin',
     to: AppRoute.stockIntegrin,
     icon: PackageSearch,
+    exact: true,
+  },
+  {
+    label: 'Previsao de Compras',
+    to: AppRoute.previsaoCompras,
+    icon: TrendingUp,
     exact: true,
   },
 ]

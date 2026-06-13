@@ -650,6 +650,12 @@ export const useNotasStore = defineStore('notas', () => {
     }
   }
 
+  const refreshNotasRetiradaInBackground = () => {
+    void fetchNotasRetirada().catch((error) => {
+      console.warn('[notas] background retirada refresh failed', error)
+    })
+  }
+
   const fetchNotaDetalhe = async (notaId: string) => {
     clearError()
     const id = String(notaId || '').trim()
@@ -819,7 +825,7 @@ export const useNotasStore = defineStore('notas', () => {
 
         await replaceNotaInCaches(notaAtualizada)
       }
-      await fetchNotasRetirada()
+      refreshNotasRetiradaInBackground()
       showSuccess('Retirada registrada com sucesso!')
       return data
     }
