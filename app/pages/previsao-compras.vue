@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { BarChart3, Bot, Lightbulb, Settings2 } from 'lucide-vue-next'
+import { BarChart3, Bot, Lightbulb, Settings2, ShoppingCart } from 'lucide-vue-next'
 import type {
   IntegrimAbcMetric,
   IntegrimCompraAiTaskUpsertRequest,
@@ -30,12 +30,14 @@ import PrevisaoComprasAiWorkspace from '../components/previsao-compras/PrevisaoC
 import PrevisaoComprasCoverageBanner from '../components/previsao-compras/PrevisaoComprasCoverageBanner.vue'
 import PrevisaoComprasInsights from '../components/previsao-compras/PrevisaoComprasInsights.vue'
 import PrevisaoComprasConfig from '../components/previsao-compras/PrevisaoComprasConfig.vue'
+import PrevisaoComprasListaCompra from '../components/previsao-compras/PrevisaoComprasListaCompra.vue'
+import type { IntegrimListaCompraQuery } from '../../shared/types/IntegrimNotas'
 
 definePageMeta({
   middleware: 'auth',
 })
 
-type PrevisaoComprasTab = 'matematica' | 'ia' | 'insights' | 'config'
+type PrevisaoComprasTab = 'comprar' | 'matematica' | 'ia' | 'insights' | 'config'
 
 const authStore = useAuthStore()
 const store = usePrevisaoComprasStore()
@@ -146,6 +148,12 @@ const salvarParametros = async (payload: IntegrimCompraParametrosUpdateRequest) 
   await store.updateCompraParametros(payload)
 }
 
+const listaCompraQuery = ref<IntegrimListaCompraQuery>({})
+const carregarListaCompra = (query: IntegrimListaCompraQuery = {}) => {
+  listaCompraQuery.value = { ...listaCompraQuery.value, ...query }
+  return store.fetchListaCompra(listaCompraQuery.value)
+}
+
 const selecionarAba = async (tab: PrevisaoComprasTab) => {
   activeTab.value = tab
   if (tab === 'ia' && !store.aiDashboard && !store.loadingAiDashboard) {
@@ -153,6 +161,9 @@ const selecionarAba = async (tab: PrevisaoComprasTab) => {
   }
   else if (tab === 'config') {
     await carregarConfig()
+  }
+  else if (tab === 'comprar' && !store.listaCompra.length && !store.loadingListaCompra) {
+    await carregarListaCompra()
   }
 }
 
@@ -304,6 +315,17 @@ onMounted(async () => {
         <button
           type="button"
           class="inline-flex min-h-10 flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-bold transition sm:flex-none"
+          :class="activeTab === 'comprar'
+            ? 'bg-slate-950 text-white shadow-sm dark:bg-white dark:text-slate-950'
+            : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'"
+          @click="selecionarAba('comprar')"
+        >
+          <ShoppingCart class="h-4 w-4" />
+          Comprar
+        </button>
+        <button
+          type="button"
+          class="inline-flex min-h-10 flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-bold transition sm:flex-none"
           :class="activeTab === 'matematica'
             ? 'bg-slate-950 text-white shadow-sm dark:bg-white dark:text-slate-950'
             : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'"
@@ -346,6 +368,15 @@ onMounted(async () => {
           Agenda & Saúde
         </button>
       </div>
+
+      <PrevisaoComprasListaCompra
+        v-if="activeTab === 'comprar'"
+        :rows="store.listaCompra"
+        :stats="store.listaCompraStats"
+        :loading="store.loadingListaCompra"
+        :total-itens="store.listaCompraTotalItens"
+        @fetch="carregarListaCompra"
+      />
 
       <template v-if="activeTab === 'matematica'">
         <!-- Grid de Resumos KPIs -->

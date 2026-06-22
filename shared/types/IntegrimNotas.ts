@@ -531,3 +531,66 @@ export type IntegrimRupturaResponse = {
   }
   parametros: IntegrimCompraParametros
 }
+
+// --- Lista de Compra do Dia (motor de decisao: ponto de reposicao) ---
+
+export type IntegrimListaCompraSort = 'risco' | 'ruptura' | 'sugestao' | 'faturamento'
+
+export type IntegrimListaCompraRow = {
+  idempresa: number
+  idproduto: number
+  idsubproduto: number
+  descricao: string
+  estoque_ausente: boolean
+  saldo_disponivel: number
+  custo_unit: number | null
+  demanda_diaria: number
+  desvio_diario: number
+  cv: number | null
+  lead_time_dias: number
+  coverage_days: number
+  estoque_seguranca: number
+  ponto_reposicao: number
+  dias_ate_ruptura: number | null
+  precisa_comprar: boolean
+  sugestao_compra: number
+  capital_necessario: number
+  margem_unit: number | null
+  dinheiro_em_risco: number
+  faturamento_periodo: number
+  qtd_periodo: number
+  dias_com_venda: number
+  ultima_venda: string | null
+  tendencia_percent: number | null
+  classe_abc: 'A' | 'B' | 'C'
+  classe_xyz: 'X' | 'Y' | 'Z'
+  confianca: 'alta' | 'media' | 'baixa'
+}
+
+export type IntegrimListaCompraStats = {
+  total_itens: number
+  itens_comprar: number
+  capital_total: number
+  risco_total: number
+}
+
+export type IntegrimListaCompraQuery = {
+  idempresa?: number | null
+  lead_time_dias?: number | null
+  coverage_days?: number | null
+  service_level?: number | null
+  horizon_days?: number | null
+  only_buy?: boolean
+  search?: string
+  sort?: IntegrimListaCompraSort
+  page?: number
+  page_size?: number
+}
+
+export type IntegrimListaCompraResponse = {
+  success: boolean
+  rows: IntegrimListaCompraRow[]
+  meta: IntegrimProdutoValorMeta
+  stats: IntegrimListaCompraStats
+  parametros: IntegrimCompraParametros
+}

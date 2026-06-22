@@ -18,6 +18,10 @@ import type {
   IntegrimCompraTaskRunResponse,
   IntegrimAbcMetric,
   IntegrimAbcResponse,
+  IntegrimListaCompraQuery,
+  IntegrimListaCompraResponse,
+  IntegrimListaCompraRow,
+  IntegrimListaCompraStats,
   IntegrimProdutoValor,
   IntegrimProdutoValorQuery,
   IntegrimProdutoValorResponse,
@@ -86,6 +90,11 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
   const abc = ref<IntegrimAbcResponse | null>(null)
   const sazonalidade = ref<IntegrimSazonalidadeResponse | null>(null)
   const ruptura = ref<IntegrimRupturaResponse | null>(null)
+  const listaCompra = ref<IntegrimListaCompraRow[]>([])
+  const listaCompraStats = ref<IntegrimListaCompraStats | null>(null)
+  const listaCompraTotalItens = ref(0)
+  const listaCompraTotalPaginas = ref(1)
+  const loadingListaCompra = ref(false)
   const loadingHealth = ref(false)
   const loadingSchedule = ref(false)
   const loadingInsights = ref(false)
@@ -649,6 +658,40 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     }
   }
 
+  const fetchListaCompra = async (query: IntegrimListaCompraQuery = {}, options: { append?: boolean } = {}) => {
+    loadingListaCompra.value = true
+    if (!options.append) clearMessages()
+    try {
+      const data = await getApiFetch()<IntegrimListaCompraResponse>('/api/integrim-notas/lista-compra', {
+        query: {
+          idempresa: query.idempresa || undefined,
+          lead_time_dias: query.lead_time_dias ?? undefined,
+          coverage_days: query.coverage_days ?? undefined,
+          service_level: query.service_level ?? undefined,
+          horizon_days: query.horizon_days ?? undefined,
+          only_buy: query.only_buy ?? undefined,
+          search: query.search?.trim() || undefined,
+          sort: query.sort || undefined,
+          page: query.page,
+          page_size: query.page_size,
+        },
+      })
+      listaCompra.value = options.append ? [...listaCompra.value, ...data.rows] : data.rows
+      listaCompraStats.value = data.stats
+      listaCompraTotalItens.value = data.meta.total_itens
+      listaCompraTotalPaginas.value = data.meta.total_paginas
+      if (data.parametros) compraParametros.value = data.parametros
+      return data
+    }
+    catch (error) {
+      errorMessage.value = getApiErrorMessage(error, 'Falha ao montar a lista de compra.')
+      return null
+    }
+    finally {
+      loadingListaCompra.value = false
+    }
+  }
+
   const reset = () => {
     produtos.value = []
     runs.value = []
@@ -682,6 +725,11 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     abc.value = null
     sazonalidade.value = null
     ruptura.value = null
+    listaCompra.value = []
+    listaCompraStats.value = null
+    listaCompraTotalItens.value = 0
+    listaCompraTotalPaginas.value = 1
+    loadingListaCompra.value = false
   }
 
   return {
@@ -698,6 +746,11 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     abc,
     sazonalidade,
     ruptura,
+    listaCompra,
+    listaCompraStats,
+    listaCompraTotalItens,
+    listaCompraTotalPaginas,
+    loadingListaCompra,
     loadingHealth,
     loadingSchedule,
     loadingInsights,
@@ -740,6 +793,7 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     fetchAbc,
     fetchSazonalidade,
     fetchRuptura,
+    fetchListaCompra,
     reset,
   }
 })
