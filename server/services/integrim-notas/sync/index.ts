@@ -1,5 +1,9 @@
 export { runIntegrimNotasSync } from './runner'
-export { startIntegrimNotasSyncInBackground } from './background'
+export { runIntegrimVendaDiaBackfill } from './venda-dia-backfill'
+export {
+  startIntegrimNotasSyncInBackground,
+  startIntegrimVendaDiaBackfillInBackground,
+} from './background'
 export type { IntegrimNotasSyncStartResult } from './background'
 export {
   createAdminClient,

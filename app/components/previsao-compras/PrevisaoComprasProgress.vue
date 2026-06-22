@@ -4,7 +4,7 @@ import type { IntegrimNotasSyncProgress } from '../../../shared/types/IntegrimNo
 import { formatStockIntegrinNumber } from '../../utils/stock-integrin-format'
 
 const props = withDefaults(defineProps<{
-  progress: IntegrimNotasSyncProgress | null
+  progress: Partial<IntegrimNotasSyncProgress> | null
   syncing?: boolean
   percent?: number
 }>(), {
@@ -19,6 +19,7 @@ const progressMessage = computed(() => {
 const progressDetail = computed(() => {
   const p = props.progress
   if (!p) return ''
+  if (p.detail) return p.detail
 
   const details = [
     p.notas_total ? `${p.notas_total} notas` : null,

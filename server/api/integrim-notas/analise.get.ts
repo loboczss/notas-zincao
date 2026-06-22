@@ -1,22 +1,35 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import type { Database } from '../../../app/types/database.types'
 import type {
+  IntegrimCompraEventoTipo,
+  IntegrimCompraOportunidadeStatus,
   IntegrimProdutoValor,
+  IntegrimProdutoOportunidadeFilter,
   IntegrimProdutoValorResponse,
   IntegrimProdutoValorSort,
   IntegrimProdutoValorStats,
 } from '../../../shared/types/IntegrimNotas'
 
-const SORT_COLUMNS: Record<IntegrimProdutoValorSort, { column: string, ascending: boolean }> = {
-  score_valor: { column: 'score_valor', ascending: false },
-  faturamento_365d: { column: 'faturamento_365d', ascending: false },
-  margem_365d: { column: 'margem_365d', ascending: false },
-  qtd_365d: { column: 'qtd_365d', ascending: false },
-  giro_diario: { column: 'giro_diario', ascending: false },
-  // Menor cobertura = mais urgente: ascendente.
-  dias_cobertura: { column: 'dias_cobertura', ascending: true },
-  sugestao_compra: { column: 'sugestao_compra', ascending: false },
-}
+const SORT_COLUMNS = new Set<IntegrimProdutoValorSort>([
+  'score_valor',
+  'faturamento_periodo',
+  'margem_periodo',
+  'qtd_periodo',
+  'faturamento_365d',
+  'margem_365d',
+  'qtd_365d',
+  'giro_diario',
+  'dias_cobertura',
+  'sugestao_compra',
+  'oportunidade_ia',
+])
+
+const OPORTUNIDADE_FILTERS = new Set<IntegrimProdutoOportunidadeFilter>([
+  'all',
+  'calculo',
+  'ia',
+  'ambos',
+])
 
 const parsePositiveInteger = (value: unknown) => {
   const parsed = Number(String(value ?? '').trim())
@@ -30,7 +43,32 @@ const sanitizeLike = (value: string) =>
 
 const parseSort = (value: unknown): IntegrimProdutoValorSort => {
   const key = String(value || '').trim() as IntegrimProdutoValorSort
-  return key in SORT_COLUMNS ? key : 'score_valor'
+  return SORT_COLUMNS.has(key) ? key : 'score_valor'
+}
+
+const parseOportunidadeFilter = (value: unknown): IntegrimProdutoOportunidadeFilter => {
+  const key = String(value || '').trim() as IntegrimProdutoOportunidadeFilter
+  return OPORTUNIDADE_FILTERS.has(key) ? key : 'all'
+}
+
+const parseDate = (value: unknown) => {
+  const raw = String(value ?? '').trim()
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return null
+  const time = Date.parse(`${raw}T00:00:00Z`)
+  return Number.isFinite(time) ? raw : null
+}
+
+const parseCoverageDays = (value: unknown) => {
+  const parsed = Number(String(value ?? '').trim())
+  if (!Number.isFinite(parsed)) return 45
+  return Math.min(365, Math.max(1, Math.trunc(parsed)))
+}
+
+const parseBoolean = (value: unknown, fallback = true) => {
+  if (typeof value === 'boolean') return value
+  const normalized = String(value ?? '').trim().toLowerCase()
+  if (!normalized) return fallback
+  return !['0', 'false', 'nao', 'não', 'no', 'off'].includes(normalized)
 }
 
 const numberOrNull = (value: unknown) =>
@@ -60,33 +98,60 @@ const toProduto = (row: Record<string, unknown>): IntegrimProdutoValor => ({
   sugestao_compra: Number(row.sugestao_compra || 0),
   score_valor: Number(row.score_valor || 0),
   updated_at: String(row.updated_at || ''),
+  qtd_periodo: Number(row.qtd_periodo || 0),
+  faturamento_periodo: Number(row.faturamento_periodo || 0),
+  margem_periodo: Number(row.margem_periodo || 0),
+  num_notas_periodo: Number(row.num_notas_periodo || 0),
+  periodo_dias: Number(row.periodo_dias || 0),
+  date_start: String(row.date_start || ''),
+  date_end: String(row.date_end || ''),
+  coverage_days: Number(row.coverage_days || 45),
+  prev_qtd_periodo: Number(row.prev_qtd_periodo || 0),
+  prev_faturamento_periodo: Number(row.prev_faturamento_periodo || 0),
+  variacao_qtd_percent: numberOrNull(row.variacao_qtd_percent),
+  variacao_faturamento_percent: numberOrNull(row.variacao_faturamento_percent),
+  ai_oportunidade: row.ai_oportunidade_id
+    ? {
+        id: String(row.ai_oportunidade_id),
+        evento_id: row.ai_evento_id ? String(row.ai_evento_id) : null,
+        evento_tipo: row.ai_evento_tipo ? String(row.ai_evento_tipo) as IntegrimCompraEventoTipo : null,
+        evento_titulo: row.ai_evento_titulo ? String(row.ai_evento_titulo) : null,
+        status: String(row.ai_status || 'nova') as IntegrimCompraOportunidadeStatus,
+        compra_extra: Number(row.ai_compra_extra || 0),
+        confidence: Number(row.ai_confidence || 0),
+        motivo: String(row.ai_motivo || ''),
+        evidencias: Array.isArray(row.ai_evidencias) ? row.ai_evidencias : [],
+        fontes: Array.isArray(row.ai_fontes) ? row.ai_fontes : [],
+        contra_argumento: row.ai_contra_argumento ? String(row.ai_contra_argumento) : null,
+        valid_until: row.ai_valid_until ? String(row.ai_valid_until) : null,
+      }
+    : null,
 })
 
 const defaultStats = (): IntegrimProdutoValorStats => ({
   total_produtos: 0,
   faturamento_365d_total: 0,
   margem_365d_total: 0,
+  faturamento_periodo_total: 0,
+  margem_periodo_total: 0,
   produtos_em_risco: 0,
+  oportunidades_ia: 0,
   ultima_sincronizacao: null,
 })
 
-const fetchStats = async (client: any, idempresa: number | null): Promise<IntegrimProdutoValorStats> => {
-  const { data, error } = await client
-    .rpc('integrim_produto_valor_stats', { p_idempresa: idempresa })
-    .maybeSingle()
-
-  if (error) {
-    console.error('[api/integrim-notas/analise] stats error:', error.message)
-    return defaultStats()
-  }
-
-  const row = (data || {}) as Record<string, unknown>
+const statsFromRow = (row: Record<string, unknown> | null): IntegrimProdutoValorStats => {
+  if (!row) return defaultStats()
   return {
-    total_produtos: Number(row.total_produtos || 0),
-    faturamento_365d_total: Number(row.faturamento_365d_total || 0),
-    margem_365d_total: Number(row.margem_365d_total || 0),
-    produtos_em_risco: Number(row.produtos_em_risco || 0),
-    ultima_sincronizacao: row.ultima_sincronizacao ? String(row.ultima_sincronizacao) : null,
+    total_produtos: Number(row.stats_total_produtos || 0),
+    faturamento_365d_total: Number(row.stats_faturamento_total || 0),
+    margem_365d_total: Number(row.stats_margem_total || 0),
+    faturamento_periodo_total: Number(row.stats_faturamento_total || 0),
+    margem_periodo_total: Number(row.stats_margem_total || 0),
+    produtos_em_risco: Number(row.stats_produtos_em_risco || 0),
+    oportunidades_ia: Number(row.stats_oportunidades_ia || 0),
+    ultima_sincronizacao: row.ultima_sincronizacao
+      ? String(row.ultima_sincronizacao)
+      : row.updated_at ? String(row.updated_at) : null,
   }
 }
 
@@ -100,40 +165,58 @@ export default defineEventHandler(async (event): Promise<IntegrimProdutoValorRes
   const query = getQuery(event)
   const page = Math.max(1, Number(query.page || 1) || 1)
   const pageSize = Math.min(Math.max(Number(query.page_size || query.limit || 50), 1), 200)
-  const from = (page - 1) * pageSize
-  const to = from + pageSize - 1
   const idempresa = parsePositiveInteger(query.idempresa)
   const search = sanitizeLike(String(query.search || ''))
   const sort = parseSort(query.sort)
-  const sortConfig = SORT_COLUMNS[sort]
+  const dateStart = parseDate(query.date_start)
+  const dateEnd = parseDate(query.date_end)
+  const coverageDays = parseCoverageDays(query.coverage_days)
+  const comparePrevious = parseBoolean(query.compare_previous, true)
+  const oportunidadeFilter = parseOportunidadeFilter(query.oportunidade_filter)
 
-  let request = (client as any)
-    .from('integrim_produto_valor')
-    .select('*', { count: 'exact' })
-
-  if (idempresa) request = request.eq('idempresa', idempresa)
-  if (search) request = request.ilike('descricao', `%${search}%`)
-
-  request = request
-    .order(sortConfig.column, { ascending: sortConfig.ascending, nullsFirst: false })
-    .order('idproduto', { ascending: true })
-    .order('idsubproduto', { ascending: true })
-    .range(from, to)
-
-  const { data, error, count } = await request
+  const { data, error } = await (client as any)
+    .rpc('integrim_produto_valor_periodo', {
+      p_date_start: dateStart,
+      p_date_end: dateEnd,
+      p_coverage_days: coverageDays,
+      p_idempresa: idempresa,
+      p_search: search || null,
+      p_sort: sort,
+      p_page: page,
+      p_page_size: pageSize,
+      p_compare_previous: comparePrevious,
+      p_oportunidade_filter: oportunidadeFilter,
+    })
 
   if (error) {
     console.error('[api/integrim-notas/analise] error:', error.message)
     throw createError({ statusCode: 500, statusMessage: 'Nao foi possivel carregar a previsao de compras.' })
   }
 
-  const stats = await fetchStats(client as any, idempresa)
-  const totalItens = Number(count || 0)
+  const rows = (data || []) as Array<Record<string, unknown>>
+  const stats = statsFromRow(rows[0] || null)
+  const totalItens = Number(rows[0]?.total_count || 0)
   const totalPaginas = Math.max(1, Math.ceil(totalItens / pageSize))
+
+  const { data: coverageData } = await (client as any).rpc('integrim_venda_dia_coverage', {
+    p_idempresa: idempresa,
+    p_date_start: dateStart,
+    p_date_end: dateEnd,
+  })
+  const coverageRow = (Array.isArray(coverageData) ? coverageData[0] : coverageData) as Record<string, unknown> | null
+  const coverage = {
+    has_daily_rows: Boolean(coverageRow?.has_daily_rows),
+    daily_min_date: coverageRow?.daily_min_date ? String(coverageRow.daily_min_date) : null,
+    daily_max_date: coverageRow?.daily_max_date ? String(coverageRow.daily_max_date) : null,
+    dias_com_dados: Number(coverageRow?.dias_com_dados || 0),
+    periodo_dias: Number(coverageRow?.periodo_dias || 0),
+    fallback_aplicavel: Boolean(coverageRow?.fallback_aplicavel),
+    periodo_coberto: coverageRow ? Boolean(coverageRow.periodo_coberto) : true,
+  }
 
   return {
     success: true,
-    produtos: ((data || []) as Array<Record<string, unknown>>).map(toProduto),
+    produtos: rows.map(toProduto),
     meta: {
       page,
       page_size: pageSize,
@@ -141,5 +224,6 @@ export default defineEventHandler(async (event): Promise<IntegrimProdutoValorRes
       total_paginas: totalPaginas,
     },
     stats,
+    coverage,
   }
 })

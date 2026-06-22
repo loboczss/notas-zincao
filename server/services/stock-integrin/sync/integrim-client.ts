@@ -14,6 +14,16 @@ import type {
 import { IntegrimHttpError } from './types'
 import { stringOrNull, toInteger } from './utils'
 
+const TOKEN_MAX_RETRIES = 6
+const TOKEN_TRANSIENT_STATUS = new Set([408, 425, 429, 500, 502, 503, 504])
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+
+const backoffMs = (attempt: number) => {
+  const base = Math.min(8000, 500 * 2 ** (attempt - 1))
+  return base + Math.floor(Math.random() * 400)
+}
+
 const fetchWithTimeout = async (url: string, init: RequestInit) => {
   try {
     return await fetch(url, {
@@ -38,30 +48,50 @@ export const getFreshAccessToken = async (config: IntegrimConfig) => {
   body.set('client_id', config.clientId)
   body.set('client_secret', config.clientSecret)
 
-  const response = await fetchWithTimeout(`${config.baseUrl}/cisspoder-auth/oauth/token`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'ngrok-skip-browser-warning': 'true',
-    },
-    body,
-  })
+  let lastStatus = 0
+  let lastBody = ''
 
-  const responseBody = await response.text()
-  if (!response.ok) {
-    throw new IntegrimHttpError('oauth/token', response.status, responseBody)
-  }
-
-  const json = JSON.parse(responseBody || '{}') as { access_token?: unknown }
-  const token = stringOrNull(json.access_token)
-  if (!token) {
-    throw createError({
-      statusCode: 502,
-      statusMessage: 'Integrim nao retornou token de acesso.',
+  for (let attempt = 1; attempt <= TOKEN_MAX_RETRIES; attempt += 1) {
+    const response = await fetchWithTimeout(`${config.baseUrl}/cisspoder-auth/oauth/token`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'ngrok-skip-browser-warning': 'true',
+      },
+      body,
     })
+
+    const responseBody = await response.text()
+    const contentType = response.headers.get('content-type') || ''
+    const transientNgrokHtml = response.status === 403
+      && contentType.includes('text/html')
+      && /ngrok|<!doctype html/i.test(responseBody)
+
+    if (!response.ok) {
+      lastStatus = response.status
+      lastBody = responseBody
+
+      if ((TOKEN_TRANSIENT_STATUS.has(response.status) || transientNgrokHtml) && attempt < TOKEN_MAX_RETRIES) {
+        await sleep(backoffMs(attempt))
+        continue
+      }
+
+      throw new IntegrimHttpError('oauth/token', response.status, responseBody)
+    }
+
+    const json = JSON.parse(responseBody || '{}') as { access_token?: unknown }
+    const token = stringOrNull(json.access_token)
+    if (!token) {
+      throw createError({
+        statusCode: 502,
+        statusMessage: 'Integrim nao retornou token de acesso.',
+      })
+    }
+
+    return token
   }
 
-  return token
+  throw new IntegrimHttpError('oauth/token', lastStatus || 502, lastBody || 'Falha ao obter token Integrim.')
 }
 
 const parseIntegrimResponse = <T>(json: unknown): IntegrimPagedResponse<T> => {

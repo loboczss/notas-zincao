@@ -3,9 +3,17 @@ import type { IntegrimPagedResponse, IntegrimRecord } from '../../stock-integrin
 export type IntegrimNotasSyncOptions = {
   companyIds?: number[]
   windowMonths?: number
+  // Intervalo explicito (YYYY-MM-DD). Quando ambos vierem, tem prioridade sobre
+  // windowMonths. Permite escolher o periodo a sincronizar pelo front-end.
+  startDate?: string
+  endDate?: string
   dryRun?: boolean
   deactivateStale?: boolean
   triggeredBy?: string
+  // Fase A (cabecalhos -> tabela integrim_notas). A previsao de compras nao le
+  // essa tabela, entao por padrao o sync pula a Fase A e roda so a agregacao de
+  // itens (Fase B). Ligue para tambem espelhar os cabecalhos das notas.
+  syncHeaders?: boolean
   onStarted?: (runId: string) => void | Promise<void>
 }
 

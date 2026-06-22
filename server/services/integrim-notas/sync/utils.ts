@@ -31,6 +31,33 @@ export const getWindowRange = (windowMonths: number, now = new Date()) => {
   }
 }
 
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
+
+export const parseIsoDate = (value: unknown): string | null => {
+  const raw = String(value ?? '').trim()
+  if (!ISO_DATE.test(raw)) return null
+  const time = Date.parse(`${raw}T00:00:00Z`)
+  return Number.isFinite(time) ? raw : null
+}
+
+// Resolve a janela de sincronizacao: um intervalo de datas explicito (escolhido
+// no front) tem prioridade sobre a janela movel por meses. Datas no futuro sao
+// recortadas para hoje (nao existem vendas futuras a sincronizar).
+export const resolveSyncRange = (
+  startDate: unknown,
+  endDate: unknown,
+  windowMonths: number,
+  now = new Date(),
+): { startDate: string, endDate: string } => {
+  const start = parseIsoDate(startDate)
+  const end = parseIsoDate(endDate)
+  if (start && end && start <= end) {
+    const today = formatIsoDate(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())))
+    return { startDate: start, endDate: end > today ? today : end }
+  }
+  return getWindowRange(windowMonths, now)
+}
+
 export const buildProgress = (input: {
   phase: IntegrimNotasSyncProgressPhase
   totalPages: number

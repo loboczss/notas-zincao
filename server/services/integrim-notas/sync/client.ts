@@ -8,7 +8,7 @@ import type {
 } from '../../stock-integrin/sync/types'
 import { IntegrimHttpError } from '../../stock-integrin/sync/types'
 import { toInteger } from '../../stock-integrin/sync/utils'
-import { ITENS_PAGE_SIZE, MAX_PAGES_PER_QUERY } from './constants'
+import { DOCS_PAGE_SIZE, ITENS_PAGE_SIZE, MAX_PAGES_PER_QUERY } from './constants'
 import type { CompanyModelPlan } from './types'
 
 export { getFreshAccessToken }
@@ -17,7 +17,7 @@ const DOCUMENTOS_SERVICE = 'documentos_fiscais_saida'
 const ITENS_SERVICE = 'itens_documentos_fiscais_saida'
 const REQUEST_TIMEOUT_MS = 45_000
 const MAX_RETRIES = 6
-// Status transitorios (incl. 503 do ngrok) que devem ser repetidos com backoff.
+// Status transitorios (incl. 403/503 HTML do ngrok) que devem ser repetidos com backoff.
 const TRANSIENT_STATUS = new Set([408, 425, 429, 500, 502, 503, 504])
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
@@ -104,6 +104,10 @@ const postNotasServicePage = async (
     }
 
     const text = await response.text()
+    const contentType = response.headers.get('content-type') || ''
+    const transientNgrokHtml = response.status === 403
+      && contentType.includes('text/html')
+      && /ngrok|<!doctype html/i.test(text)
 
     if (response.status === 401 && attempt < MAX_RETRIES) {
       await tokens.refresh()
@@ -111,7 +115,7 @@ const postNotasServicePage = async (
       continue
     }
 
-    if (TRANSIENT_STATUS.has(response.status) && attempt < MAX_RETRIES) {
+    if ((TRANSIENT_STATUS.has(response.status) || transientNgrokHtml) && attempt < MAX_RETRIES) {
       lastDetail = `HTTP ${response.status}`
       await sleep(backoffMs(attempt))
       continue
@@ -121,7 +125,6 @@ const postNotasServicePage = async (
       throw new IntegrimHttpError(service, response.status, text.slice(0, 600))
     }
 
-    const contentType = response.headers.get('content-type') || ''
     if (!contentType.includes('application/json')) {
       lastDetail = `resposta nao-JSON (${contentType || 'sem content-type'})`
       if (attempt < MAX_RETRIES) {
@@ -165,7 +168,7 @@ export const fetchDocumentosPage = async (
     { campo: 'dtmovimento', operadorlogico: 'AND', operador: 'BETWEEN', valor: [startDate, endDate] },
   ]
   const ordenacoes: IntegrimOrder[] = [{ campo: 'idplanilha', direcao: 'ASC' }]
-  return await postNotasServicePage(config, tokens, DOCUMENTOS_SERVICE, page, clausulas, ordenacoes)
+  return await postNotasServicePage(config, tokens, DOCUMENTOS_SERVICE, page, clausulas, ordenacoes, DOCS_PAGE_SIZE)
 }
 
 export const createCompanyModelPlans = async (
@@ -187,7 +190,7 @@ export const createCompanyModelPlans = async (
         idempresa,
         modelo,
         firstPage,
-        totalPages: getPageCount(firstPage, firstPage.data.length),
+        totalPages: getPageCount(firstPage, DOCS_PAGE_SIZE),
         totalRows: toInteger(firstPage.total) || firstPage.data.length,
       })
     }

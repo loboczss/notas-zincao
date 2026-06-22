@@ -19,7 +19,18 @@ export type ProdutoValorBaseRow = {
   ultima_venda: string | null
 }
 
+export type ProdutoVendaDiaRow = {
+  idempresa: number
+  idproduto: number
+  idsubproduto: number
+  venda_data: string
+  qtd: number
+  faturamento: number
+  num_notas: number
+}
+
 type Bucket = ProdutoValorBaseRow
+type DailyBucket = ProdutoVendaDiaRow
 
 const MS_PER_DAY = 86_400_000
 
@@ -32,6 +43,7 @@ const isVendaCfop = (cfop: number | null) => cfop === null || (cfop >= 5000 && c
  */
 export class ProdutoValorAggregator {
   private readonly buckets = new Map<string, Bucket>()
+  private readonly dailyBuckets = new Map<string, DailyBucket>()
   private readonly todayMs: number
 
   constructor(today = new Date()) {
@@ -53,7 +65,6 @@ export class ProdutoValorAggregator {
     if (!Number.isFinite(dateMs) || dateMs > this.todayMs) return
 
     const daysAgo = Math.floor((this.todayMs - dateMs) / MS_PER_DAY)
-    if (daysAgo > 365) return
 
     const qty = toNumber(record.qtdproduto) ?? 0
     const val = toNumber(record.valtotliquido) ?? 0
@@ -85,13 +96,33 @@ export class ProdutoValorAggregator {
       bucket.descricao = descricao
     }
 
-    bucket.qtd_365d += qty
-    bucket.faturamento_365d += val
-    bucket.num_notas_365d += 1
-    if (daysAgo <= 180) { bucket.qtd_180d += qty; bucket.faturamento_180d += val }
-    if (daysAgo <= 90) { bucket.qtd_90d += qty; bucket.faturamento_90d += val }
-    if (daysAgo <= 30) { bucket.qtd_30d += qty; bucket.faturamento_30d += val }
+    if (daysAgo <= 365) {
+      bucket.qtd_365d += qty
+      bucket.faturamento_365d += val
+      bucket.num_notas_365d += 1
+      if (daysAgo <= 180) { bucket.qtd_180d += qty; bucket.faturamento_180d += val }
+      if (daysAgo <= 90) { bucket.qtd_90d += qty; bucket.faturamento_90d += val }
+      if (daysAgo <= 30) { bucket.qtd_30d += qty; bucket.faturamento_30d += val }
+    }
     if (!bucket.ultima_venda || date > bucket.ultima_venda) bucket.ultima_venda = date
+
+    const dailyKey = `${key}:${date}`
+    let daily = this.dailyBuckets.get(dailyKey)
+    if (!daily) {
+      daily = {
+        idempresa,
+        idproduto,
+        idsubproduto,
+        venda_data: date,
+        qtd: 0,
+        faturamento: 0,
+        num_notas: 0,
+      }
+      this.dailyBuckets.set(dailyKey, daily)
+    }
+    daily.qtd += qty
+    daily.faturamento += val
+    daily.num_notas += 1
   }
 
   size() {
@@ -110,6 +141,15 @@ export class ProdutoValorAggregator {
       faturamento_90d: round(b.faturamento_90d, 2),
       faturamento_180d: round(b.faturamento_180d, 2),
       faturamento_365d: round(b.faturamento_365d, 2),
+    }))
+  }
+
+  toDailyRows(): ProdutoVendaDiaRow[] {
+    const round = (n: number, d: number) => Number(n.toFixed(d))
+    return [...this.dailyBuckets.values()].map(b => ({
+      ...b,
+      qtd: round(b.qtd, 3),
+      faturamento: round(b.faturamento, 2),
     }))
   }
 }

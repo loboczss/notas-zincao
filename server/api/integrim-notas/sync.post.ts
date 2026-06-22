@@ -15,6 +15,12 @@ const parseWindowMonths = (value: unknown) => {
   return integer >= 1 ? integer : undefined
 }
 
+const parseDate = (value: unknown) => {
+  const raw = String(value ?? '').trim()
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return undefined
+  return Number.isFinite(Date.parse(`${raw}T00:00:00Z`)) ? raw : undefined
+}
+
 const parseCompanyIds = (value: unknown) => {
   if (!Array.isArray(value)) return undefined
   const ids = value
@@ -34,7 +40,13 @@ export default defineEventHandler(async (event): Promise<IntegrimNotasSyncRespon
 
   const companyIds = parseCompanyIds(body?.company_ids)
   const windowMonths = parseWindowMonths(body?.window_months)
+  const startDate = parseDate(body?.date_start)
+  const endDate = parseDate(body?.date_end)
+  // So aceita intervalo quando as duas datas vierem coerentes (inicio <= fim).
+  const hasRange = Boolean(startDate && endDate && startDate <= endDate)
   const deactivateStale = typeof body?.deactivate_stale === 'boolean' ? body.deactivate_stale : undefined
+  // Opt-in: por padrao o sync nao baixa cabecalhos (a previsao nao os usa).
+  const syncHeaders = body?.sync_headers === true
 
   // dry-run termina rapido e nao persiste; roda inline.
   if (body?.dry_run) {
@@ -42,7 +54,10 @@ export default defineEventHandler(async (event): Promise<IntegrimNotasSyncRespon
       dryRun: true,
       companyIds,
       windowMonths,
+      startDate: hasRange ? startDate : undefined,
+      endDate: hasRange ? endDate : undefined,
       deactivateStale,
+      syncHeaders,
       triggeredBy,
     })
   }
@@ -51,7 +66,10 @@ export default defineEventHandler(async (event): Promise<IntegrimNotasSyncRespon
   return await startIntegrimNotasSyncInBackground({
     companyIds,
     windowMonths,
+    startDate: hasRange ? startDate : undefined,
+    endDate: hasRange ? endDate : undefined,
     deactivateStale,
+    syncHeaders,
     triggeredBy,
   })
 })

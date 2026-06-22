@@ -1,7 +1,7 @@
 import { createAdminClient } from '../../stock-integrin/sync/repository'
 import { chunk } from '../../stock-integrin/sync/utils'
-import type { ProdutoValorBaseRow } from './aggregator'
-import { STALE_CHUNK_SIZE, UPSERT_CHUNK_SIZE } from './constants'
+import type { ProdutoValorBaseRow, ProdutoVendaDiaRow } from './aggregator'
+import { INSERT_CHUNK_SIZE, STALE_CHUNK_SIZE, UPSERT_CHUNK_SIZE } from './constants'
 import type {
   IntegrimNotaUpsertRow,
   IntegrimNotasSyncCounters,
@@ -255,7 +255,7 @@ export const rebuildProdutoValorBase = async (
     throw createError({ statusCode: 500, statusMessage: 'Nao foi possivel limpar a analise de valor.' })
   }
 
-  for (const rowsChunk of chunk(rows, UPSERT_CHUNK_SIZE)) {
+  for (const rowsChunk of chunk(rows, INSERT_CHUNK_SIZE)) {
     await beforeChunk?.()
     const payload = rowsChunk.map(row => ({ ...row, updated_at: nowIso }))
     const { error } = await (client as any).from('integrim_produto_valor').insert(payload)
@@ -263,7 +263,38 @@ export const rebuildProdutoValorBase = async (
       console.error('[integrim-notas] insert produto valor failed:', error.message)
       throw createError({ statusCode: 500, statusMessage: 'Nao foi possivel gravar a analise de valor.' })
     }
+  }
+}
+
+export const rebuildProdutoVendaDia = async (
+  client: AdminClient,
+  rows: ProdutoVendaDiaRow[],
+  runId: string,
+  beforeChunk?: () => Promise<void>,
+) => {
+  const nowIso = new Date().toISOString()
+
+  const { error: deleteError } = await (client as any)
+    .from('integrim_produto_venda_dia')
+    .delete()
+    .not('id', 'is', null)
+  if (deleteError) {
+    console.error('[integrim-notas] clear produto venda dia failed:', deleteError.message)
+    throw createError({ statusCode: 500, statusMessage: 'Nao foi possivel limpar vendas por periodo.' })
+  }
+
+  for (const rowsChunk of chunk(rows, INSERT_CHUNK_SIZE)) {
     await beforeChunk?.()
+    const payload = rowsChunk.map(row => ({
+      ...row,
+      sync_run_id: runId,
+      updated_at: nowIso,
+    }))
+    const { error } = await (client as any).from('integrim_produto_venda_dia').insert(payload)
+    if (error) {
+      console.error('[integrim-notas] insert produto venda dia failed:', error.message)
+      throw createError({ statusCode: 500, statusMessage: 'Nao foi possivel gravar vendas por periodo.' })
+    }
   }
 }
 

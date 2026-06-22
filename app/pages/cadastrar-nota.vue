@@ -3,7 +3,7 @@ import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import { LoaderCircle } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import type { CrmContato } from '../../shared/types/CRM'
-import type { NotaIntegrimLookupCandidate, NotaProduto, NotaRetiradaDraft, NotaRetiradaListItem } from '../../shared/types/NotasRetirada'
+import type { NotaExtractionResponse, NotaIntegrimLookupCandidate, NotaProduto, NotaRetiradaDraft, NotaRetiradaListItem } from '../../shared/types/NotasRetirada'
 import { useCrmStore, useNotasStore } from '../stores'
 import { useToast } from '../composables/useToast'
 import { AppRoute } from '../constants/routes'
@@ -204,7 +204,7 @@ const integrimLookupLoading = computed(() => {
 })
 
 const fotoLookupLoading = computed(() => {
-  return notasStore.lookingUpIntegrimImage || notasStore.lookingUpIntegrimNota || notasStore.extractingImageProducts || notasStore.extractingImageChave
+  return notasStore.lookingUpIntegrimImage || notasStore.lookingUpIntegrimNota || notasStore.extractingNota || notasStore.extractingImageProducts || notasStore.extractingImageChave
 })
 
 const divergenceWarning = computed(() => {
@@ -456,16 +456,7 @@ const normalizeProduto = (produto: NotaProduto): NotaProduto => {
   }
 }
 
-const analisarImagem = async () => {
-  if (!imageDataUrl.value) {
-    return
-  }
-
-  const response = await notasStore.extractNota(imageDataUrl.value)
-  if (!response) {
-    return
-  }
-
+const aplicarDraftExtraidoDaImagem = (response: NotaExtractionResponse) => {
   form.nome_cliente = String(response.draft.nome_cliente || '').trim()
   form.telefone_cliente = formatPhone(String(response.draft.telefone_cliente || ''))
   form.documento_cliente = formatDocument(String(response.draft.documento_cliente || ''))
@@ -485,6 +476,19 @@ const analisarImagem = async () => {
   for (const field of response.missingFields || []) {
     errors[field] = 'Campo obrigatório não identificado pela IA. Confira manualmente.'
   }
+}
+
+const analisarImagem = async () => {
+  if (!imageDataUrl.value) {
+    return
+  }
+
+  const response = await notasStore.extractNota(imageDataUrl.value)
+  if (!response) {
+    return
+  }
+
+  aplicarDraftExtraidoDaImagem(response)
 }
 
 const formatCurrency = (value: number | null | undefined) => {
@@ -536,7 +540,10 @@ const aplicarDraftIntegrim = (draft: NotaRetiradaDraft, missingFields: string[] 
   }
 }
 
-const buscarNotaIntegrim = async (candidate?: NotaIntegrimLookupCandidate) => {
+const buscarNotaIntegrim = async (
+  candidate?: NotaIntegrimLookupCandidate,
+  options: { silentNotFound?: boolean } = {},
+) => {
   const numeroNota = digitsOnly(String(form.numero_nota || ''))
   const serieNota = String(form.serie_nota || '').trim()
 
@@ -572,21 +579,23 @@ const buscarNotaIntegrim = async (candidate?: NotaIntegrimLookupCandidate) => {
 
   if (!response) {
     showError(notasStore.errorMessage || 'Nao foi possivel consultar a nota na Integrim.')
-    return
+    return null
   }
 
   integrimLookupMessage.value = response.message
 
   if (!response.found) {
     integrimCandidates.value = []
-    showWarning(response.message)
-    return
+    if (!options.silentNotFound) {
+      showWarning(response.message)
+    }
+    return response
   }
 
   if (!response.draft) {
     integrimCandidates.value = response.candidates || []
     showWarning(response.message)
-    return
+    return response
   }
 
   integrimCandidates.value = []
@@ -595,6 +604,33 @@ const buscarNotaIntegrim = async (candidate?: NotaIntegrimLookupCandidate) => {
   await preencherChavePelaFotoSeNecessario()
   integrimLookupMessage.value = `Nota encontrada na empresa ${response.draft.idempresa || response.candidate?.idempresa}.`
   showSuccess(integrimLookupMessage.value)
+  return response
+}
+
+const preencherNotaPelaFotoComoFallback = async (integrimMessage: string) => {
+  const numeroNota = digitsOnly(String(form.numero_nota || ''))
+  const serieNota = String(form.serie_nota || '').trim()
+  const chaveNfe = digitsOnly(String(form.chave_nfe || ''))
+  const response = await notasStore.extractNota(imageDataUrl.value)
+
+  if (!response) {
+    integrimLookupMessage.value = integrimMessage
+    showWarning(integrimMessage)
+    return false
+  }
+
+  aplicarDraftExtraidoDaImagem(response)
+
+  // Os identificadores lidos da chave/consulta curta são mais confiáveis do que
+  // uma segunda leitura completa da foto. Preserve-os no fallback.
+  if (numeroNota) form.numero_nota = numeroNota
+  if (serieNota) form.serie_nota = serieNota
+  if (chaveNfe.length === 44) form.chave_nfe = chaveNfe
+
+  integrimCandidates.value = []
+  integrimLookupMessage.value = 'Nota ainda nao disponivel na Integrim. Dados preenchidos pela foto; confira antes de salvar.'
+  showWarning(integrimLookupMessage.value)
+  return true
 }
 
 const preencherProdutosPelaFotoSeNecessario = async () => {
@@ -639,7 +675,10 @@ const buscarNotaIntegrimPorFoto = async () => {
   const qrHints = qrLookupHints.value || await scanQrHintsFromImage()
   if (qrHints?.numero_nota) {
     applyFiscalKeyHints(qrHints, { overwriteLookupFields: true })
-    await buscarNotaIntegrim()
+    const response = await buscarNotaIntegrim(undefined, { silentNotFound: true })
+    if (response && !response.found) {
+      await preencherNotaPelaFotoComoFallback(response.message)
+    }
     return
   }
 
@@ -648,6 +687,11 @@ const buscarNotaIntegrimPorFoto = async () => {
     showError(notasStore.errorMessage || 'Nao foi possivel identificar a nota pela foto.')
     return
   }
+
+  const hintNumeroNota = digitsOnly(response.hints?.numero_nota || '')
+  const hintSerieNota = String(response.hints?.serie_nota || '').trim()
+  if (hintNumeroNota) form.numero_nota = hintNumeroNota
+  if (hintSerieNota) form.serie_nota = hintSerieNota
 
   const chaveNfe = digitsOnly(response.hints?.chave_nfe || '')
   aiChaveNfeSugerida.value = chaveNfe.length === 44 ? chaveNfe : ''
@@ -664,8 +708,7 @@ const buscarNotaIntegrimPorFoto = async () => {
   integrimLookupMessage.value = response.message
 
   if (!response.found) {
-    integrimCandidates.value = []
-    showWarning(response.message)
+    await preencherNotaPelaFotoComoFallback(response.message)
     return
   }
 

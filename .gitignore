@@ -39,3 +39,6 @@ graphify-out/
 android/app/src/main/assets/public/
 android/app/build/
 android/build/
+
+# Local build artifact (do not commit)
+app.zip

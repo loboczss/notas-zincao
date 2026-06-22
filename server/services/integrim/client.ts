@@ -509,8 +509,8 @@ export const lookupNotaIntegrim = async (options: LookupOptions): Promise<NotaIn
       success: true,
       found: false,
       message: forcedCompanyId
-        ? `Nota nao encontrada para a empresa ${forcedCompanyId}. Confira o numero da nota ou tente buscar em todas as empresas.`
-        : 'Nota nao encontrada nas empresas 1 a 6. Confira o numero da nota.',
+        ? `Nota nao encontrada na Integrim para a empresa ${forcedCompanyId}. O documento pode ainda nao ter sido disponibilizado; confira o numero ou tente todas as empresas.`
+        : 'Nota nao encontrada na Integrim nas empresas 1 a 6. O documento pode ainda nao ter sido disponibilizado pela integracao.',
       candidates: [],
     }
   }
