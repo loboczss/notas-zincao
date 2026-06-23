@@ -3,9 +3,9 @@ import { CalendarClock, ExternalLink } from 'lucide-vue-next'
 import type {
   IntegrimCompraAiEvento,
   IntegrimCompraEventoTipo,
-} from '../../../shared/types/IntegrimNotas'
-import { formatStockIntegrinNumber } from '../../utils/stock-integrin-format'
-import Card from '../Card.vue'
+} from '../../../../shared/types/IntegrimNotas'
+import { formatStockIntegrinNumber } from '../../../utils/stock-integrin-format'
+import Card from '../../Card.vue'
 
 const props = defineProps<{
   eventos: IntegrimCompraAiEvento[]
@@ -65,11 +65,11 @@ const formatPercent = (value: unknown) =>
       <div
         v-for="evento in props.eventos"
         :key="evento.id"
-        class="grid gap-4 p-5 hover:bg-slate-50/35 dark:hover:bg-slate-900/10 transition-colors md:grid-cols-[160px_minmax(0,1fr)_200px]"
+        class="grid gap-3 p-5 hover:bg-slate-50/35 dark:hover:bg-slate-900/10 transition-colors md:grid-cols-[160px_minmax(0,1fr)_200px]"
       >
         <!-- Tipo de Evento e Confiança -->
-        <div class="space-y-1.5">
-          <span class="inline-flex rounded border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide" :class="eventTypeBadgeClass(evento.tipo)">
+        <div class="flex flex-wrap items-center justify-between gap-2 md:flex-col md:items-start md:justify-start md:space-y-1.5">
+          <span class="inline-flex rounded border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide shrink-0" :class="eventTypeBadgeClass(evento.tipo)">
             {{ eventTypeLabels[evento.tipo] }}
           </span>
           <div class="text-[11px] font-bold text-slate-400 dark:text-slate-400 flex items-center gap-1">
@@ -89,7 +89,7 @@ const formatPercent = (value: unknown) =>
         </div>
 
         <!-- Metadados (Região, Data e Fonte) -->
-        <div class="flex flex-col justify-between text-xs text-slate-500 dark:text-slate-400 gap-2">
+        <div class="flex flex-col justify-between text-xs text-slate-500 dark:text-slate-400 gap-2 md:pt-0 pt-3 border-t border-slate-100 dark:border-slate-800/40 md:border-t-0">
           <div class="space-y-1">
             <div class="font-bold text-slate-700 dark:text-slate-300">
               Região: <span class="font-semibold text-slate-600 dark:text-slate-400">{{ evento.regiao || 'Nacional' }}</span>
@@ -108,7 +108,7 @@ const formatPercent = (value: unknown) =>
               rel="noreferrer"
             >
               {{ sourceTitle(evento.fontes[0]) }}
-              <ExternalLink class="h-3 w-3" />
+              <ExternalLink class="h-3.5 w-3.5 shrink-0" />
             </a>
           </div>
         </div>

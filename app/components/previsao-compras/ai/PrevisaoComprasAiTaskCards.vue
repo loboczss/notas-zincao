@@ -13,8 +13,8 @@ import {
 import type {
   IntegrimCompraAiTask,
   IntegrimCompraProdutoSelectionMode,
-} from '../../../shared/types/IntegrimNotas'
-import Botao from '../Botao.vue'
+} from '../../../../shared/types/IntegrimNotas'
+import Botao from '../../Botao.vue'
 
 const props = withDefaults(defineProps<{
   tasks: IntegrimCompraAiTask[]
@@ -187,20 +187,20 @@ const sourceSummary = (task: IntegrimCompraAiTask) => {
         </div>
 
         <div class="mt-4 grid gap-2 text-xs text-slate-600 dark:text-slate-300">
-          <div class="flex items-center gap-2">
-            <CalendarDays class="h-3.5 w-3.5 text-slate-400" />
+          <div class="flex items-center gap-2 min-w-0">
+            <CalendarDays class="h-3.5 w-3.5 text-slate-400 shrink-0" />
             <span class="truncate">{{ scheduleSummary(task) }}</span>
           </div>
-          <div class="flex items-center gap-2">
-            <Clock3 class="h-3.5 w-3.5 text-slate-400" />
+          <div class="flex items-center gap-2 min-w-0">
+            <Clock3 class="h-3.5 w-3.5 text-slate-400 shrink-0" />
             <span class="truncate">Proxima: {{ formatDateTime(task.next_run_at) }}</span>
           </div>
-          <div class="flex items-center gap-2">
-            <MapPin class="h-3.5 w-3.5 text-slate-400" />
+          <div class="flex items-center gap-2 min-w-0">
+            <MapPin class="h-3.5 w-3.5 text-slate-400 shrink-0" />
             <span class="truncate">{{ locationSummary(task) }}</span>
           </div>
-          <div class="flex items-center gap-2">
-            <Search class="h-3.5 w-3.5 text-slate-400" />
+          <div class="flex items-center gap-2 min-w-0">
+            <Search class="h-3.5 w-3.5 text-slate-400 shrink-0" />
             <span class="truncate">{{ productSelectionSummary(task) }}</span>
           </div>
         </div>

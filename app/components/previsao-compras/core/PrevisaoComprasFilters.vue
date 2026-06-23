@@ -4,10 +4,10 @@ import { CalendarDays, Search, SlidersHorizontal, Sparkles, X } from 'lucide-vue
 import type {
   IntegrimProdutoOportunidadeFilter,
   IntegrimProdutoValorSort,
-} from '../../../shared/types/IntegrimNotas'
-import Input from '../Input.vue'
-import SelectInput from '../SelectInput.vue'
-import Botao from '../Botao.vue'
+} from '../../../../shared/types/IntegrimNotas'
+import Input from '../../Input.vue'
+import SelectInput from '../../SelectInput.vue'
+import Botao from '../../Botao.vue'
 
 const props = withDefaults(defineProps<{
   searchTerm: string

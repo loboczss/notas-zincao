@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { IntegrimNotasSyncProgress } from '../../../shared/types/IntegrimNotas'
-import { formatStockIntegrinNumber } from '../../utils/stock-integrin-format'
+import type { IntegrimNotasSyncProgress } from '../../../../shared/types/IntegrimNotas'
+import { formatStockIntegrinNumber } from '../../../utils/stock-integrin-format'
 
 const props = withDefaults(defineProps<{
   progress: Partial<IntegrimNotasSyncProgress> | null

@@ -12,8 +12,8 @@ import type {
   IntegrimCompraAiOportunidade,
   IntegrimCompraEventoTipo,
   IntegrimCompraOportunidadeStatus,
-} from '../../../shared/types/IntegrimNotas'
-import { formatStockIntegrinNumber } from '../../utils/stock-integrin-format'
+} from '../../../../shared/types/IntegrimNotas'
+import { formatStockIntegrinNumber } from '../../../utils/stock-integrin-format'
 
 const props = withDefaults(defineProps<{
   oportunidades: IntegrimCompraAiOportunidade[]
@@ -194,57 +194,57 @@ const formatConfidence = (value: number) =>
         </div>
 
         <!-- Rodapé de Ações / Links -->
-        <div class="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3 dark:border-slate-800">
+        <div class="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-slate-100 pt-3 dark:border-slate-800">
           <!-- Link de Fonte -->
-          <div>
+          <div class="min-w-0">
             <a
               v-if="oportunidade.fontes.length && sourceUrl(oportunidade.fontes[0])"
-              class="inline-flex items-center gap-1 text-[11px] font-bold text-brand-600 hover:text-brand-500 hover:underline dark:text-brand-400"
+              class="inline-flex items-center gap-1 text-[11px] font-bold text-brand-600 hover:text-brand-500 hover:underline dark:text-brand-400 truncate max-w-full"
               :href="sourceUrl(oportunidade.fontes[0])"
               target="_blank"
               rel="noreferrer"
             >
               {{ sourceTitle(oportunidade.fontes[0]) }}
-              <ExternalLink class="h-3 w-3" />
+              <ExternalLink class="h-3 w-3 shrink-0" />
             </a>
           </div>
 
           <!-- Ações do Administrador -->
-          <div v-if="props.isAdmin" class="flex gap-1.5">
+          <div v-if="props.isAdmin" class="flex flex-wrap sm:flex-nowrap gap-1.5 w-full sm:w-auto justify-end">
             <!-- Aceitar -->
             <button
               v-if="oportunidade.status === 'nova'"
               type="button"
-              class="inline-flex items-center justify-center gap-1 rounded px-2.5 py-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-colors disabled:opacity-40 dark:text-emerald-300 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20"
+              class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1 rounded px-2.5 py-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-colors disabled:opacity-40 dark:text-emerald-300 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20"
               :disabled="props.actionLoading"
               @click="emit('opportunityAction', { id: oportunidade.id, status: 'aceita' })"
             >
               <Check class="h-3.5 w-3.5" />
-              Aceitar
+              <span>Aceitar</span>
             </button>
 
             <!-- Ignorar -->
             <button
               v-if="oportunidade.status === 'nova' || oportunidade.status === 'aceita'"
               type="button"
-              class="inline-flex items-center justify-center gap-1 rounded px-2.5 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 transition-colors disabled:opacity-40 dark:text-rose-300 dark:bg-rose-500/10 dark:hover:bg-rose-500/20"
+              class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1 rounded px-2.5 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 transition-colors disabled:opacity-40 dark:text-rose-300 dark:bg-rose-500/10 dark:hover:bg-rose-500/20"
               :disabled="props.actionLoading"
               @click="emit('opportunityAction', { id: oportunidade.id, status: 'ignorada' })"
             >
               <EyeOff class="h-3.5 w-3.5" />
-              Ignorar
+              <span>Ignorar</span>
             </button>
 
             <!-- Marcar comprado -->
             <button
               v-if="oportunidade.status === 'nova' || oportunidade.status === 'aceita'"
               type="button"
-              class="inline-flex items-center justify-center gap-1 rounded px-2.5 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors disabled:opacity-40 dark:text-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750"
+              class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1 rounded px-2.5 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors disabled:opacity-40 dark:text-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750"
               :disabled="props.actionLoading"
               @click="emit('opportunityAction', { id: oportunidade.id, status: 'comprada' })"
             >
               <ShoppingBag class="h-3.5 w-3.5" />
-              Comprado
+              <span>Comprado</span>
             </button>
           </div>
         </div>

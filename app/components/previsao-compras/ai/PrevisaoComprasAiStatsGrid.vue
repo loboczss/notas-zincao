@@ -6,8 +6,8 @@ import {
   FileSearch,
   Sparkles,
 } from 'lucide-vue-next'
-import type { IntegrimCompraAiDashboardStats } from '../../../shared/types/IntegrimNotas'
-import Card from '../Card.vue'
+import type { IntegrimCompraAiDashboardStats } from '../../../../shared/types/IntegrimNotas'
+import Card from '../../Card.vue'
 
 const props = defineProps<{
   stats: IntegrimCompraAiDashboardStats

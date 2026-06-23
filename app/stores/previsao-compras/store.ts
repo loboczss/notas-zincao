@@ -98,7 +98,15 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
   const loadingHealth = ref(false)
   const loadingSchedule = ref(false)
   const loadingInsights = ref(false)
+  const indexTabMode = ref<'sugestoes' | 'todos' | 'insights'>('sugestoes')
   const savingConfig = ref(false)
+  const produtoSelecionado = ref<IntegrimProdutoValor | null>(null)
+  const produtoModalAberto = computed({
+    get: () => Boolean(produtoSelecionado.value),
+    set: (value: boolean) => {
+      if (!value) produtoSelecionado.value = null
+    },
+  })
   let syncPollingTimer: ReturnType<typeof setInterval> | null = null
   let aiTaskPollingTimer: ReturnType<typeof setInterval> | null = null
 
@@ -730,9 +738,13 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     listaCompraTotalItens.value = 0
     listaCompraTotalPaginas.value = 1
     loadingListaCompra.value = false
+    produtoSelecionado.value = null
   }
 
   return {
+    produtoSelecionado,
+    produtoModalAberto,
+    indexTabMode,
     produtos,
     runs,
     latestRun,

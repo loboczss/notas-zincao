@@ -16,16 +16,16 @@ import type {
   IntegrimCompraAiTaskUpsertRequest,
   IntegrimCompraEventoTipo,
   IntegrimCompraProdutoSelectionMode,
-} from '../../../shared/types/IntegrimNotas'
-import { getApiFetch } from '../../utils/api-fetch'
+} from '../../../../shared/types/IntegrimNotas'
+import { getApiFetch } from '../../../utils/api-fetch'
 import {
   formatStockIntegrinCurrency,
   formatStockIntegrinNumber,
-} from '../../utils/stock-integrin-format'
-import Botao from '../Botao.vue'
-import Input from '../Input.vue'
-import ModalGlobal from '../ModalGlobal.vue'
-import SelectInput from '../SelectInput.vue'
+} from '../../../utils/stock-integrin-format'
+import Botao from '../../Botao.vue'
+import Input from '../../Input.vue'
+import ModalGlobal from '../../ModalGlobal.vue'
+import SelectInput from '../../SelectInput.vue'
 
 type ScheduleMode = 'daily' | 'weekly' | 'monthly' | 'yearly'
 type RigorMode = 'safe' | 'balanced' | 'wide'
@@ -532,7 +532,7 @@ Produtos enviados: {products_count}. Criterio de selecao: {selection_mode} ({pro
 
 const promptPreview = computed(() => {
   const sourcesText = form.sources.length
-    ? form.sources.map(s => eventTypeLabels[s] || s).join(', ')
+    ? form.sources.map((s: IntegrimCompraEventoTipo) => eventTypeLabels[s] || s).join(', ')
     : 'Nenhuma selecionada'
   const city = form.city.trim()
   const state = form.state.trim().toUpperCase()
@@ -592,7 +592,7 @@ const applyTaskToForm = (task: IntegrimCompraAiTask | null) => {
     ? productSelection.specific_products.join('\n')
     : ''
   form.sources = Array.isArray(task?.params?.sources) && task.params.sources.length
-    ? task.params.sources.filter((source): source is IntegrimCompraEventoTipo => eventTypes.includes(source as IntegrimCompraEventoTipo))
+    ? task.params.sources.filter((source: any): source is IntegrimCompraEventoTipo => eventTypes.includes(source as IntegrimCompraEventoTipo))
     : [...eventTypes]
   
   form.historyDateStart = task?.params?.history_date_start ? String(task.params.history_date_start) : ''
@@ -619,7 +619,7 @@ watch(() => props.task?.id, () => {
 const toggleSource = (source: IntegrimCompraEventoTipo, checked: boolean) => {
   if (checked && !form.sources.includes(source)) form.sources = [...form.sources, source]
   else if (!checked) {
-    const next = form.sources.filter(item => item !== source)
+    const next = form.sources.filter((item: IntegrimCompraEventoTipo) => item !== source)
     form.sources = next.length ? next : [source]
   }
 }
@@ -710,7 +710,7 @@ const runTask = () => {
   >
     <form class="space-y-5" autocomplete="off" @submit.prevent="saveTask">
       <!-- Abas Internas do Modal -->
-      <div class="flex border-b border-slate-200 dark:border-slate-800 gap-6 pb-px overflow-x-auto">
+      <div class="flex border-b border-slate-200 dark:border-slate-800 gap-6 pb-1 overflow-x-auto scrollbar-none whitespace-nowrap">
         <button
           v-for="tab in modalTabs"
           :key="tab.id"
@@ -998,7 +998,7 @@ const runTask = () => {
                     :key="code"
                     class="inline-flex items-center gap-1 rounded bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-700 dark:bg-slate-900 dark:text-slate-300"
                   >
-                    <span class="truncate max-w-[150px]" :title="selectedProductsMap[code] || code">
+                    <span class="truncate max-w-[100px] sm:max-w-[200px]" :title="selectedProductsMap[code] || code">
                       {{ selectedProductsMap[code] || code }}
                     </span>
                     <button

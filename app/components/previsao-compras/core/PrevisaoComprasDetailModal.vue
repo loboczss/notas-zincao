@@ -10,13 +10,13 @@ import {
 import type {
   IntegrimCompraOportunidadeStatus,
   IntegrimProdutoValor,
-} from '../../../shared/types/IntegrimNotas'
-import ModalGlobal from '../ModalGlobal.vue'
+} from '../../../../shared/types/IntegrimNotas'
+import ModalGlobal from '../../ModalGlobal.vue'
 import {
   formatStockIntegrinCurrency,
   formatStockIntegrinDate,
   formatStockIntegrinNumber,
-} from '../../utils/stock-integrin-format'
+} from '../../../utils/stock-integrin-format'
 
 const props = defineProps<{
   modelValue: boolean
@@ -77,6 +77,47 @@ const statusInfo = computed(() => {
 })
 
 const opportunity = computed(() => props.produto?.ai_oportunidade || null)
+
+const diagnostico = computed(() => {
+  const p = props.produto
+  if (!p) return null
+
+  const giro = p.giro_diario || 0
+  const estoque = p.saldo_disponivel || 0
+  const coberturaAlvo = p.coverage_days || 45
+  const coberturaAtual = p.dias_cobertura
+  const sugestao = p.sugestao_compra || 0
+
+  const estoqueIdeal = Math.round(giro * coberturaAlvo)
+
+  if (sugestao > 0) {
+    if (coberturaAtual !== null && coberturaAtual <= 0) {
+      return {
+        titulo: 'Ruptura Detectada (Estoque Zerado/Negativo)',
+        tipo: 'danger',
+        texto: `Este produto está sem estoque disponível no momento. Com uma demanda diária de <strong>${formatStockIntegrinNumber(giro, 1)} unidades/dia</strong>, você já está perdendo vendas. A sugestão de <strong>${formatStockIntegrinNumber(sugestao, 0)} unidades</strong> visa restabelecer o estoque ideal de <strong>${formatStockIntegrinNumber(estoqueIdeal, 0)} unidades</strong> para cobrir os próximos <strong>${coberturaAlvo} dias</strong>.`,
+      }
+    }
+    if (coberturaAtual !== null && coberturaAtual < 15) {
+      return {
+        titulo: 'Risco Crítico de Ruptura',
+        tipo: 'warning',
+        texto: `Seu estoque atual de <strong>${formatStockIntegrinNumber(estoque, 0)} unidades</strong> dura apenas <strong>${formatStockIntegrinNumber(coberturaAtual, 1)} dias</strong>, o que é menor que o tempo de segurança. Recomenda-se comprar <strong>${formatStockIntegrinNumber(sugestao, 0)} unidades</strong> para evitar a ruptura e atingir a meta de <strong>${coberturaAlvo} dias</strong> de cobertura (estoque ideal de <strong>${formatStockIntegrinNumber(estoqueIdeal, 0)} unidades</strong>).`,
+      }
+    }
+    return {
+      titulo: 'Reposição Necessária',
+      tipo: 'info',
+      texto: `Para manter a cobertura ideal de <strong>${coberturaAlvo} dias</strong> (estoque ideal de <strong>${formatStockIntegrinNumber(estoqueIdeal, 0)} unidades</strong>), seu estoque atual de <strong>${formatStockIntegrinNumber(estoque, 0)} unidades</strong> (cobertura de <strong>${coberturaAtual !== null ? formatStockIntegrinNumber(coberturaAtual, 1) + ' dias' : '—'}</strong>) precisa ser complementado. Sugerimos a compra de <strong>${formatStockIntegrinNumber(sugestao, 0)} unidades</strong>.`,
+    }
+  } else {
+    return {
+      titulo: 'Estoque Saudável',
+      tipo: 'success',
+      texto: `Seu estoque atual de <strong>${formatStockIntegrinNumber(estoque, 0)} unidades</strong> é suficiente para cobrir os próximos <strong>${coberturaAtual !== null ? formatStockIntegrinNumber(coberturaAtual, 0) : '—'} dias</strong>, superando a cobertura alvo de <strong>${coberturaAlvo} dias</strong>. Nenhuma compra é recomendada no momento.`,
+    }
+  }
+})
 
 const marginPercent = computed(() => {
   const p = props.produto
@@ -231,6 +272,27 @@ const opportunityAction = (
             Ate o estoque zerar
           </dd>
         </div>
+      </div>
+
+      <!-- Diagnóstico do Estoque & Justificativa do Cálculo -->
+      <div v-if="diagnostico" class="rounded-xl border p-4.5 space-y-2 transition-all duration-200 text-slate-800 dark:text-slate-200"
+        :class="[
+          diagnostico.tipo === 'danger' ? 'bg-rose-50/50 border-rose-200 dark:bg-rose-950/10 dark:border-rose-900/30' :
+          diagnostico.tipo === 'warning' ? 'bg-amber-50/50 border-amber-200 dark:bg-amber-950/10 dark:border-amber-900/30' :
+          diagnostico.tipo === 'info' ? 'bg-blue-50/40 border-blue-200 dark:bg-blue-950/10 dark:border-blue-900/30' :
+          'bg-emerald-50/40 border-emerald-200 dark:bg-emerald-950/10 dark:border-emerald-900/30'
+        ]"
+      >
+        <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
+          <Info class="h-4 w-4 shrink-0" :class="[
+            diagnostico.tipo === 'danger' ? 'text-rose-600 dark:text-rose-400' :
+            diagnostico.tipo === 'warning' ? 'text-amber-600 dark:text-amber-400' :
+            diagnostico.tipo === 'info' ? 'text-blue-600 dark:text-blue-400' :
+            'text-emerald-600 dark:text-emerald-450'
+          ]" />
+          <span>{{ diagnostico.titulo }}</span>
+        </div>
+        <p class="text-xs leading-relaxed text-slate-650 dark:text-slate-300" v-html="diagnostico.texto" />
       </div>
 
       <section

@@ -33,6 +33,7 @@ type SidebarItem = {
   to: string
   icon: Component
   exact?: boolean
+  adminOnly?: boolean
 }
 
 const route = useRoute()
@@ -43,7 +44,7 @@ const sidebarStorageKey = 'notas-zincao-sidebar-collapsed'
 
 const isAdmin = computed(() => String(authStore.profile?.role || '').trim().toLowerCase() === 'admin')
 
-const principalItems: SidebarItem[] = [
+const principalItems = computed<SidebarItem[]>(() => [
   {
     label: 'Dashboard',
     to: AppRoute.home,
@@ -78,8 +79,9 @@ const principalItems: SidebarItem[] = [
     to: AppRoute.previsaoCompras,
     icon: TrendingUp,
     exact: true,
+    adminOnly: true,
   },
-]
+].filter(item => !item.adminOnly || isAdmin.value))
 
 const operacaoItems: SidebarItem[] = [
   {
@@ -121,7 +123,7 @@ const adminItems = computed<SidebarItem[]>(() => {
 const sections = computed(() => [
   {
     title: 'Principal',
-    items: principalItems,
+    items: principalItems.value,
   },
   {
     title: 'Operacao',

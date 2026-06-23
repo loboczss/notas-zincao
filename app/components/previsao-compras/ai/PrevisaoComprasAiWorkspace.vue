@@ -6,7 +6,7 @@ import type {
   IntegrimCompraAiTask,
   IntegrimCompraAiTaskUpsertRequest,
   IntegrimCompraOportunidadeStatus,
-} from '../../../shared/types/IntegrimNotas'
+} from '../../../../shared/types/IntegrimNotas'
 import PrevisaoComprasAiStatsGrid from './PrevisaoComprasAiStatsGrid.vue'
 import PrevisaoComprasAiTaskConfig from './PrevisaoComprasAiTaskConfig.vue'
 import PrevisaoComprasAiTaskCards from './PrevisaoComprasAiTaskCards.vue'

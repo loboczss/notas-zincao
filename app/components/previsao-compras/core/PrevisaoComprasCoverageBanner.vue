@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { AlertTriangle, Info } from 'lucide-vue-next'
-import type { IntegrimVendaDiaCoverage } from '../../../shared/types/IntegrimNotas'
+import type { IntegrimVendaDiaCoverage } from '../../../../shared/types/IntegrimNotas'
 
 const props = defineProps<{
   coverage: IntegrimVendaDiaCoverage | null
