@@ -19,9 +19,9 @@ const statusInfo = computed(() => {
   if (p.giro_diario <= 0) {
     return {
       label: 'Sem venda',
-      badge: 'bg-slate-100 text-slate-650 dark:bg-slate-800 dark:text-slate-400',
+      badge: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
       dot: 'bg-slate-400',
-      textClass: 'text-slate-400 dark:text-slate-550',
+      textClass: 'text-slate-400 dark:text-slate-500',
     }
   }
 
@@ -31,7 +31,7 @@ const statusInfo = computed(() => {
       label: 'Comprar',
       badge: 'bg-rose-50 text-rose-700 border border-rose-100 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/40',
       dot: 'bg-rose-500 animate-pulse',
-      textClass: 'text-rose-600 dark:text-rose-450 font-bold',
+      textClass: 'text-rose-600 dark:text-rose-400 font-bold',
     }
   }
 
@@ -40,7 +40,7 @@ const statusInfo = computed(() => {
       label: 'Atenção',
       badge: 'bg-amber-50 text-amber-700 border border-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/40',
       dot: 'bg-amber-500 animate-pulse',
-      textClass: 'text-amber-600 dark:text-amber-450 font-semibold',
+      textClass: 'text-amber-600 dark:text-amber-400 font-semibold',
     }
   }
 
@@ -76,7 +76,7 @@ const handleSelect = () => {
         <p class="truncate font-bold text-slate-800 dark:text-slate-200 text-xs" :title="props.produto.descricao || ''">
           {{ props.produto.descricao || `Produto ${props.produto.idproduto}` }}
         </p>
-        <p class="mt-0.5 text-[10px] text-slate-450 dark:text-slate-500 font-semibold">
+        <p class="mt-0.5 text-[10px] text-slate-400 dark:text-slate-500 font-semibold">
           Empresa {{ props.produto.idempresa }} · Cód. {{ props.produto.idproduto }}/{{ props.produto.idsubproduto }}
         </p>
       </div>
@@ -111,25 +111,25 @@ const handleSelect = () => {
       >
         {{ formatStockIntegrinNumber(props.produto.sugestao_compra, 0) }}
       </span>
-      <span v-else class="text-slate-400 dark:text-slate-650 font-medium">-</span>
+      <span v-else class="text-slate-400 dark:text-slate-600 font-medium">-</span>
     </td>
 
     <td class="px-3 py-1.5 text-right whitespace-nowrap text-xs tabular-nums">
       <span
         v-if="props.produto.ai_oportunidade"
-        class="inline-flex items-center justify-end rounded-md border border-violet-200 bg-violet-50 px-1.5 py-0.5 text-[10px] font-black text-violet-755 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-300"
+        class="inline-flex items-center justify-end rounded-md border border-violet-200 bg-violet-50 px-1.5 py-0.5 text-[10px] font-black text-violet-700 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-300"
         :title="`${props.produto.ai_oportunidade.evento_titulo || 'Oportunidade IA'} (${formatConfidence(props.produto.ai_oportunidade.confidence)})`"
       >
         +{{ formatStockIntegrinNumber(props.produto.ai_oportunidade.compra_extra, 0) }}
       </span>
-      <span v-else class="text-slate-400 dark:text-slate-655 font-medium">-</span>
+      <span v-else class="text-slate-400 dark:text-slate-600 font-medium">-</span>
     </td>
 
-    <td class="px-3 py-1.5 text-right text-slate-650 dark:text-slate-350 whitespace-nowrap text-xs tabular-nums">
+    <td class="px-3 py-1.5 text-right text-slate-600 dark:text-slate-300 whitespace-nowrap text-xs tabular-nums">
       {{ formatStockIntegrinCurrency(props.produto.faturamento_periodo) }}
     </td>
 
-    <td class="px-3 py-1.5 text-right text-slate-650 dark:text-slate-350 whitespace-nowrap text-xs tabular-nums">
+    <td class="px-3 py-1.5 text-right text-slate-600 dark:text-slate-300 whitespace-nowrap text-xs tabular-nums">
       {{ formatStockIntegrinCurrency(props.produto.margem_periodo) }}
     </td>
 

@@ -5,13 +5,7 @@ import type {
   IntegrimSazonalidadeResponse,
   IntegrimSazonalidadeRow,
 } from '../../../../shared/types/IntegrimNotas'
-
-const parsePositiveInteger = (value: unknown) => {
-  const parsed = Number(String(value ?? '').trim())
-  if (!Number.isFinite(parsed)) return null
-  const integer = Math.trunc(parsed)
-  return integer > 0 ? integer : null
-}
+import { parsePositiveInteger } from '../../../utils/integrim-query'
 
 export default defineEventHandler(async (event): Promise<IntegrimSazonalidadeResponse> => {
   const user = await serverSupabaseUser(event)

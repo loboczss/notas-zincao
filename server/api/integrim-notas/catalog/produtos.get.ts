@@ -1,5 +1,5 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
-import type { Database } from '../../../app/types/database.types'
+import type { Database } from '../../../../app/types/database.types'
 import type {
   IntegrimCompraEventoTipo,
   IntegrimCompraOportunidadeStatus,
@@ -8,7 +8,8 @@ import type {
   IntegrimProdutoValorResponse,
   IntegrimProdutoValorSort,
   IntegrimProdutoValorStats,
-} from '../../../shared/types/IntegrimNotas'
+} from '../../../../shared/types/IntegrimNotas'
+import { parseDate, parsePositiveInteger, sanitizeLike } from '../../../utils/integrim-query'
 
 const SORT_COLUMNS = new Set<IntegrimProdutoValorSort>([
   'score_valor',
@@ -31,16 +32,6 @@ const OPORTUNIDADE_FILTERS = new Set<IntegrimProdutoOportunidadeFilter>([
   'ambos',
 ])
 
-const parsePositiveInteger = (value: unknown) => {
-  const parsed = Number(String(value ?? '').trim())
-  if (!Number.isFinite(parsed)) return null
-  const integer = Math.trunc(parsed)
-  return integer > 0 ? integer : null
-}
-
-const sanitizeLike = (value: string) =>
-  value.replace(/[%,()._{}\\]/g, ' ').replace(/\s+/g, ' ').trim()
-
 const parseSort = (value: unknown): IntegrimProdutoValorSort => {
   const key = String(value || '').trim() as IntegrimProdutoValorSort
   return SORT_COLUMNS.has(key) ? key : 'score_valor'
@@ -49,13 +40,6 @@ const parseSort = (value: unknown): IntegrimProdutoValorSort => {
 const parseOportunidadeFilter = (value: unknown): IntegrimProdutoOportunidadeFilter => {
   const key = String(value || '').trim() as IntegrimProdutoOportunidadeFilter
   return OPORTUNIDADE_FILTERS.has(key) ? key : 'all'
-}
-
-const parseDate = (value: unknown) => {
-  const raw = String(value ?? '').trim()
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return null
-  const time = Date.parse(`${raw}T00:00:00Z`)
-  return Number.isFinite(time) ? raw : null
 }
 
 const parseCoverageDays = (value: unknown) => {

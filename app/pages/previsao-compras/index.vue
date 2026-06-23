@@ -22,6 +22,7 @@ import InfiniteScrollTrigger from '../../components/InfiniteScrollTrigger.vue'
 
 // Mode 3: Insights
 import PrevisaoComprasInsights from '../../components/previsao-compras/insights/PrevisaoComprasInsights.vue'
+import PcSubTabs from '../../components/previsao-compras/ui/PcSubTabs.vue'
 
 const authStore = useAuthStore()
 const store = usePrevisaoComprasStore()
@@ -29,10 +30,16 @@ const store = usePrevisaoComprasStore()
 const isAdmin = computed(() => String(authStore.profile?.role || '').trim().toLowerCase() === 'admin')
 
 // --- MODE SELECTOR ---
-const activeMode = computed({
-  get: () => store.indexTabMode,
+type AnaliseView = 'sugestoes' | 'todos' | 'insights'
+const subTabs: Array<{ id: AnaliseView, label: string, icon: any }> = [
+  { id: 'sugestoes', label: 'Comprar', icon: ShoppingCart },
+  { id: 'todos', label: 'Produtos', icon: BarChart3 },
+  { id: 'insights', label: 'Insights', icon: Lightbulb },
+]
+const activeMode = computed<AnaliseView>({
+  get: () => store.analiseView,
   set: (val) => {
-    store.indexTabMode = val
+    store.analiseView = val
   }
 })
 
@@ -157,44 +164,8 @@ onMounted(async () => {
 
 <template>
   <div class="space-y-5">
-    <!-- Seletor de Modo Interno Minimalista -->
-    <div class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-1 shadow-xs dark:border-slate-800 dark:bg-slate-900/50 w-fit max-w-full overflow-x-auto scrollbar-none whitespace-nowrap">
-      <button
-        type="button"
-        class="inline-flex min-h-8 shrink-0 items-center justify-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-bold transition select-none outline-none"
-        :class="activeMode === 'sugestoes'
-          ? 'bg-slate-950 text-white shadow-sm dark:bg-white dark:text-slate-950'
-          : 'text-slate-550 hover:bg-slate-50 dark:text-slate-350 dark:hover:bg-slate-800/60'"
-        @click="activeMode = 'sugestoes'"
-      >
-        <ShoppingCart class="h-3.5 w-3.5" />
-        Sugestões de Compra
-      </button>
-      
-      <button
-        type="button"
-        class="inline-flex min-h-8 shrink-0 items-center justify-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-bold transition select-none outline-none"
-        :class="activeMode === 'todos'
-          ? 'bg-slate-950 text-white shadow-sm dark:bg-white dark:text-slate-950'
-          : 'text-slate-550 hover:bg-slate-50 dark:text-slate-350 dark:hover:bg-slate-800/60'"
-        @click="activeMode = 'todos'"
-      >
-        <BarChart3 class="h-3.5 w-3.5" />
-        Todos os Produtos
-      </button>
-
-      <button
-        type="button"
-        class="inline-flex min-h-8 shrink-0 items-center justify-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-bold transition select-none outline-none"
-        :class="activeMode === 'insights'
-          ? 'bg-slate-950 text-white shadow-sm dark:bg-white dark:text-slate-950'
-          : 'text-slate-550 hover:bg-slate-50 dark:text-slate-350 dark:hover:bg-slate-800/60'"
-        @click="activeMode = 'insights'"
-      >
-        <Lightbulb class="h-3.5 w-3.5" />
-        Gráficos e Insights
-      </button>
-    </div>
+    <!-- Sub-abas da Análise (Comprar · Produtos · Insights) -->
+    <PcSubTabs v-model="activeMode" :tabs="subTabs" class="w-fit max-w-full" />
 
     <!-- MODO 1: SUGESTÕES DE COMPRA -->
     <div v-if="activeMode === 'sugestoes'" class="animate-fade-in">

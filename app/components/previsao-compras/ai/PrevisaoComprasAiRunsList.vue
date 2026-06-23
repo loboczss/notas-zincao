@@ -17,13 +17,13 @@ const statusLabel = (status: string | null) => {
 
 const statusClass = (status: string | null) => {
   if (status === 'success') {
-    return 'border-emerald-100 bg-emerald-50 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-550/10 dark:text-emerald-300'
+    return 'border-emerald-100 bg-emerald-50 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300'
   }
   if (status === 'running') {
-    return 'border-sky-100 bg-sky-50 text-sky-700 dark:border-sky-500/20 dark:bg-sky-550/10 dark:text-sky-300'
+    return 'border-sky-100 bg-sky-50 text-sky-700 dark:border-sky-500/20 dark:bg-sky-500/10 dark:text-sky-300'
   }
   if (status === 'failed') {
-    return 'border-rose-100 bg-rose-50 text-rose-700 dark:border-rose-500/20 dark:bg-rose-550/10 dark:text-rose-350'
+    return 'border-rose-100 bg-rose-50 text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300'
   }
   return 'border-slate-100 bg-slate-50 text-slate-600 dark:border-slate-700/50 dark:bg-slate-800 dark:text-slate-400'
 }
@@ -62,7 +62,7 @@ const statusClass = (status: string | null) => {
             <div class="text-sm font-bold text-slate-900 dark:text-slate-50">
               {{ run.task_name || 'Tarefa deletada' }}
             </div>
-            <div v-if="run.error_message" class="mt-1.5 rounded bg-rose-50/50 p-2 text-xs text-rose-700 dark:bg-rose-950/20 dark:text-rose-350 border border-rose-100/50 dark:border-rose-900/20 leading-relaxed">
+            <div v-if="run.error_message" class="mt-1.5 rounded bg-rose-50/50 p-2 text-xs text-rose-700 dark:bg-rose-950/20 dark:text-rose-300 border border-rose-100/50 dark:border-rose-900/20 leading-relaxed">
               {{ run.error_message }}
             </div>
           </div>
@@ -101,10 +101,10 @@ const statusClass = (status: string | null) => {
 
               <!-- Task Name & Error Message -->
               <td class="px-4 py-3.5">
-                <div class="max-w-[220px] font-semibold text-slate-850 dark:text-slate-200">
+                <div class="max-w-[220px] font-semibold text-slate-800 dark:text-slate-200">
                   {{ run.task_name || 'Tarefa deletada' }}
                 </div>
-                <div v-if="run.error_message" class="mt-1 max-w-[280px] rounded bg-rose-50/50 p-1.5 text-xs text-rose-650 dark:bg-rose-950/20 dark:text-rose-300 border border-rose-100/50 dark:border-rose-900/20">
+                <div v-if="run.error_message" class="mt-1 max-w-[280px] rounded bg-rose-50/50 p-1.5 text-xs text-rose-600 dark:bg-rose-950/20 dark:text-rose-300 border border-rose-100/50 dark:border-rose-900/20">
                   {{ run.error_message }}
                 </div>
               </td>

@@ -105,7 +105,7 @@ const abrirDetalhe = async (row: IntegrimListaCompraRow) => {
   // 2. Se não encontrar, buscar via API
   const apiFetch = getApiFetch()
   try {
-    const data = await apiFetch<any>('/api/integrim-notas/analise', {
+    const data = await apiFetch<any>('/api/integrim-notas/catalog/produtos', {
       query: {
         idempresa: row.idempresa,
         search: `${row.idproduto}/${row.idsubproduto}`,
@@ -215,26 +215,26 @@ const moeda = (value: number) => value.toLocaleString('pt-BR', { style: 'currenc
 const empresas = ['1', '2', '3', '4', '5', '6']
 
 const abcTone: Record<string, string> = {
-  A: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-350',
-  B: 'bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-350',
-  C: 'bg-slate-105 text-slate-650 dark:bg-slate-800 dark:text-slate-350',
+  A: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
+  B: 'bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300',
+  C: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
 }
 const xyzTone: Record<string, string> = {
-  X: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-350',
-  Y: 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-350',
-  Z: 'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-350',
+  X: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
+  Y: 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300',
+  Z: 'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300',
 }
 const confiancaTone: Record<string, string> = {
-  alta: 'text-emerald-600 dark:text-emerald-450',
-  media: 'text-amber-600 dark:text-amber-450',
-  baixa: 'text-rose-600 dark:text-rose-455',
+  alta: 'text-emerald-600 dark:text-emerald-400',
+  media: 'text-amber-600 dark:text-amber-400',
+  baixa: 'text-rose-600 dark:text-rose-400',
 }
 
 const rupturaTone = (dias: number | null) => {
   if (dias === null) return 'text-slate-400 dark:text-slate-500'
   if (dias <= 2) return 'text-rose-600 dark:text-rose-400 font-extrabold'
-  if (dias <= 7) return 'text-amber-650 dark:text-amber-400 font-semibold'
-  return 'text-slate-650 dark:text-slate-350 font-medium'
+  if (dias <= 7) return 'text-amber-600 dark:text-amber-400 font-semibold'
+  return 'text-slate-600 dark:text-slate-300 font-medium'
 }
 
 const temItens = computed(() => props.rows.length > 0)
@@ -245,7 +245,7 @@ const temItens = computed(() => props.rows.length > 0)
     <!-- KPIs da decisão (Design premium e mais compacto) -->
     <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
       <div class="rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs dark:border-slate-800 dark:bg-slate-900/40">
-        <div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-slate-450 dark:text-slate-550">
+        <div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
           <ShoppingCart class="h-3.5 w-3.5 text-brand-500" /> Itens para comprar
         </div>
         <div class="mt-0.5 text-xl font-black text-slate-900 dark:text-slate-100">
@@ -255,7 +255,7 @@ const temItens = computed(() => props.rows.length > 0)
       </div>
       
       <div class="rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs dark:border-slate-800 dark:bg-slate-900/40">
-        <div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-slate-450 dark:text-slate-550">
+        <div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
           <Wallet class="h-3.5 w-3.5 text-brand-500" /> Capital necessário
         </div>
         <div class="mt-0.5 text-xl font-black text-slate-900 dark:text-slate-100">
@@ -268,10 +268,10 @@ const temItens = computed(() => props.rows.length > 0)
         <div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">
           <AlertTriangle class="h-3.5 w-3.5" /> Faturamento em risco
         </div>
-        <div class="mt-0.5 text-xl font-black text-rose-700 dark:text-rose-350">
+        <div class="mt-0.5 text-xl font-black text-rose-700 dark:text-rose-300">
           {{ moeda(props.stats?.risco_total || 0) }}
         </div>
-        <div class="text-[10px] text-rose-500/80 dark:text-rose-450/80">Margem que será perdida sem reposição</div>
+        <div class="text-[10px] text-rose-500/80 dark:text-rose-400/80">Margem que será perdida sem reposição</div>
       </div>
     </div>
 
@@ -286,9 +286,9 @@ const temItens = computed(() => props.rows.length > 0)
         leave-from-class="transform opacity-100 translate-y-0 max-h-[500px]"
         leave-to-class="transform opacity-0 -translate-y-2 max-h-0 overflow-hidden"
       >
-        <div v-show="showAdvanced" class="grid gap-3 grid-cols-2 lg:grid-cols-6 pb-3 mb-3 border-b border-slate-100 dark:border-slate-850">
+        <div v-show="showAdvanced" class="grid gap-3 grid-cols-2 lg:grid-cols-6 pb-3 mb-3 border-b border-slate-100 dark:border-slate-800">
           <div class="flex flex-col gap-1">
-            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-450 dark:text-slate-500">Empresa</span>
+            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Empresa</span>
             <SelectInput v-model="filtros.idempresa" size="sm" class="h-8.5 text-xs">
               <option value="">Todas</option>
               <option v-for="e in empresas" :key="e" :value="e">Empresa {{ e }}</option>
@@ -296,18 +296,18 @@ const temItens = computed(() => props.rows.length > 0)
           </div>
           
           <div class="flex flex-col gap-1">
-            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-450 dark:text-slate-500">Lead time (dias)</span>
+            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Lead time (dias)</span>
             <Input v-model="filtros.leadTime" type="number" min="0" max="365" size="sm" class="h-8.5 text-xs" />
           </div>
           
           <div class="flex flex-col gap-1">
-            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-450 dark:text-slate-500">Cobertura (dias)</span>
+            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Cobertura (dias)</span>
             <Input v-model="filtros.coverage" type="number" min="1" max="365" size="sm" class="h-8.5 text-xs" />
           </div>
           
           <div class="flex flex-col gap-1">
             <div class="flex items-center gap-1">
-              <span class="text-[10px] font-bold uppercase tracking-wide text-slate-450 dark:text-slate-500">Nível de serviço</span>
+              <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Nível de serviço</span>
               <InfoTooltip 
                 title="Nível de Serviço" 
                 text="Meta de probabilidade de não sofrer ruptura enquanto o fornecedor entrega. 95% é o padrão seguro. Índices maiores aumentam o estoque de segurança necessário."
@@ -323,7 +323,7 @@ const temItens = computed(() => props.rows.length > 0)
           </div>
           
           <div class="flex flex-col gap-1">
-            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-450 dark:text-slate-500">Histórico (dias)</span>
+            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Histórico (dias)</span>
             <SelectInput v-model="filtros.horizon" size="sm" class="h-8.5 text-xs">
               <option value="30">30</option>
               <option value="60">60</option>
@@ -334,7 +334,7 @@ const temItens = computed(() => props.rows.length > 0)
           </div>
           
           <div class="flex flex-col gap-1">
-            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-450 dark:text-slate-500">Filtro Servidor</span>
+            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Filtro Servidor</span>
             <SelectInput v-model="filtros.sort" size="sm" class="h-8.5 text-xs">
               <option value="risco">Dinheiro em risco</option>
               <option value="ruptura">Dias até ruptura</option>
@@ -443,7 +443,7 @@ const temItens = computed(() => props.rows.length > 0)
           </div>
           <div>
             <span class="block text-[8px] font-bold text-slate-400 uppercase">Risco</span>
-            <span class="tabular-nums font-bold text-rose-600 dark:text-rose-450">{{ moeda(row.dinheiro_em_risco) }}</span>
+            <span class="tabular-nums font-bold text-rose-600 dark:text-rose-400">{{ moeda(row.dinheiro_em_risco) }}</span>
           </div>
         </div>
 
@@ -466,7 +466,7 @@ const temItens = computed(() => props.rows.length > 0)
     <div class="hidden lg:block overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900/40">
       <table class="w-full min-w-[920px] text-xs">
         <thead>
-          <tr class="border-b border-slate-100 text-left text-[10px] font-bold uppercase tracking-wider text-slate-450 dark:border-slate-800 bg-slate-55/40 dark:bg-slate-950/20 select-none">
+          <tr class="border-b border-slate-100 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-950/20 select-none">
             
             <th class="px-3 py-2 cursor-pointer hover:bg-slate-100/50 dark:hover:bg-slate-800/50 hover:text-slate-700 dark:hover:text-slate-200 transition-colors" @click="handleSort('produto')">
               <div class="flex items-center gap-1">
@@ -565,12 +565,12 @@ const temItens = computed(() => props.rows.length > 0)
             v-else
             v-for="row in sortedRows"
             :key="`${row.idempresa}-${row.idproduto}-${row.idsubproduto}`"
-            class="border-b border-slate-100/50 last:border-0 hover:bg-slate-55/35 dark:border-slate-800/40 dark:hover:bg-slate-850/20 transition-colors cursor-pointer"
+            class="border-b border-slate-100/50 last:border-0 hover:bg-slate-50/35 dark:border-slate-800/40 dark:hover:bg-slate-800/20 transition-colors cursor-pointer"
             @click="abrirDetalhe(row)"
           >
             <td class="px-3 py-1.5">
               <div class="font-bold text-slate-800 dark:text-slate-200 line-clamp-1" :title="row.descricao">{{ row.descricao }}</div>
-              <div class="flex items-center gap-1.5 text-[10px] text-slate-450 dark:text-slate-500">
+              <div class="flex items-center gap-1.5 text-[10px] text-slate-400 dark:text-slate-500">
                 <span>Emp. {{ row.idempresa }}</span>
                 <span>·</span>
                 <span>{{ row.idproduto }}/{{ row.idsubproduto }}</span>
@@ -578,11 +578,11 @@ const temItens = computed(() => props.rows.length > 0)
               </div>
             </td>
             
-            <td class="px-3 py-1.5 text-right font-medium tabular-nums text-slate-700 dark:text-slate-350">
+            <td class="px-3 py-1.5 text-right font-medium tabular-nums text-slate-700 dark:text-slate-300">
               {{ formatStockIntegrinNumber(row.saldo_disponivel, 0) }}
             </td>
             
-            <td class="px-3 py-1.5 text-right font-medium tabular-nums text-slate-700 dark:text-slate-350">
+            <td class="px-3 py-1.5 text-right font-medium tabular-nums text-slate-700 dark:text-slate-300">
               {{ formatStockIntegrinNumber(row.demanda_diaria, 1) }}
               <span v-if="row.tendencia_percent != null" class="ml-1 inline-flex items-center text-[10px]" :class="row.tendencia_percent >= 0 ? 'text-emerald-500' : 'text-rose-500'">
                 <TrendingUp v-if="row.tendencia_percent >= 0" class="h-3 w-3" />
@@ -602,11 +602,11 @@ const temItens = computed(() => props.rows.length > 0)
               {{ formatStockIntegrinNumber(row.sugestao_compra, 0) }}
             </td>
             
-            <td class="px-3 py-1.5 text-right font-semibold tabular-nums text-slate-650 dark:text-slate-300">
+            <td class="px-3 py-1.5 text-right font-semibold tabular-nums text-slate-600 dark:text-slate-300">
               {{ moeda(row.capital_necessario) }}
             </td>
             
-            <td class="px-3 py-1.5 text-right font-bold tabular-nums text-rose-600 dark:text-rose-455">
+            <td class="px-3 py-1.5 text-right font-bold tabular-nums text-rose-600 dark:text-rose-400">
               {{ moeda(row.dinheiro_em_risco) }}
             </td>
             

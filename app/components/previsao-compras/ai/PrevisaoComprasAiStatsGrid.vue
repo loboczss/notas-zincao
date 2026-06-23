@@ -99,7 +99,7 @@ const lastRunStatusClass = computed(() => {
     >
       <div class="flex items-center justify-between">
         <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Oportunidades</span>
-        <div class="rounded-lg bg-violet-50 p-2 text-violet-600 dark:bg-violet-500/10 dark:text-violet-350">
+        <div class="rounded-lg bg-violet-50 p-2 text-violet-600 dark:bg-violet-500/10 dark:text-violet-300">
           <Sparkles class="h-5 w-5" />
         </div>
       </div>
@@ -121,7 +121,7 @@ const lastRunStatusClass = computed(() => {
     >
       <div class="flex items-center justify-between">
         <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Eventos (30d)</span>
-        <div class="rounded-lg bg-amber-50 p-2 text-amber-600 dark:bg-amber-500/10 dark:text-amber-350">
+        <div class="rounded-lg bg-amber-50 p-2 text-amber-600 dark:bg-amber-500/10 dark:text-amber-300">
           <FileSearch class="h-5 w-5" />
         </div>
       </div>

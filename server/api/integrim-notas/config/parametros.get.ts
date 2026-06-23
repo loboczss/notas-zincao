@@ -1,6 +1,6 @@
 import { serverSupabaseUser } from '#supabase/server'
-import { createAdminClient } from '../../services/integrim-notas/sync/repository'
-import type { IntegrimCompraParametros } from '../../../shared/types/IntegrimNotas'
+import { createAdminClient } from '../../../services/integrim-notas/sync/repository'
+import type { IntegrimCompraParametros } from '../../../../shared/types/IntegrimNotas'
 
 export const buildCompraParametros = (row: Record<string, unknown> | null): IntegrimCompraParametros => ({
   lead_time_dias: Number(row?.lead_time_dias ?? 7),

@@ -332,7 +332,7 @@ const fetchPreview = async () => {
       const products: any[] = []
       for (const term of terms) {
         if (products.length >= limit) break
-        const data = await apiFetch<any>('/api/integrim-notas/analise', {
+        const data = await apiFetch<any>('/api/integrim-notas/catalog/produtos', {
           query: {
             sort: 'score_valor',
             page: 1,
@@ -376,7 +376,7 @@ const fetchPreview = async () => {
         random: 'score_valor'
       }
       const sort = sortMap[mode] || 'score_valor'
-      const data = await apiFetch<any>('/api/integrim-notas/analise', {
+      const data = await apiFetch<any>('/api/integrim-notas/catalog/produtos', {
         query: {
           sort,
           page: 1,

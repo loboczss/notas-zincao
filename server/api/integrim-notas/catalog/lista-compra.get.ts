@@ -1,43 +1,20 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
-import type { Database } from '../../../app/types/database.types'
+import type { Database } from '../../../../app/types/database.types'
 import type {
   IntegrimListaCompraResponse,
   IntegrimListaCompraRow,
   IntegrimListaCompraSort,
-} from '../../../shared/types/IntegrimNotas'
+} from '../../../../shared/types/IntegrimNotas'
+import {
+  numberOrNull,
+  parseBoolean,
+  parseFloatOrNull,
+  parseNonNegativeInteger,
+  parsePositiveInteger,
+  sanitizeLike,
+} from '../../../utils/integrim-query'
 
 const SORTS = new Set<IntegrimListaCompraSort>(['risco', 'ruptura', 'sugestao', 'faturamento'])
-
-const parsePositiveInteger = (value: unknown) => {
-  const parsed = Number(String(value ?? '').trim())
-  if (!Number.isFinite(parsed)) return null
-  const integer = Math.trunc(parsed)
-  return integer > 0 ? integer : null
-}
-
-const parseNonNegativeInteger = (value: unknown) => {
-  const raw = String(value ?? '').trim()
-  if (!raw) return null
-  const parsed = Number(raw)
-  if (!Number.isFinite(parsed)) return null
-  const integer = Math.trunc(parsed)
-  return integer >= 0 ? integer : null
-}
-
-const parseFloatOrNull = (value: unknown) => {
-  const raw = String(value ?? '').trim()
-  if (!raw) return null
-  const parsed = Number(raw)
-  return Number.isFinite(parsed) ? parsed : null
-}
-
-const parseBoolean = (value: unknown, fallback: boolean) => {
-  if (value === undefined || value === null || value === '') return fallback
-  const normalized = String(value).trim().toLowerCase()
-  return !['0', 'false', 'nao', 'não', 'no', 'off'].includes(normalized)
-}
-
-const numberOrNull = (value: unknown) => (value === null || value === undefined ? null : Number(value))
 
 export default defineEventHandler(async (event): Promise<IntegrimListaCompraResponse> => {
   const user = await serverSupabaseUser(event)
@@ -47,7 +24,7 @@ export default defineEventHandler(async (event): Promise<IntegrimListaCompraResp
   const query = getQuery(event)
   const page = Math.max(1, Number(query.page || 1) || 1)
   const pageSize = Math.min(Math.max(Number(query.page_size || 50), 1), 200)
-  const search = String(query.search || '').replace(/[%,()._{}\\]/g, ' ').trim()
+  const search = sanitizeLike(query.search)
   const sortKey = String(query.sort || '').trim() as IntegrimListaCompraSort
   const sort = SORTS.has(sortKey) ? sortKey : 'risco'
 

@@ -98,7 +98,7 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
   const loadingHealth = ref(false)
   const loadingSchedule = ref(false)
   const loadingInsights = ref(false)
-  const indexTabMode = ref<'sugestoes' | 'todos' | 'insights'>('sugestoes')
+  const analiseView = ref<'sugestoes' | 'todos' | 'insights'>('sugestoes')
   const savingConfig = ref(false)
   const produtoSelecionado = ref<IntegrimProdutoValor | null>(null)
   const produtoModalAberto = computed({
@@ -165,7 +165,7 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     clearMessages()
 
     try {
-      const data = await getApiFetch()<IntegrimProdutoValorResponse>('/api/integrim-notas/analise', {
+      const data = await getApiFetch()<IntegrimProdutoValorResponse>('/api/integrim-notas/catalog/produtos', {
         query: {
           search: filters.search?.trim() || undefined,
           idempresa: filters.idempresa || undefined,
@@ -205,7 +205,7 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     if (!options.silent) loadingStatus.value = true
 
     try {
-      const data = await getApiFetch()<IntegrimNotasSyncStatusResponse>('/api/integrim-notas/sync-status')
+      const data = await getApiFetch()<IntegrimNotasSyncStatusResponse>('/api/integrim-notas/sync/status')
       runs.value = data.runs || []
       latestRun.value = data.latest || null
       return data
@@ -259,7 +259,7 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     clearMessages()
 
     try {
-      const data = await getApiFetch()<IntegrimNotasSyncResponse>('/api/integrim-notas/sync', {
+      const data = await getApiFetch()<IntegrimNotasSyncResponse>('/api/integrim-notas/sync/run', {
         method: 'POST',
         body: payload,
       })
@@ -302,7 +302,7 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     clearMessages()
 
     try {
-      const data = await getApiFetch()<IntegrimNotasCancelSyncResponse>('/api/integrim-notas/cancel', {
+      const data = await getApiFetch()<IntegrimNotasCancelSyncResponse>('/api/integrim-notas/sync/cancel', {
         method: 'POST',
         body: { run_id: runId || latestRun.value?.id || null },
       })
@@ -328,7 +328,7 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     clearMessages()
 
     try {
-      const data = await getApiFetch()<IntegrimCompraOportunidadeActionResponse>(`/api/integrim-notas/oportunidades-ia/${id}`, {
+      const data = await getApiFetch()<IntegrimCompraOportunidadeActionResponse>(`/api/integrim-notas/ai/oportunidades/${id}`, {
         method: 'PATCH',
         body: { status },
       })
@@ -377,7 +377,7 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     }
 
     try {
-      const data = await getApiFetch()<IntegrimCompraAiDashboardResponse>('/api/integrim-notas/oportunidades-ia/dashboard')
+      const data = await getApiFetch()<IntegrimCompraAiDashboardResponse>('/api/integrim-notas/ai/dashboard')
       aiDashboard.value = data
 
       // Se houver uma task rodando no dashboard, inicia o polling de progresso
@@ -406,7 +406,7 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     clearMessages()
 
     try {
-      const data = await getApiFetch()<IntegrimCompraAiTaskResponse>('/api/integrim-notas/oportunidades-ia/tasks', {
+      const data = await getApiFetch()<IntegrimCompraAiTaskResponse>('/api/integrim-notas/ai/tasks', {
         method: 'POST',
         body: payload,
       })
@@ -429,7 +429,7 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     clearMessages()
 
     try {
-      const data = await getApiFetch()<IntegrimCompraAiTaskResponse>(`/api/integrim-notas/oportunidades-ia/tasks/${id}`, {
+      const data = await getApiFetch()<IntegrimCompraAiTaskResponse>(`/api/integrim-notas/ai/tasks/${id}`, {
         method: 'PATCH',
         body: payload,
       })
@@ -458,7 +458,7 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     startAiTaskPolling()
 
     try {
-      const data = await getApiFetch()<IntegrimCompraTaskRunResponse>('/api/integrim-notas/oportunidades-ia/run-task', {
+      const data = await getApiFetch()<IntegrimCompraTaskRunResponse>('/api/integrim-notas/ai/run-task', {
         method: 'POST',
         body: { task_id: taskId || null },
       })
@@ -490,7 +490,7 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
   const fetchSyncHealth = async (options: { silent?: boolean } = {}) => {
     if (!options.silent) loadingHealth.value = true
     try {
-      const data = await getApiFetch()<IntegrimSyncHealthResponse>('/api/integrim-notas/sync-health')
+      const data = await getApiFetch()<IntegrimSyncHealthResponse>('/api/integrim-notas/sync/health')
       health.value = data.health
       return data.health
     }
@@ -506,7 +506,7 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
   const fetchSyncSchedule = async (options: { silent?: boolean } = {}) => {
     if (!options.silent) loadingSchedule.value = true
     try {
-      const data = await getApiFetch()<IntegrimSyncScheduleResponse>('/api/integrim-notas/sync-schedule')
+      const data = await getApiFetch()<IntegrimSyncScheduleResponse>('/api/integrim-notas/sync/schedule')
       schedule.value = data.schedule
       return data.schedule
     }
@@ -523,7 +523,7 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     savingConfig.value = true
     clearMessages()
     try {
-      const data = await getApiFetch()<IntegrimSyncScheduleResponse>('/api/integrim-notas/sync-schedule', {
+      const data = await getApiFetch()<IntegrimSyncScheduleResponse>('/api/integrim-notas/sync/schedule', {
         method: 'POST',
         body: payload,
       })
@@ -542,7 +542,7 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
 
   const fetchCompraParametros = async (options: { silent?: boolean } = {}) => {
     try {
-      const data = await getApiFetch()<{ success: boolean, parametros: IntegrimCompraParametros }>('/api/integrim-notas/compra-parametros')
+      const data = await getApiFetch()<{ success: boolean, parametros: IntegrimCompraParametros }>('/api/integrim-notas/config/parametros')
       compraParametros.value = data.parametros
       return data.parametros
     }
@@ -556,7 +556,7 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     savingConfig.value = true
     clearMessages()
     try {
-      const data = await getApiFetch()<{ success: boolean, parametros: IntegrimCompraParametros }>('/api/integrim-notas/compra-parametros', {
+      const data = await getApiFetch()<{ success: boolean, parametros: IntegrimCompraParametros }>('/api/integrim-notas/config/parametros', {
         method: 'POST',
         body: payload,
       })
@@ -672,7 +672,7 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     loadingListaCompra.value = true
     if (!options.append) clearMessages()
     try {
-      const data = await getApiFetch()<IntegrimListaCompraResponse>('/api/integrim-notas/lista-compra', {
+      const data = await getApiFetch()<IntegrimListaCompraResponse>('/api/integrim-notas/catalog/lista-compra', {
         query: {
           idempresa: query.idempresa || undefined,
           lead_time_dias: query.lead_time_dias ?? undefined,
@@ -746,7 +746,7 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
   return {
     produtoSelecionado,
     produtoModalAberto,
-    indexTabMode,
+    analiseView,
     produtos,
     runs,
     latestRun,

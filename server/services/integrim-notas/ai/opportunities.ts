@@ -3,15 +3,15 @@ import type { H3Event } from 'h3'
 import {
   DEFAULT_OPENAI_MODEL,
   isOpenAIModelSupported,
-} from '../../../shared/constants/OpenAIModels'
+} from '../../../../shared/constants/OpenAIModels'
 import type {
   IntegrimCompraOportunidadeActionResponse,
   IntegrimCompraOportunidadeStatus,
   IntegrimCompraTaskRunResponse,
-} from '../../../shared/types/IntegrimNotas'
-import { getOpenAIClient } from '../openai/client'
+} from '../../../../shared/types/IntegrimNotas'
+import { getOpenAIClient } from '../../openai/client'
 import { getNextCompraTaskRunAt, taskNextRunIsDue } from './opportunity-task-schedule'
-import { createAdminClient } from './sync/repository'
+import { createAdminClient } from '../sync/repository'
 
 type AdminClient = ReturnType<typeof createAdminClient>
 

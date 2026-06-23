@@ -1,10 +1,10 @@
-import { createAdminClient } from '../../services/integrim-notas/sync/repository'
-import { authorizeStockIntegrinAdminOrServiceRole } from '../../utils/stock-integrin-auth'
-import { buildCompraParametros } from './compra-parametros.get'
+import { createAdminClient } from '../../../services/integrim-notas/sync/repository'
+import { authorizeStockIntegrinAdminOrServiceRole } from '../../../utils/stock-integrin-auth'
+import { buildCompraParametros } from './parametros.get'
 import type {
   IntegrimCompraParametros,
   IntegrimCompraParametrosUpdateRequest,
-} from '../../../shared/types/IntegrimNotas'
+} from '../../../../shared/types/IntegrimNotas'
 
 const clampInt = (value: unknown, min: number, max: number, fallback: number) => {
   const parsed = Number(value)

@@ -1,14 +1,14 @@
-import { createAdminClient } from '../../services/integrim-notas/sync/repository'
+import { createAdminClient } from '../../../services/integrim-notas/sync/repository'
 import {
   SYNC_SCHEDULE_TABLE,
   buildSyncSchedule,
   sanitizeScheduleUpdate,
-} from '../../services/integrim-notas/sync-schedule'
-import { authorizeStockIntegrinAdminOrServiceRole } from '../../utils/stock-integrin-auth'
+} from '../../../services/integrim-notas/sync-schedule'
+import { authorizeStockIntegrinAdminOrServiceRole } from '../../../utils/stock-integrin-auth'
 import type {
   IntegrimSyncScheduleResponse,
   IntegrimSyncScheduleUpdateRequest,
-} from '../../../shared/types/IntegrimNotas'
+} from '../../../../shared/types/IntegrimNotas'
 
 export default defineEventHandler(async (event): Promise<IntegrimSyncScheduleResponse> => {
   const { triggeredBy } = await authorizeStockIntegrinAdminOrServiceRole(event, {

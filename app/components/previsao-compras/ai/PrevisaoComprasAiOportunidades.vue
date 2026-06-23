@@ -239,7 +239,7 @@ const formatConfidence = (value: number) =>
             <button
               v-if="oportunidade.status === 'nova' || oportunidade.status === 'aceita'"
               type="button"
-              class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1 rounded px-2.5 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors disabled:opacity-40 dark:text-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750"
+              class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1 rounded px-2.5 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors disabled:opacity-40 dark:text-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700"
               :disabled="props.actionLoading"
               @click="emit('opportunityAction', { id: oportunidade.id, status: 'comprada' })"
             >

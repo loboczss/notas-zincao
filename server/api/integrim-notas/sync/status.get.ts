@@ -1,10 +1,10 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
-import type { Database } from '../../../app/types/database.types'
+import type { Database } from '../../../../app/types/database.types'
 import type {
   IntegrimNotasSyncProgress,
   IntegrimNotasSyncRun,
   IntegrimNotasSyncStatusResponse,
-} from '../../../shared/types/IntegrimNotas'
+} from '../../../../shared/types/IntegrimNotas'
 
 const PROGRESS_PHASES = ['starting', 'reading', 'upserting', 'deactivating', 'aggregating', 'cancelled', 'done', 'failed']
 

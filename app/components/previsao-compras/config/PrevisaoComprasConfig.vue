@@ -165,10 +165,10 @@ const statusTone = computed(() => {
 })
 
 const toneClasses: Record<string, string> = {
-  emerald: 'border-emerald-200 bg-emerald-500/5 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-350',
-  rose: 'border-rose-200 bg-rose-500/5 text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-350',
-  sky: 'border-sky-200 bg-sky-500/5 text-sky-700 dark:border-sky-500/20 dark:bg-sky-500/10 dark:text-sky-350',
-  slate: 'border-slate-200 bg-slate-500/5 text-slate-600 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-350',
+  emerald: 'border-emerald-200 bg-emerald-500/5 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300',
+  rose: 'border-rose-200 bg-rose-500/5 text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300',
+  sky: 'border-sky-200 bg-sky-500/5 text-sky-700 dark:border-sky-500/20 dark:bg-sky-500/10 dark:text-sky-300',
+  slate: 'border-slate-200 bg-slate-500/5 text-slate-600 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-300',
 }
 
 const semDadosDiarios = computed(() => (props.health?.daily_rows ?? 0) === 0)
@@ -266,7 +266,7 @@ const semDadosDiarios = computed(() => (props.health?.daily_rows ?? 0) === 0)
           </div>
 
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-slate-100 pt-3 dark:border-slate-800">
-            <span class="text-[11px] text-slate-500 dark:text-slate-450">
+            <span class="text-[11px] text-slate-500 dark:text-slate-400">
               Próxima execução:
               <strong class="text-slate-700 dark:text-slate-300 font-bold">{{ formatDateTime(props.schedule?.next_run_at || null) }}</strong>
             </span>
@@ -364,40 +364,40 @@ const semDadosDiarios = computed(() => (props.health?.daily_rows ?? 0) === 0)
 
         <div
           v-if="semDadosDiarios"
-          class="rounded-lg border border-amber-300 bg-amber-500/5 px-3 py-2 text-[10px] font-semibold text-amber-800 dark:border-amber-550/30 dark:bg-amber-500/10 dark:text-amber-300"
+          class="rounded-lg border border-amber-300 bg-amber-500/5 px-3 py-2 text-[10px] font-semibold text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300"
         >
           Sem dados históricos armazenados. Por favor, execute uma sincronização completa para ativar o motor.
         </div>
 
         <dl class="space-y-2 text-xs">
           <div class="flex items-center justify-between gap-3">
-            <dt class="text-slate-450 dark:text-slate-500">Último sucesso</dt>
+            <dt class="text-slate-400 dark:text-slate-500">Último sucesso</dt>
             <dd class="font-bold text-slate-700 dark:text-slate-300 tabular-nums">{{ formatDateTime(props.health?.last_success_at || null) }}</dd>
           </div>
           <div class="flex items-center justify-between gap-3">
-            <dt class="text-slate-455 dark:text-slate-500">Vendas/dia armazenadas</dt>
+            <dt class="text-slate-400 dark:text-slate-500">Vendas/dia armazenadas</dt>
             <dd class="font-bold text-slate-700 dark:text-slate-300 tabular-nums">{{ formatStockIntegrinNumber(props.health?.daily_rows || 0, 0) }}</dd>
           </div>
           <div class="flex items-center justify-between gap-3">
-            <dt class="text-slate-455 dark:text-slate-500">Dados diários até</dt>
+            <dt class="text-slate-400 dark:text-slate-500">Dados diários até</dt>
             <dd class="font-bold text-slate-700 dark:text-slate-300">
               {{ props.health?.daily_max_date || '—' }}
               <span v-if="props.health?.daily_stale_days != null" class="text-[10px] text-slate-400 dark:text-slate-500">({{ props.health?.daily_stale_days }}d atrás)</span>
             </dd>
           </div>
           <div class="flex items-center justify-between gap-3">
-            <dt class="text-slate-455 dark:text-slate-500">Produtos analisados</dt>
+            <dt class="text-slate-400 dark:text-slate-500">Produtos analisados</dt>
             <dd class="font-bold text-slate-700 dark:text-slate-300 tabular-nums">{{ formatStockIntegrinNumber(props.health?.produtos || 0, 0) }}</dd>
           </div>
           <div class="flex items-center justify-between gap-3">
-            <dt class="text-slate-455 dark:text-slate-500">Análise recalculada em</dt>
+            <dt class="text-slate-400 dark:text-slate-500">Análise recalculada em</dt>
             <dd class="font-bold text-slate-700 dark:text-slate-300 tabular-nums">{{ formatDateTime(props.health?.base_updated_at || null) }}</dd>
           </div>
         </dl>
 
         <div
           v-if="props.health?.last_status === 'failed' && props.health?.last_error"
-          class="rounded-lg border border-rose-200 bg-rose-500/5 px-3 py-2 text-[10px] text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-350"
+          class="rounded-lg border border-rose-200 bg-rose-500/5 px-3 py-2 text-[10px] text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300"
         >
           <p class="mb-1 font-bold">Erro do último sync</p>
           <p class="line-clamp-3 break-words font-mono text-[9px]">{{ props.health?.last_error }}</p>

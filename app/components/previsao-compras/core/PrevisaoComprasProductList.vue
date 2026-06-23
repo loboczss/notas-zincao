@@ -65,8 +65,8 @@ const getProdutoStatus = (p: IntegrimProdutoValor) => {
   if (p.giro_diario <= 0) {
     return {
       label: 'Sem venda',
-      badge: 'bg-slate-100 text-slate-650 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700',
-      textClass: 'text-slate-400 dark:text-slate-550',
+      badge: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700',
+      textClass: 'text-slate-400 dark:text-slate-500',
     }
   }
 
@@ -74,16 +74,16 @@ const getProdutoStatus = (p: IntegrimProdutoValor) => {
   if (dias !== null && dias < 15) {
     return {
       label: 'Comprar',
-      badge: 'bg-rose-50 text-rose-700 border border-rose-100 dark:bg-rose-950/30 dark:text-rose-455 dark:border-rose-900/40',
-      textClass: 'text-rose-600 dark:text-rose-450 font-bold',
+      badge: 'bg-rose-50 text-rose-700 border border-rose-100 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/40',
+      textClass: 'text-rose-600 dark:text-rose-400 font-bold',
     }
   }
 
   if (dias !== null && dias < 45) {
     return {
       label: 'Atenção',
-      badge: 'bg-amber-50 text-amber-700 border border-amber-100 dark:bg-amber-950/30 dark:text-amber-455 dark:border-amber-900/40',
-      textClass: 'text-amber-600 dark:text-amber-450 font-semibold',
+      badge: 'bg-amber-50 text-amber-700 border border-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/40',
+      textClass: 'text-amber-600 dark:text-amber-400 font-semibold',
     }
   }
 
@@ -155,7 +155,7 @@ watch(() => props.produtos, (newVal, oldVal) => {
     <div v-if="props.loadingInitial" class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/40" aria-busy="true">
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-slate-100 text-left text-xs dark:divide-slate-800">
-          <thead class="bg-slate-50/50 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:bg-slate-900/60 dark:text-slate-550">
+          <thead class="bg-slate-50/50 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:bg-slate-900/60 dark:text-slate-500">
             <tr class="select-none">
               <th class="px-3 py-2">Produto / Identificação</th>
               <th class="px-3 py-2 text-center">Status</th>
@@ -217,7 +217,7 @@ watch(() => props.produtos, (newVal, oldVal) => {
             <h4 class="font-bold text-slate-800 dark:text-slate-200 text-xs line-clamp-2">
               {{ produto.descricao || `Produto ${produto.idproduto}` }}
             </h4>
-            <div class="flex flex-wrap items-center gap-1.5 text-[10px] text-slate-450 mt-1 font-semibold">
+            <div class="flex flex-wrap items-center gap-1.5 text-[10px] text-slate-400 mt-1 font-semibold">
               <span>Empresa {{ produto.idempresa }}</span>
               <span>·</span>
               <span class="font-mono">Cód: {{ produto.idproduto }}/{{ produto.idsubproduto }}</span>
@@ -237,33 +237,33 @@ watch(() => props.produtos, (newVal, oldVal) => {
         <!-- Metrics Grid -->
         <div class="grid grid-cols-3 gap-2 rounded-lg bg-slate-50 p-2.5 dark:bg-slate-950/40 text-[10px] font-semibold text-slate-700 dark:text-slate-300">
           <div>
-            <span class="block text-[8px] font-bold text-slate-450 uppercase">Giro / Dia</span>
+            <span class="block text-[8px] font-bold text-slate-400 uppercase">Giro / Dia</span>
             <span class="tabular-nums">{{ formatStockIntegrinNumber(produto.giro_diario, 1) }}</span>
           </div>
           <div>
-            <span class="block text-[8px] font-bold text-slate-450 uppercase">Estoque</span>
+            <span class="block text-[8px] font-bold text-slate-400 uppercase">Estoque</span>
             <span class="tabular-nums">{{ formatStockIntegrinNumber(produto.saldo_disponivel, 0) }}</span>
           </div>
           <div>
-            <span class="block text-[8px] font-bold text-slate-450 uppercase">Cobertura</span>
+            <span class="block text-[8px] font-bold text-slate-400 uppercase">Cobertura</span>
             <span class="tabular-nums font-bold" :class="getProdutoStatus(produto).textClass">
               {{ formatCobertura(produto.dias_cobertura) }}
             </span>
           </div>
           <div>
-            <span class="block text-[8px] font-bold text-slate-450 uppercase">Comprar</span>
+            <span class="block text-[8px] font-bold text-slate-400 uppercase">Comprar</span>
             <span class="tabular-nums font-bold text-brand-600 dark:text-brand-400">
               {{ produto.sugestao_compra > 0 ? formatStockIntegrinNumber(produto.sugestao_compra, 0) : '—' }}
             </span>
           </div>
           <div>
-            <span class="block text-[8px] font-bold text-slate-450 uppercase">Sugestão IA</span>
-            <span class="tabular-nums font-bold text-violet-755 dark:text-violet-300">
+            <span class="block text-[8px] font-bold text-slate-400 uppercase">Sugestão IA</span>
+            <span class="tabular-nums font-bold text-violet-700 dark:text-violet-300">
               {{ produto.ai_oportunidade ? `+${formatStockIntegrinNumber(produto.ai_oportunidade.compra_extra, 0)}` : '—' }}
             </span>
           </div>
           <div>
-            <span class="block text-[8px] font-bold text-slate-450 uppercase">Score</span>
+            <span class="block text-[8px] font-bold text-slate-400 uppercase">Score</span>
             <span class="tabular-nums font-bold text-slate-800 dark:text-slate-200">
               {{ formatStockIntegrinNumber(produto.score_valor, 1) }}
             </span>
@@ -286,7 +286,7 @@ watch(() => props.produtos, (newVal, oldVal) => {
     <div class="hidden lg:block overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900/40">
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-slate-100 text-left text-xs dark:divide-slate-800">
-          <thead class="bg-slate-55/40 text-[10px] font-bold uppercase tracking-wider text-slate-450 dark:bg-slate-900/60 dark:text-slate-550 select-none">
+          <thead class="bg-slate-50/40 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:bg-slate-900/60 dark:text-slate-500 select-none">
             <tr>
               <!-- Produto / Identificação -->
               <th
@@ -297,7 +297,7 @@ watch(() => props.produtos, (newVal, oldVal) => {
                   <span>Produto / Identificação</span>
                   <span
                     class="text-[9px] transition-colors"
-                    :class="currentSortField === 'descricao' ? 'text-brand-500 font-extrabold' : 'text-slate-300 dark:text-slate-700 group-hover:text-slate-450'"
+                    :class="currentSortField === 'descricao' ? 'text-brand-500 font-extrabold' : 'text-slate-300 dark:text-slate-700 group-hover:text-slate-400'"
                   >
                     {{ currentSortField === 'descricao' ? (currentSortDir === 'asc' ? '▲' : '▼') : '↕' }}
                   </span>
@@ -313,7 +313,7 @@ watch(() => props.produtos, (newVal, oldVal) => {
                   <span>Status</span>
                   <span
                     class="text-[9px] transition-colors"
-                    :class="currentSortField === 'status' ? 'text-brand-500 font-extrabold' : 'text-slate-300 dark:text-slate-700 group-hover:text-slate-450'"
+                    :class="currentSortField === 'status' ? 'text-brand-500 font-extrabold' : 'text-slate-300 dark:text-slate-700 group-hover:text-slate-400'"
                   >
                     {{ currentSortField === 'status' ? (currentSortDir === 'asc' ? '▲' : '▼') : '↕' }}
                   </span>
@@ -329,7 +329,7 @@ watch(() => props.produtos, (newVal, oldVal) => {
                   <span>Giro / Dia</span>
                   <span
                     class="text-[9px] transition-colors"
-                    :class="currentSortField === 'giro_diario' ? 'text-brand-500 font-extrabold' : 'text-slate-300 dark:text-slate-700 group-hover:text-slate-450'"
+                    :class="currentSortField === 'giro_diario' ? 'text-brand-500 font-extrabold' : 'text-slate-300 dark:text-slate-700 group-hover:text-slate-400'"
                   >
                     {{ currentSortField === 'giro_diario' ? (currentSortDir === 'asc' ? '▲' : '▼') : '↕' }}
                   </span>
@@ -345,7 +345,7 @@ watch(() => props.produtos, (newVal, oldVal) => {
                   <span>Estoque</span>
                   <span
                     class="text-[9px] transition-colors"
-                    :class="currentSortField === 'saldo_disponivel' ? 'text-brand-500 font-extrabold' : 'text-slate-300 dark:text-slate-700 group-hover:text-slate-450'"
+                    :class="currentSortField === 'saldo_disponivel' ? 'text-brand-500 font-extrabold' : 'text-slate-300 dark:text-slate-700 group-hover:text-slate-400'"
                   >
                     {{ currentSortField === 'saldo_disponivel' ? (currentSortDir === 'asc' ? '▲' : '▼') : '↕' }}
                   </span>
@@ -361,7 +361,7 @@ watch(() => props.produtos, (newVal, oldVal) => {
                   <span>Cobertura</span>
                   <span
                     class="text-[9px] transition-colors"
-                    :class="currentSortField === 'dias_cobertura' ? 'text-brand-500 font-extrabold' : 'text-slate-300 dark:text-slate-700 group-hover:text-slate-450'"
+                    :class="currentSortField === 'dias_cobertura' ? 'text-brand-500 font-extrabold' : 'text-slate-300 dark:text-slate-700 group-hover:text-slate-400'"
                   >
                     {{ currentSortField === 'dias_cobertura' ? (currentSortDir === 'asc' ? '▲' : '▼') : '↕' }}
                   </span>
@@ -377,7 +377,7 @@ watch(() => props.produtos, (newVal, oldVal) => {
                   <span>Comprar</span>
                   <span
                     class="text-[9px] transition-colors"
-                    :class="currentSortField === 'sugestao_compra' ? 'text-brand-500 font-extrabold' : 'text-slate-300 dark:text-slate-700 group-hover:text-slate-450'"
+                    :class="currentSortField === 'sugestao_compra' ? 'text-brand-500 font-extrabold' : 'text-slate-300 dark:text-slate-700 group-hover:text-slate-400'"
                   >
                     {{ currentSortField === 'sugestao_compra' ? (currentSortDir === 'asc' ? '▲' : '▼') : '↕' }}
                   </span>
@@ -393,7 +393,7 @@ watch(() => props.produtos, (newVal, oldVal) => {
                   <span>IA</span>
                   <span
                     class="text-[9px] transition-colors"
-                    :class="currentSortField === 'ai_oportunidade' ? 'text-brand-500 font-extrabold' : 'text-slate-300 dark:text-slate-700 group-hover:text-slate-450'"
+                    :class="currentSortField === 'ai_oportunidade' ? 'text-brand-500 font-extrabold' : 'text-slate-300 dark:text-slate-700 group-hover:text-slate-400'"
                   >
                     {{ currentSortField === 'ai_oportunidade' ? (currentSortDir === 'asc' ? '▲' : '▼') : '↕' }}
                   </span>
@@ -409,7 +409,7 @@ watch(() => props.produtos, (newVal, oldVal) => {
                   <span>Faturamento</span>
                   <span
                     class="text-[9px] transition-colors"
-                    :class="currentSortField === 'faturamento_periodo' ? 'text-brand-500 font-extrabold' : 'text-slate-300 dark:text-slate-700 group-hover:text-slate-450'"
+                    :class="currentSortField === 'faturamento_periodo' ? 'text-brand-500 font-extrabold' : 'text-slate-300 dark:text-slate-700 group-hover:text-slate-400'"
                   >
                     {{ currentSortField === 'faturamento_periodo' ? (currentSortDir === 'asc' ? '▲' : '▼') : '↕' }}
                   </span>
@@ -425,7 +425,7 @@ watch(() => props.produtos, (newVal, oldVal) => {
                   <span>Lucro</span>
                   <span
                     class="text-[9px] transition-colors"
-                    :class="currentSortField === 'margem_periodo' ? 'text-brand-500 font-extrabold' : 'text-slate-300 dark:text-slate-700 group-hover:text-slate-450'"
+                    :class="currentSortField === 'margem_periodo' ? 'text-brand-500 font-extrabold' : 'text-slate-300 dark:text-slate-700 group-hover:text-slate-400'"
                   >
                     {{ currentSortField === 'margem_periodo' ? (currentSortDir === 'asc' ? '▲' : '▼') : '↕' }}
                   </span>
@@ -441,7 +441,7 @@ watch(() => props.produtos, (newVal, oldVal) => {
                   <span>Score</span>
                   <span
                     class="text-[9px] transition-colors"
-                    :class="currentSortField === 'score_valor' ? 'text-brand-500 font-extrabold' : 'text-slate-300 dark:text-slate-700 group-hover:text-slate-450'"
+                    :class="currentSortField === 'score_valor' ? 'text-brand-500 font-extrabold' : 'text-slate-300 dark:text-slate-700 group-hover:text-slate-400'"
                   >
                     {{ currentSortField === 'score_valor' ? (currentSortDir === 'asc' ? '▲' : '▼') : '↕' }}
                   </span>

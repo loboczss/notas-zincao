@@ -288,11 +288,11 @@ const opportunityAction = (
             diagnostico.tipo === 'danger' ? 'text-rose-600 dark:text-rose-400' :
             diagnostico.tipo === 'warning' ? 'text-amber-600 dark:text-amber-400' :
             diagnostico.tipo === 'info' ? 'text-blue-600 dark:text-blue-400' :
-            'text-emerald-600 dark:text-emerald-450'
+            'text-emerald-600 dark:text-emerald-400'
           ]" />
           <span>{{ diagnostico.titulo }}</span>
         </div>
-        <p class="text-xs leading-relaxed text-slate-650 dark:text-slate-300" v-html="diagnostico.texto" />
+        <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-300" v-html="diagnostico.texto" />
       </div>
 
       <section
@@ -398,7 +398,7 @@ const opportunityAction = (
             </h4>
           </header>
           <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-100 text-left text-xs dark:divide-slate-850">
+            <table class="min-w-full divide-y divide-slate-100 text-left text-xs dark:divide-slate-800">
               <thead class="bg-slate-50 text-[10px] font-bold uppercase text-slate-400 dark:bg-slate-900/40 dark:text-slate-500">
                 <tr>
                   <th class="px-4 py-2.5">Periodo</th>

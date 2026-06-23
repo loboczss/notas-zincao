@@ -5,8 +5,8 @@ import type {
 import {
   mapCompraAiTask,
   sanitizeCompraTaskPayload,
-} from '../../../services/integrim-notas/opportunity-task-config'
-import { getNextCompraTaskRunAt } from '../../../services/integrim-notas/opportunity-task-schedule'
+} from '../../../services/integrim-notas/ai/opportunity-task-config'
+import { getNextCompraTaskRunAt } from '../../../services/integrim-notas/ai/opportunity-task-schedule'
 import { createAdminClient } from '../../../services/integrim-notas/sync/repository'
 import { authorizeStockIntegrinAdminOrServiceRole } from '../../../utils/stock-integrin-auth'
 

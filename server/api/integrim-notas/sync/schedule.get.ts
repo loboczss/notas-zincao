@@ -1,7 +1,7 @@
 import { serverSupabaseUser } from '#supabase/server'
-import { createAdminClient } from '../../services/integrim-notas/sync/repository'
-import { loadSyncSchedule } from '../../services/integrim-notas/sync-schedule'
-import type { IntegrimSyncScheduleResponse } from '../../../shared/types/IntegrimNotas'
+import { createAdminClient } from '../../../services/integrim-notas/sync/repository'
+import { loadSyncSchedule } from '../../../services/integrim-notas/sync-schedule'
+import type { IntegrimSyncScheduleResponse } from '../../../../shared/types/IntegrimNotas'
 
 export default defineEventHandler(async (event): Promise<IntegrimSyncScheduleResponse> => {
   const user = await serverSupabaseUser(event)

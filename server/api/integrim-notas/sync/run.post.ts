@@ -1,12 +1,12 @@
 import {
   runIntegrimNotasSync,
   startIntegrimNotasSyncInBackground,
-} from '../../services/integrim-notas/sync/index'
-import { authorizeStockIntegrinAdminOrServiceRole } from '../../utils/stock-integrin-auth'
+} from '../../../services/integrim-notas/sync/index'
+import { authorizeStockIntegrinAdminOrServiceRole } from '../../../utils/stock-integrin-auth'
 import type {
   IntegrimNotasSyncRequest,
   IntegrimNotasSyncResponse,
-} from '../../../shared/types/IntegrimNotas'
+} from '../../../../shared/types/IntegrimNotas'
 
 const parseWindowMonths = (value: unknown) => {
   const parsed = Number(value)

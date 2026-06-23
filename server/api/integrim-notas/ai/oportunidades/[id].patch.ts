@@ -3,9 +3,9 @@ import type {
   IntegrimCompraOportunidadeActionRequest,
   IntegrimCompraOportunidadeActionResponse,
   IntegrimCompraOportunidadeStatus,
-} from '../../../../shared/types/IntegrimNotas'
-import { updateCompraOpportunityStatus } from '../../../services/integrim-notas/opportunities'
-import { assertRateLimit } from '../../../utils/rate-limit'
+} from '../../../../../shared/types/IntegrimNotas'
+import { updateCompraOpportunityStatus } from '../../../../services/integrim-notas/ai/opportunities'
+import { assertRateLimit } from '../../../../utils/rate-limit'
 
 const ACTIONABLE_STATUS = new Set<IntegrimCompraOportunidadeStatus>([
   'aceita',

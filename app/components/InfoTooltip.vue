@@ -23,7 +23,7 @@ const alignClass = computed(() => {
 
 <template>
   <div class="relative group inline-block ml-1.5 cursor-help align-middle select-none">
-    <Info class="h-3.5 w-3.5 text-slate-400 hover:text-slate-650 transition dark:text-slate-500 dark:hover:text-slate-400" />
+    <Info class="h-3.5 w-3.5 text-slate-400 hover:text-slate-600 transition dark:text-slate-500 dark:hover:text-slate-400" />
     
     <!-- Tooltip content -->
     <div 
@@ -33,7 +33,7 @@ const alignClass = computed(() => {
       <div v-if="props.title" class="mb-1 text-xs font-bold text-slate-900 dark:text-slate-100">
         {{ props.title }}
       </div>
-      <p class="text-[11px] font-normal leading-normal text-slate-650 dark:text-slate-350">
+      <p class="text-[11px] font-normal leading-normal text-slate-600 dark:text-slate-300">
         {{ props.text }}
       </p>
     </div>

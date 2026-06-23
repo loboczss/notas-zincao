@@ -4,11 +4,11 @@ import type {
   IntegrimCompraAiTaskUpsertRequest,
   IntegrimCompraEventoTipo,
   IntegrimCompraProdutoSelectionMode,
-} from '../../../shared/types/IntegrimNotas'
+} from '../../../../shared/types/IntegrimNotas'
 import {
   DEFAULT_OPENAI_MODEL,
   isOpenAIModelSupported,
-} from '../../../shared/constants/OpenAIModels'
+} from '../../../../shared/constants/OpenAIModels'
 
 const EVENT_TYPES: IntegrimCompraEventoTipo[] = [
   'clima',

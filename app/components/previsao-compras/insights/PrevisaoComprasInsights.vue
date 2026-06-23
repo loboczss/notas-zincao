@@ -37,7 +37,7 @@ const abrirDetalhe = async (row: { idempresa: number; idproduto: number; idsubpr
   // 2. Se não encontrar, buscar via API
   const apiFetch = getApiFetch()
   try {
-    const data = await apiFetch<any>('/api/integrim-notas/analise', {
+    const data = await apiFetch<any>('/api/integrim-notas/catalog/produtos', {
       query: {
         idempresa: row.idempresa,
         search: `${row.idproduto}/${row.idsubproduto}`,
@@ -140,9 +140,9 @@ const changeMetric = (metric: IntegrimAbcMetric) => {
 }
 
 const classeTone: Record<string, string> = {
-  A: 'bg-emerald-105 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
-  B: 'bg-amber-105 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300',
-  C: 'bg-slate-105 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
+  A: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
+  B: 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300',
+  C: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
 }
 
 const metricValue = (valor: number) =>
@@ -343,19 +343,19 @@ onMounted(loadActive)
     <template v-else-if="activeSub === 'ruptura'">
       <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <div class="rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs dark:border-slate-800 dark:bg-slate-900/40">
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-450 dark:text-slate-550">Produtos em risco</p>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Produtos em risco</p>
           <p class="mt-0.5 text-xl font-extrabold text-rose-600 dark:text-rose-400">
             {{ formatStockIntegrinNumber(props.ruptura?.resumo.total_risco || 0, 0) }}
           </p>
         </div>
         <div class="rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs dark:border-slate-800 dark:bg-slate-900/40">
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-450 dark:text-slate-550">Custo p/ repor</p>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Custo p/ repor</p>
           <p class="mt-0.5 text-xl font-extrabold text-slate-800 dark:text-slate-200">
             {{ formatStockIntegrinCurrency(props.ruptura?.resumo.custo_total || 0) }}
           </p>
         </div>
         <div class="col-span-2 sm:col-span-1 rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs dark:border-slate-800 dark:bg-slate-900/40">
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-450 dark:text-slate-550">Lead time / Cobertura</p>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Lead time / Cobertura</p>
           <p class="mt-0.5 text-xl font-extrabold text-slate-800 dark:text-slate-200">
             {{ props.ruptura?.parametros.lead_time_dias ?? 7 }}d <span class="text-xs font-bold text-slate-400 dark:text-slate-500">+ {{ props.ruptura?.parametros.coverage_days ?? 45 }}d</span>
           </p>
@@ -373,7 +373,7 @@ onMounted(loadActive)
           <div class="flex justify-between gap-3">
             <div class="min-w-0">
               <h4 class="font-bold text-slate-800 dark:text-slate-200 text-xs line-clamp-2">{{ row.descricao }}</h4>
-              <div class="text-[10px] text-slate-450 dark:text-slate-500 font-semibold mt-1">Empresa {{ row.idempresa }} · Cód. {{ row.idproduto }}/{{ row.idsubproduto }}</div>
+              <div class="text-[10px] text-slate-400 dark:text-slate-500 font-semibold mt-1">Empresa {{ row.idempresa }} · Cód. {{ row.idproduto }}/{{ row.idsubproduto }}</div>
             </div>
             <div class="shrink-0 text-right">
               <span class="block text-[8px] font-bold text-slate-400 uppercase">Comprar</span>
@@ -382,36 +382,36 @@ onMounted(loadActive)
           </div>
           <div class="grid grid-cols-3 gap-2 rounded-lg bg-slate-50 p-2.5 dark:bg-slate-950/40 text-[10px] font-semibold text-slate-700 dark:text-slate-300">
             <div>
-              <span class="block text-[8px] font-bold text-slate-450 uppercase">Saldo</span>
+              <span class="block text-[8px] font-bold text-slate-400 uppercase">Saldo</span>
               <span class="tabular-nums">{{ formatStockIntegrinNumber(row.saldo_disponivel, 0) }}</span>
             </div>
             <div>
-              <span class="block text-[8px] font-bold text-slate-450 uppercase">Giro / Dia</span>
+              <span class="block text-[8px] font-bold text-slate-400 uppercase">Giro / Dia</span>
               <span class="tabular-nums">{{ formatStockIntegrinNumber(row.giro_diario, 2) }}</span>
             </div>
             <div>
-              <span class="block text-[8px] font-bold text-slate-450 uppercase">Cobertura</span>
+              <span class="block text-[8px] font-bold text-slate-400 uppercase">Cobertura</span>
               <span class="tabular-nums font-bold" :class="(row.dias_cobertura ?? 999) <= row.lead_time_dias ? 'text-rose-600 dark:text-rose-400' : 'text-amber-600 dark:text-amber-400'">
                 {{ row.dias_cobertura != null ? `${formatStockIntegrinNumber(row.dias_cobertura, 0)}d` : '—' }}
               </span>
             </div>
             <div>
-              <span class="block text-[8px] font-bold text-slate-450 uppercase">Ruptura</span>
+              <span class="block text-[8px] font-bold text-slate-400 uppercase">Ruptura</span>
               <span class="tabular-nums font-semibold">{{ row.data_ruptura || '—' }}</span>
             </div>
             <div class="col-span-2">
-              <span class="block text-[8px] font-bold text-slate-450 uppercase">Custo Reposição</span>
+              <span class="block text-[8px] font-bold text-slate-400 uppercase">Custo Reposição</span>
               <span class="tabular-nums font-bold text-slate-900 dark:text-slate-100">{{ formatStockIntegrinCurrency(row.custo_sugestao) }}</span>
             </div>
           </div>
         </div>
-        <div v-if="!(props.ruptura?.rows || []).length" class="py-8 text-center text-slate-400 dark:text-slate-550 font-medium">Nenhum produto em risco de ruptura.</div>
+        <div v-if="!(props.ruptura?.rows || []).length" class="py-8 text-center text-slate-400 dark:text-slate-500 font-medium">Nenhum produto em risco de ruptura.</div>
       </div>
 
       <!-- Desktop table (Ruptura) -->
       <div class="hidden lg:block overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900/40">
         <table class="w-full text-xs">
-          <thead class="bg-slate-55/40 text-[10px] font-bold uppercase tracking-wider text-slate-450 dark:bg-slate-950/20 dark:text-slate-500 select-none">
+          <thead class="bg-slate-50/40 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:bg-slate-950/20 dark:text-slate-500 select-none">
             <tr>
               <th class="px-3 py-2 text-left">Produto</th>
               <th class="px-3 py-2 text-right">
@@ -453,24 +453,24 @@ onMounted(loadActive)
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-            <tr v-for="row in props.ruptura?.rows || []" :key="`${row.idempresa}-${row.idproduto}-${row.idsubproduto}`" class="hover:bg-slate-55/30 dark:hover:bg-slate-850/20 transition-colors cursor-pointer" @click="abrirDetalhe(row)">
+            <tr v-for="row in props.ruptura?.rows || []" :key="`${row.idempresa}-${row.idproduto}-${row.idsubproduto}`" class="hover:bg-slate-50/30 dark:hover:bg-slate-800/20 transition-colors cursor-pointer" @click="abrirDetalhe(row)">
               <td class="px-3 py-1.5">
                 <div class="font-bold text-slate-800 dark:text-slate-200 line-clamp-1">{{ row.descricao || `Produto ${row.idproduto}/${row.idsubproduto}` }}</div>
-                <div class="text-[10px] text-slate-450 dark:text-slate-500">Empresa {{ row.idempresa }} · Cód. {{ row.idproduto }}/{{ row.idsubproduto }}</div>
+                <div class="text-[10px] text-slate-400 dark:text-slate-500">Empresa {{ row.idempresa }} · Cód. {{ row.idproduto }}/{{ row.idsubproduto }}</div>
               </td>
-              <td class="px-3 py-1.5 text-right font-medium text-slate-700 dark:text-slate-350 tabular-nums">{{ formatStockIntegrinNumber(row.saldo_disponivel, 0) }}</td>
-              <td class="px-3 py-1.5 text-right font-medium text-slate-700 dark:text-slate-350 tabular-nums">{{ formatStockIntegrinNumber(row.giro_diario, 2) }}</td>
+              <td class="px-3 py-1.5 text-right font-medium text-slate-700 dark:text-slate-300 tabular-nums">{{ formatStockIntegrinNumber(row.saldo_disponivel, 0) }}</td>
+              <td class="px-3 py-1.5 text-right font-medium text-slate-700 dark:text-slate-300 tabular-nums">{{ formatStockIntegrinNumber(row.giro_diario, 2) }}</td>
               <td class="px-3 py-1.5 text-right font-semibold tabular-nums">
                 <span :class="(row.dias_cobertura ?? 999) <= row.lead_time_dias ? 'text-rose-600 dark:text-rose-400' : 'text-amber-600 dark:text-amber-400'">
                   {{ row.dias_cobertura != null ? `${formatStockIntegrinNumber(row.dias_cobertura, 0)}d` : '—' }}
                 </span>
               </td>
-              <td class="px-3 py-1.5 text-right text-slate-600 dark:text-slate-350 tabular-nums">{{ row.data_ruptura || '—' }}</td>
+              <td class="px-3 py-1.5 text-right text-slate-600 dark:text-slate-300 tabular-nums">{{ row.data_ruptura || '—' }}</td>
               <td class="px-3 py-1.5 text-right font-bold text-slate-900 dark:text-slate-100 tabular-nums">{{ formatStockIntegrinNumber(row.sugestao_compra, 0) }}</td>
-              <td class="px-3 py-1.5 text-right font-semibold text-slate-650 dark:text-slate-355 tabular-nums">{{ formatStockIntegrinCurrency(row.custo_sugestao) }}</td>
+              <td class="px-3 py-1.5 text-right font-semibold text-slate-600 dark:text-slate-300 tabular-nums">{{ formatStockIntegrinCurrency(row.custo_sugestao) }}</td>
             </tr>
             <tr v-if="!(props.ruptura?.rows || []).length">
-              <td colspan="7" class="px-3 py-8 text-center text-slate-400 dark:text-slate-550 font-medium">Nenhum produto em risco de ruptura para os parâmetros atuais.</td>
+              <td colspan="7" class="px-3 py-8 text-center text-slate-400 dark:text-slate-500 font-medium">Nenhum produto em risco de ruptura para os parâmetros atuais.</td>
             </tr>
           </tbody>
         </table>
@@ -483,15 +483,15 @@ onMounted(loadActive)
         <div class="grid flex-1 grid-cols-2 gap-3 sm:grid-cols-3">
           <div class="rounded-xl border border-emerald-200 bg-emerald-500/5 p-3 dark:border-emerald-500/20 dark:bg-emerald-500/10">
             <p class="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Classe A (80%)</p>
-            <p class="mt-0.5 text-lg font-extrabold text-emerald-700 dark:text-emerald-355">{{ formatStockIntegrinNumber(props.abc?.resumo.classe_a || 0, 0) }}</p>
+            <p class="mt-0.5 text-lg font-extrabold text-emerald-700 dark:text-emerald-300">{{ formatStockIntegrinNumber(props.abc?.resumo.classe_a || 0, 0) }}</p>
           </div>
           <div class="rounded-xl border border-amber-200 bg-amber-500/5 p-3 dark:border-amber-500/20 dark:bg-amber-500/10">
             <p class="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Classe B (15%)</p>
-            <p class="mt-0.5 text-lg font-extrabold text-amber-700 dark:text-amber-355">{{ formatStockIntegrinNumber(props.abc?.resumo.classe_b || 0, 0) }}</p>
+            <p class="mt-0.5 text-lg font-extrabold text-amber-700 dark:text-amber-300">{{ formatStockIntegrinNumber(props.abc?.resumo.classe_b || 0, 0) }}</p>
           </div>
           <div class="col-span-2 sm:col-span-1 rounded-xl border border-slate-200 bg-slate-500/5 p-3 dark:border-slate-800 dark:bg-slate-900/40">
-            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-450 dark:text-slate-550">Classe C (5%)</p>
-            <p class="mt-0.5 text-lg font-extrabold text-slate-650 dark:text-slate-350">{{ formatStockIntegrinNumber(props.abc?.resumo.classe_c || 0, 0) }}</p>
+            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Classe C (5%)</p>
+            <p class="mt-0.5 text-lg font-extrabold text-slate-600 dark:text-slate-300">{{ formatStockIntegrinNumber(props.abc?.resumo.classe_c || 0, 0) }}</p>
           </div>
         </div>
         
@@ -516,7 +516,7 @@ onMounted(loadActive)
               <h4 class="font-bold text-slate-800 dark:text-slate-200 text-xs line-clamp-2">
                 {{ idx + 1 }}. {{ row.descricao || `Produto ${row.idproduto}` }}
               </h4>
-              <div class="text-[10px] text-slate-450 dark:text-slate-555 font-semibold mt-1">Empresa {{ row.idempresa }} · Cód. {{ row.idproduto }}/{{ row.idsubproduto }}</div>
+              <div class="text-[10px] text-slate-400 dark:text-slate-500 font-semibold mt-1">Empresa {{ row.idempresa }} · Cód. {{ row.idproduto }}/{{ row.idsubproduto }}</div>
             </div>
             <div class="shrink-0 text-center">
               <span class="block text-[8px] font-bold text-slate-400 uppercase">Classe</span>
@@ -525,26 +525,26 @@ onMounted(loadActive)
           </div>
           <div class="grid grid-cols-3 gap-2 rounded-lg bg-slate-50 p-2.5 dark:bg-slate-950/40 text-[10px] font-semibold text-slate-700 dark:text-slate-300">
             <div>
-              <span class="block text-[8px] font-bold text-slate-450 uppercase">Valor</span>
+              <span class="block text-[8px] font-bold text-slate-400 uppercase">Valor</span>
               <span class="tabular-nums font-bold text-slate-900 dark:text-slate-100">{{ metricValue(row.valor) }}</span>
             </div>
             <div>
-              <span class="block text-[8px] font-bold text-slate-450 uppercase">Partic.</span>
+              <span class="block text-[8px] font-bold text-slate-400 uppercase">Partic.</span>
               <span class="tabular-nums">{{ formatStockIntegrinNumber(row.participacao, 1) }}%</span>
             </div>
             <div>
-              <span class="block text-[8px] font-bold text-slate-450 uppercase">Acumul.</span>
+              <span class="block text-[8px] font-bold text-slate-400 uppercase">Acumul.</span>
               <span class="tabular-nums text-slate-500">{{ formatStockIntegrinNumber(row.acumulado, 1) }}%</span>
             </div>
           </div>
         </div>
-        <div v-if="!(props.abc?.rows || []).length" class="py-8 text-center text-slate-400 dark:text-slate-550 font-medium">Sem dados para classificar no período.</div>
+        <div v-if="!(props.abc?.rows || []).length" class="py-8 text-center text-slate-400 dark:text-slate-500 font-medium">Sem dados para classificar no período.</div>
       </div>
 
       <!-- Desktop table (ABC) -->
       <div class="hidden lg:block overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900/40">
         <table class="w-full text-xs">
-          <thead class="bg-slate-55/40 text-[10px] font-bold uppercase tracking-wider text-slate-450 dark:bg-slate-950/20 dark:text-slate-500 select-none">
+          <thead class="bg-slate-50/40 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:bg-slate-950/20 dark:text-slate-500 select-none">
             <tr>
               <th class="px-3 py-2 text-left w-12">#</th>
               <th class="px-3 py-2 text-left">Produto</th>
@@ -570,21 +570,21 @@ onMounted(loadActive)
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-            <tr v-for="(row, idx) in props.abc?.rows || []" :key="`${row.idempresa}-${row.idproduto}-${row.idsubproduto}`" class="hover:bg-slate-55/30 dark:hover:bg-slate-850/20 transition-colors cursor-pointer" @click="abrirDetalhe(row)">
+            <tr v-for="(row, idx) in props.abc?.rows || []" :key="`${row.idempresa}-${row.idproduto}-${row.idsubproduto}`" class="hover:bg-slate-50/30 dark:hover:bg-slate-800/20 transition-colors cursor-pointer" @click="abrirDetalhe(row)">
               <td class="px-3 py-1.5 text-slate-400 dark:text-slate-500 tabular-nums">{{ idx + 1 }}</td>
               <td class="px-3 py-1.5">
                 <div class="font-bold text-slate-800 dark:text-slate-200 line-clamp-1">{{ row.descricao || `Produto ${row.idproduto}/${row.idsubproduto}` }}</div>
-                <div class="text-[10px] text-slate-450 dark:text-slate-500">Empresa {{ row.idempresa }} · Cód. {{ row.idproduto }}/{{ row.idsubproduto }}</div>
+                <div class="text-[10px] text-slate-400 dark:text-slate-500">Empresa {{ row.idempresa }} · Cód. {{ row.idproduto }}/{{ row.idsubproduto }}</div>
               </td>
               <td class="px-3 py-1.5 text-right font-bold text-slate-900 dark:text-slate-100 tabular-nums">{{ metricValue(row.valor) }}</td>
-              <td class="px-3 py-1.5 text-right text-slate-650 dark:text-slate-350 tabular-nums">{{ formatStockIntegrinNumber(row.participacao, 1) }}%</td>
-              <td class="px-3 py-1.5 text-right text-slate-650 dark:text-slate-355 tabular-nums">{{ formatStockIntegrinNumber(row.acumulado, 1) }}%</td>
+              <td class="px-3 py-1.5 text-right text-slate-600 dark:text-slate-300 tabular-nums">{{ formatStockIntegrinNumber(row.participacao, 1) }}%</td>
+              <td class="px-3 py-1.5 text-right text-slate-600 dark:text-slate-300 tabular-nums">{{ formatStockIntegrinNumber(row.acumulado, 1) }}%</td>
               <td class="px-3 py-1.5 text-center">
                 <span class="inline-flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-extrabold" :class="classeTone[row.classe]">{{ row.classe }}</span>
               </td>
             </tr>
             <tr v-if="!(props.abc?.rows || []).length">
-              <td colspan="6" class="px-3 py-8 text-center text-slate-400 dark:text-slate-555 font-medium">Sem dados para classificar no período.</td>
+              <td colspan="6" class="px-3 py-8 text-center text-slate-400 dark:text-slate-500 font-medium">Sem dados para classificar no período.</td>
             </tr>
           </tbody>
         </table>
@@ -605,7 +605,7 @@ onMounted(loadActive)
         <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Mostrando: {{ escopoLabel }}</p>
-            <p class="text-[11px] text-slate-450 dark:text-slate-500">
+            <p class="text-[11px] text-slate-400 dark:text-slate-500">
               Cada mês consolida as vendas daquele mês {{ anoSelecionado == null ? 'em todos os anos do histórico' : `de ${anoSelecionado}` }}.
             </p>
           </div>
@@ -627,23 +627,23 @@ onMounted(loadActive)
         <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <div class="rounded-xl border border-brand-200 bg-brand-500/5 p-3 dark:border-brand-500/25 dark:bg-brand-500/10">
             <p class="text-[10px] font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400">Mês de pico</p>
-            <p class="mt-0.5 text-lg font-extrabold text-brand-700 dark:text-brand-355">{{ sazonalidadeResumo.pico?.label || '—' }}</p>
-            <p class="text-[10px] font-semibold text-slate-500 dark:text-slate-450 tabular-nums">{{ formatStockIntegrinCurrency(sazonalidadeResumo.pico?.faturamento || 0) }}</p>
+            <p class="mt-0.5 text-lg font-extrabold text-brand-700 dark:text-brand-300">{{ sazonalidadeResumo.pico?.label || '—' }}</p>
+            <p class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 tabular-nums">{{ formatStockIntegrinCurrency(sazonalidadeResumo.pico?.faturamento || 0) }}</p>
           </div>
           <div class="rounded-xl border border-slate-200 bg-white p-3 shadow-xs dark:border-slate-800 dark:bg-slate-900/40">
-            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-450 dark:text-slate-550">Média mensal</p>
+            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Média mensal</p>
             <p class="mt-0.5 text-lg font-extrabold text-slate-800 dark:text-slate-200 tabular-nums">{{ formatStockIntegrinCurrency(sazonalidadeResumo.mediaMensal) }}</p>
-            <p class="text-[10px] font-semibold text-slate-450 dark:text-slate-500">{{ sazonalidadeResumo.mesesComVenda }} {{ sazonalidadeResumo.mesesComVenda === 1 ? 'mês com venda' : 'meses com venda' }}</p>
+            <p class="text-[10px] font-semibold text-slate-400 dark:text-slate-500">{{ sazonalidadeResumo.mesesComVenda }} {{ sazonalidadeResumo.mesesComVenda === 1 ? 'mês com venda' : 'meses com venda' }}</p>
           </div>
           <div class="rounded-xl border border-slate-200 bg-white p-3 shadow-xs dark:border-slate-800 dark:bg-slate-900/40">
-            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-450 dark:text-slate-550">Mês mais fraco</p>
+            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Mês mais fraco</p>
             <p class="mt-0.5 text-lg font-extrabold text-slate-800 dark:text-slate-200">{{ sazonalidadeResumo.vale?.label || '—' }}</p>
-            <p class="text-[10px] font-semibold text-slate-450 dark:text-slate-500 tabular-nums">{{ sazonalidadeResumo.vale ? formatStockIntegrinCurrency(sazonalidadeResumo.vale.faturamento) : '—' }}</p>
+            <p class="text-[10px] font-semibold text-slate-400 dark:text-slate-500 tabular-nums">{{ sazonalidadeResumo.vale ? formatStockIntegrinCurrency(sazonalidadeResumo.vale.faturamento) : '—' }}</p>
           </div>
           <div class="rounded-xl border border-slate-200 bg-white p-3 shadow-xs dark:border-slate-800 dark:bg-slate-900/40">
-            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-450 dark:text-slate-550">{{ anoSelecionado == null ? 'Total no período' : `Total em ${anoSelecionado}` }}</p>
+            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{{ anoSelecionado == null ? 'Total no período' : `Total em ${anoSelecionado}` }}</p>
             <p class="mt-0.5 text-lg font-extrabold text-slate-800 dark:text-slate-200 tabular-nums">{{ formatStockIntegrinCurrency(sazonalidadeResumo.totalFaturamento) }}</p>
-            <p class="text-[10px] font-semibold text-slate-450 dark:text-slate-500 tabular-nums">{{ formatStockIntegrinNumber(sazonalidadeResumo.totalNotas, 0) }} notas</p>
+            <p class="text-[10px] font-semibold text-slate-400 dark:text-slate-500 tabular-nums">{{ formatStockIntegrinNumber(sazonalidadeResumo.totalNotas, 0) }} notas</p>
           </div>
         </div>
 
@@ -664,20 +664,20 @@ onMounted(loadActive)
           <!-- Readout do mês ativo (hover) -->
           <div class="mb-3 grid grid-cols-2 gap-2 rounded-lg bg-slate-50 p-2.5 dark:bg-slate-950/40 sm:grid-cols-4">
             <div>
-              <span class="block text-[8px] font-bold uppercase tracking-wide text-slate-450">Mês</span>
+              <span class="block text-[8px] font-bold uppercase tracking-wide text-slate-400">Mês</span>
               <span class="text-sm font-extrabold text-slate-900 dark:text-slate-100">{{ mesAtivo.label }}</span>
             </div>
             <div>
-              <span class="block text-[8px] font-bold uppercase tracking-wide text-slate-450">Faturamento</span>
+              <span class="block text-[8px] font-bold uppercase tracking-wide text-slate-400">Faturamento</span>
               <span class="text-sm font-bold text-brand-700 dark:text-brand-400 tabular-nums">{{ formatStockIntegrinCurrency(mesAtivo.faturamento) }}</span>
               <span class="ml-1 text-[10px] font-bold text-slate-400 tabular-nums">{{ formatStockIntegrinNumber(mesAtivo.share, 1) }}%</span>
             </div>
             <div>
-              <span class="block text-[8px] font-bold uppercase tracking-wide text-slate-450">Quantidade</span>
+              <span class="block text-[8px] font-bold uppercase tracking-wide text-slate-400">Quantidade</span>
               <span class="text-sm font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">{{ formatStockIntegrinNumber(mesAtivo.qtd, 0) }} un</span>
             </div>
             <div>
-              <span class="block text-[8px] font-bold uppercase tracking-wide text-slate-450">Notas</span>
+              <span class="block text-[8px] font-bold uppercase tracking-wide text-slate-400">Notas</span>
               <span class="text-sm font-bold text-slate-700 dark:text-slate-300 tabular-nums">{{ formatStockIntegrinNumber(mesAtivo.numNotas, 0) }}</span>
             </div>
           </div>

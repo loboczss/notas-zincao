@@ -1,5 +1,5 @@
 import type { IntegrimCompraTaskRunResponse } from '../../../../shared/types/IntegrimNotas'
-import { runCompraOpportunityTask } from '../../../services/integrim-notas/opportunities'
+import { runCompraOpportunityTask } from '../../../services/integrim-notas/ai/opportunities'
 import { authorizeStockIntegrinAdminOrServiceRole } from '../../../utils/stock-integrin-auth'
 
 export default defineEventHandler(async (event): Promise<IntegrimCompraTaskRunResponse> => {

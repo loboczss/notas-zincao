@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { BarChart3, Bot, Lightbulb, Settings2, ShoppingCart } from 'lucide-vue-next'
+import { Bot, Settings2, ShoppingCart } from 'lucide-vue-next'
 import type {
   IntegrimCompraOportunidadeStatus,
 } from '../../shared/types/IntegrimNotas'
@@ -27,6 +27,12 @@ const store = usePrevisaoComprasStore()
 
 const isAdmin = computed(() => String(authStore.profile?.role || '').trim().toLowerCase() === 'admin')
 const syncEmAndamento = computed(() => store.syncing || store.latestRun?.status === 'running')
+
+const navTabs = [
+  { to: '/previsao-compras', label: 'Análise', icon: ShoppingCart },
+  { to: '/previsao-compras/ia', label: 'IA', icon: Bot },
+  { to: '/previsao-compras/config', label: 'Config', icon: Settings2 },
+]
 const mostrarProgresso = computed(() => syncEmAndamento.value)
 const atualizandoLista = ref(false)
 
@@ -42,7 +48,7 @@ const atualizarLista = async () => {
         store.fetchCompraParametros({ silent: true }),
       ])
     } else if (route.path === '/previsao-compras') {
-      const mode = store.indexTabMode
+      const mode = store.analiseView
       if (mode === 'sugestoes') {
         await store.fetchListaCompra()
       } else if (mode === 'todos') {
@@ -156,36 +162,18 @@ onMounted(async () => {
       />
 
       <!-- Navegação por Abas (Sub-rotas do Nuxt 4) -->
-      <div class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-1 shadow-sm dark:border-slate-800 dark:bg-slate-900/50 overflow-x-auto scrollbar-none whitespace-nowrap">
+      <div class="flex items-center gap-1 overflow-x-auto rounded-xl border border-slate-200 bg-white p-1 shadow-xs scrollbar-none whitespace-nowrap dark:border-slate-800 dark:bg-slate-900/50">
         <NuxtLink
-          to="/previsao-compras"
-          class="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-bold transition"
-          :class="route.path === '/previsao-compras'
+          v-for="tab in navTabs"
+          :key="tab.to"
+          :to="tab.to"
+          class="inline-flex min-h-9 shrink-0 items-center justify-center gap-2 rounded-lg px-4 py-1.5 text-sm font-bold transition"
+          :class="route.path === tab.to
             ? 'bg-slate-950 text-white shadow-sm dark:bg-white dark:text-slate-950'
-            : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'"
+            : 'text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800/60'"
         >
-          <ShoppingCart class="h-4 w-4" />
-          Compras & Analítico
-        </NuxtLink>
-        <NuxtLink
-          to="/previsao-compras/ia"
-          class="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-bold transition"
-          :class="route.path === '/previsao-compras/ia'
-            ? 'bg-slate-950 text-white shadow-sm dark:bg-white dark:text-slate-950'
-            : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'"
-        >
-          <Bot class="h-4 w-4" />
-          IA e tasks
-        </NuxtLink>
-        <NuxtLink
-          to="/previsao-compras/config"
-          class="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-bold transition"
-          :class="route.path === '/previsao-compras/config'
-            ? 'bg-slate-950 text-white shadow-sm dark:bg-white dark:text-slate-950'
-            : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'"
-        >
-          <Settings2 class="h-4 w-4" />
-          Agenda & Saúde
+          <component :is="tab.icon" class="h-4 w-4" />
+          {{ tab.label }}
         </NuxtLink>
       </div>
 

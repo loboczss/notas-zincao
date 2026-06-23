@@ -1,6 +1,6 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
-import type { Database } from '../../../app/types/database.types'
-import type { IntegrimSyncHealth, IntegrimSyncHealthResponse } from '../../../shared/types/IntegrimNotas'
+import type { Database } from '../../../../app/types/database.types'
+import type { IntegrimSyncHealth, IntegrimSyncHealthResponse } from '../../../../shared/types/IntegrimNotas'
 
 const numberOrNull = (value: unknown) => (value === null || value === undefined ? null : Number(value))
 

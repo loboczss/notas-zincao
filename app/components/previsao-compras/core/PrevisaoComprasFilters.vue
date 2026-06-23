@@ -98,9 +98,9 @@ const handlePeriodPresetChange = (value: string) => {
       
       <!-- Buscar Produto -->
       <div class="flex flex-col gap-1.5 w-full">
-        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-450 dark:text-slate-400">Buscar produto</span>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">Buscar produto</span>
         <div class="relative w-full">
-          <Search class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-450 dark:text-slate-500" />
+          <Search class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
           <Input
             :model-value="props.searchTerm"
             type="search"
@@ -111,7 +111,7 @@ const handlePeriodPresetChange = (value: string) => {
           <button
             v-if="props.searchTerm"
             type="button"
-            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-650 dark:text-slate-500 dark:hover:text-slate-300 transition-colors"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors"
             @click="emit('update:searchTerm', ''); emit('apply')"
           >
             <X class="h-4 w-4" />
@@ -121,7 +121,7 @@ const handlePeriodPresetChange = (value: string) => {
 
       <!-- Empresa -->
       <div class="flex flex-col gap-1.5">
-        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-450 dark:text-slate-400">Empresa</span>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">Empresa</span>
         <SelectInput
           :model-value="props.idempresa"
           class="h-10 text-xs"
@@ -134,7 +134,7 @@ const handlePeriodPresetChange = (value: string) => {
 
       <!-- Período Preset -->
       <div class="flex flex-col gap-1.5">
-        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-450 dark:text-slate-400">Período de Análise</span>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">Período de Análise</span>
         <SelectInput
           :model-value="props.periodPreset"
           class="h-10 text-xs"
@@ -146,7 +146,7 @@ const handlePeriodPresetChange = (value: string) => {
 
       <!-- Ordenar Por -->
       <div class="flex flex-col gap-1.5">
-        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-450 dark:text-slate-400">Ordenar por</span>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">Ordenar por</span>
         <SelectInput
           :model-value="props.sort"
           class="h-10 text-xs"
@@ -163,7 +163,7 @@ const handlePeriodPresetChange = (value: string) => {
           class="h-10 px-3.5 rounded-lg border text-xs font-bold flex items-center justify-center gap-1.5 transition select-none shrink-0 relative"
           :class="showAdvancedFilters || activeAdvancedCount > 0
             ? 'border-brand-500 bg-brand-50 text-brand-900 dark:border-brand-500/40 dark:bg-brand-500/10 dark:text-brand-300'
-            : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-55 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400 dark:hover:bg-slate-900'"
+            : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400 dark:hover:bg-slate-900'"
           @click="showAdvancedFilters = !showAdvancedFilters"
         >
           <SlidersHorizontal class="h-4 w-4" />
@@ -202,7 +202,7 @@ const handlePeriodPresetChange = (value: string) => {
       >
         <!-- Data Inicial (Aparece apenas quando Período é Personalizado) -->
         <div v-if="props.periodPreset === 'custom'" class="flex flex-col gap-1.5 animate-fade-in">
-          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-450 dark:text-slate-400">Data Inicial</span>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">Data Inicial</span>
           <Input
             :model-value="props.dateStart"
             type="date"
@@ -213,7 +213,7 @@ const handlePeriodPresetChange = (value: string) => {
 
         <!-- Data Final (Aparece apenas quando Período é Personalizado) -->
         <div v-if="props.periodPreset === 'custom'" class="flex flex-col gap-1.5 animate-fade-in">
-          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-450 dark:text-slate-400">Data Final</span>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">Data Final</span>
           <Input
             :model-value="props.dateEnd"
             type="date"
@@ -224,7 +224,7 @@ const handlePeriodPresetChange = (value: string) => {
 
         <!-- Cobertura de Estoque (Filtro Avançado) -->
         <div v-show="showAdvancedFilters" class="flex flex-col gap-1.5">
-          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-450 dark:text-slate-400">Dias de Cobertura</span>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">Dias de Cobertura</span>
           <Input
             :model-value="props.coverageDays"
             type="number"
@@ -238,7 +238,7 @@ const handlePeriodPresetChange = (value: string) => {
 
         <!-- Oportunidades IA (Filtro Avançado) -->
         <div v-show="showAdvancedFilters" class="flex flex-col gap-1.5">
-          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-450 dark:text-slate-400">Oportunidades IA</span>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">Oportunidades IA</span>
           <SelectInput
             :model-value="props.oportunidadeFilter"
             class="h-10 text-xs"
@@ -250,7 +250,7 @@ const handlePeriodPresetChange = (value: string) => {
 
         <!-- Comparar Período Anterior (Filtro Avançado com Toggle Switch) -->
         <div v-show="showAdvancedFilters" class="flex flex-col gap-1.5 justify-end">
-          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-450 dark:text-slate-400">Comparação</span>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">Comparação</span>
           <button
             type="button"
             class="flex h-10 w-full items-center justify-between rounded-lg border px-3 text-xs font-semibold transition cursor-pointer select-none"
@@ -260,7 +260,7 @@ const handlePeriodPresetChange = (value: string) => {
             @click="emit('update:comparePrevious', !props.comparePrevious); emit('apply')"
           >
             <span class="flex items-center gap-2">
-              <CalendarDays class="h-4 w-4 text-slate-450" />
+              <CalendarDays class="h-4 w-4 text-slate-400" />
               Comparar anterior
             </span>
             <span

@@ -6,18 +6,7 @@ import type {
   IntegrimAbcResponse,
   IntegrimAbcRow,
 } from '../../../../shared/types/IntegrimNotas'
-
-const parsePositiveInteger = (value: unknown) => {
-  const parsed = Number(String(value ?? '').trim())
-  if (!Number.isFinite(parsed)) return null
-  const integer = Math.trunc(parsed)
-  return integer > 0 ? integer : null
-}
-
-const parseDate = (value: unknown) => {
-  const raw = String(value ?? '').trim()
-  return /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : null
-}
+import { parseDate, parsePositiveInteger, sanitizeLike } from '../../../utils/integrim-query'
 
 const parseMetric = (value: unknown): IntegrimAbcMetric => {
   const key = String(value || '').trim().toLowerCase()
@@ -33,7 +22,7 @@ export default defineEventHandler(async (event): Promise<IntegrimAbcResponse> =>
   const page = Math.max(1, Number(query.page || 1) || 1)
   const pageSize = Math.min(Math.max(Number(query.page_size || 50), 1), 200)
   const metric = parseMetric(query.metric)
-  const search = String(query.search || '').replace(/[%,()._{}\\]/g, ' ').trim()
+  const search = sanitizeLike(query.search)
 
   const { data, error } = await (client as any).rpc('integrim_produto_abc', {
     p_idempresa: parsePositiveInteger(query.idempresa),
