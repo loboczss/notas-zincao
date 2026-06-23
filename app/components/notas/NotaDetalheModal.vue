@@ -593,6 +593,15 @@ onBeforeUnmount(() => {
             <img :src="nota.foto_url" alt="Foto da nota" class="h-full w-full object-cover transition duration-200 group-hover:opacity-85">
           </CardButton>
 
+          <div v-else-if="nota.midia_status === 'processando'" class="mt-3 flex items-center justify-center gap-2 rounded-lg border border-dashed border-brand-300 bg-brand-50/50 px-4 py-8 text-center text-sm font-medium text-brand-700 dark:border-brand-500/30 dark:bg-brand-500/10 dark:text-brand-300">
+            <span class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-brand-400 border-t-transparent" />
+            Foto sendo processada…
+          </div>
+
+          <div v-else-if="nota.midia_status === 'erro'" class="mt-3 rounded-lg border border-dashed border-rose-300 px-4 py-8 text-center text-sm font-medium text-rose-600 dark:border-rose-500/30 dark:text-rose-400">
+            Falha ao processar a foto. Tente editar a nota e reenviar.
+          </div>
+
           <div v-else class="mt-3 rounded-lg border border-dashed border-slate-200 px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
             Nenhuma foto anexada.
           </div>
