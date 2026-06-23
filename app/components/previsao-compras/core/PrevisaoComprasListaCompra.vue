@@ -335,20 +335,41 @@ const temItens = computed(() => props.rows.length > 0)
       >
         <div v-show="showAdvanced" class="grid gap-3 grid-cols-2 lg:grid-cols-6 pb-3 mb-3 border-b border-slate-100 dark:border-slate-800">
           <div class="flex flex-col gap-1">
-            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Empresa</span>
+            <div class="flex items-center gap-1">
+              <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Empresa</span>
+              <InfoTooltip
+                title="Empresa"
+                text="Filtra a análise por uma das 6 empresas/lojas. 'Todas' soma o estoque e as vendas de todas elas num cálculo só."
+                align="center"
+              />
+            </div>
             <SelectInput v-model="filtros.idempresa" size="sm" class="h-8.5 text-xs">
               <option value="">Todas</option>
               <option v-for="e in empresas" :key="e" :value="e">Empresa {{ e }}</option>
             </SelectInput>
           </div>
-          
+
           <div class="flex flex-col gap-1">
-            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Lead time (dias)</span>
+            <div class="flex items-center gap-1">
+              <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Lead time (dias)</span>
+              <InfoTooltip
+                title="Lead Time"
+                text="Quantos dias o fornecedor leva para entregar depois do pedido. Quanto maior, mais cedo é preciso comprar — entra direto no cálculo do ponto de reposição e do estoque de segurança."
+                align="center"
+              />
+            </div>
             <Input v-model="filtros.leadTime" type="number" min="0" max="365" size="sm" class="h-8.5 text-xs" />
           </div>
-          
+
           <div class="flex flex-col gap-1">
-            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Cobertura (dias)</span>
+            <div class="flex items-center gap-1">
+              <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Cobertura (dias)</span>
+              <InfoTooltip
+                title="Dias de Cobertura"
+                text="Por quantos dias de venda a compra sugerida deve durar, além do lead time. Ex.: 30 = repor o suficiente para cobrir ~1 mês de demanda."
+                align="center"
+              />
+            </div>
             <Input v-model="filtros.coverage" type="number" min="1" max="365" size="sm" class="h-8.5 text-xs" />
           </div>
           
@@ -370,7 +391,14 @@ const temItens = computed(() => props.rows.length > 0)
           </div>
           
           <div class="flex flex-col gap-1">
-            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Histórico (dias)</span>
+            <div class="flex items-center gap-1">
+              <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Histórico (dias)</span>
+              <InfoTooltip
+                title="Histórico analisado"
+                text="Quantos dias de vendas passadas o cálculo usa para estimar a demanda média e a variabilidade. Períodos maiores são mais estáveis; menores reagem mais rápido a mudanças recentes."
+                align="center"
+              />
+            </div>
             <SelectInput v-model="filtros.horizon" size="sm" class="h-8.5 text-xs">
               <option value="30">30</option>
               <option value="60">60</option>
@@ -379,9 +407,16 @@ const temItens = computed(() => props.rows.length > 0)
               <option value="365">365</option>
             </SelectInput>
           </div>
-          
+
           <div class="flex flex-col gap-1">
-            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Filtro Servidor</span>
+            <div class="flex items-center gap-1">
+              <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Filtro Servidor</span>
+              <InfoTooltip
+                title="Ordenação no servidor"
+                text="Critério usado pelo servidor para ordenar e priorizar os itens trazidos (dinheiro em risco, dias até ruptura, sugestão de compra ou faturamento). Útil para ver primeiro o que mais importa."
+                align="right"
+              />
+            </div>
             <SelectInput v-model="filtros.sort" size="sm" class="h-8.5 text-xs">
               <option value="risco">Dinheiro em risco</option>
               <option value="ruptura">Dias até ruptura</option>
