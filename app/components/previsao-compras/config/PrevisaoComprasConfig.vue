@@ -134,6 +134,14 @@ const saveSchedule = () => {
   })
 }
 
+// O switch Ativo/Pausado salva na hora (não depende do botão "Salvar agenda"),
+// para que o estado persista ao atualizar a página.
+const toggleEnabled = () => {
+  if (!props.isAdmin || props.saving) return
+  form.enabled = !form.enabled
+  saveSchedule()
+}
+
 const saveParametros = () => {
   emit('saveParametros', {
     lead_time_dias: Math.min(365, Math.max(0, Number(paramsForm.leadTime || 7))),
@@ -185,16 +193,31 @@ const semDadosDiarios = computed(() => (props.health?.daily_rows ?? 0) === 0)
             <CalendarClock class="h-4.5 w-4.5 text-brand-500" />
             Agendamento da sincronização
           </span>
-          <CheckboxField
-            v-model="form.enabled"
-            :disabled="!props.isAdmin"
-            class="h-8 min-h-0 py-1 text-xs font-extrabold uppercase tracking-wider"
-            :class="form.enabled 
-              ? '!border-emerald-200 !bg-emerald-500/5 !text-emerald-700 dark:!border-emerald-500/20 dark:!bg-emerald-500/10 dark:!text-emerald-300'
-              : '!border-slate-200 !bg-slate-50/50 !text-slate-500 dark:!border-slate-800 dark:!bg-slate-950 dark:!text-slate-400'"
+          <button
+            type="button"
+            role="switch"
+            :aria-checked="form.enabled"
+            :disabled="!props.isAdmin || props.saving"
+            class="inline-flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-60"
+            :title="form.enabled ? 'Sincronização automática ativa — clique para pausar' : 'Sincronização automática pausada — clique para ativar'"
+            @click="toggleEnabled"
           >
-            {{ form.enabled ? 'Ativo' : 'Pausado' }}
-          </CheckboxField>
+            <span
+              class="relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors"
+              :class="form.enabled ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'"
+            >
+              <span
+                class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform"
+                :class="form.enabled ? 'translate-x-4' : 'translate-x-0.5'"
+              />
+            </span>
+            <span
+              class="text-xs font-extrabold uppercase tracking-wider"
+              :class="form.enabled ? 'text-emerald-600 dark:text-emerald-300' : 'text-slate-500 dark:text-slate-400'"
+            >
+              {{ form.enabled ? 'Ativo' : 'Pausado' }}
+            </span>
+          </button>
         </div>
 
         <div class="space-y-4">
