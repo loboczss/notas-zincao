@@ -48,18 +48,11 @@ const atualizarLista = async () => {
         store.fetchCompraParametros({ silent: true }),
       ])
     } else if (route.path === '/previsao-compras') {
-      const mode = store.analiseView
-      if (mode === 'sugestoes') {
-        await store.fetchListaCompra()
-      } else if (mode === 'todos') {
-        await store.fetchProdutos()
-      } else if (mode === 'insights') {
-        await Promise.all([
-          store.fetchRuptura(),
-          store.fetchAbc({ metric: 'faturamento' }),
-          store.fetchSazonalidade(),
-        ])
-      }
+      await Promise.all([
+        store.fetchListaCompra({ only_buy: true }),
+        store.fetchSazonalidade(),
+        store.fetchAiDashboard({ silent: true }),
+      ])
     }
   } finally {
     atualizandoLista.value = false

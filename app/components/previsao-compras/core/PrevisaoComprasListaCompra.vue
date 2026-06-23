@@ -27,6 +27,8 @@ import SelectInput from '../../SelectInput.vue'
 import Input from '../../Input.vue'
 import Botao from '../../Botao.vue'
 import InfoTooltip from '../../InfoTooltip.vue'
+import InfiniteScrollTrigger from '../../InfiniteScrollTrigger.vue'
+import PcSectionHeader from '../ui/PcSectionHeader.vue'
 
 const props = withDefaults(defineProps<{
   rows: IntegrimListaCompraRow[]
@@ -36,11 +38,10 @@ const props = withDefaults(defineProps<{
 }>(), {
   loading: false,
   totalItens: 0,
-  zZz: 0, // dummy
 })
 
 const emit = defineEmits<{
-  (e: 'fetch', query: IntegrimListaCompraQuery): void
+  (e: 'fetch', query: IntegrimListaCompraQuery, options?: { append?: boolean }): void
 }>()
 
 const store = usePrevisaoComprasStore()
@@ -54,7 +55,11 @@ const filtros = reactive({
   horizon: '90',
   sort: 'risco' as IntegrimListaCompraSort,
   search: '',
+  // true = só itens que precisam repor agora; false = todos os produtos
+  onlyBuy: true,
 })
+
+const page = ref(1)
 
 // Visibilidade dos parâmetros avançados
 const showAdvanced = ref(false)
@@ -65,20 +70,37 @@ const sortState = reactive({
   direction: 'desc' as 'asc' | 'desc',
 })
 
-const buildQuery = (page = 1): IntegrimListaCompraQuery => ({
+const buildQuery = (pageToLoad = 1): IntegrimListaCompraQuery => ({
   idempresa: filtros.idempresa ? Number(filtros.idempresa) : null,
   lead_time_dias: Number(filtros.leadTime || 7),
   coverage_days: Number(filtros.coverage || 30),
   service_level: Number(filtros.serviceLevel || 0.95),
   horizon_days: Number(filtros.horizon || 90),
-  only_buy: true,
+  only_buy: filtros.onlyBuy,
   sort: filtros.sort,
   search: filtros.search,
-  page,
+  page: pageToLoad,
   page_size: 50,
 })
 
-const aplicar = () => emit('fetch', buildQuery(1))
+const aplicar = () => {
+  page.value = 1
+  emit('fetch', buildQuery(1), { append: false })
+}
+
+const temMais = computed(() => props.rows.length < (props.totalItens || 0))
+
+const carregarMais = () => {
+  if (props.loading || !temMais.value) return
+  page.value += 1
+  emit('fetch', buildQuery(page.value), { append: true })
+}
+
+// Alternar o modo "só repor agora" recarrega do zero.
+const toggleOnlyBuy = () => {
+  filtros.onlyBuy = !filtros.onlyBuy
+  aplicar()
+}
 
 const handleSort = (colName: string) => {
   if (sortState.column === colName) {
@@ -242,6 +264,31 @@ const temItens = computed(() => props.rows.length > 0)
 
 <template>
   <div class="space-y-4">
+    <!-- Cabeçalho explicativo + alternância de modo -->
+    <PcSectionHeader
+      :title="filtros.onlyBuy ? 'Comprar agora' : 'Todos os produtos'"
+      :subtitle="filtros.onlyBuy
+        ? 'Só os itens que cruzaram o ponto de reposição — precisam de compra para não faltar.'
+        : 'Catálogo completo com os mesmos indicadores de decisão. Use para explorar tudo.'"
+    >
+      <template #actions>
+        <button
+          type="button"
+          class="inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-bold transition"
+          :class="filtros.onlyBuy
+            ? 'border-brand-300 bg-brand-50 text-brand-700 dark:border-brand-500/30 dark:bg-brand-500/10 dark:text-brand-300'
+            : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'"
+          @click="toggleOnlyBuy"
+        >
+          <span class="relative inline-flex h-4 w-7 items-center rounded-full transition" :class="filtros.onlyBuy ? 'bg-brand-500' : 'bg-slate-300 dark:bg-slate-600'">
+            <span class="inline-block h-3 w-3 transform rounded-full bg-white transition" :class="filtros.onlyBuy ? 'translate-x-3.5' : 'translate-x-0.5'" />
+          </span>
+          Só repor agora
+          <InfoTooltip title="Só repor agora" text="Ligado: mostra apenas itens abaixo do ponto de reposição (o que comprar já). Desligado: lista todos os produtos com os mesmos indicadores, para explorar o catálogo inteiro." align="right" />
+        </button>
+      </template>
+    </PcSectionHeader>
+
     <!-- KPIs da decisão (Design premium e mais compacto) -->
     <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
       <div class="rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs dark:border-slate-800 dark:bg-slate-900/40">
@@ -386,7 +433,7 @@ const temItens = computed(() => props.rows.length > 0)
         Calculando...
       </div>
       <div v-else-if="!temItens" class="py-8 text-center text-slate-400 dark:text-slate-500 font-medium">
-        Nenhum item precisa de compra agora. 🎉
+        {{ filtros.onlyBuy ? 'Nenhum item precisa de compra agora. 🎉' : 'Nenhum produto encontrado.' }}
       </div>
       <div
         v-else
@@ -559,7 +606,7 @@ const temItens = computed(() => props.rows.length > 0)
             <td colspan="10" class="px-3 py-8 text-center text-slate-400 dark:text-slate-500">Calculando...</td>
           </tr>
           <tr v-else-if="!temItens">
-            <td colspan="10" class="px-3 py-8 text-center text-slate-400 dark:text-slate-500 font-medium">Nenhum item precisa de compra agora. 🎉</td>
+            <td colspan="10" class="px-3 py-8 text-center text-slate-400 dark:text-slate-500 font-medium">{{ filtros.onlyBuy ? 'Nenhum item precisa de compra agora. 🎉' : 'Nenhum produto encontrado.' }}</td>
           </tr>
           <tr
             v-else
@@ -623,6 +670,18 @@ const temItens = computed(() => props.rows.length > 0)
       </table>
     </div>
     
+    <!-- Scroll infinito -->
+    <InfiniteScrollTrigger
+      v-if="temItens"
+      :loading="props.loading && temItens"
+      :done="!temMais"
+      :loaded-count="props.rows.length"
+      :total="props.totalItens || 0"
+      label="itens"
+      done-label="Todos os itens foram carregados."
+      @load-more="carregarMais"
+    />
+
     <p class="px-1 text-[10px] leading-relaxed text-slate-400 dark:text-slate-500">
       Comprar quando o estoque cruza o <strong>ponto de reposição</strong> = demanda diária × lead time + estoque de segurança
       (nível de serviço × variabilidade). Classe <strong>ABC</strong> = importância no faturamento; <strong>XYZ</strong> = previsibilidade da demanda.

@@ -16,8 +16,6 @@ import type {
   IntegrimCompraParametros,
   IntegrimCompraParametrosUpdateRequest,
   IntegrimCompraTaskRunResponse,
-  IntegrimAbcMetric,
-  IntegrimAbcResponse,
   IntegrimListaCompraQuery,
   IntegrimListaCompraResponse,
   IntegrimListaCompraRow,
@@ -27,7 +25,6 @@ import type {
   IntegrimProdutoValorResponse,
   IntegrimProdutoValorSort,
   IntegrimProdutoValorStats,
-  IntegrimRupturaResponse,
   IntegrimSazonalidadeResponse,
   IntegrimSyncHealth,
   IntegrimSyncHealthResponse,
@@ -87,9 +84,7 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
   const health = ref<IntegrimSyncHealth | null>(null)
   const schedule = ref<IntegrimSyncSchedule | null>(null)
   const compraParametros = ref<IntegrimCompraParametros | null>(null)
-  const abc = ref<IntegrimAbcResponse | null>(null)
   const sazonalidade = ref<IntegrimSazonalidadeResponse | null>(null)
-  const ruptura = ref<IntegrimRupturaResponse | null>(null)
   const listaCompra = ref<IntegrimListaCompraRow[]>([])
   const listaCompraStats = ref<IntegrimListaCompraStats | null>(null)
   const listaCompraTotalItens = ref(0)
@@ -98,7 +93,6 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
   const loadingHealth = ref(false)
   const loadingSchedule = ref(false)
   const loadingInsights = ref(false)
-  const analiseView = ref<'sugestoes' | 'todos' | 'insights'>('sugestoes')
   const savingConfig = ref(false)
   const produtoSelecionado = ref<IntegrimProdutoValor | null>(null)
   const produtoModalAberto = computed({
@@ -573,40 +567,6 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     }
   }
 
-  const fetchAbc = async (query: {
-    idempresa?: string | number | null
-    date_start?: string | null
-    date_end?: string | null
-    metric?: IntegrimAbcMetric
-    search?: string
-    page?: number
-    page_size?: number
-  } = {}) => {
-    loadingInsights.value = true
-    try {
-      const data = await getApiFetch()<IntegrimAbcResponse>('/api/integrim-notas/insights/abc', {
-        query: {
-          idempresa: query.idempresa || undefined,
-          date_start: query.date_start || undefined,
-          date_end: query.date_end || undefined,
-          metric: query.metric || undefined,
-          search: query.search?.trim() || undefined,
-          page: query.page,
-          page_size: query.page_size,
-        },
-      })
-      abc.value = data
-      return data
-    }
-    catch (error) {
-      errorMessage.value = getApiErrorMessage(error, 'Falha ao calcular a curva ABC.')
-      return null
-    }
-    finally {
-      loadingInsights.value = false
-    }
-  }
-
   const fetchSazonalidade = async (query: {
     idempresa?: string | number | null
     idproduto?: number | null
@@ -628,43 +588,6 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     catch (error) {
       errorMessage.value = getApiErrorMessage(error, 'Falha ao calcular a sazonalidade.')
       return null
-    }
-  }
-
-  const fetchRuptura = async (query: {
-    idempresa?: string | number | null
-    lead_time_dias?: number | null
-    coverage_days?: number | null
-    date_start?: string | null
-    date_end?: string | null
-    search?: string
-    page?: number
-    page_size?: number
-  } = {}) => {
-    loadingInsights.value = true
-    try {
-      const data = await getApiFetch()<IntegrimRupturaResponse>('/api/integrim-notas/insights/ruptura', {
-        query: {
-          idempresa: query.idempresa || undefined,
-          lead_time_dias: query.lead_time_dias ?? undefined,
-          coverage_days: query.coverage_days ?? undefined,
-          date_start: query.date_start || undefined,
-          date_end: query.date_end || undefined,
-          search: query.search?.trim() || undefined,
-          page: query.page,
-          page_size: query.page_size,
-        },
-      })
-      ruptura.value = data
-      compraParametros.value = data.parametros
-      return data
-    }
-    catch (error) {
-      errorMessage.value = getApiErrorMessage(error, 'Falha ao calcular o alerta de ruptura.')
-      return null
-    }
-    finally {
-      loadingInsights.value = false
     }
   }
 
@@ -732,9 +655,7 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     health.value = null
     schedule.value = null
     compraParametros.value = null
-    abc.value = null
     sazonalidade.value = null
-    ruptura.value = null
     listaCompra.value = []
     listaCompraStats.value = null
     listaCompraTotalItens.value = 0
@@ -746,7 +667,6 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
   return {
     produtoSelecionado,
     produtoModalAberto,
-    analiseView,
     produtos,
     runs,
     latestRun,
@@ -757,9 +677,7 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     health,
     schedule,
     compraParametros,
-    abc,
     sazonalidade,
-    ruptura,
     listaCompra,
     listaCompraStats,
     listaCompraTotalItens,
@@ -804,9 +722,7 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     updateSyncSchedule,
     fetchCompraParametros,
     updateCompraParametros,
-    fetchAbc,
     fetchSazonalidade,
-    fetchRuptura,
     fetchListaCompra,
     reset,
   }
