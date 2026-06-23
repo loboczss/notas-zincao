@@ -19,7 +19,7 @@ const insightsQueryBase = () => ({
 
 const carregarRuptura = () => store.fetchRuptura(insightsQueryBase())
 const carregarAbc = (metric: IntegrimAbcMetric) => store.fetchAbc({ ...insightsQueryBase(), metric })
-const carregarSazonalidade = () => store.fetchSazonalidade({ idempresa: idempresa.value || undefined })
+const carregarSazonalidade = (ano?: number | null) => store.fetchSazonalidade({ idempresa: idempresa.value || undefined, ano })
 
 onMounted(async () => {
   if (!store.abc && !store.loadingInsights) {

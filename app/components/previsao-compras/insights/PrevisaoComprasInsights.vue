@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { AlertOctagon, BarChart4, CalendarRange, Loader2 } from 'lucide-vue-next'
 import type {
   IntegrimAbcMetric,
@@ -98,12 +98,16 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   (e: 'loadRuptura'): void
   (e: 'loadAbc', metric: IntegrimAbcMetric): void
-  (e: 'loadSazonalidade'): void
+  (e: 'loadSazonalidade', ano?: number | null): void
 }>()
 
 type SubTab = 'ruptura' | 'abc' | 'sazonalidade'
 const activeSub = ref<SubTab>('ruptura')
 const abcMetric = ref<IntegrimAbcMetric>('faturamento')
+
+// Ano selecionado na sazonalidade. undefined = ainda não inicializado (assume o
+// ano mais recente quando os dados chegam); null = "Todos os anos" (consolidado).
+const anoSelecionado = ref<number | null | undefined>(undefined)
 
 const subTabs: Array<{ id: SubTab, label: string, icon: any }> = [
   { id: 'ruptura', label: 'Risco de ruptura', icon: AlertOctagon },
@@ -122,7 +126,7 @@ const monthLabels = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Se
 const loadActive = () => {
   if (activeSub.value === 'ruptura') emit('loadRuptura')
   else if (activeSub.value === 'abc') emit('loadAbc', abcMetric.value)
-  else emit('loadSazonalidade')
+  else emit('loadSazonalidade', anoSelecionado.value ?? undefined)
 }
 
 const selectSub = (tab: SubTab) => {
@@ -277,6 +281,38 @@ const formatCompactCurrency = (valor: number) => {
   if (valor >= 1000) return `R$ ${formatStockIntegrinNumber(valor / 1000, valor >= 10000 ? 0 : 1)}k`
   return formatStockIntegrinCurrency(valor)
 }
+
+// Seletor de ano da sazonalidade
+const anosDisponiveis = computed(() => props.sazonalidade?.anos || [])
+
+const periodoLabel = computed(() => {
+  const anos = anosDisponiveis.value
+  if (!anos.length) return ''
+  const max = anos[0]?.ano
+  const min = anos[anos.length - 1]?.ano
+  return min === max ? `${min}` : `${min}–${max}`
+})
+
+const escopoLabel = computed(() => {
+  if (anoSelecionado.value == null) {
+    return periodoLabel.value ? `Todos os anos · ${periodoLabel.value}` : 'Todos os anos'
+  }
+  return `Ano de ${anoSelecionado.value}`
+})
+
+const selecionarAno = (valor: string) => {
+  anoSelecionado.value = valor === 'todos' ? null : Number(valor)
+  emit('loadSazonalidade', anoSelecionado.value ?? undefined)
+}
+
+// Quando os anos chegam pela primeira vez, assume o mais recente (em vez do
+// consolidado ambíguo de todos os anos) e recarrega só aquele ano.
+watch(anosDisponiveis, (anos) => {
+  if (anoSelecionado.value === undefined && anos.length) {
+    anoSelecionado.value = anos[0]?.ano ?? null
+    emit('loadSazonalidade', anoSelecionado.value ?? undefined)
+  }
+}, { immediate: true })
 
 onMounted(loadActive)
 </script>
@@ -565,6 +601,28 @@ onMounted(loadActive)
         Rode a sincronização das notas para habilitar a curva por mês do ano.
       </div>
       <template v-else>
+        <!-- Cabeçalho: escopo temporal + seletor de ano -->
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Mostrando: {{ escopoLabel }}</p>
+            <p class="text-[11px] text-slate-450 dark:text-slate-500">
+              Cada mês consolida as vendas daquele mês {{ anoSelecionado == null ? 'em todos os anos do histórico' : `de ${anoSelecionado}` }}.
+            </p>
+          </div>
+          <div class="flex flex-col gap-1 w-full sm:w-44 shrink-0">
+            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Ano</span>
+            <SelectInput
+              :model-value="anoSelecionado == null ? 'todos' : String(anoSelecionado)"
+              size="sm"
+              class="h-8.5 text-xs"
+              @update:model-value="selecionarAno($event as string)"
+            >
+              <option v-for="a in anosDisponiveis" :key="a.ano" :value="String(a.ano)">{{ a.ano }}</option>
+              <option value="todos">Todos os anos</option>
+            </SelectInput>
+          </div>
+        </div>
+
         <!-- Cartões de resumo da curva sazonal -->
         <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <div class="rounded-xl border border-brand-200 bg-brand-500/5 p-3 dark:border-brand-500/25 dark:bg-brand-500/10">
@@ -583,7 +641,7 @@ onMounted(loadActive)
             <p class="text-[10px] font-semibold text-slate-450 dark:text-slate-500 tabular-nums">{{ sazonalidadeResumo.vale ? formatStockIntegrinCurrency(sazonalidadeResumo.vale.faturamento) : '—' }}</p>
           </div>
           <div class="rounded-xl border border-slate-200 bg-white p-3 shadow-xs dark:border-slate-800 dark:bg-slate-900/40">
-            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-450 dark:text-slate-550">Total no histórico</p>
+            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-450 dark:text-slate-550">{{ anoSelecionado == null ? 'Total no período' : `Total em ${anoSelecionado}` }}</p>
             <p class="mt-0.5 text-lg font-extrabold text-slate-800 dark:text-slate-200 tabular-nums">{{ formatStockIntegrinCurrency(sazonalidadeResumo.totalFaturamento) }}</p>
             <p class="text-[10px] font-semibold text-slate-450 dark:text-slate-500 tabular-nums">{{ formatStockIntegrinNumber(sazonalidadeResumo.totalNotas, 0) }} notas</p>
           </div>
@@ -593,7 +651,7 @@ onMounted(loadActive)
           <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
             <p class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
               <CalendarRange class="h-4.5 w-4.5 text-brand-500" />
-              Curva de sazonalidade por mês do ano
+              Curva de sazonalidade · {{ escopoLabel }}
             </p>
             <!-- Legenda -->
             <div class="flex items-center gap-3 text-[10px] font-bold text-slate-500 dark:text-slate-400">

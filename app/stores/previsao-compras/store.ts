@@ -611,6 +611,7 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     idempresa?: string | number | null
     idproduto?: number | null
     idsubproduto?: number | null
+    ano?: number | null
   } = {}) => {
     try {
       const data = await getApiFetch()<IntegrimSazonalidadeResponse>('/api/integrim-notas/insights/sazonalidade', {
@@ -618,6 +619,7 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
           idempresa: query.idempresa || undefined,
           idproduto: query.idproduto || undefined,
           idsubproduto: query.idsubproduto || undefined,
+          ano: query.ano || undefined,
         },
       })
       sazonalidade.value = data

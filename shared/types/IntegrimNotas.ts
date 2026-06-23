@@ -499,10 +499,19 @@ export type IntegrimSazonalidadeRow = {
   faturamento_share: number
 }
 
+export type IntegrimSazonalidadeAno = {
+  ano: number
+  qtd: number
+  faturamento: number
+  num_notas: number
+}
+
 export type IntegrimSazonalidadeResponse = {
   success: boolean
   rows: IntegrimSazonalidadeRow[]
   requer_backfill: boolean
+  ano: number | null
+  anos: IntegrimSazonalidadeAno[]
 }
 
 export type IntegrimRupturaRow = {
