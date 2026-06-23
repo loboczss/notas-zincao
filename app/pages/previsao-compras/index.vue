@@ -32,20 +32,22 @@ onMounted(async () => {
       :loading="store.loadingAiDashboard"
     />
 
-    <!-- Tabela única: "só repor agora" (decisão) ou catálogo completo -->
+    <!-- Sazonalidade: quando cada mês vende mais.
+         Fica ANTES da tabela porque a tabela tem scroll infinito — se ficasse
+         depois, o gráfico nunca seria alcançável (a rolagem carrega mais itens). -->
+    <PrevisaoComprasSazonalidade
+      :sazonalidade="store.sazonalidade"
+      :loading="store.loadingInsights"
+      @load="carregarSazonalidade"
+    />
+
+    <!-- Tabela única (scroll infinito) — sempre por último na página -->
     <PrevisaoComprasListaCompra
       :rows="store.listaCompra"
       :stats="store.listaCompraStats"
       :loading="store.loadingListaCompra"
       :total-itens="store.listaCompraTotalItens"
       @fetch="carregarListaCompra"
-    />
-
-    <!-- Sazonalidade: quando cada mês vende mais -->
-    <PrevisaoComprasSazonalidade
-      :sazonalidade="store.sazonalidade"
-      :loading="store.loadingInsights"
-      @load="carregarSazonalidade"
     />
   </div>
 </template>
