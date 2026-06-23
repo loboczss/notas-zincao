@@ -1,7 +1,7 @@
 import { serverSupabaseUser } from '#supabase/server'
 import type { OpenAINotaExtractionRequest } from '../../../../shared/types/OpenAI'
 import type { NotaIntegrimLookupResponse } from '../../../../shared/types/NotasRetirada'
-import { lookupNotaIntegrim } from '../../../services/integrim/client'
+import { lookupNotaIntegrimFromImageHints } from '../../../services/integrim/client'
 import { extractNotaLookupHintsFromImage, extractNotaProductsFromImage } from '../../../services/openai'
 import { assertRateLimit } from '../../../utils/rate-limit'
 
@@ -108,10 +108,7 @@ export default defineEventHandler(async (event) => {
       } satisfies NotaIntegrimLookupResponse
     }
 
-    const lookupResponse = await lookupNotaIntegrim({
-      numeroNota: hints.numero_nota,
-      serieNota: hints.serie_nota || null,
-    })
+    const lookupResponse = await lookupNotaIntegrimFromImageHints(hints)
 
     const withChave = applyAiChaveToDraft(lookupResponse, hints.chave_nfe)
     const enrichedResponse = await applyImageProductsFallback(event, withChave, body.imageDataUrl)

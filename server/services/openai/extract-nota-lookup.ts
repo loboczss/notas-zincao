@@ -16,12 +16,20 @@ const notaLookupSchema = {
     'numero_nota',
     'serie_nota',
     'chave_nfe',
+    'chave_referenciada',
+    'documento_cliente',
+    'valor_total',
+    'data_emissao',
     'missingFields',
   ],
   properties: {
     numero_nota: { type: 'string' },
     serie_nota: { type: 'string' },
     chave_nfe: { type: 'string' },
+    chave_referenciada: { type: 'string' },
+    documento_cliente: { type: 'string' },
+    valor_total: { type: 'string' },
+    data_emissao: { type: 'string' },
     missingFields: {
       type: 'array',
       items: {
@@ -36,6 +44,10 @@ type NotaLookupModelOutput = {
   numero_nota: string
   serie_nota: string
   chave_nfe: string
+  chave_referenciada: string
+  documento_cliente: string
+  valor_total: string
+  data_emissao: string
   missingFields: string[]
 }
 
@@ -45,6 +57,26 @@ const normalizeSerie = (value: unknown) => {
   return String(value || '')
     .trim()
     .replace(/[^\w-]/g, '')
+}
+
+const normalizeDate = (value: unknown) => {
+  const raw = String(value || '').trim()
+  const iso = raw.match(/^(\d{4}-\d{2}-\d{2})/)
+  if (iso?.[1]) return iso[1]
+  const br = raw.match(/^(\d{2})\/(\d{2})\/(\d{4})/)
+  if (br) return `${br[3]}-${br[2]}-${br[1]}`
+  return ''
+}
+
+const toNumber = (value: unknown): number | undefined => {
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+  if (typeof value === 'string') {
+    const normalized = value.replace(/[^\d,.-]/g, '').replace(',', '.').trim()
+    if (!normalized) return undefined
+    const parsed = Number(normalized)
+    return Number.isFinite(parsed) ? parsed : undefined
+  }
+  return undefined
 }
 
 const isLookupMissingField = (field: string): field is NotaIntegrimLookupHints['missingFields'][number] => {
@@ -73,11 +105,13 @@ export async function extractNotaLookupHintsFromImage(
     },
     instructions: [
       'Voce le uma foto de nota fiscal, NFC-e, cupom fiscal ou DANFE apenas para ajudar uma busca em sistema fiscal.',
-      'Extraia somente tres campos: numero da nota, serie da nota e chave NFe/NFC-e de 44 digitos.',
-      'Nao extraia cliente, produtos, telefone, valores ou data. Esses dados serao buscados em outro sistema.',
-      'Retorne apenas o que estiver visualmente legivel. Nao invente numero, serie ou chave.',
-      'numero_nota e chave_nfe devem conter somente digitos. serie_nota deve preservar letras/numeros/hifen quando estiver legivel.',
-      'Se um campo estiver ausente, borrado, cortado ou ambiguo, retorne string vazia e inclua em missingFields.',
+      'Extraia os identificadores da nota: numero da nota (numero_nota), serie (serie_nota) e chave NFe/NFC-e de 44 digitos (chave_nfe).',
+      'Algumas NF-e sao complementares de um cupom (natureza "NOTA DE ECF" ou texto como "NFCE", "CUPOM", "ECF" nas Informacoes/Dados Adicionais). Nesses casos extraia a chave de 44 digitos do cupom/NFC-e referenciado em chave_referenciada (procure por "refNFe", "NFCE/CHAVE", "CUPOM"). Se nao houver referencia, retorne string vazia.',
+      'Para ajudar a localizar a venda, extraia tambem: documento_cliente (CNPJ ou CPF do destinatario, somente digitos), valor_total (valor total da nota, numero decimal com ponto, sem moeda) e data_emissao (data de emissao em YYYY-MM-DD).',
+      'Nao extraia nomes de produtos, telefone ou nome do cliente. Esses dados serao buscados em outro sistema.',
+      'Retorne apenas o que estiver visualmente legivel. Nao invente numero, serie, chave, documento, valor ou data.',
+      'numero_nota, chave_nfe, chave_referenciada e documento_cliente devem conter somente digitos. serie_nota deve preservar letras/numeros/hifen quando estiver legivel.',
+      'Se um campo estiver ausente, borrado, cortado ou ambiguo, retorne string vazia. Em missingFields inclua apenas numero_nota, serie_nota ou chave_nfe quando faltarem.',
     ].join(' '),
     input: [
       {
@@ -85,7 +119,7 @@ export async function extractNotaLookupHintsFromImage(
         content: [
           {
             type: 'input_text',
-            text: 'Leia a imagem e retorne somente numero_nota, serie_nota e chave_nfe para localizar a nota na Integrim.',
+            text: 'Leia a imagem e retorne os identificadores da nota e, se houver, a chave do cupom referenciado e os dados do destinatario para localizar a venda na Integrim.',
           },
           {
             type: 'input_image',
@@ -105,6 +139,10 @@ export async function extractNotaLookupHintsFromImage(
   const numeroNota = digitsOnly(parsed.numero_nota)
   const serieNota = normalizeSerie(parsed.serie_nota)
   const chaveNfe = digitsOnly(parsed.chave_nfe).slice(0, 44)
+  const chaveReferenciada = digitsOnly(parsed.chave_referenciada).slice(0, 44)
+  const documentoCliente = digitsOnly(parsed.documento_cliente)
+  const dataEmissao = normalizeDate(parsed.data_emissao)
+  const valorTotal = toNumber(parsed.valor_total)
   const parsedKey = parseNfeKey(chaveNfe)
   const finalNumeroNota = numeroNota || parsedKey?.numero_nota || ''
   const finalSerieNota = serieNota || parsedKey?.serie_nota || ''
@@ -120,6 +158,10 @@ export async function extractNotaLookupHintsFromImage(
     numero_nota: finalNumeroNota,
     serie_nota: finalSerieNota,
     chave_nfe: chaveNfe.length === 44 ? chaveNfe : '',
+    chave_referenciada: chaveReferenciada.length === 44 ? chaveReferenciada : '',
+    documento_cliente: documentoCliente,
+    valor_total: valorTotal ?? null,
+    data_emissao: dataEmissao,
     missingFields: Array.from(new Set([...modelMissingFields, ...requiredMissingFields])),
   }
 }

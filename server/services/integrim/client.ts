@@ -1,10 +1,12 @@
 import type {
   NotaIntegrimLookupCandidate,
+  NotaIntegrimLookupHints,
   NotaIntegrimLookupResponse,
   NotaMissingField,
   NotaProduto,
   NotaRetiradaDraft,
 } from '../../../shared/types/NotasRetirada'
+import { parseNfeKey } from '../../../shared/utils/nfe-chave'
 
 const DEFAULT_COMPANY_IDS = [1, 2, 3, 4, 5, 6]
 const DEFAULT_MODELO = '55'
@@ -462,43 +464,91 @@ const findItems = async (
   )
 }
 
-export const lookupNotaIntegrim = async (options: LookupOptions): Promise<NotaIntegrimLookupResponse> => {
-  const numeroNota = String(options.numeroNota || '').trim()
-  const serieNota = normalizeSerieNota(options.serieNota)
-  const forcedCompanyId = options.idempresa === null || options.idempresa === undefined
-    ? null
-    : parseCompanyId(options.idempresa)
-  const forcedPlanilhaId = options.idplanilha === null || options.idplanilha === undefined
-    ? null
-    : toInteger(options.idplanilha)
+// Localiza a venda pelo CNPJ/CPF do destinatario + dia da emissao. Usado como
+// fallback quando a NF-e referencia um cupom (NOTA DE ECF) e a busca pelo numero
+// da NF-e nao encontra o documento (que esta gravado como NFC-e).
+const findDocumentsByCnpjData = async (
+  config: IntegrimConfig,
+  token: string,
+  idempresa: number,
+  documentoCliente: string,
+  dataEmissao: string,
+) => {
+  return await postServiceAllPages<IntegrimDocument>(
+    config,
+    token,
+    'documentos_fiscais_saida',
+    [
+      { campo: 'idempresa', operadorlogico: 'AND', operador: 'IGUAL', valor: idempresa },
+      { campo: 'cnpjcpf', operadorlogico: 'AND', operador: 'IGUAL', valor: documentoCliente },
+      {
+        campo: 'dtmovimento',
+        operadorlogico: 'AND',
+        operador: 'BETWEEN',
+        valor: [`${dataEmissao} 00:00:00.000000`, `${dataEmissao} 23:59:59.999999`],
+      },
+    ],
+    [{ campo: 'dtmovimento', direcao: 'DESC' }],
+  )
+}
 
-  if (!numeroNota || !/^\d+$/.test(numeroNota)) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Informe o numero da nota para buscar.',
-    })
-  }
-
-  if (options.idempresa !== null && options.idempresa !== undefined && !forcedCompanyId) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'ID da empresa invalido. Use um numero entre 1 e 6.',
-    })
-  }
-
-  const config = getIntegrimConfig()
-  const token = await getAccessToken(config)
-  const companyIds = forcedCompanyId ? [forcedCompanyId] : config.companyIds
+const collectDocumentsByNumero = async (
+  config: IntegrimConfig,
+  token: string,
+  companyIds: number[],
+  numeroNota: string,
+  serieNota?: string | null,
+  stopOnFirstCompany = true,
+) => {
   const documents: IntegrimDocument[] = []
-
   for (const idempresa of companyIds) {
     const found = await findDocumentsByCompany(config, token, idempresa, numeroNota, serieNota)
     documents.push(...found)
-
-    if (!forcedCompanyId && found.length) {
-      break
-    }
+    if (stopOnFirstCompany && found.length) break
   }
+  return documents
+}
+
+type DraftOverrides = {
+  numero_nota?: string
+  serie_nota?: string
+  chave_nfe?: string
+  observacaoExtra?: string
+}
+
+type BuildResponseOptions = {
+  forcedCompanyId?: number | null
+  forcedPlanilhaId?: number | null
+  notFoundMessage: string
+  overrides?: DraftOverrides
+}
+
+const applyDraftOverrides = (draft: NotaRetiradaDraft, overrides?: DraftOverrides): NotaRetiradaDraft => {
+  if (!overrides) return draft
+
+  const numeroNota = String(overrides.numero_nota || '').trim()
+  const serieNota = String(overrides.serie_nota || '').trim()
+  const chaveNfe = digitsOnly(overrides.chave_nfe)
+  const observacao = String(overrides.observacaoExtra || '').trim()
+
+  return {
+    ...draft,
+    ...(numeroNota ? { numero_nota: numeroNota } : {}),
+    ...(serieNota ? { serie_nota: serieNota } : {}),
+    ...(chaveNfe.length === 44 ? { chave_nfe: chaveNfe } : {}),
+    ...(observacao
+      ? { observacoes: [draft.observacoes, observacao].filter(Boolean).join(' ').trim() }
+      : {}),
+  }
+}
+
+const buildLookupResponse = async (
+  config: IntegrimConfig,
+  token: string,
+  documents: IntegrimDocument[],
+  options: BuildResponseOptions,
+): Promise<NotaIntegrimLookupResponse> => {
+  const { forcedCompanyId, forcedPlanilhaId, notFoundMessage } = options
 
   const candidates = documents
     .map(documentToCandidate)
@@ -508,9 +558,7 @@ export const lookupNotaIntegrim = async (options: LookupOptions): Promise<NotaIn
     return {
       success: true,
       found: false,
-      message: forcedCompanyId
-        ? `Nota nao encontrada na Integrim para a empresa ${forcedCompanyId}. O documento pode ainda nao ter sido disponibilizado; confira o numero ou tente todas as empresas.`
-        : 'Nota nao encontrada na Integrim nas empresas 1 a 6. O documento pode ainda nao ter sido disponibilizado pela integracao.',
+      message: notFoundMessage,
       candidates: [],
     }
   }
@@ -541,7 +589,7 @@ export const lookupNotaIntegrim = async (options: LookupOptions): Promise<NotaIn
   }
 
   const itens = await findItems(config, token, selected.idempresa, selected.idplanilha)
-  const draft = buildDraft(documento, selected, itens)
+  const draft = applyDraftOverrides(buildDraft(documento, selected, itens), options.overrides)
   const missingFields = [
     !draft.telefone_cliente ? 'telefone_cliente' : null,
     !draft.chave_nfe ? 'chave_nfe' : null,
@@ -558,4 +606,113 @@ export const lookupNotaIntegrim = async (options: LookupOptions): Promise<NotaIn
     candidates: [selected],
     missingFields,
   }
+}
+
+export const lookupNotaIntegrim = async (options: LookupOptions): Promise<NotaIntegrimLookupResponse> => {
+  const numeroNota = String(options.numeroNota || '').trim()
+  const serieNota = normalizeSerieNota(options.serieNota)
+  const forcedCompanyId = options.idempresa === null || options.idempresa === undefined
+    ? null
+    : parseCompanyId(options.idempresa)
+  const forcedPlanilhaId = options.idplanilha === null || options.idplanilha === undefined
+    ? null
+    : toInteger(options.idplanilha)
+
+  if (!numeroNota || !/^\d+$/.test(numeroNota)) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Informe o numero da nota para buscar.',
+    })
+  }
+
+  if (options.idempresa !== null && options.idempresa !== undefined && !forcedCompanyId) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'ID da empresa invalido. Use um numero entre 1 e 6.',
+    })
+  }
+
+  const config = getIntegrimConfig()
+  const token = await getAccessToken(config)
+  const companyIds = forcedCompanyId ? [forcedCompanyId] : config.companyIds
+  const documents = await collectDocumentsByNumero(config, token, companyIds, numeroNota, serieNota, !forcedCompanyId)
+
+  return buildLookupResponse(config, token, documents, {
+    forcedCompanyId,
+    forcedPlanilhaId,
+    notFoundMessage: forcedCompanyId
+      ? `Nota nao encontrada na Integrim para a empresa ${forcedCompanyId}. O documento pode ainda nao ter sido disponibilizado; confira o numero ou tente todas as empresas.`
+      : 'Nota nao encontrada na Integrim nas empresas 1 a 6. O documento pode ainda nao ter sido disponibilizado pela integracao.',
+  })
+}
+
+// Busca a venda a partir dos dados lidos da foto, tratando NF-e complementares de
+// cupom ("NOTA DE ECF"): se o numero da NF-e nao for encontrado, usamos a chave do
+// cupom referenciado e, por ultimo, o CNPJ/CPF do destinatario + dia da emissao.
+export const lookupNotaIntegrimFromImageHints = async (
+  hints: NotaIntegrimLookupHints,
+): Promise<NotaIntegrimLookupResponse> => {
+  const numeroNota = String(hints.numero_nota || '').trim()
+  const serieNota = normalizeSerieNota(hints.serie_nota)
+  const chaveNfe = digitsOnly(hints.chave_nfe)
+
+  if (!numeroNota || !/^\d+$/.test(numeroNota)) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Informe o numero da nota para buscar.',
+    })
+  }
+
+  const config = getIntegrimConfig()
+  const token = await getAccessToken(config)
+  const companyIds = config.companyIds
+
+  // 1) Busca direta pelo numero da nota lido.
+  let documents = await collectDocumentsByNumero(config, token, companyIds, numeroNota, serieNota)
+  let cupomRef: ReturnType<typeof parseNfeKey> = null
+  let viaFallback = false
+
+  // 2) NF-e que referencia um cupom (NOTA DE ECF): busca pela NFC-e referenciada.
+  if (!documents.length && hints.chave_referenciada) {
+    cupomRef = parseNfeKey(hints.chave_referenciada)
+    if (cupomRef?.numero_nota) {
+      documents = await collectDocumentsByNumero(config, token, companyIds, cupomRef.numero_nota, cupomRef.serie_nota)
+      if (!documents.length) cupomRef = null
+    }
+    else {
+      cupomRef = null
+    }
+  }
+
+  // 3) Fallback robusto: CNPJ/CPF do destinatario + dia da emissao.
+  const documentoCliente = digitsOnly(hints.documento_cliente)
+  const dataEmissao = String(hints.data_emissao || '').trim()
+  if (!documents.length && documentoCliente && /^\d{4}-\d{2}-\d{2}$/.test(dataEmissao)) {
+    for (const idempresa of companyIds) {
+      const found = await findDocumentsByCnpjData(config, token, idempresa, documentoCliente, dataEmissao)
+      documents.push(...found)
+      if (found.length) {
+        viaFallback = true
+        break
+      }
+    }
+  }
+
+  const overrides: DraftOverrides = {
+    numero_nota: numeroNota,
+    serie_nota: serieNota,
+    ...(chaveNfe.length === 44 ? { chave_nfe: chaveNfe } : {}),
+  }
+
+  if (cupomRef) {
+    overrides.observacaoExtra = `Dados fiscais obtidos do cupom NFC-e ${cupomRef.numero_nota}/${cupomRef.serie_nota}; NF-e ${numeroNota} e complementar (NOTA DE ECF).`
+  }
+  else if (viaFallback) {
+    overrides.observacaoExtra = `Dados fiscais localizados pelo cupom da venda (NF-e ${numeroNota} complementar). Confira antes de salvar.`
+  }
+
+  return buildLookupResponse(config, token, documents, {
+    notFoundMessage: 'Nota nao encontrada na Integrim nas empresas 1 a 6. O documento pode ainda nao ter sido disponibilizado pela integracao.',
+    overrides,
+  })
 }

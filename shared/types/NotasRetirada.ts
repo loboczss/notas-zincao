@@ -191,6 +191,12 @@ export type NotaIntegrimLookupHints = {
   numero_nota: string
   serie_nota: string
   chave_nfe: string
+  // Quando a NF-e e uma "NOTA DE ECF" complementar, ela referencia o cupom (NFC-e)
+  // onde a venda foi realmente registrada. Dados abaixo ajudam a localizar essa venda.
+  chave_referenciada?: string
+  documento_cliente?: string
+  valor_total?: number | null
+  data_emissao?: string
   missingFields: Array<'numero_nota' | 'serie_nota' | 'chave_nfe'>
 }
 
