@@ -1,3 +1,11 @@
+import {
+  backblazeKeyFromValue,
+  isBackblazeConfigured,
+  isBackblazeValue,
+  presignBackblazeReadUrl,
+  uploadObjectToBackblaze,
+} from './object-storage'
+
 export const NOTAS_RETIRADA_STORAGE_BUCKET = 'notas-retirada'
 
 const SIGNED_IMAGE_TTL_SECONDS = 60 * 60
@@ -61,7 +69,33 @@ export const getStorageObjectPath = (
 }
 
 export const getNotasRetiradaStoragePath = (value: unknown) => {
+  // Valores já no Backblaze são preservados como estão (b2:{key}).
+  if (isBackblazeValue(value)) return String(value)
   return getStorageObjectPath(value, NOTAS_RETIRADA_STORAGE_BUCKET)
+}
+
+/**
+ * Sobe uma imagem de nota/retirada e devolve o valor a gravar no banco.
+ * Usa Backblaze quando configurado (retorna `b2:{key}`); senão cai no Supabase
+ * Storage (retorna o path cru) para não quebrar ambientes em transição/dev.
+ */
+export const uploadNotaImageObject = async (
+  client: any,
+  key: string,
+  body: Buffer,
+  contentType: string,
+  bucket = NOTAS_RETIRADA_STORAGE_BUCKET,
+): Promise<string> => {
+  if (isBackblazeConfigured()) {
+    return uploadObjectToBackblaze(key, body, contentType)
+  }
+
+  const { error } = await client.storage
+    .from(bucket)
+    .upload(key, body, { contentType, upsert: false })
+
+  if (error) throw error
+  return key
 }
 
 export const createSignedStorageUrl = async (
@@ -70,6 +104,20 @@ export const createSignedStorageUrl = async (
   bucket = NOTAS_RETIRADA_STORAGE_BUCKET,
   expiresIn = SIGNED_IMAGE_TTL_SECONDS,
 ) => {
+  // Objetos novos vivem no Backblaze (valor prefixado com `b2:`).
+  if (isBackblazeValue(value)) {
+    const key = backblazeKeyFromValue(value)
+    if (!key) return value ?? null
+    try {
+      return await presignBackblazeReadUrl(key, expiresIn)
+    }
+    catch (error) {
+      console.error(`[storage] backblaze signed url error for ${key}:`, error instanceof Error ? error.message : error)
+      return value
+    }
+  }
+
+  // Compatibilidade: objetos antigos no Supabase Storage (URL pública ou path).
   const path = getStorageObjectPath(value, bucket)
 
   if (!path) {

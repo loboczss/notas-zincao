@@ -50,6 +50,14 @@ export default defineNuxtConfig({
   ],
   runtimeConfig: {
     openaiApiKey: process.env.OPENAI_API_KEY,
+    // Backblaze B2 (API S3-compatível). Vazio = cai no Supabase Storage (transição).
+    backblaze: {
+      endpoint: process.env.B2_ENDPOINT || '',
+      region: process.env.B2_REGION || '',
+      bucket: process.env.B2_BUCKET || '',
+      keyId: process.env.B2_KEY_ID || '',
+      applicationKey: process.env.B2_APPLICATION_KEY || '',
+    },
     public: {
       apiBaseUrl,
     },

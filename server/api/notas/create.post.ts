@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto'
 import type { NotaRetiradaDraft } from '../../../shared/types/NotasRetirada'
 import { vincularProdutosAoEstoque } from '../../services/estoque/match-produtos'
 import { assertCanCreateNota, getAuthUidOrThrow } from '../../utils/permissions'
-import { NOTAS_RETIRADA_STORAGE_BUCKET, signNotaStorageUrls } from '../../utils/storage'
+import { NOTAS_RETIRADA_STORAGE_BUCKET, signNotaStorageUrls, uploadNotaImageObject } from '../../utils/storage'
 
 const requiredFields = ['nome_cliente', 'numero_nota', 'data_compra', 'produtos'] as const
 const storageBucket = NOTAS_RETIRADA_STORAGE_BUCKET
@@ -225,17 +225,14 @@ const uploadImageDataUrl = async (
   const path = `${ownerUserId}/${type}/${Date.now()}-${randomUUID()}.${extension}`
   const fileBuffer = Buffer.from(parsed.base64Content, 'base64')
 
-  const { error: uploadError } = await (client as any).storage
-    .from(storageBucket)
-    .upload(path, fileBuffer, {
-      contentType: parsed.mimeType,
-      upsert: false,
-    })
+  try {
+    return await uploadNotaImageObject(client, path, fileBuffer, parsed.mimeType, storageBucket)
+  }
+  catch (uploadError) {
+    const message = uploadError instanceof Error ? uploadError.message : String(uploadError)
+    console.error(`[api/notas/create] upload ${type} error:`, message)
 
-  if (uploadError) {
-    console.error(`[api/notas/create] upload ${type} error:`, uploadError.message)
-
-    const lowerMessage = String(uploadError.message || '').toLowerCase()
+    const lowerMessage = message.toLowerCase()
     if (lowerMessage.includes('row-level security') || lowerMessage.includes('permission')) {
       throw createError({
         statusCode: 403,
@@ -248,12 +245,6 @@ const uploadImageDataUrl = async (
       statusMessage: `Nao foi possivel salvar a foto de ${type}.`,
     })
   }
-
-  const { data: publicUrlData } = (client as any).storage
-    .from(storageBucket)
-    .getPublicUrl(path)
-
-  return publicUrlData?.publicUrl || path
 }
 
 const createContatoId = () => `crm-${Date.now()}-${randomUUID().slice(0, 8)}`

@@ -9,7 +9,7 @@ import type {
 import { getNotaRetiradaStatusFromProdutos } from '../../../../shared/utils/notas-retirada-status'
 import { encontrarProdutoEstoque } from '../../../services/estoque/match-produtos'
 import { assertActiveProfileRole } from '../../../utils/permissions'
-import { NOTAS_RETIRADA_STORAGE_BUCKET, signNotaStorageUrls } from '../../../utils/storage'
+import { NOTAS_RETIRADA_STORAGE_BUCKET, signNotaStorageUrls, uploadNotaImageObject } from '../../../utils/storage'
 
 const storageBucket = NOTAS_RETIRADA_STORAGE_BUCKET
 
@@ -127,22 +127,16 @@ const uploadRetiradaPhoto = async (client: any, ownerUserId: string, dataUrl: st
   const path = `${ownerUserId}/retirada/${Date.now()}-${randomUUID()}.${extension}`
   const fileBuffer = Buffer.from(parsed.base64Content, 'base64')
 
-  const { error: uploadError } = await client.storage
-    .from(storageBucket)
-    .upload(path, fileBuffer, {
-      contentType: parsed.mimeType,
-      upsert: false,
-    })
-
-  if (uploadError) {
-    console.error('[api/notas/:id/retirada] upload error:', uploadError.message)
+  try {
+    return await uploadNotaImageObject(client, path, fileBuffer, parsed.mimeType, storageBucket)
+  }
+  catch (uploadError) {
+    console.error('[api/notas/:id/retirada] upload error:', uploadError instanceof Error ? uploadError.message : uploadError)
     throw createError({
       statusCode: 500,
       statusMessage: 'Não foi possível salvar a foto da retirada.',
     })
   }
-
-  return path
 }
 
 const getItensSolicitadosKey = (items: NonNullable<NotaRetiradaHistoricoItem['itens_solicitados']>) => {

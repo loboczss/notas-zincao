@@ -13,7 +13,6 @@ import StockIntegrinActions from '../components/stock-integrin/StockIntegrinActi
 import StockIntegrinNotices from '../components/stock-integrin/StockIntegrinNotices.vue'
 
 // Componentes da Previsão de Compras (pasta core)
-import PrevisaoComprasHelpTooltip from '../components/previsao-compras/core/PrevisaoComprasHelpTooltip.vue'
 import PrevisaoComprasProgress from '../components/previsao-compras/core/PrevisaoComprasProgress.vue'
 import PrevisaoComprasDetailModal from '../components/previsao-compras/core/PrevisaoComprasDetailModal.vue'
 
@@ -114,9 +113,6 @@ onMounted(async () => {
     <!-- Ações de Header -->
     <template #headerAside>
       <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-        <!-- Tooltip com legenda das métricas ao passar o mouse -->
-        <PrevisaoComprasHelpTooltip />
-        
         <StockIntegrinActions
           :is-admin="isAdmin"
           :sync-in-progress="syncEmAndamento"
