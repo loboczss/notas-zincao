@@ -3,10 +3,11 @@ import { randomUUID } from 'node:crypto'
 import type { NotaRetiradaDraft } from '../../../shared/types/NotasRetirada'
 import { vincularProdutosAoEstoque } from '../../services/estoque/match-produtos'
 import { assertCanCreateNota, getAuthUidOrThrow } from '../../utils/permissions'
-import { NOTAS_RETIRADA_STORAGE_BUCKET, signNotaStorageUrls, uploadNotaImageObject } from '../../utils/storage'
+import { signNotaStorageUrls } from '../../utils/storage'
+import { parseImageDataUrl } from '../../utils/nota-image'
+import { processCreateNotaMediaInBackground } from '../../services/notas/media-background'
 
 const requiredFields = ['nome_cliente', 'numero_nota', 'data_compra', 'produtos'] as const
-const storageBucket = NOTAS_RETIRADA_STORAGE_BUCKET
 const allowedStatus = ['pendente', 'parcial', 'retirada', 'cancelada'] as const
 const notaReturnSelect = [
   'id',
@@ -34,6 +35,7 @@ const notaReturnSelect = [
   'foto_cliente_url',
   'comprovante_retirada_url',
   'historico_retiradas',
+  'midia_status',
 ].join(', ')
 
 const badRequest = (statusMessage: string) => createError({ statusCode: 400, statusMessage })
@@ -134,32 +136,6 @@ const isValidISODate = (value: string) => {
     && date.getUTCDate() === day
 }
 
-const parseImageDataUrl = (value: string) => {
-  const match = value.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/)
-  if (!match) return null
-
-  const mimeType = match[1] || ''
-  const base64Content = match[2] || ''
-  if (!mimeType || !base64Content) return null
-
-  return { mimeType, base64Content }
-}
-
-const getExtensionFromMime = (mimeType: string) => {
-  switch (mimeType) {
-    case 'image/jpeg':
-      return 'jpg'
-    case 'image/png':
-      return 'png'
-    case 'image/webp':
-      return 'webp'
-    case 'image/heic':
-      return 'heic'
-    default:
-      return 'bin'
-  }
-}
-
 const mapSupabaseCreateError = (error: any) => {
   const code = String(error?.code || '')
   const message = String(error?.message || '')
@@ -210,41 +186,6 @@ const mapSupabaseCreateError = (error: any) => {
     statusCode: 500,
     statusMessage: 'Nao foi possivel salvar a nota. Tente novamente em instantes.',
   })
-}
-
-const uploadImageDataUrl = async (
-  client: any,
-  ownerUserId: string,
-  type: 'cupom' | 'cliente',
-  dataUrl: string,
-) => {
-  const parsed = parseImageDataUrl(dataUrl)
-  if (!parsed) throw badRequest(`Imagem de ${type} invalida.`)
-
-  const extension = getExtensionFromMime(parsed.mimeType)
-  const path = `${ownerUserId}/${type}/${Date.now()}-${randomUUID()}.${extension}`
-  const fileBuffer = Buffer.from(parsed.base64Content, 'base64')
-
-  try {
-    return await uploadNotaImageObject(client, path, fileBuffer, parsed.mimeType, storageBucket)
-  }
-  catch (uploadError) {
-    const message = uploadError instanceof Error ? uploadError.message : String(uploadError)
-    console.error(`[api/notas/create] upload ${type} error:`, message)
-
-    const lowerMessage = message.toLowerCase()
-    if (lowerMessage.includes('row-level security') || lowerMessage.includes('permission')) {
-      throw createError({
-        statusCode: 403,
-        statusMessage: `Sem permissao para salvar a foto de ${type}. Verifique as politicas do Storage.`,
-      })
-    }
-
-    throw createError({
-      statusCode: 500,
-      statusMessage: `Nao foi possivel salvar a foto de ${type}.`,
-    })
-  }
 }
 
 const createContatoId = () => `crm-${Date.now()}-${randomUUID().slice(0, 8)}`
@@ -491,28 +432,18 @@ export const notasCreatePostHandler = defineEventHandler(async (event) => {
     })
   }
 
-  let fotoCupomUrl: string
-  let fotoClienteUrl: string | null = null
-  try {
-    fotoCupomUrl = await uploadImageDataUrl(client, authUid, 'cupom', fotoCupomDataUrl)
-    fotoClienteUrl = fotoClienteDataUrl
-      ? await uploadImageDataUrl(client, authUid, 'cliente', fotoClienteDataUrl)
-      : null
-  }
-  catch (error) {
-    console.error('[api/notas/create] storage error:', error instanceof Error ? error.message : 'unknown error')
-    if (isHttpError(error)) throw error
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Nao foi possivel salvar as imagens da nota.',
-    })
-  }
+  // Valida as imagens (formato data URL) de forma síncrona, mas NÃO faz o upload
+  // aqui: a nota é gravada já e as fotos sobem para o Backblaze em segundo plano
+  // (midia_status = 'processando' até concluir), sem travar a interface no clique.
+  if (!parseImageDataUrl(fotoCupomDataUrl)) throw badRequest('Imagem do cupom invalida.')
+  if (fotoClienteDataUrl && !parseImageDataUrl(fotoClienteDataUrl)) throw badRequest('Imagem do cliente invalida.')
 
   const payload = {
     owner_user_id: authUid,
     contato_id: crmContato.contato_id,
-    foto_url: fotoCupomUrl,
-    ...(fotoClienteUrl ? { foto_cliente_url: fotoClienteUrl } : {}),
+    foto_url: null,
+    foto_cliente_url: null,
+    midia_status: 'processando',
     ...(idempresa !== undefined ? { idempresa } : {}),
     nome_cliente: crmContato.nome,
     documento_cliente: normalizeDigits(body.documento_cliente),
@@ -539,6 +470,14 @@ export const notasCreatePostHandler = defineEventHandler(async (event) => {
     console.error('[api/notas/create] insert error:', error.message)
     throw mapSupabaseCreateError(error)
   }
+
+  // Dispara o upload das imagens em segundo plano (não aguarda).
+  processCreateNotaMediaInBackground({
+    notaId: String(data.id),
+    ownerUserId: authUid,
+    cupomDataUrl: fotoCupomDataUrl,
+    clienteDataUrl: fotoClienteDataUrl || null,
+  })
 
   return {
     success: true,

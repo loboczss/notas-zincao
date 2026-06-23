@@ -9,9 +9,9 @@ import type {
 import { getNotaRetiradaStatusFromProdutos } from '../../../../shared/utils/notas-retirada-status'
 import { encontrarProdutoEstoque } from '../../../services/estoque/match-produtos'
 import { assertActiveProfileRole } from '../../../utils/permissions'
-import { NOTAS_RETIRADA_STORAGE_BUCKET, signNotaStorageUrls, uploadNotaImageObject } from '../../../utils/storage'
-
-const storageBucket = NOTAS_RETIRADA_STORAGE_BUCKET
+import { signNotaStorageUrls } from '../../../utils/storage'
+import { parseImageDataUrl } from '../../../utils/nota-image'
+import { processRetiradaMediaInBackground } from '../../../services/notas/media-background'
 
 type ProdutoNormalizadoRetirada = {
   index: number
@@ -79,64 +79,6 @@ const normalizeText = (value: unknown) => String(value || '')
 const isTelhaZincoProduto = (nome: string) => {
   const normalized = normalizeText(nome)
   return /\btelhas?\b/.test(normalized) && normalized.includes('zinco')
-}
-
-const parseImageDataUrl = (value: string) => {
-  const match = value.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/)
-
-  if (!match) {
-    return null
-  }
-
-  const mimeType = match[1] || ''
-  const base64Content = match[2] || ''
-
-  if (!mimeType || !base64Content) {
-    return null
-  }
-
-  return { mimeType, base64Content }
-}
-
-const getExtensionFromMime = (mimeType: string) => {
-  switch (mimeType) {
-    case 'image/jpeg':
-      return 'jpg'
-    case 'image/png':
-      return 'png'
-    case 'image/webp':
-      return 'webp'
-    case 'image/heic':
-      return 'heic'
-    default:
-      return 'bin'
-  }
-}
-
-const uploadRetiradaPhoto = async (client: any, ownerUserId: string, dataUrl: string) => {
-  const parsed = parseImageDataUrl(dataUrl)
-
-  if (!parsed) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Foto da retirada inválida.',
-    })
-  }
-
-  const extension = getExtensionFromMime(parsed.mimeType)
-  const path = `${ownerUserId}/retirada/${Date.now()}-${randomUUID()}.${extension}`
-  const fileBuffer = Buffer.from(parsed.base64Content, 'base64')
-
-  try {
-    return await uploadNotaImageObject(client, path, fileBuffer, parsed.mimeType, storageBucket)
-  }
-  catch (uploadError) {
-    console.error('[api/notas/:id/retirada] upload error:', uploadError instanceof Error ? uploadError.message : uploadError)
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Não foi possível salvar a foto da retirada.',
-    })
-  }
 }
 
 const getItensSolicitadosKey = (items: NonNullable<NotaRetiradaHistoricoItem['itens_solicitados']>) => {
@@ -626,6 +568,11 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
   const totalRetiradoNestaSolicitacao = Array.from(retiradasEfetivas.values())
     .reduce((total, retirada) => total + Math.max(0, retirada.quantidade), 0)
 
+  // Valida a foto de forma síncrona; o upload em si vai para segundo plano.
+  if (!parseImageDataUrl(body.foto_cliente_retirada_data_url)) {
+    throw createError({ statusCode: 400, statusMessage: 'Foto da retirada inválida.' })
+  }
+
   if (totalRetiradoNestaSolicitacao <= 0) {
     const itensSolicitadosKey = getItensSolicitadosKey(itensSolicitados)
     const tentativaSemBaixaJaRegistrada = historicoAtual.some((item: NotaRetiradaHistoricoItem) => {
@@ -635,7 +582,6 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
     })
 
     if (!tentativaSemBaixaJaRegistrada) {
-      const comprovanteRetiradaUrl = await uploadRetiradaPhoto(client as any, authUid, body.foto_cliente_retirada_data_url)
       const tentativaHistorico: NotaRetiradaHistoricoItem = {
         data: new Date().toISOString(),
         responsavel_id: authUid,
@@ -643,7 +589,7 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
         tipo: 'tentativa_sem_baixa',
         retirada_efetuada: false,
         motivo_falha: RETIRADA_SEM_BAIXA_MESSAGE,
-        fotos: comprovanteRetiradaUrl ? [comprovanteRetiradaUrl] : [],
+        fotos: [],
         itens_solicitados: itensSolicitados,
         itens_retirados: [],
         observacoes: body.observacoes ?? null,
@@ -657,18 +603,25 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
         .from('notas_retirada')
         .update({
           historico_retiradas: [...historicoAtual, tentativaHistorico],
+          midia_status: 'processando',
         })
         .eq('id', id)
 
       if (tentativaError) {
         console.error('[api/notas/:id/retirada] failed attempt history update error:', tentativaError.message)
       }
+      else {
+        processRetiradaMediaInBackground({
+          notaId: String(id),
+          requestId,
+          ownerUserId: authUid,
+          fotoDataUrl: body.foto_cliente_retirada_data_url,
+        })
+      }
     }
 
     throwRetiradaSemBaixa()
   }
-
-  const comprovanteRetiradaUrl = await uploadRetiradaPhoto(client as any, authUid, body.foto_cliente_retirada_data_url)
 
   const eventoHistorico: NotaRetiradaHistoricoItem = {
     data: new Date().toISOString(),
@@ -676,7 +629,7 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
     responsavel_nome: responsavelNome,
     tipo: 'retirada',
     retirada_efetuada: true,
-    fotos: comprovanteRetiradaUrl ? [comprovanteRetiradaUrl] : [],
+    fotos: [],
     itens_retirados: produtosNormalizados
       .map((produto) => {
         const retirada = retiradasEfetivas.get(produto.index)
@@ -702,7 +655,8 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
   const payload: Record<string, unknown> = {
     produtos: produtosAtualizados,
     status_retirada: statusRetirada,
-    comprovante_retirada_url: comprovanteRetiradaUrl,
+    comprovante_retirada_url: null,
+    midia_status: 'processando',
     retirada_confirmada_por: authUid,
     data_retirada: statusRetirada === 'pendente' ? null : new Date().toISOString(),
     historico_retiradas: [...historicoAtual, eventoHistorico],
@@ -716,7 +670,7 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
     .from('notas_retirada')
     .update(payload)
     .eq('id', id)
-    .select('id, status_retirada, data_retirada, comprovante_retirada_url, historico_retiradas, atualizado_em')
+    .select('id, status_retirada, data_retirada, comprovante_retirada_url, historico_retiradas, atualizado_em, midia_status')
     .single()
 
   if (error || !data) {
@@ -726,6 +680,14 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
       statusMessage: 'Não foi possível registrar a retirada.',
     })
   }
+
+  // Sobe o comprovante em segundo plano e anexa na entrada do histórico (request_id).
+  processRetiradaMediaInBackground({
+    notaId: String(id),
+    requestId,
+    ownerUserId: authUid,
+    fotoDataUrl: body.foto_cliente_retirada_data_url,
+  })
 
   return {
     success: true,

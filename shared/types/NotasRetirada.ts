@@ -97,6 +97,8 @@ export type NotaRetiradaListItem = {
   foto_url?: string | null
   foto_cliente_url?: string | null
   comprovante_retirada_url?: string | null
+  // Upload de imagens em segundo plano: 'processando' | 'pronta' | 'erro' (null = sem mídia pendente).
+  midia_status?: 'processando' | 'pronta' | 'erro' | null
   cadastrado_por_nome?: string | null
   deleted_at?: string | null
   deleted_by?: string | null
