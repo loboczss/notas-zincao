@@ -4,10 +4,7 @@ import type { Database } from '../../../app/types/database.types'
 import { serverSupabaseClient } from '#supabase/server'
 import { vincularProdutosAoEstoque } from '../estoque/match-produtos'
 import { getOpenAIClient } from './client'
-
-const NOTA_EXTRACTION_MODEL = 'gpt-5-nano'
-const NOTA_EXTRACTION_IMAGE_DETAIL = 'auto'
-const NOTA_EXTRACTION_REASONING_EFFORT = 'low'
+import { getNotaExtractionOpenAIConfig } from './nota-config'
 
 const notaMissingFields = [
   'nome_cliente',
@@ -165,11 +162,12 @@ export async function extractNotaFromImage(
   imageDataUrl: string,
 ): Promise<OpenAINotaExtractionResponse> {
   const client = getOpenAIClient(event)
+  const config = getNotaExtractionOpenAIConfig()
 
   const response = await client.responses.create({
-    model: NOTA_EXTRACTION_MODEL,
+    model: config.model,
     store: false,
-    reasoning: { effort: NOTA_EXTRACTION_REASONING_EFFORT },
+    reasoning: { effort: config.reasoningEffort },
     text: {
       verbosity: 'low',
       format: {
@@ -199,7 +197,7 @@ export async function extractNotaFromImage(
           {
             type: 'input_image',
             image_url: imageDataUrl,
-            detail: NOTA_EXTRACTION_IMAGE_DETAIL,
+            detail: config.imageDetail,
           },
         ],
       },
@@ -216,6 +214,8 @@ export async function extractNotaFromImage(
   const produtosComEstoque = await vincularProdutosAoEstoque(supabase as any, produtos)
   const modelMissingFields = parsed.missingFields.filter(isNotaMissingField)
 
+  // O telefone do cliente nunca consta na nota/DANFE/cupom, mas e obrigatorio:
+  // marcamos como faltante para que o funcionario preencha manualmente.
   const requiredMissingFields = [
     !parsed.nome_cliente ? 'nome_cliente' : null,
     !parsed.telefone_cliente ? 'telefone_cliente' : null,

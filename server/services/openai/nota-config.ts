@@ -25,6 +25,12 @@ export const getNotaLookupOpenAIConfig = () => ({
   reasoningEffort: parseReasoningEffort(getEnv('OPENAI_NOTA_LOOKUP_REASONING_EFFORT') || getEnv('OPENAI_NOTA_REASONING_EFFORT')),
 })
 
+export const getNotaExtractionOpenAIConfig = () => ({
+  model: getEnv('OPENAI_NOTA_EXTRACTION_MODEL') || getEnv('OPENAI_NOTA_MODEL') || DEFAULT_NOTA_MODEL,
+  imageDetail: parseImageDetail(getEnv('OPENAI_NOTA_EXTRACTION_IMAGE_DETAIL') || getEnv('OPENAI_NOTA_IMAGE_DETAIL')),
+  reasoningEffort: parseReasoningEffort(getEnv('OPENAI_NOTA_EXTRACTION_REASONING_EFFORT') || getEnv('OPENAI_NOTA_REASONING_EFFORT')),
+})
+
 export const getNotaProductsOpenAIConfig = () => ({
   model: getEnv('OPENAI_NOTA_PRODUCTS_MODEL') || getEnv('OPENAI_NOTA_MODEL') || DEFAULT_NOTA_MODEL,
   imageDetail: parseImageDetail(getEnv('OPENAI_NOTA_PRODUCTS_IMAGE_DETAIL') || getEnv('OPENAI_NOTA_IMAGE_DETAIL')),

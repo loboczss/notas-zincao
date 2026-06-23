@@ -474,7 +474,9 @@ const aplicarDraftExtraidoDaImagem = (response: NotaExtractionResponse) => {
 
   resetErrors()
   for (const field of response.missingFields || []) {
-    errors[field] = 'Campo obrigatório não identificado pela IA. Confira manualmente.'
+    errors[field] = field === 'telefone_cliente'
+      ? 'Telefone do cliente é obrigatório. Preencha manualmente (não consta na nota).'
+      : 'Não foi possível ler este campo na foto. Confira manualmente.'
   }
 }
 
@@ -622,10 +624,20 @@ const preencherNotaPelaFotoComoFallback = async (integrimMessage: string) => {
   aplicarDraftExtraidoDaImagem(response)
 
   // Os identificadores lidos da chave/consulta curta são mais confiáveis do que
-  // uma segunda leitura completa da foto. Preserve-os no fallback.
-  if (numeroNota) form.numero_nota = numeroNota
-  if (serieNota) form.serie_nota = serieNota
-  if (chaveNfe.length === 44) form.chave_nfe = chaveNfe
+  // uma segunda leitura completa da foto. Preserve-os no fallback e limpe os
+  // erros "não identificado" herdados da leitura completa quando o valor existir.
+  if (numeroNota) {
+    form.numero_nota = numeroNota
+    delete errors.numero_nota
+  }
+  if (serieNota) {
+    form.serie_nota = serieNota
+    delete errors.serie_nota
+  }
+  if (chaveNfe.length === 44) {
+    form.chave_nfe = chaveNfe
+    delete errors.chave_nfe
+  }
 
   integrimCandidates.value = []
   integrimLookupMessage.value = 'Nota ainda nao disponivel na Integrim. Dados preenchidos pela foto; confira antes de salvar.'
