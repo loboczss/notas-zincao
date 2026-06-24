@@ -12,7 +12,7 @@ const store = usePrevisaoComprasStore()
 const carregarListaCompra = (query: IntegrimListaCompraQuery = {}, options: { append?: boolean } = {}) =>
   store.fetchListaCompra(query, options)
 
-const carregarSazonalidade = (ano?: number | null) => store.fetchSazonalidade({ ano })
+const carregarSazonalidade = (payload: { ano?: number | null; mesInicio?: number }) => store.fetchSazonalidade({ ano: payload.ano, mesInicio: payload.mesInicio })
 
 onMounted(async () => {
   if (!store.listaCompra.length && !store.loadingListaCompra) {

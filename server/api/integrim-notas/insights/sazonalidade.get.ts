@@ -18,6 +18,7 @@ export default defineEventHandler(async (event): Promise<IntegrimSazonalidadeRes
   const idproduto = parsePositiveInteger(query.idproduto)
   const idsubproduto = parsePositiveInteger(query.idsubproduto)
   const ano = parsePositiveInteger(query.ano)
+  const mesInicio = parsePositiveInteger(query.mesInicio) || 1
 
   const [{ data, error }, { data: anosData, error: anosError }] = await Promise.all([
     (client as any).rpc('integrim_sazonalidade', {
@@ -25,6 +26,7 @@ export default defineEventHandler(async (event): Promise<IntegrimSazonalidadeRes
       p_idproduto: idproduto,
       p_idsubproduto: idsubproduto,
       p_ano: ano,
+      p_mes_inicio: mesInicio,
     }),
     (client as any).rpc('integrim_sazonalidade_anos', {
       p_idempresa: idempresa,

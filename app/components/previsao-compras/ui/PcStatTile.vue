@@ -28,9 +28,9 @@ const shell: Record<string, string> = {
 </script>
 
 <template>
-  <div class="rounded-xl border p-3 shadow-xs" :class="shell[tone]">
-    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{{ label }}</p>
-    <p class="mt-0.5 text-lg font-extrabold tabular-nums" :class="valueTone[tone]">{{ value }}</p>
-    <p v-if="hint" class="text-[10px] font-semibold text-slate-400 dark:text-slate-500 tabular-nums">{{ hint }}</p>
+  <div class="rounded-xl border p-2.5 shadow-xs" :class="shell[tone]">
+    <p class="text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{{ label }}</p>
+    <p class="mt-0.5 text-base font-bold tabular-nums tracking-tight" :class="valueTone[tone]">{{ value }}</p>
+    <p v-if="hint" class="text-[9px] font-semibold text-slate-400 dark:text-slate-500 tabular-nums">{{ hint }}</p>
   </div>
 </template>

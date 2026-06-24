@@ -85,6 +85,8 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
   const schedule = ref<IntegrimSyncSchedule | null>(null)
   const compraParametros = ref<IntegrimCompraParametros | null>(null)
   const sazonalidade = ref<IntegrimSazonalidadeResponse | null>(null)
+  const sazonalidadeAno = ref<number | null>(null)
+  const sazonalidadeMesInicio = ref<number>(1)
   const listaCompra = ref<IntegrimListaCompraRow[]>([])
   const listaCompraStats = ref<IntegrimListaCompraStats | null>(null)
   const listaCompraTotalItens = ref(0)
@@ -572,14 +574,21 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     idproduto?: number | null
     idsubproduto?: number | null
     ano?: number | null
+    mesInicio?: number | null
   } = {}) => {
+    if (query.ano !== undefined) sazonalidadeAno.value = query.ano
+    if (query.mesInicio !== undefined && query.mesInicio !== null) {
+      sazonalidadeMesInicio.value = query.mesInicio
+    }
+
     try {
       const data = await getApiFetch()<IntegrimSazonalidadeResponse>('/api/integrim-notas/insights/sazonalidade', {
         query: {
           idempresa: query.idempresa || undefined,
           idproduto: query.idproduto || undefined,
           idsubproduto: query.idsubproduto || undefined,
-          ano: query.ano || undefined,
+          ano: query.ano !== undefined ? (query.ano || undefined) : (sazonalidadeAno.value || undefined),
+          mesInicio: query.mesInicio !== undefined ? (query.mesInicio || undefined) : (sazonalidadeMesInicio.value || undefined),
         },
       })
       sazonalidade.value = data
@@ -656,6 +665,8 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     schedule.value = null
     compraParametros.value = null
     sazonalidade.value = null
+    sazonalidadeAno.value = null
+    sazonalidadeMesInicio.value = 1
     listaCompra.value = []
     listaCompraStats.value = null
     listaCompraTotalItens.value = 0
@@ -678,6 +689,8 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     schedule,
     compraParametros,
     sazonalidade,
+    sazonalidadeAno,
+    sazonalidadeMesInicio,
     listaCompra,
     listaCompraStats,
     listaCompraTotalItens,
