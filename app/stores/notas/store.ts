@@ -1,8 +1,9 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { useToast } from '../../composables/useToast'
-import { getApiErrorMessage, getApiErrorStatus, isNetworkFetchError } from '../../utils/api-errors'
+import { getApiErrorMessage } from '../../utils/api-errors'
 import { getApiFetch } from '../../utils/api-fetch'
+import { processNotasQueueInBackground } from '../../composables/useNotasBackgroundQueue'
 import { normalizeNotaImageDataUrl } from '../../utils/image-compression'
 import {
   enqueueOfflineRequest,
@@ -560,50 +561,29 @@ export const useNotasStore = defineStore('notas', () => {
     return offlineNota
   }
 
-  const shouldQueueCreateAfterError = (error: unknown) => {
-    if (!import.meta.client) return false
-    if (!getOnlineStatus()) return true
-    if (typeof navigator !== 'undefined' && navigator.onLine === false) return true
-
-    return getApiErrorStatus(error) === null && isNetworkFetchError(error)
-  }
-
+  // Cadastro sempre passa pela fila local + envio em segundo plano: a tela é
+  // liberada na hora e o POST (upload/gravação) roda sem travar o usuário.
   const createNota = async (payload: NotaRetiradaDraft) => {
     creatingNota.value = true
     clearError()
 
     try {
-      if (!getOnlineStatus()) {
-        const offlineNota = await queueCreateNota(payload)
-        showSuccess('Nota salva offline. Ela sera sincronizada quando a internet voltar.')
-        return { success: true, nota: offlineNota }
+      const offlineNota = await queueCreateNota(payload)
+      processNotasQueueInBackground()
+
+      if (getOnlineStatus()) {
+        showSuccess('Nota enviada — processando em segundo plano.')
+        return { success: true, queued: true, nota: offlineNota }
       }
 
-      const data = await getApiFetch()<{
-        success: boolean
-        nota: NotaRetiradaDetalheItem
-      }>('/api/notas/create', {
-        method: 'POST',
-        body: payload,
-      })
-
-      if (data?.nota?.id) {
-        await replaceNotaInCaches(toDetalheNota(data.nota))
-      }
-      return data
+      showSuccess('Nota salva offline. Ela sera sincronizada quando a internet voltar.')
+      return { success: true, offline: true, nota: offlineNota }
     }
     catch (error) {
-      if (!shouldQueueCreateAfterError(error)) {
-        const msg = getApiErrorMessage(error, 'Falha ao salvar nota.')
-        errorMessage.value = msg
-        showError(msg)
-        return { success: false, nota: null }
-      }
-
-      const offlineNota = await queueCreateNota(payload)
-      clearError()
-      showSuccess('Nota salva offline. Ela sera sincronizada quando a internet voltar.')
-      return { success: true, nota: offlineNota }
+      const msg = getApiErrorMessage(error, 'Falha ao salvar nota.')
+      errorMessage.value = msg
+      showError(msg)
+      return { success: false, nota: null }
     }
     finally {
       creatingNota.value = false
@@ -648,12 +628,6 @@ export const useNotasStore = defineStore('notas', () => {
     finally {
       loadingRetirada.value = false
     }
-  }
-
-  const refreshNotasRetiradaInBackground = () => {
-    void fetchNotasRetirada().catch((error) => {
-      console.warn('[notas] background retirada refresh failed', error)
-    })
   }
 
   const fetchNotaDetalhe = async (notaId: string) => {
@@ -786,64 +760,32 @@ export const useNotasStore = defineStore('notas', () => {
     return await applyLocalRetirada(notaId, payload)
   }
 
+  // Retirada sempre passa pela fila local + envio em segundo plano: aplica a
+  // baixa otimista, libera a tela na hora e drena o PATCH (baixa de estoque +
+  // upload do comprovante) sem travar o usuário. O request_id garante que o
+  // reprocessamento seja idempotente.
   const registrarRetirada = async (notaId: string, payload: NotaRegistrarRetiradaRequest) => {
     savingRetirada.value = true
     clearError()
 
     try {
-      if (!getOnlineStatus()) {
-        const notaOffline = await queueRetirada(notaId, payload)
-        showSuccess('Retirada salva offline. Ela sera sincronizada quando a internet voltar.')
-        return { success: true, offline: true, nota: notaOffline }
-      }
-
-      const data = await getApiFetch()<{ success: boolean; nota?: NotaRetiradaDetalheItem }>(`/api/notas/${notaId}/retirada`, {
-        method: 'PATCH',
-        body: payload,
-      })
-
-      if (data?.nota) {
-        const notaAtualizada = toDetalheNota(data.nota)
-
-        if (payload.foto_cliente_retirada_data_url) {
-          notaAtualizada.comprovante_retirada_url = payload.foto_cliente_retirada_data_url
-
-          const historico = Array.isArray(notaAtualizada.historico_retiradas)
-            ? [...notaAtualizada.historico_retiradas]
-            : []
-          const ultimoIndice = historico.length - 1
-          const ultimoEvento = ultimoIndice >= 0 ? historico[ultimoIndice] : null
-
-          if (ultimoEvento) {
-            historico[ultimoIndice] = {
-              ...ultimoEvento,
-              fotos: [payload.foto_cliente_retirada_data_url],
-            }
-            notaAtualizada.historico_retiradas = historico
-          }
-        }
-
-        await replaceNotaInCaches(notaAtualizada)
-      }
-      refreshNotasRetiradaInBackground()
-      showSuccess('Retirada registrada com sucesso!')
-      return data
-    }
-    catch (error) {
-      if (!isNetworkFetchError(error)) {
-        const msg = getApiErrorMessage(error, 'Nao foi possivel registrar a retirada.')
-        errorMessage.value = msg
-        showError(msg)
-        return null
-      }
-
       const notaOffline = await queueRetirada(notaId, payload)
-      const msg = 'Sem conexao: retirada salva offline para sincronizar depois.'
-      errorMessage.value = msg
-      showSuccess(msg)
+      processNotasQueueInBackground()
+
+      if (getOnlineStatus()) {
+        showSuccess('Retirada enviada — processando em segundo plano.')
+        return { success: true, queued: true, nota: notaOffline }
+      }
+
+      showSuccess('Retirada salva offline. Ela sera sincronizada quando a internet voltar.')
       return { success: true, offline: true, nota: notaOffline }
     }
-
+    catch (error) {
+      const msg = getApiErrorMessage(error, 'Nao foi possivel registrar a retirada.')
+      errorMessage.value = msg
+      showError(msg)
+      return null
+    }
     finally {
       savingRetirada.value = false
     }

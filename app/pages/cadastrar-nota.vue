@@ -8,7 +8,7 @@ import { useCrmStore, useNotasStore } from '../stores'
 import { useToast } from '../composables/useToast'
 import { AppRoute } from '../constants/routes'
 import { CADASTRO_NOTA_RESTORED_IMAGE_STATE_KEY } from '../constants/camera-capture'
-import { normalizeNotaImageDataUrl } from '../utils/image-compression'
+import { normalizeNotaImageDataUrl, normalizeNotaImageFile } from '../utils/image-compression'
 import { readNfeKeyFromQrImage } from '../utils/nota-qr'
 import type { NfeKeyParts } from '~~/shared/utils/nfe-chave'
 import { parseNfeKey } from '~~/shared/utils/nfe-chave'
@@ -415,6 +415,27 @@ const scanQrHintsFromImage = async () => {
   return hints
 }
 
+const selecionarImagemFile = async (file: File) => {
+  try {
+    // Decodifica direto do arquivo (createImageBitmap) sem materializar a data URL
+    // em resolução total — evita o estouro de memória/reload no mobile.
+    const normalized = await normalizeNotaImageFile(file)
+    if (!normalized) return
+
+    imageDataUrl.value = normalized
+    delete errors.foto_cupom_data_url
+    qrLookupHints.value = null
+    void scanQrHintsFromImage()
+  }
+  catch (error) {
+    imageDataUrl.value = ''
+    const message = error instanceof Error
+      ? error.message
+      : 'Nao foi possivel preparar a imagem para envio.'
+    showError(message)
+  }
+}
+
 const selecionarImagem = async (event: Event) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
@@ -424,14 +445,8 @@ const selecionarImagem = async (event: Event) => {
     return
   }
 
-  const reader = new FileReader()
   try {
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-      reader.onload = () => resolve(String(reader.result || ''))
-      reader.onerror = () => reject(new Error('Falha ao ler imagem'))
-      reader.readAsDataURL(file)
-    })
-    await selecionarImagemDataUrl(dataUrl)
+    await selecionarImagemFile(file)
   } finally {
     target.value = ''
   }
@@ -804,22 +819,17 @@ const saveNota = async () => {
   }
 
   const response = await notasStore.createNota(payload)
-  if (!response?.nota) {
+  if (!response?.success) {
     return
   }
 
-  createdNota.value = {
-    id: response.nota.id,
-    numero_nota: response.nota.numero_nota,
-    serie_nota: response.nota.serie_nota,
-  }
-  successModalOpen.value = true
+  // Fluxo assíncrono: libera o formulário na hora para o usuário já lançar a
+  // próxima nota; o envio (upload/gravação) roda em segundo plano com o painel
+  // de progresso mostrando o status.
+  resetForm()
 }
 
-const cadastrarOutra = async () => {
-  successModalOpen.value = false
-  createdNota.value = null
-  notasStore.clearError()
+const resetForm = () => {
   imageDataUrl.value = ''
   form.idempresa = null
   form.contato_id = undefined
@@ -844,6 +854,13 @@ const cadastrarOutra = async () => {
   vendaFutura.value = false
   resetErrors()
   crmStore.clearContatos()
+}
+
+const cadastrarOutra = async () => {
+  successModalOpen.value = false
+  createdNota.value = null
+  notasStore.clearError()
+  resetForm()
 }
 
 onMounted(() => {

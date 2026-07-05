@@ -28,6 +28,7 @@ useHead(() => ({
     </div>
     <LayoutMobileBottomNav v-if="exibirHeader" />
     <OfflineSyncStatus />
+    <NotasBackgroundQueuePanel />
     <Toast />
   </div>
 </template>

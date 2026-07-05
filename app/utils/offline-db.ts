@@ -53,6 +53,10 @@ export type OfflineQueueSyncProgress = {
 
 export type SyncOfflineQueueOptions = {
   onProgress?: (progress: OfflineQueueSyncProgress) => void
+  /** Quando true, não interrompe a fila no primeiro erro: marca o item e segue os demais. */
+  continueOnError?: boolean
+  /** Restringe o processamento a uma entidade específica (ex.: apenas 'notas'). */
+  entity?: OfflineQueueEntity
 }
 
 export type OfflineCacheEntry<T = unknown> = {
@@ -446,6 +450,12 @@ const deleteQueueEntry = async (id: string) => {
   notifyOfflineQueueChanged()
 }
 
+/** Remove um item da fila (ex.: usuário descarta um envio em background que falhou). */
+export const removeOfflineQueueEntry = async (id: string) => {
+  if (!isOfflineStorageAvailable()) return
+  await deleteQueueEntry(id)
+}
+
 const updateQueueEntry = async (entry: OfflineQueueEntry) => {
   await runStore<IDBValidKey>(QUEUE_STORE, 'readwrite', store => store.put(entry))
   notifyOfflineQueueChanged()
@@ -532,7 +542,21 @@ const persistCreatedEntityMapping = async (entry: OfflineQueueEntry, response: a
   })
 }
 
-export const syncOfflineQueue = async (options: SyncOfflineQueueOptions = {}) => {
+// Serializa todas as drenagens da fila (auto-sync offline, sync completo e envio
+// em segundo plano) para que nunca rodem em paralelo — o que reenviaria o mesmo
+// item. Chamadas concorrentes aguardam a anterior e então releem a fila (já
+// drenada), evitando envios duplicados de itens sem idempotência (ex.: create).
+let queueSyncChain: Promise<OfflineSyncResult> = Promise.resolve({ synced: 0, failed: 0, pending: 0 })
+
+export const syncOfflineQueue = (options: SyncOfflineQueueOptions = {}) => {
+  const run = queueSyncChain
+    .catch(() => undefined)
+    .then(() => syncOfflineQueueInternal(options))
+  queueSyncChain = run.catch(() => ({ synced: 0, failed: 0, pending: 0 }))
+  return run
+}
+
+const syncOfflineQueueInternal = async (options: SyncOfflineQueueOptions = {}) => {
   if (!getOnlineStatus()) {
     return {
       synced: 0,
@@ -541,7 +565,7 @@ export const syncOfflineQueue = async (options: SyncOfflineQueueOptions = {}) =>
     }
   }
 
-  const entries = await getOfflineQueue()
+  const entries = await getOfflineQueue(options.entity)
   let synced = 0
   let failed = 0
   let processed = 0
@@ -582,9 +606,9 @@ export const syncOfflineQueue = async (options: SyncOfflineQueueOptions = {}) =>
         lastError: error instanceof Error ? error.message : 'Falha ao sincronizar.',
       })
       notifyProgress(entry)
-      break
+      if (!options.continueOnError) break
     }
   }
 
-  return { synced, failed, pending: (await getOfflineQueue()).length }
+  return { synced, failed, pending: (await getOfflineQueue(options.entity)).length }
 }

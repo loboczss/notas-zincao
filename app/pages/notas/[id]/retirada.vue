@@ -12,7 +12,7 @@ import {
   RETIRADA_FOTO_CAMERA_PENDING_KEY,
   retiradaFotoRestoredImageStateKey,
 } from '../../../constants/camera-capture'
-import { NOTA_IMAGE_MAX_DIMENSION, normalizeNotaImageDataUrl } from '../../../utils/image-compression'
+import { NOTA_IMAGE_MAX_DIMENSION, normalizeNotaImageDataUrl, normalizeNotaImageFile } from '../../../utils/image-compression'
 
 definePageMeta({
   middleware: 'auth',
@@ -270,6 +270,28 @@ const triggerGallery = async () => {
   galleryInput.value?.click()
 }
 
+const selecionarFotoFile = async (file: File) => {
+  fotoProcessing.value = true
+  try {
+    // Decodifica direto do arquivo (createImageBitmap) sem materializar a data URL
+    // em resolução total — evita o estouro de memória/reload no mobile.
+    const normalized = await normalizeNotaImageFile(file)
+    if (!normalized) return
+
+    fotoDataUrl.value = normalized
+    fotoPreviewUrl.value = normalized
+  }
+  catch (error) {
+    const message = error instanceof Error
+      ? error.message
+      : 'Nao foi possivel preparar a foto da retirada.'
+    showError(message)
+  }
+  finally {
+    fotoProcessing.value = false
+  }
+}
+
 const onSelecionarFoto = async (event: Event) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
@@ -279,15 +301,8 @@ const onSelecionarFoto = async (event: Event) => {
     return
   }
 
-  const reader = new FileReader()
   try {
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-      reader.onload = () => resolve(String(reader.result || ''))
-      reader.onerror = () => reject(new Error('Falha ao ler imagem'))
-      reader.readAsDataURL(file)
-    })
-
-    await selecionarFotoDataUrl(dataUrl)
+    await selecionarFotoFile(file)
   }
   finally {
     target.value = ''
