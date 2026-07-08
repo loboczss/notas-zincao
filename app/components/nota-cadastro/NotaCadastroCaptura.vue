@@ -5,7 +5,7 @@ import { ref } from 'vue'
 import Botao from '../Botao.vue'
 import NotaCadastroSection from './NotaCadastroSection.vue'
 import { CADASTRO_NOTA_CAMERA_PENDING_KEY } from '../../constants/camera-capture'
-import { NOTA_IMAGE_MAX_DIMENSION } from '../../utils/image-compression'
+import { NOTA_IMAGE_MAX_DIMENSION, normalizeNotaImageWebPath } from '../../utils/image-compression'
 
 const props = withDefaults(defineProps<{
   previewUrl?: string
@@ -39,16 +39,6 @@ const isNativeCameraCanceled = (error: unknown) => {
   return /cancel|cancelled|canceled|user cancelled/i.test(message)
 }
 
-const dataUrlFromPhoto = (photo: { dataUrl?: string; base64String?: string; format?: string }) => {
-  if (photo.dataUrl) return photo.dataUrl
-  if (photo.base64String) {
-    const format = photo.format || 'jpeg'
-    return `data:image/${format};base64,${photo.base64String}`
-  }
-
-  return ''
-}
-
 const requestNativeImage = async (source: 'camera' | 'photos') => {
   if (!import.meta.client || !Capacitor.isNativePlatform()) return false
 
@@ -62,14 +52,18 @@ const requestNativeImage = async (source: 'camera' | 'photos') => {
       correctOrientation: true,
       height: NOTA_IMAGE_MAX_DIMENSION,
       quality: 72,
-      resultType: CameraResultType.DataUrl,
+      resultType: CameraResultType.Uri,
       source: source === 'camera' ? CameraSource.Camera : CameraSource.Photos,
       width: NOTA_IMAGE_MAX_DIMENSION,
     })
-    const dataUrl = dataUrlFromPhoto(photo)
 
-    if (dataUrl) {
-      emit('selectImageDataUrl', dataUrl)
+    if (photo.webPath) {
+      // Lê o arquivo temporário como Blob e comprime, sem materializar a data URL
+      // em resolução total na bridge JS — evita o estouro de memória no mobile.
+      const normalized = await normalizeNotaImageWebPath(photo.webPath)
+      if (normalized) {
+        emit('selectImageDataUrl', normalized)
+      }
     }
 
     return true

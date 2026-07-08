@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core'
 import { AppRoute } from '../constants/routes'
 import {
   CADASTRO_NOTA_CAMERA_PENDING_KEY,
@@ -5,11 +6,14 @@ import {
   RETIRADA_FOTO_CAMERA_PENDING_KEY,
   retiradaFotoRestoredImageStateKey,
 } from '../constants/camera-capture'
+import { normalizeNotaImageWebPath } from '../utils/image-compression'
 
 type RestoredCameraPhoto = {
   dataUrl?: string
   base64String?: string
   format?: string
+  webPath?: string
+  path?: string
 }
 
 type RestoredCameraEvent = {
@@ -24,8 +28,22 @@ type PendingRetiradaCamera = {
   route?: string
 }
 
-const dataUrlFromRestoredPhoto = (photo?: RestoredCameraPhoto) => {
+const dataUrlFromRestoredPhoto = async (photo?: RestoredCameraPhoto) => {
   if (!photo) return ''
+
+  // Resultado Uri (baixo consumo de memória): lê o arquivo temporário e comprime.
+  const webPath = photo.webPath
+    || (photo.path ? Capacitor.convertFileSrc(photo.path) : '')
+  if (webPath) {
+    try {
+      return await normalizeNotaImageWebPath(webPath)
+    }
+    catch (error) {
+      console.warn('[native-camera-restore] falha ao ler foto restaurada', error)
+    }
+  }
+
+  // Fallback legado (resultType DataUrl).
   if (photo.dataUrl) return photo.dataUrl
   if (photo.base64String) {
     const format = photo.format || 'jpeg'
@@ -36,7 +54,6 @@ const dataUrlFromRestoredPhoto = (photo?: RestoredCameraPhoto) => {
 }
 
 export default defineNuxtPlugin(async () => {
-  const { Capacitor } = await import('@capacitor/core')
   if (!Capacitor.isNativePlatform()) return
 
   const { App } = await import('@capacitor/app')
@@ -66,7 +83,7 @@ export default defineNuxtPlugin(async () => {
     localStorage.removeItem(RETIRADA_FOTO_CAMERA_PENDING_KEY)
     if (!event.success) return
 
-    const dataUrl = dataUrlFromRestoredPhoto(event.data)
+    const dataUrl = await dataUrlFromRestoredPhoto(event.data)
     if (!dataUrl) return
 
     if (pendingRetirada?.notaId) {

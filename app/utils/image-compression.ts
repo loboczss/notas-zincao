@@ -185,6 +185,25 @@ export const normalizeNotaImageFile = async (
   return await normalizeNotaImageDataUrlViaImage(dataUrl, options)
 }
 
+/**
+ * Normaliza a foto vinda do plugin de câmera nativa quando usamos
+ * CameraResultType.Uri: buscamos o arquivo temporário como Blob e reaproveitamos
+ * normalizeNotaImageFile. Assim evitamos que o plugin serialize a foto inteira
+ * como uma string base64 gigante na bridge JS — que era o que estourava a
+ * memória do WebView em aparelhos com pouca RAM.
+ */
+export const normalizeNotaImageWebPath = async (
+  webPath: string,
+  options: NotaImageCompressionOptions = {},
+) => {
+  const trimmed = String(webPath || '').trim()
+  if (!trimmed) return ''
+
+  const response = await fetch(trimmed)
+  const blob = await response.blob()
+  return await normalizeNotaImageFile(blob, options)
+}
+
 // ---------------------------------------------------------------------------
 // Caminho legado por <img> + canvas.toDataURL, mantido como fallback.
 // ---------------------------------------------------------------------------

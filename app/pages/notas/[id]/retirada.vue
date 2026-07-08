@@ -12,7 +12,7 @@ import {
   RETIRADA_FOTO_CAMERA_PENDING_KEY,
   retiradaFotoRestoredImageStateKey,
 } from '../../../constants/camera-capture'
-import { NOTA_IMAGE_MAX_DIMENSION, normalizeNotaImageDataUrl, normalizeNotaImageFile } from '../../../utils/image-compression'
+import { NOTA_IMAGE_MAX_DIMENSION, normalizeNotaImageDataUrl, normalizeNotaImageFile, normalizeNotaImageWebPath } from '../../../utils/image-compression'
 
 definePageMeta({
   middleware: 'auth',
@@ -186,14 +186,28 @@ const isNativeCameraCanceled = (error: unknown) => {
   return /cancel|cancelled|canceled|user cancelled/i.test(message)
 }
 
-const dataUrlFromPhoto = (photo: { dataUrl?: string; base64String?: string; format?: string }) => {
-  if (photo.dataUrl) return photo.dataUrl
-  if (photo.base64String) {
-    const format = photo.format || 'jpeg'
-    return `data:image/${format};base64,${photo.base64String}`
-  }
+const selecionarFotoWebPath = async (webPath: string) => {
+  if (!webPath) return
 
-  return ''
+  fotoProcessing.value = true
+  try {
+    // Lê o arquivo temporário da câmera como Blob e comprime via createImageBitmap,
+    // sem materializar a data URL em resolução total — evita o estouro de memória no mobile.
+    const normalized = await normalizeNotaImageWebPath(webPath)
+    if (!normalized) return
+
+    fotoDataUrl.value = normalized
+    fotoPreviewUrl.value = normalized
+  }
+  catch (error) {
+    const message = error instanceof Error
+      ? error.message
+      : 'Nao foi possivel preparar a foto da retirada.'
+    showError(message)
+  }
+  finally {
+    fotoProcessing.value = false
+  }
 }
 
 const selecionarFotoDataUrl = async (dataUrl: string) => {
@@ -235,14 +249,13 @@ const requestNativeImage = async (source: 'camera' | 'photos') => {
       correctOrientation: true,
       height: NOTA_IMAGE_MAX_DIMENSION,
       quality: 72,
-      resultType: CameraResultType.DataUrl,
+      resultType: CameraResultType.Uri,
       source: source === 'camera' ? CameraSource.Camera : CameraSource.Photos,
       width: NOTA_IMAGE_MAX_DIMENSION,
     })
-    const dataUrl = dataUrlFromPhoto(photo)
 
-    if (dataUrl) {
-      await selecionarFotoDataUrl(dataUrl)
+    if (photo.webPath) {
+      await selecionarFotoWebPath(photo.webPath)
     }
 
     return true
