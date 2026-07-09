@@ -40,6 +40,26 @@ const sincronizarPeriodo = async (payload: { date_start: string, date_end: strin
   }
 }
 
+const sincronizarAgora = async () => {
+  if (import.meta.client) {
+    const confirmed = window.confirm('Sincronizar baixa as notas fiscais das 6 empresas direto na Integrim e recalcula a analise. A rotina pode levar alguns minutos. Continuar?')
+    if (!confirmed) return
+  }
+  const result = await store.syncNow()
+  if (result) {
+    await store.fetchSyncHealth()
+    await store.fetchProdutos({ page: 1, page_size: store.pageSize })
+  }
+}
+
+const pararSincronizacao = async () => {
+  if (import.meta.client) {
+    const confirmed = window.confirm('Parar a sincronizacao das notas do Integrim? Ela encerra no proximo lote seguro.')
+    if (!confirmed) return
+  }
+  await store.cancelSync()
+}
+
 onMounted(async () => {
   if (!authStore.profile) await authStore.getMe()
   await carregarConfig()
@@ -54,9 +74,12 @@ onMounted(async () => {
     :is-admin="isAdmin"
     :saving="store.savingConfig"
     :syncing="syncEmAndamento"
+    :cancelling="store.cancelling"
     @save-schedule="salvarAgenda"
     @save-parametros="salvarParametros"
     @sync-periodo="sincronizarPeriodo"
+    @sync-now="sincronizarAgora"
+    @cancel-sync="pararSincronizacao"
     @refresh="store.fetchSyncHealth"
   />
 </template>

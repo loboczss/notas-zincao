@@ -5,6 +5,7 @@ import type {
   OfflineNotaSyncItem,
 } from '../../../shared/types/OfflineNotasSync'
 import { NOTAS_RETIRADA_STORAGE_BUCKET, getNotasRetiradaStoragePath } from '../../utils/storage'
+import { backblazeKeyFromValue, isBackblazeValue, presignBackblazeReadUrl } from '../../utils/object-storage'
 
 const OFFLINE_NOTAS_SYNC_DEFAULT_PAGE_SIZE = 50
 const OFFLINE_NOTAS_SYNC_MAX_PAGE_SIZE = 100
@@ -151,7 +152,24 @@ export const createSignedUrlMap = async (
     ? new Date(Date.now() + expiresIn * 1000).toISOString()
     : null
 
-  for (const pathChunk of chunk(uniquePaths, 100)) {
+  // Objetos no Backblaze (b2:{key}) são assinados via S3 presign; os antigos
+  // continuam no Supabase Storage (leitura dupla durante a transição).
+  const backblazePaths = uniquePaths.filter(isBackblazeValue)
+  const supabasePaths = uniquePaths.filter(path => !isBackblazeValue(path))
+
+  await Promise.all(backblazePaths.map(async (path) => {
+    const key = backblazeKeyFromValue(path)
+    if (!key) return
+    try {
+      const signedUrl = String(await presignBackblazeReadUrl(key, expiresIn) || '').trim()
+      if (signedUrl) signedUrlByPath.set(path, signedUrl)
+    }
+    catch (error) {
+      console.error(`[sync/notas] signed url error for ${path}:`, error instanceof Error ? error.message : error)
+    }
+  }))
+
+  for (const pathChunk of chunk(supabasePaths, 100)) {
     const storage = client.storage.from(NOTAS_RETIRADA_STORAGE_BUCKET)
 
     if (typeof storage.createSignedUrls === 'function') {

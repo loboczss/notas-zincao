@@ -7,13 +7,10 @@ import type {
   IntegrimRecord,
 } from '../../stock-integrin/sync/types'
 import { IntegrimHttpError } from '../../stock-integrin/sync/types'
-import { toInteger } from '../../stock-integrin/sync/utils'
-import { DOCS_PAGE_SIZE, ITENS_PAGE_SIZE, MAX_PAGES_PER_QUERY } from './constants'
-import type { CompanyModelPlan } from './types'
+import { ITENS_PAGE_SIZE, MAX_PAGES_PER_QUERY } from './constants'
 
 export { getFreshAccessToken }
 
-const DOCUMENTOS_SERVICE = 'documentos_fiscais_saida'
 const ITENS_SERVICE = 'itens_documentos_fiscais_saida'
 const REQUEST_TIMEOUT_MS = 45_000
 const MAX_RETRIES = 6
@@ -146,57 +143,6 @@ const getPageCount = (result: IntegrimPagedResponse<IntegrimRecord>, pageSize: n
   const size = Math.max(result.data.length, pageSize, 1)
   const pageCount = Math.ceil(result.total / size)
   return Math.min(Math.max(pageCount, 1), MAX_PAGES_PER_QUERY)
-}
-
-// ---------------------------------------------------------------------------
-// Cabecalhos (notas fiscais 55/65) por empresa + modelo + janela de data.
-// ---------------------------------------------------------------------------
-
-export const fetchDocumentosPage = async (
-  config: IntegrimConfig,
-  tokens: TokenManager,
-  idempresa: number,
-  modelo: string,
-  startDate: string,
-  endDate: string,
-  page: number,
-) => {
-  // O Integrim nao aceita duas clausulas no mesmo campo (retorna vazio): usar BETWEEN.
-  const clausulas: IntegrimClause[] = [
-    { campo: 'idempresa', operadorlogico: 'AND', operador: 'IGUAL', valor: idempresa },
-    { campo: 'modelo', operadorlogico: 'AND', operador: 'IGUAL', valor: modelo },
-    { campo: 'dtmovimento', operadorlogico: 'AND', operador: 'BETWEEN', valor: [startDate, endDate] },
-  ]
-  const ordenacoes: IntegrimOrder[] = [{ campo: 'idplanilha', direcao: 'ASC' }]
-  return await postNotasServicePage(config, tokens, DOCUMENTOS_SERVICE, page, clausulas, ordenacoes, DOCS_PAGE_SIZE)
-}
-
-export const createCompanyModelPlans = async (
-  config: IntegrimConfig,
-  tokens: TokenManager,
-  companyIds: number[],
-  modelos: string[],
-  startDate: string,
-  endDate: string,
-): Promise<CompanyModelPlan[]> => {
-  const plans: CompanyModelPlan[] = []
-
-  for (const idempresa of companyIds) {
-    for (const modelo of modelos) {
-      const firstPage = await fetchDocumentosPage(config, tokens, idempresa, modelo, startDate, endDate, 1)
-      if (!firstPage.data.length) continue
-
-      plans.push({
-        idempresa,
-        modelo,
-        firstPage,
-        totalPages: getPageCount(firstPage, DOCS_PAGE_SIZE),
-        totalRows: toInteger(firstPage.total) || firstPage.data.length,
-      })
-    }
-  }
-
-  return plans
 }
 
 // ---------------------------------------------------------------------------

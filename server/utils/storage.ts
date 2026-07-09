@@ -5,6 +5,7 @@ import {
   presignBackblazeReadUrl,
   uploadObjectToBackblaze,
 } from './object-storage'
+import { buildNotaImageKey, parseImageDataUrl } from './nota-image'
 
 export const NOTAS_RETIRADA_STORAGE_BUCKET = 'notas-retirada'
 
@@ -96,6 +97,24 @@ export const uploadNotaImageObject = async (
 
   if (error) throw error
   return key
+}
+
+/**
+ * Decodifica uma imagem em data URL e sobe pro storage, devolvendo o valor a
+ * gravar no banco (`b2:{key}` no Backblaze, ou o path cru no Supabase).
+ * Retorna null se o data URL for inválido. Lança se o upload falhar.
+ */
+export const uploadNotaImageDataUrl = async (
+  client: any,
+  ownerUserId: string,
+  kind: string,
+  dataUrl: string,
+): Promise<string | null> => {
+  const parsed = parseImageDataUrl(dataUrl)
+  if (!parsed) return null
+  const key = buildNotaImageKey(ownerUserId, kind, parsed.mimeType)
+  const buffer = Buffer.from(parsed.base64Content, 'base64')
+  return uploadNotaImageObject(client, key, buffer, parsed.mimeType)
 }
 
 export const createSignedStorageUrl = async (

@@ -4,6 +4,7 @@ import {
   Activity,
   CalendarClock,
   CalendarRange,
+  CircleStop,
   Clock3,
   RefreshCw,
   Save,
@@ -20,7 +21,6 @@ import { formatStockIntegrinNumber } from '../../../utils/stock-integrin-format'
 import Botao from '../../Botao.vue'
 import Input from '../../Input.vue'
 import SelectInput from '../../SelectInput.vue'
-import CheckboxField from '../../CheckboxField.vue'
 import InfoTooltip from '../../InfoTooltip.vue'
 
 const props = withDefaults(defineProps<{
@@ -30,16 +30,20 @@ const props = withDefaults(defineProps<{
   isAdmin?: boolean
   saving?: boolean
   syncing?: boolean
+  cancelling?: boolean
 }>(), {
   isAdmin: false,
   saving: false,
   syncing: false,
+  cancelling: false,
 })
 
 const emit = defineEmits<{
-  (e: 'saveSchedule', payload: { enabled: boolean, times: string[], window_months: number, timezone: string, deactivate_stale: boolean }): void
+  (e: 'saveSchedule', payload: { enabled: boolean, times: string[], window_months: number, timezone: string }): void
   (e: 'saveParametros', payload: { lead_time_dias: number, coverage_days: number }): void
   (e: 'syncPeriodo', payload: { date_start: string, date_end: string }): void
+  (e: 'syncNow'): void
+  (e: 'cancelSync'): void
   (e: 'refresh'): void
 }>()
 
@@ -57,7 +61,6 @@ const form = reactive({
   times: ['03:00'],
   windowMonths: '24',
   timezone: 'America/Sao_Paulo',
-  deactivateStale: true,
 })
 
 const paramsForm = reactive({
@@ -95,7 +98,6 @@ watch(() => props.schedule, (schedule) => {
   form.times = schedule.times.length ? [...schedule.times] : ['03:00']
   form.windowMonths = String(schedule.window_months)
   form.timezone = schedule.timezone
-  form.deactivateStale = schedule.deactivate_stale
 }, { immediate: true })
 
 watch(() => props.parametros, (parametros) => {
@@ -130,7 +132,6 @@ const saveSchedule = () => {
     times: cleanTimes.value,
     window_months: Math.min(120, Math.max(1, Number(form.windowMonths || 24))),
     timezone: form.timezone,
-    deactivate_stale: form.deactivateStale,
   })
 }
 
@@ -281,13 +282,6 @@ const semDadosDiarios = computed(() => (props.health?.daily_rows ?? 0) === 0)
             </div>
           </div>
 
-          <div class="flex items-center gap-2">
-            <CheckboxField v-model="form.deactivateStale" :disabled="!props.isAdmin" class="h-9 min-h-0 py-1 text-xs font-semibold">
-              Desativar notas que sumiram da janela (recomendado)
-            </CheckboxField>
-            <InfoTooltip title="Deletar fora da janela" text="Ao diminuir o histórico, notas antigas que saírem da janela de análise de meses serão desconsideradas no cálculo." />
-          </div>
-
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-slate-100 pt-3 dark:border-slate-800">
             <span class="text-[11px] text-slate-500 dark:text-slate-400">
               Próxima execução:
@@ -301,35 +295,73 @@ const semDadosDiarios = computed(() => (props.health?.daily_rows ?? 0) === 0)
         </div>
       </div>
 
-      <!-- Sincronizacao manual por periodo -->
+      <!-- Sincronização manual -->
       <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900/40">
-        <div class="mb-3 flex items-center gap-2 border-b border-slate-100 pb-2.5 text-sm font-bold text-slate-800 dark:border-slate-800 dark:text-slate-200">
-          <CalendarRange class="h-4.5 w-4.5 text-brand-500" />
-          Sincronizar um período específico
-          <InfoTooltip title="Sync por Período" text="Baixe notas fiscais de venda manualmente dentro do intervalo escolhido para forçar a análise desse período." />
-        </div>
-        <div class="grid gap-3 sm:grid-cols-2">
-          <div class="flex flex-col gap-1">
-            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Data inicial</span>
-            <Input v-model="periodForm.start" type="date" :max="periodForm.end || hojeIso" size="sm" class="h-8.5 text-xs" :disabled="!props.isAdmin || props.syncing" />
-          </div>
-          <div class="flex flex-col gap-1">
-            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Data final</span>
-            <Input v-model="periodForm.end" type="date" :min="periodForm.start" :max="hojeIso" size="sm" class="h-8.5 text-xs" :disabled="!props.isAdmin || props.syncing" />
-          </div>
-        </div>
-        <p class="mt-2 text-[10px] leading-relaxed text-slate-400 dark:text-slate-500">
-          Processa as notas das 6 empresas apenas nesse intervalo de datas e recalcula as sugestões matemáticas.
-        </p>
-        <div class="mt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-slate-100 pt-3 dark:border-slate-800">
-          <span v-if="!periodoValido" class="text-[10px] font-bold text-rose-500">
-            A data inicial deve ser menor ou igual à final.
+        <div class="mb-3 flex items-center justify-between border-b border-slate-100 pb-2.5 dark:border-slate-800">
+          <span class="inline-flex items-center gap-2 text-sm font-bold text-slate-800 dark:text-slate-200">
+            <RefreshCw class="h-4.5 w-4.5 text-brand-500" />
+            Sincronização manual
           </span>
-          <span v-else />
-          <Botao type="button" class="w-full sm:w-auto h-8.5 px-4 text-xs font-semibold justify-center" :disabled="!periodoValido || props.syncing || !props.isAdmin" @click="sincronizarPeriodo">
-            <RefreshCw class="h-3.5 w-3.5 mr-1.5" :class="props.syncing ? 'animate-spin' : ''" />
-            {{ props.syncing ? 'Sincronizando…' : 'Sincronizar período' }}
-          </Botao>
+          <div class="flex items-center gap-2">
+            <Botao
+              v-if="props.isAdmin && props.syncing"
+              type="button"
+              variant="danger"
+              class="h-8.5 px-3 text-xs font-semibold justify-center border border-rose-200 bg-rose-50 dark:border-rose-900/60 dark:bg-rose-500/10"
+              :disabled="props.cancelling"
+              title="Solicita parada da sincronização no próximo lote seguro."
+              @click="emit('cancelSync')"
+            >
+              <CircleStop class="h-3.5 w-3.5 mr-1.5" :class="props.cancelling ? 'animate-pulse' : ''" />
+              {{ props.cancelling ? 'Parando' : 'Parar sync' }}
+            </Botao>
+            <Botao
+              v-if="props.isAdmin"
+              type="button"
+              variant="primary"
+              class="h-8.5 px-3 text-xs font-semibold justify-center"
+              :disabled="props.syncing"
+              title="Busca as notas fiscais das 6 empresas na Integrim e recalcula a análise."
+              @click="emit('syncNow')"
+            >
+              <RefreshCw class="h-3.5 w-3.5 mr-1.5" :class="props.syncing ? 'animate-spin' : ''" />
+              {{ props.syncing ? 'Sincronizando' : 'Sincronizar busca no Integrim' }}
+            </Botao>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+            <CalendarRange class="h-3.5 w-3.5" />
+            Ou sincronizar um período específico
+            <InfoTooltip title="Sync por Período" text="Baixe notas fiscais de venda manualmente dentro do intervalo escolhido para forçar a análise desse período." />
+          </div>
+
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div class="flex flex-col gap-1">
+              <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Data inicial</span>
+              <Input v-model="periodForm.start" type="date" :max="periodForm.end || hojeIso" size="sm" class="h-8.5 text-xs" :disabled="!props.isAdmin || props.syncing" />
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Data final</span>
+              <Input v-model="periodForm.end" type="date" :min="periodForm.start" :max="hojeIso" size="sm" class="h-8.5 text-xs" :disabled="!props.isAdmin || props.syncing" />
+            </div>
+          </div>
+
+          <p class="text-[10px] leading-relaxed text-slate-400 dark:text-slate-500">
+            Processa as notas das 6 empresas apenas nesse intervalo de datas e recalcula as sugestões matemáticas.
+          </p>
+
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-slate-100 pt-3 dark:border-slate-800">
+            <span v-if="!periodoValido" class="text-[10px] font-bold text-rose-500">
+              A data inicial deve ser menor ou igual à final.
+            </span>
+            <span v-else />
+            <Botao type="button" class="w-full sm:w-auto h-8.5 px-4 text-xs font-semibold justify-center" :disabled="!periodoValido || props.syncing || !props.isAdmin" @click="sincronizarPeriodo">
+              <RefreshCw class="h-3.5 w-3.5 mr-1.5" :class="props.syncing ? 'animate-spin' : ''" />
+              {{ props.syncing ? 'Sincronizando…' : 'Sincronizar período' }}
+            </Botao>
+          </div>
         </div>
       </div>
 

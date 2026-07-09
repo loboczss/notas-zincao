@@ -1,4 +1,3 @@
-import { randomUUID } from 'node:crypto'
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import type {
   NotaRegistrarRetiradaRequest,

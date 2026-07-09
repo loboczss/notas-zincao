@@ -1,9 +1,8 @@
 import { createAdminClient } from '../../stock-integrin/sync/repository'
 import { chunk } from '../../stock-integrin/sync/utils'
 import type { ProdutoValorBaseRow, ProdutoVendaDiaRow } from './aggregator'
-import { INSERT_CHUNK_SIZE, STALE_CHUNK_SIZE, UPSERT_CHUNK_SIZE } from './constants'
+import { INSERT_CHUNK_SIZE } from './constants'
 import type {
-  IntegrimNotaUpsertRow,
   IntegrimNotasSyncCounters,
   IntegrimNotasSyncProgress,
 } from './types'
@@ -171,71 +170,6 @@ export const requestSyncCancel = async (client: AdminClient, runId?: string | nu
   }
 
   return { runId: String(runningRun.id), cancelRequested: true, cancelled: true }
-}
-
-export const upsertNotas = async (
-  client: AdminClient,
-  rows: IntegrimNotaUpsertRow[],
-  beforeChunk?: () => Promise<void>,
-) => {
-  let upserted = 0
-  for (const rowsChunk of chunk(rows, UPSERT_CHUNK_SIZE)) {
-    await beforeChunk?.()
-    const { error } = await (client as any)
-      .from('integrim_notas')
-      .upsert(rowsChunk, { onConflict: 'idempresa,idplanilha' })
-    if (error) {
-      console.error('[integrim-notas] upsert notas failed:', error.message)
-      throw createError({ statusCode: 500, statusMessage: 'Nao foi possivel salvar as notas do Integrim.' })
-    }
-    upserted += rowsChunk.length
-    await beforeChunk?.()
-  }
-  return upserted
-}
-
-// Desativa, dentro da janela, cabecalhos que este run nao tocou (notas removidas).
-export const deactivateStaleRows = async (
-  client: AdminClient,
-  startDate: string,
-  runId: string,
-  beforeChunk?: () => Promise<void>,
-) => {
-  let deactivated = 0
-
-  while (true) {
-    await beforeChunk?.()
-    const { data, error } = await (client as any)
-      .from('integrim_notas')
-      .select('id')
-      .eq('is_present', true)
-      .gte('dtmovimento', startDate)
-      .neq('sync_run_id', runId)
-      .limit(STALE_CHUNK_SIZE)
-
-    if (error) {
-      console.error('[integrim-notas] fetch stale notas failed:', error.message)
-      throw createError({ statusCode: 500, statusMessage: 'Nao foi possivel localizar notas antigas do Integrim.' })
-    }
-
-    const ids = ((data || []) as Array<{ id?: string }>).map(row => row.id).filter((id): id is string => Boolean(id))
-    if (!ids.length) break
-
-    const { error: updateError } = await (client as any)
-      .from('integrim_notas')
-      .update({ is_present: false, updated_at: new Date().toISOString() })
-      .in('id', ids)
-
-    if (updateError) {
-      console.error('[integrim-notas] deactivate notas failed:', updateError.message)
-      throw createError({ statusCode: 500, statusMessage: 'Nao foi possivel desativar notas antigas do Integrim.' })
-    }
-
-    deactivated += ids.length
-    await beforeChunk?.()
-  }
-
-  return deactivated
 }
 
 // Reconstroi a tabela derivada de valor a partir das vendas agregadas em memoria.

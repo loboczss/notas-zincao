@@ -8,7 +8,6 @@ import { normalizeNotaImageDataUrl } from '../../utils/image-compression'
 import {
   enqueueOfflineRequest,
   getOfflineCache,
-  getOfflineQueue,
   getOnlineStatus,
   setOfflineCache,
 } from '../../utils/offline-db'

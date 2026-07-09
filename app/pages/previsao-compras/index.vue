@@ -1,18 +1,92 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { usePrevisaoComprasStore } from '../../stores'
-import type { IntegrimListaCompraQuery } from '../../../shared/types/IntegrimNotas'
+import { getApiFetch } from '../../utils/api-fetch'
+import { getApiErrorMessage } from '../../utils/api-errors'
+import type {
+  IntegrimCompraAiOportunidade,
+  IntegrimCompraOportunidadeStatus,
+  IntegrimListaCompraQuery,
+  IntegrimListaCompraRow,
+} from '../../../shared/types/IntegrimNotas'
 
 import PrevisaoComprasListaCompra from '../../components/previsao-compras/core/PrevisaoComprasListaCompra.vue'
-import PrevisaoComprasAiResumo from '../../components/previsao-compras/analise/PrevisaoComprasAiResumo.vue'
-import PrevisaoComprasSazonalidade from '../../components/previsao-compras/analise/PrevisaoComprasSazonalidade.vue'
+import PrevisaoComprasCompraDetail from '../../components/previsao-compras/core/PrevisaoComprasCompraDetail.vue'
 
 const store = usePrevisaoComprasStore()
+
+const rowSelecionada = ref<IntegrimListaCompraRow | null>(null)
+const detalheAberto = ref(false)
+const printing = ref(false)
+
+// Cruza as recomendações da IA (dashboard) por produto: idempresa-idproduto-idsubproduto.
+const oportunidadesMap = computed(() => {
+  const map = new Map<string, IntegrimCompraAiOportunidade[]>()
+  for (const op of store.aiDashboard?.oportunidades || []) {
+    const key = `${op.idempresa}-${op.idproduto}-${op.idsubproduto}`
+    const arr = map.get(key)
+    if (arr) arr.push(op)
+    else map.set(key, [op])
+  }
+  return map
+})
+
+const oportunidadesDaLinha = computed(() => {
+  const row = rowSelecionada.value
+  if (!row) return []
+  return oportunidadesMap.value.get(`${row.idempresa}-${row.idproduto}-${row.idsubproduto}`) || []
+})
 
 const carregarListaCompra = (query: IntegrimListaCompraQuery = {}, options: { append?: boolean } = {}) =>
   store.fetchListaCompra(query, options)
 
-const carregarSazonalidade = (payload: { ano?: number | null; mesInicio?: number }) => store.fetchSazonalidade({ ano: payload.ano, mesInicio: payload.mesInicio })
+const abrirDetalhe = (row: IntegrimListaCompraRow) => {
+  rowSelecionada.value = row
+  detalheAberto.value = true
+}
+
+const acaoOportunidade = async (input: {
+  id: string
+  status: Extract<IntegrimCompraOportunidadeStatus, 'aceita' | 'ignorada' | 'comprada' | 'expirada'>
+}) => {
+  const result = await store.updateOportunidadeStatus(input.id, input.status)
+  if (result) await store.fetchAiDashboard({ silent: true })
+}
+
+// Abre o PDF (gerado no servidor) numa nova aba. Usa fetch autenticado + blob
+// para funcionar mesmo com apiBaseUrl em outra origem.
+const baixarRelatorio = async (query: Record<string, string | number>) => {
+  printing.value = true
+  store.clearMessages()
+  try {
+    const blob = await getApiFetch()<Blob, 'blob'>('/api/integrim-notas/relatorio-compra.pdf', {
+      query,
+      responseType: 'blob',
+    })
+    const url = URL.createObjectURL(blob)
+    window.open(url, '_blank')
+    setTimeout(() => URL.revokeObjectURL(url), 60_000)
+  }
+  catch (error) {
+    store.errorMessage = getApiErrorMessage(error, 'Falha ao gerar o relatório em PDF.')
+  }
+  finally {
+    printing.value = false
+  }
+}
+
+const imprimirLista = (payload: { idempresa: number | null }) =>
+  baixarRelatorio(payload.idempresa
+    ? { escopo: 'empresa', idempresa: payload.idempresa }
+    : { escopo: 'geral' })
+
+const imprimirProduto = (row: IntegrimListaCompraRow) =>
+  baixarRelatorio({
+    escopo: 'produto',
+    idempresa: row.idempresa,
+    idproduto: row.idproduto,
+    idsubproduto: row.idsubproduto,
+  })
 
 onMounted(async () => {
   if (!store.listaCompra.length && !store.loadingListaCompra) {
@@ -26,28 +100,25 @@ onMounted(async () => {
 
 <template>
   <div class="space-y-5">
-    <!-- Resumo das oportunidades da IA (detalhe completo fica na aba IA) -->
-    <PrevisaoComprasAiResumo
-      :dashboard="store.aiDashboard"
-      :loading="store.loadingAiDashboard"
-    />
-
-    <!-- Sazonalidade: quando cada mês vende mais.
-         Fica ANTES da tabela porque a tabela tem scroll infinito — se ficasse
-         depois, o gráfico nunca seria alcançável (a rolagem carrega mais itens). -->
-    <PrevisaoComprasSazonalidade
-      :sazonalidade="store.sazonalidade"
-      :loading="store.loadingInsights"
-      @load="carregarSazonalidade"
-    />
-
-    <!-- Tabela única (scroll infinito) — sempre por último na página -->
     <PrevisaoComprasListaCompra
       :rows="store.listaCompra"
       :stats="store.listaCompraStats"
       :loading="store.loadingListaCompra"
       :total-itens="store.listaCompraTotalItens"
+      :oportunidades-map="oportunidadesMap"
+      :printing="printing"
       @fetch="carregarListaCompra"
+      @abrir="abrirDetalhe"
+      @print="imprimirLista"
+    />
+
+    <PrevisaoComprasCompraDetail
+      v-model="detalheAberto"
+      :row="rowSelecionada"
+      :oportunidades="oportunidadesDaLinha"
+      :printing="printing"
+      @opportunity-action="acaoOportunidade"
+      @print="imprimirProduto"
     />
   </div>
 </template>

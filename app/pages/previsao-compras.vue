@@ -2,19 +2,14 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { Bot, Settings2, ShoppingCart } from 'lucide-vue-next'
-import type {
-  IntegrimCompraOportunidadeStatus,
-} from '../../shared/types/IntegrimNotas'
+import type { IntegrimCompraParametrosUpdateRequest } from '../../shared/types/IntegrimNotas'
 import { useAuthStore, usePrevisaoComprasStore } from '../stores'
 
-// Layout e Componentes Gerais
 import LayoutAppPageShell from '../components/layout/AppPageShell.vue'
 import StockIntegrinActions from '../components/stock-integrin/StockIntegrinActions.vue'
 import StockIntegrinNotices from '../components/stock-integrin/StockIntegrinNotices.vue'
-
-// Componentes da Previsão de Compras (pasta core)
 import PrevisaoComprasProgress from '../components/previsao-compras/core/PrevisaoComprasProgress.vue'
-import PrevisaoComprasDetailModal from '../components/previsao-compras/core/PrevisaoComprasDetailModal.vue'
+import PrevisaoComprasAjustes from '../components/previsao-compras/config/PrevisaoComprasAjustes.vue'
 
 definePageMeta({
   middleware: ['auth', 'admin'],
@@ -28,32 +23,27 @@ const isAdmin = computed(() => String(authStore.profile?.role || '').trim().toLo
 const syncEmAndamento = computed(() => store.syncing || store.latestRun?.status === 'running')
 
 const navTabs = [
-  { to: '/previsao-compras', label: 'Análise', icon: ShoppingCart },
-  { to: '/previsao-compras/ia', label: 'IA', icon: Bot },
-  { to: '/previsao-compras/config', label: 'Config', icon: Settings2 },
+  { to: '/previsao-compras', label: 'Comprar', icon: ShoppingCart },
+  { to: '/previsao-compras/ia', label: 'Assistente IA', icon: Bot },
 ]
 const mostrarProgresso = computed(() => syncEmAndamento.value)
 const atualizandoLista = ref(false)
+const ajustesAberto = ref(false)
 
 const atualizarLista = async () => {
   atualizandoLista.value = true
   try {
     if (route.path === '/previsao-compras/ia') {
       await store.fetchAiDashboard()
-    } else if (route.path === '/previsao-compras/config') {
-      await Promise.all([
-        store.fetchSyncSchedule(),
-        store.fetchSyncHealth(),
-        store.fetchCompraParametros({ silent: true }),
-      ])
-    } else if (route.path === '/previsao-compras') {
+    }
+    else {
       await Promise.all([
         store.fetchListaCompra({ only_buy: true }),
-        store.fetchSazonalidade(),
         store.fetchAiDashboard({ silent: true }),
       ])
     }
-  } finally {
+  }
+  finally {
     atualizandoLista.value = false
   }
 }
@@ -75,25 +65,13 @@ const pararSincronizacao = async () => {
   await store.cancelSync()
 }
 
-const atualizarOportunidade = async (input: {
-  id: string
-  status: Extract<IntegrimCompraOportunidadeStatus, 'aceita' | 'ignorada' | 'comprada' | 'expirada'>
-}) => {
-  const result = await store.updateOportunidadeStatus(input.id, input.status)
-  if (!result) return
-
-  if (store.produtoSelecionado?.ai_oportunidade && store.produtoSelecionado.ai_oportunidade.id === input.id) {
-    store.produtoSelecionado = {
-      ...store.produtoSelecionado,
-      ai_oportunidade: {
-        ...store.produtoSelecionado.ai_oportunidade,
-        status: result.status,
-      },
+const salvarAjustes = async (payload: IntegrimCompraParametrosUpdateRequest) => {
+  const saved = await store.updateCompraParametros(payload)
+  if (saved) {
+    ajustesAberto.value = false
+    if (route.path === '/previsao-compras') {
+      await store.fetchListaCompra({ only_buy: true })
     }
-  }
-
-  if (route.path === '/previsao-compras/ia') {
-    await store.fetchAiDashboard({ silent: true })
   }
 }
 
@@ -101,20 +79,21 @@ onMounted(async () => {
   if (!authStore.profile) await authStore.getMe()
   await store.fetchSyncStatus()
   store.resumeSyncTrackingIfRunning()
+  store.fetchCompraParametros({ silent: true })
 })
 </script>
 
 <template>
   <LayoutAppPageShell
     eyebrow="Previsão de Compras"
-    title="O que vale a pena comprar"
-    description="Mostra quais produtos mais vendem e geram lucro, e quais estão perto de acabar, para você decidir as compras."
+    title="O que comprar agora"
+    description="Mostra o que precisa comprar, por quê e o saldo atual do estoque — com recomendações da IA e relatórios para imprimir."
   >
-    <!-- Ações de Header -->
     <template #headerAside>
-      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
         <StockIntegrinActions
           :is-admin="isAdmin"
+          :show-sync="false"
           :sync-in-progress="syncEmAndamento"
           :cancelling="store.cancelling"
           :loading-produtos="store.loadingProdutos"
@@ -123,18 +102,24 @@ onMounted(async () => {
           @cancel-sync="pararSincronizacao"
           @refresh="atualizarLista"
         />
+        <button
+          type="button"
+          class="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/60"
+          @click="ajustesAberto = true"
+        >
+          <Settings2 class="h-4 w-4" />
+          Ajustes
+        </button>
       </div>
     </template>
 
     <div class="space-y-5">
-      <!-- Notificações de Erro/Sucesso -->
       <StockIntegrinNotices
         :readonly-mode="!isAdmin"
         :error-message="store.errorMessage"
         :success-message="store.successMessage"
       />
 
-      <!-- Barra de Progresso de Sincronização -->
       <PrevisaoComprasProgress
         v-if="mostrarProgresso"
         :progress="store.syncProgress"
@@ -142,7 +127,6 @@ onMounted(async () => {
         :percent="store.syncProgressPercent"
       />
 
-      <!-- Barra de Progresso da IA de Previsão de Compras -->
       <PrevisaoComprasProgress
         v-if="store.aiTaskRunning"
         :progress="{ message: store.aiTaskProgressMessage, detail: store.aiTaskProgressDetail }"
@@ -150,7 +134,6 @@ onMounted(async () => {
         :percent="store.aiTaskProgressPercent"
       />
 
-      <!-- Navegação por Abas (Sub-rotas do Nuxt 4) -->
       <div class="flex items-center gap-1 overflow-x-auto rounded-xl border border-slate-200 bg-white p-1 shadow-xs scrollbar-none whitespace-nowrap dark:border-slate-800 dark:bg-slate-900/50">
         <NuxtLink
           v-for="tab in navTabs"
@@ -166,15 +149,14 @@ onMounted(async () => {
         </NuxtLink>
       </div>
 
-      <!-- Conteúdo da Sub-rota Ativa -->
       <NuxtPage />
     </div>
 
-    <!-- Modal Detalhado do Item -->
-    <PrevisaoComprasDetailModal
-      v-model="store.produtoModalAberto"
-      :produto="store.produtoSelecionado"
-      @opportunity-action="atualizarOportunidade"
+    <PrevisaoComprasAjustes
+      v-model="ajustesAberto"
+      :parametros="store.compraParametros"
+      :saving="store.savingConfig"
+      @save="salvarAjustes"
     />
   </LayoutAppPageShell>
 </template>

@@ -133,7 +133,6 @@ export const buildSyncSchedule = (
     times,
     window_months: clampWindowMonths(row?.window_months),
     timezone,
-    deactivate_stale: row ? parseBoolean(row.deactivate_stale, true) : true,
     updated_at: row?.updated_at ? String(row.updated_at) : null,
     updated_by: row?.updated_by ? String(row.updated_by) : null,
     next_run_at: next ? next.toISOString() : null,
@@ -163,6 +162,5 @@ export const sanitizeScheduleUpdate = (
   if (body.times !== undefined) values.times = sanitizeScheduleTimes(body.times)
   if (body.window_months !== undefined) values.window_months = clampWindowMonths(body.window_months)
   if (body.timezone !== undefined) values.timezone = normalizeTimezone(body.timezone)
-  if (body.deactivate_stale !== undefined) values.deactivate_stale = parseBoolean(body.deactivate_stale, true)
   return values
 }

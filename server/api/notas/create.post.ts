@@ -3,9 +3,8 @@ import { randomUUID } from 'node:crypto'
 import type { NotaRetiradaDraft } from '../../../shared/types/NotasRetirada'
 import { vincularProdutosAoEstoque } from '../../services/estoque/match-produtos'
 import { assertCanCreateNota, getAuthUidOrThrow } from '../../utils/permissions'
-import { signNotaStorageUrls } from '../../utils/storage'
+import { signNotaStorageUrls, uploadNotaImageDataUrl } from '../../utils/storage'
 import { parseImageDataUrl } from '../../utils/nota-image'
-import { processCreateNotaMediaInBackground } from '../../services/notas/media-background'
 
 const requiredFields = ['nome_cliente', 'numero_nota', 'data_compra', 'produtos'] as const
 const allowedStatus = ['pendente', 'parcial', 'retirada', 'cancelada'] as const
@@ -432,18 +431,46 @@ export const notasCreatePostHandler = defineEventHandler(async (event) => {
     })
   }
 
-  // Valida as imagens (formato data URL) de forma síncrona, mas NÃO faz o upload
-  // aqui: a nota é gravada já e as fotos sobem para o Backblaze em segundo plano
-  // (midia_status = 'processando' até concluir), sem travar a interface no clique.
+  // A evidência fiscal (foto do cupom) é enviada ao Backblaze de forma SÍNCRONA,
+  // antes do INSERT: se o upload falhar, a nota NÃO é gravada. Isso garante a
+  // regra de negócio "nenhuma nota existe sem evidência fiscal". A fila offline
+  // do cliente mantém o item e reenvia em caso de erro do servidor.
   if (!parseImageDataUrl(fotoCupomDataUrl)) throw badRequest('Imagem do cupom invalida.')
   if (fotoClienteDataUrl && !parseImageDataUrl(fotoClienteDataUrl)) throw badRequest('Imagem do cliente invalida.')
+
+  let fotoUrl: string
+  try {
+    const uploaded = await uploadNotaImageDataUrl(client, authUid, 'cupom', fotoCupomDataUrl)
+    if (!uploaded) throw new Error('upload do cupom retornou vazio')
+    fotoUrl = uploaded
+  }
+  catch (error) {
+    console.error('[api/notas/create] cupom upload falhou:', error instanceof Error ? error.message : error)
+    throw createError({
+      statusCode: 502,
+      statusMessage: 'Nao foi possivel salvar a evidencia fiscal (foto do cupom). Tente novamente.',
+    })
+  }
+
+  // A foto do cliente é complementar (não é evidência fiscal): se o upload
+  // falhar, não bloqueia o cadastro — segue com null.
+  let fotoClienteUrl: string | null = null
+  if (fotoClienteDataUrl) {
+    try {
+      fotoClienteUrl = await uploadNotaImageDataUrl(client, authUid, 'cliente', fotoClienteDataUrl)
+    }
+    catch (error) {
+      console.error('[api/notas/create] foto do cliente upload falhou (nao bloqueia):', error instanceof Error ? error.message : error)
+      fotoClienteUrl = null
+    }
+  }
 
   const payload = {
     owner_user_id: authUid,
     contato_id: crmContato.contato_id,
-    foto_url: null,
-    foto_cliente_url: null,
-    midia_status: 'processando',
+    foto_url: fotoUrl,
+    foto_cliente_url: fotoClienteUrl,
+    midia_status: 'pronta',
     ...(idempresa !== undefined ? { idempresa } : {}),
     nome_cliente: crmContato.nome,
     documento_cliente: normalizeDigits(body.documento_cliente),
@@ -470,14 +497,6 @@ export const notasCreatePostHandler = defineEventHandler(async (event) => {
     console.error('[api/notas/create] insert error:', error.message)
     throw mapSupabaseCreateError(error)
   }
-
-  // Dispara o upload das imagens em segundo plano (não aguarda).
-  processCreateNotaMediaInBackground({
-    notaId: String(data.id),
-    ownerUserId: authUid,
-    cupomDataUrl: fotoCupomDataUrl,
-    clienteDataUrl: fotoClienteDataUrl || null,
-  })
 
   return {
     success: true,

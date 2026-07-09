@@ -5,18 +5,14 @@ import { IntegrimHttpError } from '../../stock-integrin/sync/types'
 import { normalizeSyncErrorMessage, toInteger, yieldToEventLoop } from '../../stock-integrin/sync/utils'
 import { ProdutoValorAggregator } from './aggregator'
 import {
-  createCompanyModelPlans,
   createTokenManager,
-  fetchDocumentosPage,
   fetchItensByDatePage,
   getItensTotalPages,
 } from './client'
 import { getIntegrimNotasConfig } from './config'
-import { DEFAULT_WINDOW_MONTHS, FETCH_CONCURRENCY, SUPPORTED_MODELOS } from './constants'
-import { buildNotaRow, isNotaCancelada } from './mapper'
+import { DEFAULT_WINDOW_MONTHS, FETCH_CONCURRENCY } from './constants'
 import {
   createAdminClient,
-  deactivateStaleRows,
   finalizeProdutoValor,
   finishSyncRun,
   isSyncCancelRequested,
@@ -24,11 +20,8 @@ import {
   rebuildProdutoVendaDia,
   startSyncRun,
   updateSyncProgress,
-  upsertNotas,
 } from './repository'
 import type {
-  CompanyModelPlan,
-  IntegrimNotaUpsertRow,
   IntegrimNotasSyncCounters,
   IntegrimNotasSyncOptions,
 } from './types'
@@ -80,24 +73,15 @@ export const runIntegrimNotasSync = async (
   const companyIds = options.companyIds?.length ? [...new Set(options.companyIds)] : config.companyIds
   const windowMonths = Math.max(1, toInteger(options.windowMonths) || DEFAULT_WINDOW_MONTHS)
   // Intervalo explicito escolhido no front tem prioridade sobre a janela por meses.
-  const { startDate: headerStart, endDate } = resolveSyncRange(options.startDate, options.endDate, windowMonths)
-  const analysisStart = headerStart
+  const { startDate, endDate } = resolveSyncRange(options.startDate, options.endDate, windowMonths)
   const dryRun = Boolean(options.dryRun)
-  // A previsao de compras nao consulta a tabela de cabecalhos (integrim_notas):
-  // ela vive da agregacao de itens (Fase B). Por padrao pulamos a Fase A, que era
-  // a fase mais lenta do sync (167k+ notas pagina a pagina).
-  const syncHeaders = Boolean(options.syncHeaders)
-  // So faz sentido desativar cabecalhos antigos quando os cabecalhos foram lidos.
-  const deactivateStale = syncHeaders && (options.deactivateStale ?? !dryRun)
   const triggeredBy = String(options.triggeredBy || (dryRun ? 'dry-run' : 'manual')).slice(0, 80)
   const adminClient = dryRun ? null : createAdminClient()
 
   const metadata = {
     company_ids: companyIds,
-    modelos: SUPPORTED_MODELOS,
     window_months: windowMonths,
-    header_start: headerStart,
-    analysis_start: analysisStart,
+    analysis_start: startDate,
     end_date: endDate,
     cancel_requested: false,
   }
@@ -140,11 +124,6 @@ export const runIntegrimNotasSync = async (
     const tokens = await createTokenManager(config)
     await assertNotCancelled()
 
-    // Planos: cabecalhos (por empresa+modelo, Fase A opcional) e itens (por empresa).
-    const headerPlans = syncHeaders
-      ? await createCompanyModelPlans(config, tokens, companyIds, SUPPORTED_MODELOS, headerStart, endDate)
-      : []
-
     // Primeira pagina de itens de cada empresa em paralelo (define o plano de leitura).
     const itemPlans: ItemPlan[] = new Array(companyIds.length)
     await runPool(
@@ -152,51 +131,16 @@ export const runIntegrimNotasSync = async (
       FETCH_CONCURRENCY,
       async ({ idempresa, index }) => {
         await assertNotCancelled()
-        const firstPage = await fetchItensByDatePage(config, tokens, idempresa, analysisStart, endDate, 1)
+        const firstPage = await fetchItensByDatePage(config, tokens, idempresa, startDate, endDate, 1)
         itemPlans[index] = { idempresa, firstPage, totalPages: getItensTotalPages(firstPage) }
       },
     )
 
-    totalPages = Math.max(
-      headerPlans.reduce((t, p) => t + p.totalPages, 0)
-      + itemPlans.reduce((t, p) => t + p.totalPages, 0),
-      1,
-    )
+    totalPages = Math.max(itemPlans.reduce((t, p) => t + p.totalPages, 0), 1)
 
-    await pushProgress(progressInput('starting', `Lendo vendas desde ${analysisStart} (${companyIds.length} empresas).`))
+    await pushProgress(progressInput('starting', `Lendo vendas desde ${startDate} (${companyIds.length} empresas).`))
 
-    // -------- Fase A: cabecalhos das notas (55/65) --------
-    for (const plan of headerPlans as CompanyModelPlan[]) {
-      for (let page = 1; page <= plan.totalPages; page += 1) {
-        await assertNotCancelled()
-        const docsResult = page === 1
-          ? plan.firstPage
-          : await fetchDocumentosPage(config, tokens, plan.idempresa, plan.modelo, headerStart, endDate, page)
-        if (!docsResult.data.length) break
-
-        const nowIso = new Date().toISOString()
-        const notaRows: IntegrimNotaUpsertRow[] = []
-        for (const record of docsResult.data) {
-          if (isNotaCancelada(record)) continue
-          const row = buildNotaRow(record, runId, nowIso)
-          if (row) notaRows.push(row)
-        }
-
-        if (notaRows.length && !dryRun) await upsertNotas(adminClient!, notaRows, assertNotCancelled)
-        counters.notasTotal += notaRows.length
-        counters.upsertedRows += notaRows.length
-        processedPages += 1
-
-        await pushProgress(progressInput('reading', `Notas empresa ${plan.idempresa} (modelo ${plan.modelo}): ${counters.notasTotal}.`, {
-          currentCompany: plan.idempresa,
-          currentModelo: plan.modelo,
-          currentPage: page,
-        }))
-        await yieldToEventLoop()
-      }
-    }
-
-    // -------- Fase B: agregacao de itens de venda --------
+    // -------- Agregacao de itens de venda --------
     const aggregator = new ProdutoValorAggregator()
 
     // Pagina 1 de cada empresa ja veio no plano: agrega de imediato.
@@ -217,7 +161,7 @@ export const runIntegrimNotasSync = async (
 
     await runPool(itemJobs, FETCH_CONCURRENCY, async ({ idempresa, page }) => {
       await assertNotCancelled()
-      const itemsResult = await fetchItensByDatePage(config, tokens, idempresa, analysisStart, endDate, page)
+      const itemsResult = await fetchItensByDatePage(config, tokens, idempresa, startDate, endDate, page)
       for (const record of itemsResult.data) aggregator.add(record)
       counters.itensTotal += itemsResult.data.length
       processedPages += 1
@@ -242,11 +186,6 @@ export const runIntegrimNotasSync = async (
 
       await pushProgress(progressInput('aggregating', 'Cruzando com estoque e calculando score.'))
       await finalizeProdutoValor(adminClient!)
-
-      if (deactivateStale) {
-        await pushProgress(progressInput('deactivating', 'Desativando notas que sumiram da janela.'))
-        counters.deactivatedRows = await deactivateStaleRows(adminClient!, headerStart, runId, assertNotCancelled)
-      }
 
       const doneProgress = buildProgress(progressInput('done', 'Sincronizacao concluida.'))
       await finishSyncRun(adminClient!, runId, 'success', {

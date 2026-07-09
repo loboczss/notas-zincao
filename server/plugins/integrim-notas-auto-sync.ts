@@ -35,7 +35,6 @@ const runNightlySync = async (schedule: IntegrimSyncSchedule) => {
 
   await runIntegrimNotasSync({
     triggeredBy: 'auto-agendado',
-    deactivateStale: schedule.deactivate_stale,
     windowMonths: schedule.window_months,
   })
 }

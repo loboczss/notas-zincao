@@ -59,10 +59,6 @@ export type IntegrimNotasSyncRequest = {
   date_start?: string
   date_end?: string
   dry_run?: boolean
-  deactivate_stale?: boolean
-  // Inclui a Fase A (cabecalhos -> integrim_notas). A previsao de compras nao usa
-  // essa tabela; por padrao o sync roda so a agregacao de itens (mais rapido).
-  sync_headers?: boolean
 }
 
 export type IntegrimNotasSyncResponse = {
@@ -404,7 +400,6 @@ export type IntegrimSyncSchedule = {
   times: string[]
   window_months: number
   timezone: string
-  deactivate_stale: boolean
   updated_at: string | null
   updated_by: string | null
   next_run_at: string | null
@@ -420,7 +415,6 @@ export type IntegrimSyncScheduleUpdateRequest = {
   times?: string[]
   window_months?: number
   timezone?: string
-  deactivate_stale?: boolean
 }
 
 // ---------------------------------------------------------------------------

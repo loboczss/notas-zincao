@@ -8,12 +8,14 @@ const props = withDefaults(defineProps<{
   cancelling?: boolean
   loadingProdutos?: boolean
   refreshing?: boolean
+  showSync?: boolean
 }>(), {
   isAdmin: false,
   syncInProgress: false,
   cancelling: false,
   loadingProdutos: false,
   refreshing: false,
+  showSync: true,
 })
 
 const emit = defineEmits<{
@@ -26,7 +28,7 @@ const emit = defineEmits<{
 <template>
   <div class="grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:justify-end">
     <Botao
-      v-if="props.isAdmin"
+      v-if="props.isAdmin && props.showSync"
       type="button"
       variant="primary"
       class="min-h-12 justify-start px-3 py-2 sm:justify-center"
@@ -43,7 +45,7 @@ const emit = defineEmits<{
     </Botao>
 
     <Botao
-      v-if="props.isAdmin && props.syncInProgress"
+      v-if="props.isAdmin && props.syncInProgress && props.showSync"
       type="button"
       variant="danger"
       class="min-h-12 justify-start border border-rose-200 bg-rose-50 px-3 py-2 sm:justify-center dark:border-rose-900/60 dark:bg-rose-500/10"

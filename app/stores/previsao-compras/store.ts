@@ -25,7 +25,6 @@ import type {
   IntegrimProdutoValorResponse,
   IntegrimProdutoValorSort,
   IntegrimProdutoValorStats,
-  IntegrimSazonalidadeResponse,
   IntegrimSyncHealth,
   IntegrimSyncHealthResponse,
   IntegrimSyncSchedule,
@@ -84,9 +83,6 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
   const health = ref<IntegrimSyncHealth | null>(null)
   const schedule = ref<IntegrimSyncSchedule | null>(null)
   const compraParametros = ref<IntegrimCompraParametros | null>(null)
-  const sazonalidade = ref<IntegrimSazonalidadeResponse | null>(null)
-  const sazonalidadeAno = ref<number | null>(null)
-  const sazonalidadeMesInicio = ref<number>(1)
   const listaCompra = ref<IntegrimListaCompraRow[]>([])
   const listaCompraStats = ref<IntegrimListaCompraStats | null>(null)
   const listaCompraTotalItens = ref(0)
@@ -94,7 +90,6 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
   const loadingListaCompra = ref(false)
   const loadingHealth = ref(false)
   const loadingSchedule = ref(false)
-  const loadingInsights = ref(false)
   const savingConfig = ref(false)
   const produtoSelecionado = ref<IntegrimProdutoValor | null>(null)
   const produtoModalAberto = computed({
@@ -263,7 +258,7 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
       lastSyncResult.value = data
 
       if (data.dry_run) {
-        successMessage.value = `Teste concluido: ${data.notas_total} notas lidas da Integrim.`
+        successMessage.value = `Teste concluido: ${data.itens_total} itens lidos da Integrim.`
         await fetchSyncStatus()
         return data
       }
@@ -271,7 +266,7 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
       const finishedRun = await waitForSyncRun(data.run_id)
 
       if (!finishedRun || finishedRun.status === 'success') {
-        successMessage.value = `Sincronizacao concluida: ${finishedRun?.notas_total ?? 0} notas e ${finishedRun?.itens_total ?? 0} itens.`
+        successMessage.value = `Sincronizacao concluida: ${finishedRun?.itens_total ?? 0} itens lidos.`
       }
       else if (finishedRun.status === 'cancelled') {
         successMessage.value = 'Sincronizacao cancelada com seguranca.'
@@ -569,37 +564,6 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     }
   }
 
-  const fetchSazonalidade = async (query: {
-    idempresa?: string | number | null
-    idproduto?: number | null
-    idsubproduto?: number | null
-    ano?: number | null
-    mesInicio?: number | null
-  } = {}) => {
-    if (query.ano !== undefined) sazonalidadeAno.value = query.ano
-    if (query.mesInicio !== undefined && query.mesInicio !== null) {
-      sazonalidadeMesInicio.value = query.mesInicio
-    }
-
-    try {
-      const data = await getApiFetch()<IntegrimSazonalidadeResponse>('/api/integrim-notas/insights/sazonalidade', {
-        query: {
-          idempresa: query.idempresa || undefined,
-          idproduto: query.idproduto || undefined,
-          idsubproduto: query.idsubproduto || undefined,
-          ano: query.ano !== undefined ? (query.ano || undefined) : (sazonalidadeAno.value || undefined),
-          mesInicio: query.mesInicio !== undefined ? (query.mesInicio || undefined) : (sazonalidadeMesInicio.value || undefined),
-        },
-      })
-      sazonalidade.value = data
-      return data
-    }
-    catch (error) {
-      errorMessage.value = getApiErrorMessage(error, 'Falha ao calcular a sazonalidade.')
-      return null
-    }
-  }
-
   const fetchListaCompra = async (query: IntegrimListaCompraQuery = {}, options: { append?: boolean } = {}) => {
     loadingListaCompra.value = true
     if (!options.append) clearMessages()
@@ -664,9 +628,6 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     health.value = null
     schedule.value = null
     compraParametros.value = null
-    sazonalidade.value = null
-    sazonalidadeAno.value = null
-    sazonalidadeMesInicio.value = 1
     listaCompra.value = []
     listaCompraStats.value = null
     listaCompraTotalItens.value = 0
@@ -688,9 +649,6 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     health,
     schedule,
     compraParametros,
-    sazonalidade,
-    sazonalidadeAno,
-    sazonalidadeMesInicio,
     listaCompra,
     listaCompraStats,
     listaCompraTotalItens,
@@ -698,7 +656,6 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     loadingListaCompra,
     loadingHealth,
     loadingSchedule,
-    loadingInsights,
     savingConfig,
     page,
     pageSize,
@@ -735,7 +692,6 @@ export const usePrevisaoComprasStore = defineStore('previsao-compras', () => {
     updateSyncSchedule,
     fetchCompraParametros,
     updateCompraParametros,
-    fetchSazonalidade,
     fetchListaCompra,
     reset,
   }

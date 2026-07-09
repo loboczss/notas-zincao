@@ -44,9 +44,6 @@ export default defineEventHandler(async (event): Promise<IntegrimNotasSyncRespon
   const endDate = parseDate(body?.date_end)
   // So aceita intervalo quando as duas datas vierem coerentes (inicio <= fim).
   const hasRange = Boolean(startDate && endDate && startDate <= endDate)
-  const deactivateStale = typeof body?.deactivate_stale === 'boolean' ? body.deactivate_stale : undefined
-  // Opt-in: por padrao o sync nao baixa cabecalhos (a previsao nao os usa).
-  const syncHeaders = body?.sync_headers === true
 
   // dry-run termina rapido e nao persiste; roda inline.
   if (body?.dry_run) {
@@ -56,8 +53,6 @@ export default defineEventHandler(async (event): Promise<IntegrimNotasSyncRespon
       windowMonths,
       startDate: hasRange ? startDate : undefined,
       endDate: hasRange ? endDate : undefined,
-      deactivateStale,
-      syncHeaders,
       triggeredBy,
     })
   }
@@ -68,8 +63,6 @@ export default defineEventHandler(async (event): Promise<IntegrimNotasSyncRespon
     windowMonths,
     startDate: hasRange ? startDate : undefined,
     endDate: hasRange ? endDate : undefined,
-    deactivateStale,
-    syncHeaders,
     triggeredBy,
   })
 })
