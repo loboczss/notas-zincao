@@ -60,9 +60,14 @@ const sortState = reactive({
 
 const empresas = ['1', '2', '3', '4', '5', '6']
 
+// Ao buscar (nome ou codigo), varre o catalogo inteiro: quem procura um produto
+// especifico quer acha-lo mesmo que ele nao precise de reposicao agora. Sem busca,
+// respeita o toggle "So repor agora".
+const buscando = computed(() => filtros.search.trim().length > 0)
+
 const buildQuery = (pageToLoad = 1): IntegrimListaCompraQuery => ({
   idempresa: filtros.idempresa ? Number(filtros.idempresa) : null,
-  only_buy: filtros.onlyBuy,
+  only_buy: buscando.value ? false : filtros.onlyBuy,
   sort: 'risco',
   search: filtros.search,
   page: pageToLoad,
@@ -156,10 +161,12 @@ const temItens = computed(() => props.rows.length > 0)
 <template>
   <div class="space-y-4">
     <PcSectionHeader
-      :title="filtros.onlyBuy ? 'Comprar agora' : 'Todos os produtos'"
-      :subtitle="filtros.onlyBuy
-        ? 'Itens abaixo do ponto de reposição — precisam de compra para não faltar.'
-        : 'Catálogo completo com os mesmos indicadores de decisão.'"
+      :title="buscando ? 'Resultados da busca' : (filtros.onlyBuy ? 'Comprar agora' : 'Todos os produtos')"
+      :subtitle="buscando
+        ? 'Busca por nome ou código no catálogo inteiro — inclusive itens que não precisam repor agora.'
+        : (filtros.onlyBuy
+          ? 'Itens abaixo do ponto de reposição — precisam de compra para não faltar.'
+          : 'Catálogo completo com os mesmos indicadores de decisão.')"
     >
       <template #actions>
         <div class="flex items-center gap-2">
@@ -258,7 +265,7 @@ const temItens = computed(() => props.rows.length > 0)
     <div class="block lg:hidden space-y-3">
       <div v-if="props.loading && !temItens" class="py-8 text-center text-slate-400 dark:text-slate-500">Calculando...</div>
       <div v-else-if="!temItens" class="py-8 text-center text-slate-400 dark:text-slate-500 font-medium">
-        {{ filtros.onlyBuy ? 'Nenhum item precisa de compra agora. 🎉' : 'Nenhum produto encontrado.' }}
+        {{ buscando ? 'Nenhum produto encontrado para essa busca.' : (filtros.onlyBuy ? 'Nenhum item precisa de compra agora. 🎉' : 'Nenhum produto encontrado.') }}
       </div>
       <div
         v-else
@@ -383,7 +390,7 @@ const temItens = computed(() => props.rows.length > 0)
             <td colspan="7" class="px-3 py-8 text-center text-slate-400 dark:text-slate-500">Calculando...</td>
           </tr>
           <tr v-else-if="!temItens">
-            <td colspan="7" class="px-3 py-8 text-center text-slate-400 dark:text-slate-500 font-medium">{{ filtros.onlyBuy ? 'Nenhum item precisa de compra agora. 🎉' : 'Nenhum produto encontrado.' }}</td>
+            <td colspan="7" class="px-3 py-8 text-center text-slate-400 dark:text-slate-500 font-medium">{{ buscando ? 'Nenhum produto encontrado para essa busca.' : (filtros.onlyBuy ? 'Nenhum item precisa de compra agora. 🎉' : 'Nenhum produto encontrado.') }}</td>
           </tr>
           <tr
             v-else
