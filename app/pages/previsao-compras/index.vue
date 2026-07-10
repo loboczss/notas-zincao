@@ -53,8 +53,19 @@ const acaoOportunidade = async (input: {
   if (result) await store.fetchAiDashboard({ silent: true })
 }
 
-// Abre o PDF (gerado no servidor) numa nova aba. Usa fetch autenticado + blob
-// para funcionar mesmo com apiBaseUrl em outra origem.
+// Nome de arquivo do PDF conforme o escopo (espelha o filename do servidor).
+const nomeRelatorio = (query: Record<string, string | number>) => {
+  const data = new Date().toISOString().slice(0, 10)
+  if (query.escopo === 'produto') return `relatorio-compra-produto-${query.idproduto}-${query.idsubproduto}-${data}.pdf`
+  if (query.escopo === 'empresa') return `relatorio-compra-empresa-${query.idempresa}-${data}.pdf`
+  return `relatorio-compra-geral-${data}.pdf`
+}
+
+// Entrega o PDF (gerado no servidor). Usa fetch autenticado + blob para funcionar
+// mesmo com apiBaseUrl em outra origem. Como o window.open roda DEPOIS do await
+// (fora do gesto do clique), o bloqueador de pop-up costuma barrar e "nao acontece
+// nada"; por isso, se a aba nao abrir, caimos para download via <a download>, que
+// nao e bloqueado.
 const baixarRelatorio = async (query: Record<string, string | number>) => {
   printing.value = true
   store.clearMessages()
@@ -64,7 +75,15 @@ const baixarRelatorio = async (query: Record<string, string | number>) => {
       responseType: 'blob',
     })
     const url = URL.createObjectURL(blob)
-    window.open(url, '_blank')
+    const win = window.open(url, '_blank')
+    if (!win) {
+      const a = document.createElement('a')
+      a.href = url
+      a.download = nomeRelatorio(query)
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+    }
     setTimeout(() => URL.revokeObjectURL(url), 60_000)
   }
   catch (error) {
