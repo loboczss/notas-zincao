@@ -121,10 +121,29 @@ export const refreshStockIntegrinSummary = async (client: AdminClient) => {
   }
 }
 
+// Um run marcado 'running' cujo processo morreu (deploy, restart, excecao nao
+// tratada) fica preso para sempre e trava toda a fila de sync, porque o guard de
+// concorrencia so olha o status. Se o ultimo heartbeat de progresso (ou, na
+// falta dele, o started_at) for mais velho que este limite, tratamos o run como
+// morto: marcamos como 'failed' e liberamos a fila. Um sync saudavel atualiza o
+// progresso a cada pagina (~dezenas de segundos), entao esta folga e seguríssima.
+const STALE_RUN_MS = 15 * 60 * 1000
+
+const runLastHeartbeatMs = (row: Record<string, unknown>) => {
+  const metadata = (row.metadata && typeof row.metadata === 'object' ? row.metadata : {}) as Record<string, unknown>
+  const progress = (metadata.progress && typeof metadata.progress === 'object'
+    ? metadata.progress
+    : {}) as Record<string, unknown>
+  const beat = (progress.updated_at as string | undefined) || (row.started_at as string | undefined)
+  if (!beat) return null
+  const ms = Date.parse(String(beat).replace(' ', 'T'))
+  return Number.isFinite(ms) ? ms : null
+}
+
 export const getRunningSyncRun = async (client: AdminClient, runId?: string | null) => {
   let request = (client as any)
     .from('stock_integrin_sync_runs')
-    .select('id, metadata, status, cancel_requested, cancel_requested_at, cad_produtos_total, precos_total, saldos_total, upserted_rows, deactivated_rows')
+    .select('id, metadata, status, cancel_requested, cancel_requested_at, cad_produtos_total, precos_total, saldos_total, upserted_rows, deactivated_rows, started_at')
     .eq('status', 'running')
     .order('started_at', { ascending: false })
     .limit(1)
@@ -144,7 +163,26 @@ export const getRunningSyncRun = async (client: AdminClient, runId?: string | nu
   }
 
   const rows = (data || []) as Array<Record<string, unknown>>
-  return rows[0] || null
+  const row = rows[0] || null
+  if (!row) return null
+
+  // Reivindica runs travados: sem heartbeat ha muito tempo = processo morto.
+  const lastBeat = runLastHeartbeatMs(row)
+  if (lastBeat !== null && Date.now() - lastBeat > STALE_RUN_MS) {
+    await (client as any)
+      .from('stock_integrin_sync_runs')
+      .update({
+        status: 'failed',
+        finished_at: new Date().toISOString(),
+        error_message: 'Run sem progresso por muito tempo; reivindicado automaticamente para liberar a fila.',
+      })
+      .eq('id', row.id)
+      .eq('status', 'running')
+    console.warn(`[stock-integrin] run travado ${row.id} reivindicado (sem heartbeat > ${STALE_RUN_MS / 60000}min).`)
+    return null
+  }
+
+  return row
 }
 
 const numberValue = (value: unknown) => {

@@ -82,10 +82,27 @@ export const finishSyncRun = async (
   if (error) console.error('[integrim-notas] failed to finish sync run:', error.message)
 }
 
+// Um run 'running' cujo processo morreu (deploy/restart/excecao) fica preso e
+// trava a fila, pois o guard so olha o status. Se o ultimo heartbeat (ou o
+// started_at, na falta dele) for mais velho que este limite, tratamos como morto
+// e liberamos a fila. Um sync saudavel bate progresso a cada pagina.
+const STALE_RUN_MS = 15 * 60 * 1000
+
+const runLastHeartbeatMs = (row: Record<string, unknown>) => {
+  const metadata = (row.metadata && typeof row.metadata === 'object' ? row.metadata : {}) as Record<string, unknown>
+  const progress = (metadata.progress && typeof metadata.progress === 'object'
+    ? metadata.progress
+    : {}) as Record<string, unknown>
+  const beat = (progress.updated_at as string | undefined) || (row.started_at as string | undefined)
+  if (!beat) return null
+  const ms = Date.parse(String(beat).replace(' ', 'T'))
+  return Number.isFinite(ms) ? ms : null
+}
+
 export const getRunningSyncRun = async (client: AdminClient, runId?: string | null) => {
   let request = (client as any)
     .from(RUNS_TABLE)
-    .select('id, metadata, status, cancel_requested, cancel_requested_at, notas_total, itens_total, upserted_rows, deactivated_rows')
+    .select('id, metadata, status, cancel_requested, cancel_requested_at, notas_total, itens_total, upserted_rows, deactivated_rows, started_at')
     .eq('status', 'running')
     .order('started_at', { ascending: false })
     .limit(1)
@@ -99,7 +116,25 @@ export const getRunningSyncRun = async (client: AdminClient, runId?: string | nu
   }
 
   const rows = (data || []) as Array<Record<string, unknown>>
-  return rows[0] || null
+  const row = rows[0] || null
+  if (!row) return null
+
+  const lastBeat = runLastHeartbeatMs(row)
+  if (lastBeat !== null && Date.now() - lastBeat > STALE_RUN_MS) {
+    await (client as any)
+      .from(RUNS_TABLE)
+      .update({
+        status: 'failed',
+        finished_at: new Date().toISOString(),
+        error_message: 'Run sem progresso por muito tempo; reivindicado automaticamente para liberar a fila.',
+      })
+      .eq('id', row.id)
+      .eq('status', 'running')
+    console.warn(`[integrim-notas] run travado ${row.id} reivindicado (sem heartbeat > ${STALE_RUN_MS / 60000}min).`)
+    return null
+  }
+
+  return row
 }
 
 export const isSyncCancelRequested = async (client: AdminClient, runId: string) => {
