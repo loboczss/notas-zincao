@@ -3,6 +3,11 @@ import type { IntegrimNotasSyncResponse } from '../../../../shared/types/Integri
 import type { IntegrimPagedResponse, IntegrimRecord } from '../../stock-integrin/sync/types'
 import { IntegrimHttpError } from '../../stock-integrin/sync/types'
 import { normalizeSyncErrorMessage, toInteger, yieldToEventLoop } from '../../stock-integrin/sync/utils'
+import { runStockIntegrinSync } from '../../stock-integrin/sync/runner'
+import {
+  createAdminClient as createStockAdminClient,
+  getRunningSyncRun as getStockRunningSyncRun,
+} from '../../stock-integrin/sync/repository'
 import { ProdutoValorAggregator } from './aggregator'
 import {
   createTokenManager,
@@ -47,6 +52,30 @@ const emptyCounters = (): IntegrimNotasSyncCounters => ({
   upsertedRows: 0,
   deactivatedRows: 0,
 })
+
+// O saldo/custo da analise vem da tabela stock_integrin, alimentada por um sync
+// proprio. Como este sync so le vendas, sem atualizar o estoque a analise fica
+// com saldo defasado (ex.: ERP mostra 252 e a previsao mostra 55). Por isso,
+// antes de cruzar com o estoque no finalize, disparamos um refresh completo do
+// stock_integrin. Falha aqui degrada (saldo velho) mas nao derruba o sync de
+// vendas; se ja houver um sync de estoque rodando, deixamos ele terminar.
+const refreshStockBeforeFinalize = async (companyIds: number[]) => {
+  try {
+    const stockClient = createStockAdminClient()
+    const running = await getStockRunningSyncRun(stockClient)
+    if (running) {
+      console.warn('[integrim-notas] stock sync ja em andamento; pulando refresh inline do estoque.')
+      return
+    }
+    await runStockIntegrinSync({ companyIds, triggeredBy: 'previsao-compras' })
+  }
+  catch (error) {
+    console.error(
+      '[integrim-notas] refresh de estoque antes do finalize falhou:',
+      error instanceof Error ? error.message : error,
+    )
+  }
+}
 
 // Processa uma fila de tarefas com no maximo `concurrency` em voo. O gargalo do
 // sync e a latencia por consulta do Integrim, entao varias requisicoes em
@@ -188,6 +217,9 @@ export const runIntegrimNotasSync = async (
 
       await pushProgress(progressInput('upserting', `Gravando vendas por vendedor (${vendedorRows.length} vendedor/dia).`))
       await rebuildVendaVendedorDia(adminClient!, vendedorRows, runId, assertNotCancelled)
+
+      await pushProgress(progressInput('aggregating', 'Atualizando saldo de estoque das empresas.'))
+      await refreshStockBeforeFinalize(companyIds)
 
       await pushProgress(progressInput('aggregating', 'Cruzando com estoque e calculando score.'))
       await finalizeProdutoValor(adminClient!)

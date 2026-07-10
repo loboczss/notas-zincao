@@ -24,7 +24,7 @@ const brl = (n: number) =>
 const intBR = (n: number) => (Number(n) || 0).toLocaleString('pt-BR')
 
 const rangeFromMes = (mes: string) => {
-  const [y, m] = mes.split('-').map(Number)
+  const [y, m] = mes.split('-').map(Number) as [number, number]
   const start = `${y}-${pad(m)}-01`
   const end = new Date(Date.UTC(y, m, 0))
   return { start, end: `${end.getUTCFullYear()}-${pad(end.getUTCMonth() + 1)}-${pad(end.getUTCDate())}` }
