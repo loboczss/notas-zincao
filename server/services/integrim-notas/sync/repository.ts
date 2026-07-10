@@ -1,6 +1,6 @@
 import { createAdminClient } from '../../stock-integrin/sync/repository'
 import { chunk } from '../../stock-integrin/sync/utils'
-import type { ProdutoValorBaseRow, ProdutoVendaDiaRow } from './aggregator'
+import type { ProdutoValorBaseRow, ProdutoVendaDiaRow, VendaVendedorDiaRow } from './aggregator'
 import { INSERT_CHUNK_SIZE } from './constants'
 import type {
   IntegrimNotasSyncCounters,
@@ -228,6 +228,38 @@ export const rebuildProdutoVendaDia = async (
     if (error) {
       console.error('[integrim-notas] insert produto venda dia failed:', error.message)
       throw createError({ statusCode: 500, statusMessage: 'Nao foi possivel gravar vendas por periodo.' })
+    }
+  }
+}
+
+export const rebuildVendaVendedorDia = async (
+  client: AdminClient,
+  rows: VendaVendedorDiaRow[],
+  runId: string,
+  beforeChunk?: () => Promise<void>,
+) => {
+  const nowIso = new Date().toISOString()
+
+  const { error: deleteError } = await (client as any)
+    .from('integrim_venda_vendedor_dia')
+    .delete()
+    .not('id', 'is', null)
+  if (deleteError) {
+    console.error('[integrim-notas] clear venda vendedor dia failed:', deleteError.message)
+    throw createError({ statusCode: 500, statusMessage: 'Nao foi possivel limpar vendas por vendedor.' })
+  }
+
+  for (const rowsChunk of chunk(rows, INSERT_CHUNK_SIZE)) {
+    await beforeChunk?.()
+    const payload = rowsChunk.map(row => ({
+      ...row,
+      sync_run_id: runId,
+      updated_at: nowIso,
+    }))
+    const { error } = await (client as any).from('integrim_venda_vendedor_dia').insert(payload)
+    if (error) {
+      console.error('[integrim-notas] insert venda vendedor dia failed:', error.message)
+      throw createError({ statusCode: 500, statusMessage: 'Nao foi possivel gravar vendas por vendedor.' })
     }
   }
 }

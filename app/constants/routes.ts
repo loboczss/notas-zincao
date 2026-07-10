@@ -9,6 +9,8 @@ export const AppRoute = {
   estoque: '/estoque',
   stockIntegrin: '/stock-integrin',
   previsaoCompras: '/previsao-compras',
+  vendasLoja: '/vendas-loja',
+  vendasVendedor: '/vendas-vendedor',
   cadastrarNota: '/cadastrar-nota',
   profile: '/profile',
   adminUsuarios: '/admin/usuarios',
@@ -38,6 +40,8 @@ export const getPageTitle = (path: string) => {
   if (path === AppRoute.estoque) return 'Estoque'
   if (path === AppRoute.stockIntegrin) return 'Stock Integrin'
   if (path === AppRoute.previsaoCompras) return 'Previsao de Compras'
+  if (path === AppRoute.vendasLoja) return 'Vendas por Loja'
+  if (path === AppRoute.vendasVendedor) return 'Vendas por Vendedor'
   if (path === AppRoute.cadastrarNota) return 'Cadastrar Nota'
   if (path === AppRoute.profile) return 'Perfil'
   if (path === AppRoute.adminUsuarios) return 'Usuarios'

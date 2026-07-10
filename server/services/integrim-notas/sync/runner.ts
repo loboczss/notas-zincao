@@ -18,6 +18,7 @@ import {
   isSyncCancelRequested,
   rebuildProdutoValorBase,
   rebuildProdutoVendaDia,
+  rebuildVendaVendedorDia,
   startSyncRun,
   updateSyncProgress,
 } from './repository'
@@ -176,13 +177,17 @@ export const runIntegrimNotasSync = async (
     if (!dryRun) {
       const baseRows = aggregator.toRows()
       const dailyRows = aggregator.toDailyRows()
-      counters.upsertedRows += baseRows.length + dailyRows.length
+      const vendedorRows = aggregator.toVendedorRows()
+      counters.upsertedRows += baseRows.length + dailyRows.length + vendedorRows.length
 
       await pushProgress(progressInput('upserting', `Gravando analise de ${baseRows.length} produtos.`))
       await rebuildProdutoValorBase(adminClient!, baseRows, assertNotCancelled)
 
       await pushProgress(progressInput('upserting', `Gravando vendas diarias de ${dailyRows.length} produto/dia.`))
       await rebuildProdutoVendaDia(adminClient!, dailyRows, runId, assertNotCancelled)
+
+      await pushProgress(progressInput('upserting', `Gravando vendas por vendedor (${vendedorRows.length} vendedor/dia).`))
+      await rebuildVendaVendedorDia(adminClient!, vendedorRows, runId, assertNotCancelled)
 
       await pushProgress(progressInput('aggregating', 'Cruzando com estoque e calculando score.'))
       await finalizeProdutoValor(adminClient!)

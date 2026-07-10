@@ -29,8 +29,21 @@ export type ProdutoVendaDiaRow = {
   num_notas: number
 }
 
+// Vendas agregadas por vendedor/dia. idvendedor = 0 representa "sem vendedor"
+// (itens sem atribuicao, tipicamente cupom/PDV). num_itens conta linhas de item,
+// nao notas distintas (mesma convencao das outras agregacoes deste sync).
+export type VendaVendedorDiaRow = {
+  idempresa: number
+  idvendedor: number
+  venda_data: string
+  qtd: number
+  faturamento: number
+  num_itens: number
+}
+
 type Bucket = ProdutoValorBaseRow
 type DailyBucket = ProdutoVendaDiaRow
+type VendedorBucket = VendaVendedorDiaRow
 
 const MS_PER_DAY = 86_400_000
 
@@ -44,6 +57,7 @@ const isVendaCfop = (cfop: number | null) => cfop === null || (cfop >= 5000 && c
 export class ProdutoValorAggregator {
   private readonly buckets = new Map<string, Bucket>()
   private readonly dailyBuckets = new Map<string, DailyBucket>()
+  private readonly vendedorBuckets = new Map<string, VendedorBucket>()
   private readonly todayMs: number
 
   constructor(today = new Date()) {
@@ -123,6 +137,18 @@ export class ProdutoValorAggregator {
     daily.qtd += qty
     daily.faturamento += val
     daily.num_notas += 1
+
+    // Agregacao por vendedor/dia. idvendedor ausente/0 vira o balde "sem vendedor".
+    const idvendedor = toInteger(record.idvendedor) || 0
+    const vendKey = `${idempresa}:${idvendedor}:${date}`
+    let vend = this.vendedorBuckets.get(vendKey)
+    if (!vend) {
+      vend = { idempresa, idvendedor, venda_data: date, qtd: 0, faturamento: 0, num_itens: 0 }
+      this.vendedorBuckets.set(vendKey, vend)
+    }
+    vend.qtd += qty
+    vend.faturamento += val
+    vend.num_itens += 1
   }
 
   size() {
@@ -147,6 +173,15 @@ export class ProdutoValorAggregator {
   toDailyRows(): ProdutoVendaDiaRow[] {
     const round = (n: number, d: number) => Number(n.toFixed(d))
     return [...this.dailyBuckets.values()].map(b => ({
+      ...b,
+      qtd: round(b.qtd, 3),
+      faturamento: round(b.faturamento, 2),
+    }))
+  }
+
+  toVendedorRows(): VendaVendedorDiaRow[] {
+    const round = (n: number, d: number) => Number(n.toFixed(d))
+    return [...this.vendedorBuckets.values()].map(b => ({
       ...b,
       qtd: round(b.qtd, 3),
       faturamento: round(b.faturamento, 2),

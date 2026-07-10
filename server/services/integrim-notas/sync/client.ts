@@ -167,3 +167,36 @@ export const fetchItensByDatePage = async (
 
 export const getItensTotalPages = (firstPage: IntegrimPagedResponse<IntegrimRecord>) =>
   getPageCount(firstPage, ITENS_PAGE_SIZE)
+
+// ---------------------------------------------------------------------------
+// Cabecalhos de venda (documentos_fiscais_saida). Usado apenas para extrair os
+// pares idvendedor -> cpfvendedor (o cpf so existe no cabecalho, nao no item).
+// Ordena por data DESC para pegar os vendedores ativos mais recentes primeiro.
+// ---------------------------------------------------------------------------
+export const fetchDocumentosByDatePage = async (
+  config: IntegrimConfig,
+  tokens: TokenManager,
+  idempresa: number,
+  startDate: string,
+  endDate: string,
+  page: number,
+) => {
+  const clausulas: IntegrimClause[] = [
+    { campo: 'idempresa', operadorlogico: 'AND', operador: 'IGUAL', valor: idempresa },
+    { campo: 'dtmovimento', operadorlogico: 'AND', operador: 'BETWEEN', valor: [startDate, endDate] },
+  ]
+  const ordenacoes: IntegrimOrder[] = [{ campo: 'dtmovimento', direcao: 'DESC' }]
+  return await postNotasServicePage(config, tokens, 'documentos_fiscais_saida', page, clausulas, ordenacoes, ITENS_PAGE_SIZE)
+}
+
+// Resolve nome de uma pessoa (vendedor) pelo CPF/CNPJ em cad_pessoas.
+export const fetchPessoaByCpf = async (
+  config: IntegrimConfig,
+  tokens: TokenManager,
+  cpf: string,
+) => {
+  const clausulas: IntegrimClause[] = [
+    { campo: 'cnpjcpf', operadorlogico: 'AND', operador: 'IGUAL', valor: cpf },
+  ]
+  return await postNotasServicePage(config, tokens, 'cad_pessoas', 1, clausulas, [], 1)
+}

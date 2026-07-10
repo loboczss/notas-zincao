@@ -68,8 +68,11 @@ const pad = n => String(n).padStart(2, '0')
 const fmt = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 const inicio = arg('inicio', fmt(new Date(hoje.getTime() - dias * 86400000)))
 const fim = arg('fim', fmt(hoje))
-const startTs = `${inicio} 00:00:00.000000`
-const endTs = `${fim} 23:59:59.999999`
+// A produção manda a data pura YYYY-MM-DD no BETWEEN (formatIsoDate). O timestamp
+// completo com microsegundos ('2026-06-25 00:00:00.000000') faz o DB2/CISS
+// devolver 500 (SQLException no prepared statement). Então usamos data pura.
+const startTs = inicio
+const endTs = fim
 
 // ---------- HTTP ----------
 async function getToken() {
@@ -92,21 +95,48 @@ async function getToken() {
   return tok
 }
 
+const sleep = ms => new Promise(r => setTimeout(r, ms))
+// Mesmos status transitorios que o client.ts de producao trata com retry: o
+// CISS/DB2 atras do ngrok cospe 500/503 esporadico sob carga.
+const TRANSIENT = new Set([408, 425, 429, 500, 502, 503, 504])
+
 async function service(token, name, clausulas, ordenacoes, page = 1, limit = 1000) {
-  const r = await fetch(`${cfg.baseUrl}/cisspoder-service/${name}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-      'ngrok-skip-browser-warning': 'true',
-    },
-    body: JSON.stringify({ page, clausulas, ordenacoes, limit }),
-  })
-  const text = await r.text()
-  if (!r.ok) throw new Error(`${name} HTTP ${r.status}: ${text.slice(0, 300)}`)
-  const json = JSON.parse(text || '{}')
-  const data = Array.isArray(json) ? json : (Array.isArray(json.data) ? json.data : [])
-  return { data, total: json.total ?? json.Total ?? data.length, hasNext: Boolean(json.hasNext) }
+  const body = JSON.stringify({ page, clausulas, ordenacoes, limit })
+  let lastErr = ''
+  for (let attempt = 1; attempt <= 6; attempt += 1) {
+    let r
+    try {
+      r = await fetch(`${cfg.baseUrl}/cisspoder-service/${name}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'ngrok-skip-browser-warning': 'true',
+        },
+        body,
+        signal: AbortSignal.timeout(45000),
+      })
+    }
+    catch (e) {
+      lastErr = e.message
+      if (attempt < 6) { await sleep(Math.min(8000, 500 * 2 ** (attempt - 1))); continue }
+      throw new Error(`${name}: falha de conexão após retries (${lastErr})`)
+    }
+    const text = await r.text()
+    if (!r.ok) {
+      lastErr = `HTTP ${r.status}: ${text.slice(0, 200)}`
+      if (TRANSIENT.has(r.status) && attempt < 6) {
+        process.stdout.write(`  (retry ${attempt}/5 em ${name}: HTTP ${r.status})\n`)
+        await sleep(Math.min(8000, 500 * 2 ** (attempt - 1)))
+        continue
+      }
+      throw new Error(`${name} ${lastErr}`)
+    }
+    const json = JSON.parse(text || '{}')
+    const data = Array.isArray(json) ? json : (Array.isArray(json.data) ? json.data : [])
+    return { data, total: json.total ?? json.Total ?? data.length, hasNext: Boolean(json.hasNext) }
+  }
+  throw new Error(`${name}: instável após retries (${lastErr})`)
 }
 
 // pega valor de uma chave sem depender de maiúscula/minúscula
@@ -118,6 +148,11 @@ function pick(obj, key) {
 
 function money(n) {
   return (Number(n) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+}
+
+// só os dígitos de um CPF/CNPJ (remove pontuação); retorna '' se vazio
+function digits(v) {
+  return String(v ?? '').replace(/\D/g, '')
 }
 
 // ---------- main ----------
@@ -139,7 +174,7 @@ function money(n) {
 
   if (!itens.data.length) {
     console.log('⚠ Nenhum item no período. Aumente --dias ou troque --empresa e rode de novo.')
-    process.exit(0)
+    return
   }
 
   // Todos os campos disponíveis (pra achar de onde vem o vendedor / o nome)
@@ -167,19 +202,21 @@ function money(n) {
     console.log(`  vendedor ${id.padEnd(14)} ${money(v.fat).padStart(16)}  (${v.itens} itens)`)
   })
 
-  // 2) CABEÇALHO: tem CPFVENDEDOR / NOMEUSUARIO? (rota alternativa pro nome)
+  // 2) CABEÇALHO: monta o dicionário idvendedor -> cpfvendedor (base pro nome)
+  const idvendToCpf = new Map()
   try {
-    const docs = await service(token, 'documentos_fiscais_saida', clausulas, [{ campo: 'idplanilha', direcao: 'ASC' }], 1, 50)
+    const docs = await service(token, 'documentos_fiscais_saida', clausulas, [{ campo: 'idplanilha', direcao: 'ASC' }], 1, 200)
     console.log(`\n═══ DOCUMENTOS_FISCAIS_SAIDA (cabeçalho) ═══`)
     if (docs.data.length) {
-      console.log('Campos disponíveis no cabeçalho:')
-      console.log('  ' + Object.keys(docs.data[0]).sort().join(', ') + '\n')
-      const cpf = docs.data.filter(r => { const v = pick(r, 'cpfvendedor'); return v !== undefined && v !== null && String(v).trim() !== '' }).length
-      const nomeU = docs.data.filter(r => { const v = pick(r, 'nomeusuario'); return v !== undefined && v !== null && String(v).trim() !== '' }).length
+      const cpf = docs.data.filter(r => digits(pick(r, 'cpfvendedor'))).length
       console.log(`CPFVENDEDOR preenchido: ${cpf}/${docs.data.length}`)
-      console.log(`NOMEUSUARIO preenchido: ${nomeU}/${docs.data.length}`)
-      const ex = docs.data[0]
-      console.log(`\nExemplo cabeçalho: idvendedor=${pick(ex, 'idvendedor')} cpfvendedor=${pick(ex, 'cpfvendedor')} nomeusuario=${pick(ex, 'nomeusuario')} idusuario=${pick(ex, 'idusuario')}`)
+      for (const r of docs.data) {
+        const idv = pick(r, 'idvendedor')
+        const cpfv = digits(pick(r, 'cpfvendedor'))
+        if (idv && Number(idv) !== 0 && cpfv && !idvendToCpf.has(String(idv))) idvendToCpf.set(String(idv), cpfv)
+      }
+      console.log(`Pares idvendedor→cpfvendedor coletados: ${idvendToCpf.size}`)
+      console.log(`(lembrete: NOMEUSUARIO é o operador de caixa, NÃO o vendedor)`)
     }
     else {
       console.log('sem cabeçalhos no período.')
@@ -189,20 +226,46 @@ function money(n) {
     console.log(`\n(cabeçalho não consultado: ${e.message})`)
   }
 
-  // 3) Existe serviço de vendedores? Tentativa best-effort (pode não existir no ambiente)
-  for (const svc of ['vendedor', 'cad_vendedores', 'cad_pessoas']) {
+  // 3) NOME DO VENDEDOR: cpfvendedor -> nome via CAD_PESSOAS (cnpjcpf)
+  console.log(`\n═══ RESOLUÇÃO DE NOME (idvendedor → cpf → CAD_PESSOAS) ═══`)
+  const topIds = [...porVend.entries()]
+    .filter(([id]) => id !== '(sem vendedor)')
+    .sort((a, b) => b[1].fat - a[1].fat)
+    .slice(0, 5)
+    .map(([id]) => id)
+  if (!idvendToCpf.size) {
+    console.log('Sem pares idvendedor→cpf no período; não dá pra resolver nome por CPF.')
+  }
+  for (const id of topIds) {
+    const cpf = idvendToCpf.get(id)
+    if (!cpf) { console.log(`  vendedor ${id.padEnd(8)} → sem cpf no cabeçalho`); continue }
     try {
-      const cl = svc === 'cad_pessoas'
-        ? [{ campo: 'idclifor', operadorlogico: 'AND', operador: 'MENOR_IGUAL', valor: 5 }]
-        : []
-      const res = await service(token, svc, cl, [], 1, 3)
-      console.log(`\n═══ ${svc.toUpperCase()} existe ✓ (${res.data.length} amostra) ═══`)
-      if (res.data.length) console.log('  campos: ' + Object.keys(res.data[0]).sort().join(', '))
+      const res = await service(token, 'cad_pessoas',
+        [{ campo: 'cnpjcpf', operadorlogico: 'AND', operador: 'IGUAL', valor: cpf }], [], 1, 1)
+      const nome = res.data.length ? pick(res.data[0], 'nome') : null
+      console.log(`  vendedor ${id.padEnd(8)} cpf ${cpf.padEnd(14)} → ${nome || '(não encontrado em CAD_PESSOAS)'}`)
     }
     catch (e) {
-      console.log(`\n${svc.toUpperCase()}: indisponível (${String(e.message).split(':')[0]})`)
+      console.log(`  vendedor ${id.padEnd(8)} cpf ${cpf.padEnd(14)} → erro: ${String(e.message).split(':')[0]}`)
     }
   }
 
+  // 4) NOME DAS LOJAS: CAD_LOJAS (pra rotular a página por loja)
+  console.log(`\n═══ CAD_LOJAS (nome das empresas/lojas) ═══`)
+  try {
+    const res = await service(token, 'cad_lojas', [], [{ campo: 'idempresa', direcao: 'ASC' }], 1, 20)
+    if (res.data.length) {
+      console.log('  campos: ' + Object.keys(res.data[0]).sort().join(', ') + '\n')
+      for (const r of res.data) {
+        const nome = pick(r, 'nomefantasia') || pick(r, 'razaosocial') || pick(r, 'nome') || pick(r, 'descrempresa')
+        console.log(`  empresa ${String(pick(r, 'idempresa')).padEnd(3)} → ${nome || '(sem nome)'}`)
+      }
+    }
+    else { console.log('  CAD_LOJAS vazio.') }
+  }
+  catch (e) {
+    console.log(`  CAD_LOJAS indisponível (${String(e.message).split(':')[0]})`)
+  }
+
   console.log('\n— fim do diagnóstico —\n')
-})().catch(e => { console.error('\n✗ ERRO:', e.message, '\n'); process.exit(1) })
+})().catch(e => { console.error('\n✗ ERRO:', e.message, '\n'); process.exitCode = 1 })
