@@ -242,8 +242,14 @@ const buildTablePdf = async (rows: CompraRow[], subtitulo: string): Promise<Buff
     const range = doc.bufferedPageRange()
     for (let i = 0; i < range.count; i++) {
       doc.switchToPage(range.start + i)
+      // O rodape fica abaixo da margem inferior; com `width`+`align` o pdfkit passa
+      // pelo LineWrapper, ve a posicao alem do maxY e ADICIONA uma pagina em branco
+      // por rodape (dobrava o PDF). Zerar a margem inferior evita a paginacao.
+      const prevBottom = doc.page.margins.bottom
+      doc.page.margins.bottom = 0
       doc.fillColor(GRAY).fontSize(7).font('Helvetica')
         .text(`Página ${i + 1} de ${range.count}  —  Notas Zincão`, 40, doc.page.height - 24, { width: W, align: 'center', lineBreak: false })
+      doc.page.margins.bottom = prevBottom
     }
     doc.end()
   })
@@ -336,8 +342,12 @@ const buildProdutoPdf = async (row: CompraRow, recs: AiRec[]): Promise<Buffer> =
     const range = doc.bufferedPageRange()
     for (let i = 0; i < range.count; i++) {
       doc.switchToPage(range.start + i)
+      // Mesma armadilha do rodape: zerar a margem inferior evita paginas em branco.
+      const prevBottom = doc.page.margins.bottom
+      doc.page.margins.bottom = 0
       doc.fillColor(GRAY).fontSize(7).font('Helvetica')
         .text(`Notas Zincão  —  Página ${i + 1} de ${range.count}`, 48, doc.page.height - 26, { width: W, align: 'center', lineBreak: false })
+      doc.page.margins.bottom = prevBottom
     }
     doc.end()
   })
