@@ -9,6 +9,7 @@ export const AppRoute = {
   estoque: '/estoque',
   stockIntegrin: '/stock-integrin',
   previsaoCompras: '/previsao-compras',
+  sincronizarIntegrim: '/previsao-compras/config',
   vendasLoja: '/vendas-loja',
   vendasVendedor: '/vendas-vendedor',
   cadastrarNota: '/cadastrar-nota',
