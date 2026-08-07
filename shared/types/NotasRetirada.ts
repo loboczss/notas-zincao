@@ -37,6 +37,9 @@ export type NotaRetiradaHistoricoItem = {
     index: number
     quantidade: number
     quantidade_solicitada?: number
+    // Quanto saiu de fato do estoque. Menor que `quantidade` quando o produto
+    // nao e controlado pelo saldo do zinco e saiu sem cadastro/saldo no estoque.
+    quantidade_baixada?: number
     id_produto_estoque?: number | null
     id_produto_estoque_baixa?: number | null
   }>

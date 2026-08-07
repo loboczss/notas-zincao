@@ -25,6 +25,7 @@ type ProdutoNormalizadoRetirada = {
 type RetiradaEfetiva = {
   quantidade: number
   quantidade_solicitada: number
+  quantidade_baixada: number
   id_produto_estoque: number | null
   id_produto_estoque_baixa: number | null
 }
@@ -78,6 +79,24 @@ const normalizeText = (value: unknown) => String(value || '')
 const isTelhaZincoProduto = (nome: string) => {
   const normalized = normalizeText(nome)
   return /\btelhas?\b/.test(normalized) && normalized.includes('zinco')
+}
+
+// O saldo so trava a retirada do zinco e dos produtos vinculados a ele
+// (bd_estoque_geral.IDPRODUTOPAI = 10), cuja baixa sempre cai no produto pai.
+// Os demais produtos nem sempre estao cadastrados no estoque, entao a retirada
+// deles e registrada pela quantidade solicitada mesmo sem baixa.
+const isProdutoZincoControlado = (
+  produto: ProdutoNormalizadoRetirada,
+  produtoBaixa: ProdutoBaixaEstoque | null,
+) => {
+  if (produtoBaixa) {
+    return produtoBaixa.origem === 'bd_estoque_geral'
+      && (produtoBaixa.idProdutoBaixa === TELHA_ZINCO_PRODUTO_PAI_ID
+        || produtoBaixa.idProdutoEstoque === TELHA_ZINCO_PRODUTO_PAI_ID)
+  }
+
+  return produto.idProdutoEstoque === TELHA_ZINCO_PRODUTO_PAI_ID
+    || isTelhaZincoProduto(produto.nome)
 }
 
 const getItensSolicitadosKey = (items: NonNullable<NotaRetiradaHistoricoItem['itens_solicitados']>) => {
@@ -449,7 +468,7 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
       continue
     }
 
-    let retiradaEfetiva = 0
+    let quantidadeBaixada = 0
     let idProdutoEstoque = produto.idProdutoEstoque
 
     if (idProdutoEstoque === null) {
@@ -490,25 +509,25 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
       }
 
       const primeiraLinha = Array.isArray(baixaData) ? baixaData[0] : null
-      retiradaEfetiva = Math.max(0, Math.min(
+      quantidadeBaixada = Math.max(0, Math.min(
         produto.retiradaSolicitada,
         toNumber(primeiraLinha?.quantidade_retirada) ?? 0,
       ))
-
-      retiradasEfetivas.set(produto.index, {
-        quantidade: retiradaEfetiva,
-        quantidade_solicitada: produto.retiradaSolicitada,
-        id_produto_estoque: produtoBaixa.idProdutoEstoque,
-        id_produto_estoque_baixa: produtoBaixa.idProdutoBaixa,
-      })
-      continue
     }
+
+    // Fora do zinco, o estoque nao e a fonte da verdade (nem todo produto esta
+    // cadastrado): a retirada sai pela quantidade solicitada e a baixa, quando
+    // acontece, fica registrada em quantidade_baixada.
+    const retiradaEfetiva = isProdutoZincoControlado(produtoComIdResolvido, produtoBaixa)
+      ? quantidadeBaixada
+      : produto.retiradaSolicitada
 
     retiradasEfetivas.set(produto.index, {
       quantidade: retiradaEfetiva,
       quantidade_solicitada: produto.retiradaSolicitada,
-      id_produto_estoque: idProdutoEstoque,
-      id_produto_estoque_baixa: null,
+      quantidade_baixada: quantidadeBaixada,
+      id_produto_estoque: produtoBaixa?.idProdutoEstoque ?? idProdutoEstoque,
+      id_produto_estoque_baixa: produtoBaixa?.idProdutoBaixa ?? null,
     })
   }
 
@@ -637,6 +656,7 @@ export const notasRetiradaPatchHandler = defineEventHandler(async (event) => {
           index: produto.index,
           quantidade: retirada?.quantidade ?? 0,
           quantidade_solicitada: retirada?.quantidade_solicitada ?? 0,
+          quantidade_baixada: retirada?.quantidade_baixada ?? 0,
           id_produto_estoque: retirada?.id_produto_estoque ?? produto.idProdutoEstoque,
           id_produto_estoque_baixa: retirada?.id_produto_estoque_baixa ?? null,
         }
